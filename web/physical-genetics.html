@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genetics · Physical Health · JC Advisory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=22">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+</head>
+<body>
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html" class="active"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+  
+  <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+</div>
+
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="container">
+    <a href="physical.html" class="back-link">← Physical Health</a>
+    <div class="page-eyebrow">Physical · Genetics</div>
+    <h1 class="page-title">Genetics</h1>
+    <p class="page-desc"><span class="lang-en">Pharmacogenetic profile from the GnTech® TotalGene panel — four sub-modules (psychiatry / oncology / cardiology / infectious disease), with the patient's current medications cross-referenced against the gene–drug interaction tables.</span><span class="lang-pt">Perfil farmacogenético do painel GnTech® TotalGene — quatro submódulos (psiquiatria / oncologia / cardiologia / infectologia), com as medicações atuais do paciente cruzadas com as tabelas de interação gene-medicamento.</span></p>
+  </div>
+</header>
+
+<div class="container"><div class="pt-pending-notice">A tabela detalhada de interações farmacogenéticas e os módulos por especialidade ainda estão sendo traduzidos. Os títulos, descrições e a tabela de medicações atuais já estão bilíngues.</div></div>
+
+
+<!-- IN-PAGE NAV -->
+<div class="section-nav">
+  <div class="section-nav-inner">
+    <a href="#pgx">Pharmacogenetics</a>
+  </div>
+</div>
+
+<!-- 09B PHARMACOGENETICS — TOTALGENE -->
+<section class="report-section" id="pgx">
+  <div class="container">
+    <div class="section-label">09B · Pharmacogenetics</div>
+    <h2 class="section-title"><span class="lang-en">Pharmacogenetic profile — TotalGene · 2023-06-14</span><span class="lang-pt">Perfil farmacogenético — TotalGene · 14/06/2023</span></h2>
+    <p class="section-desc"><span class="lang-en">
+      GnTech® TotalGene panel — buccal-cell sample collected 2023-05-28,
+      reported 2023-06-14. Four sub-modules: <strong>PsicoGene</strong>
+      (psychiatry / neurology), <strong>OncoGene</strong>, <strong>CardioGene</strong>,
+      <strong>InfectoGene</strong>. Method: Next-Generation Sequencing (NGS), Real-time PCR for CYP2D6 deletion/duplication, PCR electrophoresis for SLC6A4.
+      All clinical notes shown in English with <span class="mono" style="color:var(--text-muted);font-size:10.5px;">(translated)</span>
+      where the source is Portuguese.
+    </span><span class="lang-pt">Painel GnTech® TotalGene — amostra de células bucais coletada em 28/05/2023, laudo emitido em 14/06/2023. Quatro submódulos: <strong>PsicoGene</strong> (psiquiatria / neurologia, 91 medicações), <strong>OncoGene</strong> (oncologia), <strong>CardioGene</strong> (cardiologia) e <strong>FarmaGene</strong> (farmacologia geral). As interações gene-medicamento seguem as diretrizes CPIC / DPWG e são marcadas em verde / âmbar / vermelho.</span></p>
+
+    <div class="alert alert-info">
+      <strong>Clinical summary (TL;DR for the treating team):</strong>
+      <ul class="pgx-summary-list"><li>Duloxetine, diazepam and quetiapine (plus pregabalin, not on the PGx panel) sit in the GREEN “use as labelled” band: CYP2D6 *1/*1, CYP2C19 *1C/*1C, CYP3A4 *1/*1 normal metabolisers; FKBP5 A/A and SLC6A4 L/C predict favourable serotonergic response, supporting current SNRI choice. <strong>The newly-added Depakote ER (valproate) sits in AMBER</strong> — patient is CYP2C9 *1/*2 intermediate metaboliser and UGT2B15 reduced metaboliser, both relevant for valproate clearance; titrate cautiously.</li>
+<li>MTHFR C677T + A1298C compound heterozygote with ~50% reduction in MTHFR enzyme activity — consider L-methylfolate adjunct to optimise antidepressant response; current B12 supplementation is appropriate but methylated folate is the actionable add-on.</li>
+<li>Highest-stakes incidental finding: warfarin would require alternative agent or PGx-algorithm-guided dosing (CYP2C9 *1/*2 intermediate + VKORC1 increased sensitivity + CYP4F2 *3/*3); also avoid dabigatran (CES1 rs2244613 T/T elevated bleed risk), simvastatin (reduced response), and benazepril (reduced response). If anticoagulation ever needed, rivaroxaban is green.</li>
+<li>CYP3A5 *3/*3 non-expresser — midazolam clearance is reduced (red flag); UGT2B15 reduced metaboliser — lorazepam and oxazepam can accumulate (relevant if benzodiazepine rotation is ever needed during the diazepam taper).</li>
+<li>Other actionable incidental flags: phenytoin/fosphenytoin would need ~25% dose reduction (CYP2C9 intermediate); celecoxib/flurbiprofen start at lowest labelled dose; HLA-B *15:02 and HLA-A *31:01 negative — normal SJS/TEN risk for carbamazepine/oxcarbazepine; cisplatin would carry elevated ototoxicity risk (XPC G/T) if oncology ever relevant.</li></ul>
+    </div>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 1rem;">
+      Patient's current medications &amp; supplements vs PGx profile
+    </h3>
+    <table class="data-table mb-3">
+      <thead><tr><th>Drug</th><th>Dose</th><th>Module</th><th>Genes</th><th>Risk band</th><th>Note (translated)</th></tr></thead>
+      <tbody>
+        <tr><td class="strong">Depakote ER (divalproex)</td><td>750 mg/day <span class="pill pill-info" style="margin-left:6px;">new</span></td><td>PsicoGene</td><td class="mono" style="font-size:11.5px;">CYP2C9, UGT1A6, UGT2B15</td><td><span class="pill pill-watch">Use with caution</span></td><td>Patient is CYP2C9 <strong>*1/*2 intermediate metaboliser</strong> and UGT2B15 reduced metaboliser — both contribute to valproate clearance. Start lower and titrate by clinical response &amp; serum level. Hepatotoxicity, thrombocytopenia and ammonia screening recommended.</td></tr>
+        <tr><td class="strong">Lyrica (pregabalin)</td><td>225 mg/day · 2 tomadas <span class="pill pill-info" style="margin-left:6px;">↑ from 150</span></td><td>PsicoGene</td><td class="mono" style="font-size:11.5px;">—</td><td><span class="pill">—</span></td><td>Drug is not listed in the PsicoGene panel. Pregabalin is predominantly renally excreted; the report has no gene–drug interaction data for this agent.</td></tr>
+        <tr><td class="strong">Quetiapine (Quetros)</td><td>50 mg/day <span class="pill pill-flag" style="margin-left:6px;">to be reduced soon</span></td><td>PsicoGene</td><td class="mono" style="font-size:11.5px;">CYP3A4, MC4R</td><td><span class="pill pill-ok">Use as labelled</span></td><td>Normal drug metabolism and lower risk of weight gain and hypertriglyceridaemia; standard precautions should be maintained. Evidence level: Moderate.</td></tr>
+        <tr><td class="strong">Cymbalta (duloxetine)</td><td>30 mg/day <span class="pill pill-watch" style="margin-left:6px;">↓ from 120</span></td><td>PsicoGene</td><td class="mono" style="font-size:11.5px;">CYP2D6</td><td><span class="pill pill-ok">Use as labelled</span></td><td>Normal drug metabolism; standard precautions should be maintained. Evidence level: High. Monitor for SNRI-discontinuation symptoms after the large dose drop.</td></tr>
+        <tr><td class="strong">Valium (diazepam)</td><td>35 mg/day <span class="pill pill-watch" style="margin-left:6px;">tapering</span></td><td>PsicoGene</td><td class="mono" style="font-size:11.5px;">CYP2C19, CYP3A4</td><td><span class="pill pill-ok">Use as labelled</span></td><td>Normal drug metabolism; standard precautions should be maintained. Evidence level: High.</td></tr>
+<tr><td class="strong">Vitamin B1 (Thiamine)</td><td>supplement</td><td>—</td><td class="mono" style="font-size:11.5px;">—</td><td><span class="pill">—</span></td><td>Outside the scope of this PGx panel.</td></tr>
+<tr><td class="strong">Vitamin B12 (Cyanocobalamin)</td><td>supplement</td><td>—</td><td class="mono" style="font-size:11.5px;">MTHFR (indirectly)</td><td><span class="pill">—</span></td><td>Compound heterozygote MTHFR genotype with ~50% reduction in MTHFR enzyme activity. L-methylfolate supplementation may be appropriate; ongoing B12 use is reasonable, with consideration of methylated folate.</td></tr>
+<tr><td class="strong">Vitamin D3</td><td>supplement</td><td>—</td><td class="mono" style="font-size:11.5px;">—</td><td><span class="pill">—</span></td><td>Outside the scope of this PGx panel.</td></tr>
+<tr><td class="strong">Magnesium</td><td>supplement</td><td>—</td><td class="mono" style="font-size:11.5px;">—</td><td><span class="pill">—</span></td><td>Outside the scope of this PGx panel.</td></tr>
+<tr><td class="strong">Melatonin</td><td>supplement</td><td>—</td><td class="mono" style="font-size:11.5px;">CYP1A2 (indirectly)</td><td><span class="pill">—</span></td><td>Not directly listed, but CYP1A2 *1M/*1M genotype implies inducible ultrarapid metabolism in smokers / heavy coffee consumers, which can lower exogenous melatonin exposure.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 1rem;">
+      Browse the four modules
+    </h3>
+    <div class="pgx-tabs" role="tablist">
+  <button class="pgx-tab active" data-target="PsicoGene" role="tab">PsicoGene</button>
+  <button class="pgx-tab" data-target="OncoGene" role="tab">OncoGene</button>
+  <button class="pgx-tab" data-target="CardioGene" role="tab">CardioGene</button>
+  <button class="pgx-tab" data-target="InfectoGene" role="tab">InfectoGene</button>
+</div>
+<div class="pgx-module" data-module="PsicoGene" >
+<p class="pgx-summary">Psychiatry/neurology PGx panel covering 91 drugs across antidepressants, anxiolytics, mood stabilisers, antipsychotics, analgesics, opioid antagonists, cannabinoids, hypnotics, cholinesterase inhibitors, COMT inhibitors, monoamine transporter inhibitors, S1P modulators, non-stimulant CNS agents and psychostimulants. The patient is a normal metaboliser at all major hepatic CYP loci (CYP1A2 *1M/*1M, CYP2B6 *1/*4 rapid, CYP2C9 *1/*2 intermediate, CYP2C19 *1C/*1C, CYP2D6 *1/*1, CYP3A4 *1/*1) but a CYP3A5 non-expresser (*3/*3) and a UGT2B15 reduced metaboliser. A handful of drugs fall into amber (paroxetine, bupropion, selegiline, lorazepam, oxazepam, valproic acid, carbamazepine, phenytoin/fosphenytoin, phenobarbital, lithium, aripiprazole, iloperidone, celecoxib, fentanyl, flurbiprofen, methadone, naloxone, naltrexone, THC), and only midazolam is red because of the CYP3A5 non-expresser status.</p>
+<h4 class="pgx-block-title">Drug classes</h4>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antidepressants <span class="pgx-class-pt">(Antidepressivos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Agomelatine</span><span class="pgx-drug pgx-drug-ok">Amitriptyline</span><span class="pgx-drug pgx-drug-ok">Amoxapine</span><span class="pgx-drug pgx-drug-ok">Citalopram</span><span class="pgx-drug pgx-drug-ok">Clomipramine</span><span class="pgx-drug pgx-drug-ok">Desipramine</span><span class="pgx-drug pgx-drug-ok">Desvenlafaxine</span><span class="pgx-drug pgx-drug-ok">Doxepin</span><span class="pgx-drug pgx-drug-ok">Duloxetine</span><span class="pgx-drug pgx-drug-ok">Escitalopram</span><span class="pgx-drug pgx-drug-ok">Fluoxetine</span><span class="pgx-drug pgx-drug-ok">Fluvoxamine</span><span class="pgx-drug pgx-drug-ok">Imipramine</span><span class="pgx-drug pgx-drug-ok">Mirtazapine</span><span class="pgx-drug pgx-drug-ok">Nortriptyline</span><span class="pgx-drug pgx-drug-ok">Protriptyline</span><span class="pgx-drug pgx-drug-ok">Sertraline</span><span class="pgx-drug pgx-drug-ok">Trazodone</span><span class="pgx-drug pgx-drug-ok">Trimipramine</span><span class="pgx-drug pgx-drug-ok">Venlafaxine</span><span class="pgx-drug pgx-drug-ok">Vilazodone</span><span class="pgx-drug pgx-drug-ok">Vortioxetine</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Bupropion</span><span class="pgx-drug pgx-drug-watch">Paroxetine</span><span class="pgx-drug pgx-drug-watch">Selegiline</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Anxiolytics <span class="pgx-class-pt">(Ansiolíticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Alprazolam</span><span class="pgx-drug pgx-drug-ok">Buspirone</span><span class="pgx-drug pgx-drug-ok">Clobazam</span><span class="pgx-drug pgx-drug-ok">Clonazepam</span><span class="pgx-drug pgx-drug-ok">Diazepam</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Lorazepam</span><span class="pgx-drug pgx-drug-watch">Oxazepam</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Anticonvulsants / Mood stabilisers <span class="pgx-class-pt">(Anticonvulsivantes-Estabilizadores de Humor)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Brivaracetam</span><span class="pgx-drug pgx-drug-ok">Lamotrigine</span><span class="pgx-drug pgx-drug-ok">Oxcarbazepine</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Valproic acid</span><span class="pgx-drug pgx-drug-watch">Carbamazepine</span><span class="pgx-drug pgx-drug-watch">Phenytoin</span><span class="pgx-drug pgx-drug-watch">Phenobarbital</span><span class="pgx-drug pgx-drug-watch">Fosphenytoin</span><span class="pgx-drug pgx-drug-watch">Lithium</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antipsychotics <span class="pgx-class-pt">(Antipsicóticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Amisulpride</span><span class="pgx-drug pgx-drug-ok">Aripiprazole Lauroxil</span><span class="pgx-drug pgx-drug-ok">Asenapine</span><span class="pgx-drug pgx-drug-ok">Brexpiprazole</span><span class="pgx-drug pgx-drug-ok">Clozapine</span><span class="pgx-drug pgx-drug-ok">Fluphenazine</span><span class="pgx-drug pgx-drug-ok">Haloperidol</span><span class="pgx-drug pgx-drug-ok">Lurasidone</span><span class="pgx-drug pgx-drug-ok">Olanzapine</span><span class="pgx-drug pgx-drug-ok">Paliperidone</span><span class="pgx-drug pgx-drug-ok">Perphenazine</span><span class="pgx-drug pgx-drug-ok">Pimozide</span><span class="pgx-drug pgx-drug-ok">Quetiapine</span><span class="pgx-drug pgx-drug-ok">Risperidone</span><span class="pgx-drug pgx-drug-ok">Thioridazine</span><span class="pgx-drug pgx-drug-ok">Ziprasidone</span><span class="pgx-drug pgx-drug-ok">Zuclopenthixol</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Aripiprazole</span><span class="pgx-drug pgx-drug-watch">Iloperidone</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Wakefulness agents <span class="pgx-class-pt">(Agentes Estimulantes de Vigília)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Modafinil</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Analgesics <span class="pgx-class-pt">(Analgésicos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Alfentanil</span><span class="pgx-drug pgx-drug-ok">Buprenorphine</span><span class="pgx-drug pgx-drug-ok">Carisoprodol</span><span class="pgx-drug pgx-drug-ok">Codeine</span><span class="pgx-drug pgx-drug-ok">Hydrocodone</span><span class="pgx-drug pgx-drug-ok">Meperidine</span><span class="pgx-drug pgx-drug-ok">Morphine</span><span class="pgx-drug pgx-drug-ok">Oxycodone</span><span class="pgx-drug pgx-drug-ok">Sufentanil</span><span class="pgx-drug pgx-drug-ok">Tramadol</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Celecoxib</span><span class="pgx-drug pgx-drug-watch">Fentanyl</span><span class="pgx-drug pgx-drug-watch">Flurbiprofen</span><span class="pgx-drug pgx-drug-watch">Methadone</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Opioid antagonists <span class="pgx-class-pt">(Antagonistas de Opioide)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Naloxone</span><span class="pgx-drug pgx-drug-watch">Naltrexone</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Cannabinoids <span class="pgx-class-pt">(Canabinoides)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Cannabidiol</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Tetrahydrocannabinol</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Hypnotics <span class="pgx-class-pt">(Hipnóticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Eszopiclone</span><span class="pgx-drug pgx-drug-ok">Zolpidem</span></div>
+    </div>
+    <div class="pgx-band pgx-band-flag">
+      <span class="pgx-band-label">Use with caution</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-flag">Midazolam</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Cholinesterase inhibitors <span class="pgx-class-pt">(Inibidores da Colinesterase)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Donepezil</span><span class="pgx-drug pgx-drug-ok">Galantamine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">COMT inhibitors <span class="pgx-class-pt">(Inibidores de COMT)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Entacapone</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Monoamine transporter inhibitors <span class="pgx-class-pt">(Inibidores do Transportador de Monoamina)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Deutetrabenazine</span><span class="pgx-drug pgx-drug-ok">Tetrabenazine</span><span class="pgx-drug pgx-drug-ok">Valbenazine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">S1P receptor modulators <span class="pgx-class-pt">(Moduladores do Receptor de Esfingosina-1-fosfato)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Siponimod</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Non-stimulant CNS agents <span class="pgx-class-pt">(Não Estimulantes do SNC)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Atomoxetine</span><span class="pgx-drug pgx-drug-ok">Guanfacine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Psychostimulants <span class="pgx-class-pt">(Psicoestimulantes)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Amphetamine</span><span class="pgx-drug pgx-drug-ok">Dexmethylphenidate</span><span class="pgx-drug pgx-drug-ok">Dextroamphetamine</span><span class="pgx-drug pgx-drug-ok">Methylphenidate</span></div>
+    </div>
+  </div>
+</div>
+<h4 class="pgx-block-title">Metabolism genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP1A2</div>
+  <div class="pgx-gene-genotype">*1M/*1M</div>
+  <div class="pgx-gene-pheno">Normal metaboliser (inducible ultrarapid in smokers / heavy CYP1A2 inducers)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2B6</div>
+  <div class="pgx-gene-genotype">*1/*4</div>
+  <div class="pgx-gene-pheno">Rapid metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C9</div>
+  <div class="pgx-gene-genotype">*1/*2</div>
+  <div class="pgx-gene-pheno">Intermediate metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C9 (rs1057910)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C19</div>
+  <div class="pgx-gene-genotype">*1C/*1C</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2D6</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP3A4</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP3A5</div>
+  <div class="pgx-gene-genotype">*3/*3</div>
+  <div class="pgx-gene-pheno">Non-expresser (poor metaboliser) — most common phenotype in non-Africans</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">EPHX1 (rs1051740)</div>
+  <div class="pgx-gene-genotype">T/C</div>
+  <div class="pgx-gene-pheno">Elevated metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">EPHX1 (rs2234922)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Reduced metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">UGT1A4 (rs2011425)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Reduced metaboliser (lamotrigine)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">UGT2B15 (rs1902023)</div>
+  <div class="pgx-gene-genotype">A/C</div>
+  <div class="pgx-gene-pheno">Reduced metaboliser (lorazepam, oxazepam)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">MTHFR (rs1801131 c.1298A&gt;C)</div>
+  <div class="pgx-gene-genotype">A/C</div>
+  <div class="pgx-gene-pheno">Heterozygous</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">MTHFR (rs1801133 c.677C&gt;T)</div>
+  <div class="pgx-gene-genotype">C/T</div>
+  <div class="pgx-gene-pheno">Heterozygous; combined ~50% reduction in MTHFR enzyme activity</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Response &amp; toxicity genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs1045642)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs2032583)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Reduced risk of adverse effects</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ADRA2A (rs1800544)</div>
+  <div class="pgx-gene-genotype">G/C</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ANKK1 (rs1800497)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Drug-dependent toxicity/response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">BDNF (rs962369)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Reduced risk of adverse effects</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">BDNF (rs61888800)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">COMT (rs4680)</div>
+  <div class="pgx-gene-genotype">G/A</div>
+  <div class="pgx-gene-pheno">Drug-dependent response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">COMT (rs13306278)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP3A4 (rs2242480)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">DRD1 (rs4532)</div>
+  <div class="pgx-gene-genotype">C/T</div>
+  <div class="pgx-gene-pheno">Reduced risk of adverse effects</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">DRD2 (rs1799978)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">FKBP5 (rs4713916)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Favourable response (antidepressants)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">G6PD</div>
+  <div class="pgx-gene-genotype">B/-</div>
+  <div class="pgx-gene-pheno">Normal G6PD activity</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">GRIK4 (rs1954787)</div>
+  <div class="pgx-gene-genotype">T/C</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">GSK3B (rs334558)</div>
+  <div class="pgx-gene-genotype">A/G</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">GSK3B (rs6438552)</div>
+  <div class="pgx-gene-genotype">A/G</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HLA-A (rs1061235)</div>
+  <div class="pgx-gene-genotype">WT/WT</div>
+  <div class="pgx-gene-pheno">HLA-A *31:01 negative (normal SJS/TEN risk with carbamazepine)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HLA-B (rs144012689)</div>
+  <div class="pgx-gene-genotype">WT/WT</div>
+  <div class="pgx-gene-pheno">HLA-B *15:02 negative (normal SJS/TEN risk with carbamazepine, oxcarbazepine, phenytoin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HTR1A (rs6295)</div>
+  <div class="pgx-gene-genotype">C/G</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HTR2A (rs7997012)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Reduced response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HTR2C (rs1414334)</div>
+  <div class="pgx-gene-genotype">G/-</div>
+  <div class="pgx-gene-pheno">Reduced risk of adverse effects (weight gain)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HTR2C (rs3813929)</div>
+  <div class="pgx-gene-genotype">C/-</div>
+  <div class="pgx-gene-pheno">Elevated risk of adverse effects</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">MC4R (rs489693)</div>
+  <div class="pgx-gene-genotype">C/A</div>
+  <div class="pgx-gene-pheno">Reduced risk of adverse effects (weight gain) with antipsychotics</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">OPRD1 (rs678849)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Favourable response (opioids)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">OPRM1 (rs1799971)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Drug-dependent toxicity/response (opioids)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">SLC6A2 (rs28386840)</div>
+  <div class="pgx-gene-genotype">T/A</div>
+  <div class="pgx-gene-pheno">Favourable response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">SLC6A4 (5-HTTLPR)</div>
+  <div class="pgx-gene-genotype">L/C</div>
+  <div class="pgx-gene-pheno">Favourable response (SSRIs)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">rs2952768</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Favourable response (opioid analgesics)</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Key recommendations</h4>
+<ul class="pgx-recs">
+<li>All major CYPs (1A2, 2C19, 2D6, 3A4) are normal metabolisers — standard dosing of duloxetine, quetiapine, diazepam should be expected to behave normally.</li>
+<li>CYP3A5 *3/*3 non-expresser — midazolam clearance reduced (red flag in PsicoGene module).</li>
+<li>UGT2B15 reduced metaboliser — lorazepam/oxazepam plasma levels can be elevated; consider dose reduction (amber).</li>
+<li>CYP2C9 *1/*2 intermediate — phenytoin / fosphenytoin require ~25% maintenance dose reduction per CPIC; celecoxib and flurbiprofen should be started at the lowest labelled dose.</li>
+<li>HLA-B *15:02 and HLA-A *31:01 negative — normal SJS/TEN risk with carbamazepine, oxcarbazepine, phenytoin.</li>
+<li>MTHFR compound heterozygote with ~50% reduced enzyme activity — L-methylfolate supplementation may improve antidepressant response.</li>
+<li>FKBP5 A/A and SLC6A4 L/C — favourable serotonergic response markers (relevant for duloxetine, escitalopram, fluoxetine, sertraline, paroxetine, venlafaxine).</li>
+<li>Paroxetine is amber due to conflicting FKBP5/HTR1A response signals — prefer duloxetine, escitalopram, sertraline if SSRI/SNRI rotation is being considered.</li>
+<li>Bupropion and selegiline (both CYP2B6 substrates) may require dose increase due to rapid CYP2B6 metaboliser status.</li>
+</ul>
+</div>
+<div class="pgx-module" data-module="OncoGene" hidden>
+<p class="pgx-summary">Oncology PGx panel of 26 agents (analgesics, antiemetics, antineoplastics, immunosuppressants, hyperuricaemia prophylactics). Patient has normal DPYD, NUDT15, TPMT and UGT1A1 metabolism, normal G6PD activity, but is CYP2C9 *1/*2 intermediate metaboliser and CYP3A5 *3/*3 non-expresser. Only one drug is amber: cisplatin (XPC G/T heterozygote = elevated risk of cisplatin-induced ototoxicity and neutropenia). All other oncology agents are green for this patient.</p>
+<h4 class="pgx-block-title">Drug classes</h4>
+<div class="pgx-class">
+  <div class="pgx-class-name">Analgesics <span class="pgx-class-pt">(Analgésicos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Codeine</span><span class="pgx-drug pgx-drug-ok">Oxycodone</span><span class="pgx-drug pgx-drug-ok">Tramadol</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antiemetics <span class="pgx-class-pt">(Antieméticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Dronabinol</span><span class="pgx-drug pgx-drug-ok">Ondansetron</span><span class="pgx-drug pgx-drug-ok">Tropisetron</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antineoplastics <span class="pgx-class-pt">(Antineoplásicos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Belinostat</span><span class="pgx-drug pgx-drug-ok">Capecitabine</span><span class="pgx-drug pgx-drug-ok">Dabrafenib</span><span class="pgx-drug pgx-drug-ok">Daunorubicin</span><span class="pgx-drug pgx-drug-ok">Doxorubicin</span><span class="pgx-drug pgx-drug-ok">Erdafitinib</span><span class="pgx-drug pgx-drug-ok">Erlotinib</span><span class="pgx-drug pgx-drug-ok">Fluorouracil</span><span class="pgx-drug pgx-drug-ok">Flutamide</span><span class="pgx-drug pgx-drug-ok">Gefitinib</span><span class="pgx-drug pgx-drug-ok">Irinotecan</span><span class="pgx-drug pgx-drug-ok">Mercaptopurine</span><span class="pgx-drug pgx-drug-ok">Nilotinib</span><span class="pgx-drug pgx-drug-ok">Pazopanib</span><span class="pgx-drug pgx-drug-ok">Tamoxifen</span><span class="pgx-drug pgx-drug-ok">Tamsulosin</span><span class="pgx-drug pgx-drug-ok">Tegafur</span><span class="pgx-drug pgx-drug-ok">Thioguanine</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Cisplatin</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Immunosuppressants <span class="pgx-class-pt">(Imunossupressores)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Azathioprine</span><span class="pgx-drug pgx-drug-ok">Tacrolimus</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Hyperuricaemia prophylactics <span class="pgx-class-pt">(Profiláticos de hiperuricemia)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Rasburicase</span></div>
+    </div>
+  </div>
+</div>
+<h4 class="pgx-block-title">Metabolism genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C9</div>
+  <div class="pgx-gene-genotype">*1/*2</div>
+  <div class="pgx-gene-pheno">Intermediate metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2D6</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP3A5</div>
+  <div class="pgx-gene-genotype">*3/*3</div>
+  <div class="pgx-gene-pheno">Non-expresser (poor metaboliser)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">DPYD</div>
+  <div class="pgx-gene-genotype">*1/*4</div>
+  <div class="pgx-gene-pheno">Normal metaboliser — normal DPD activity, normal toxicity risk for fluoropyrimidines</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">NUDT15</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">TPMT</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">UGT1A1</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser — reduced atazanavir-induced jaundice and irinotecan toxicity risk</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Response &amp; toxicity genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">G6PD</div>
+  <div class="pgx-gene-genotype">B/-</div>
+  <div class="pgx-gene-pheno">Normal G6PD activity</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">RARG (rs2229774)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Pediatric-only marker (not applicable to adult patient)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">SLC28A3 (rs7853758)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Pediatric-only marker (not applicable)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">UGT1A6 (rs17863783)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Pediatric-only marker (not applicable)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">XPC (rs2228001)</div>
+  <div class="pgx-gene-genotype">G/T</div>
+  <div class="pgx-gene-pheno">Elevated risk of cisplatin-induced toxicity (hearing loss, neutropenia)</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Key recommendations</h4>
+<ul class="pgx-recs">
+<li>Cisplatin: heterozygous XPC genotype implies elevated ototoxicity/neutropenia risk — audiometric monitoring if used.</li>
+<li>Tamoxifen: CYP2D6 *1/*1 yields therapeutic endoxifen — avoid strong/moderate CYP2D6 inhibitors but standard dose 20 mg/day expected to work.</li>
+<li>Tacrolimus: CYP3A5 *3/*3 non-expresser — standard starting dose with therapeutic drug monitoring.</li>
+<li>Fluoropyrimidines (5-FU, capecitabine, tegafur): normal DPD activity — standard dosing.</li>
+<li>Thiopurines (azathioprine, mercaptopurine, thioguanine): normal TPMT and NUDT15 — normal myelosuppression risk.</li>
+</ul>
+</div>
+<div class="pgx-module" data-module="CardioGene" hidden>
+<p class="pgx-summary">Cardiology PGx panel of ~30 agents across ARBs, antianginals, antiarrhythmics, antithrombotics/anticoagulants, PPAR activators, beta-blockers, calcium-channel blockers, diuretics, statins and ACE inhibitors. The Warfarin response sub-analysis shows CYP2C9 *1/*2 intermediate + VKORC1 *1/*2 increased sensitivity + CYP4F2 *3/*3 carrier — the report flags: “Consider an alternative agent. If not possible, calculate the dose using a published, validated pharmacogenetic algorithm (e.g. warfarindosing.org), and increase the calculated dose by 5–10% to account for the CYP4F2 carrier status when not included in the algorithm.” Most cardiac drugs are green; amber-flag drugs include irbesartan, losartan, acenocoumarol, clopidogrel, phenprocoumon, bumetanide, furosemide, torsemide, pravastatin. Red-flag drugs include simvastatin, benazepril, dabigatran.</p>
+<h4 class="pgx-block-title">Drug classes</h4>
+<div class="pgx-class">
+  <div class="pgx-class-name">Angiotensin II receptor antagonists <span class="pgx-class-pt">(Antagonistas dos Receptores de Angiotensina II)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Irbesartan</span><span class="pgx-drug pgx-drug-watch">Losartan</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antianginals <span class="pgx-class-pt">(Antianginosos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Digoxin</span><span class="pgx-drug pgx-drug-ok">Ranolazine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antiarrhythmics <span class="pgx-class-pt">(Antiarrítmicos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Amiodarone</span><span class="pgx-drug pgx-drug-ok">Flecainide</span><span class="pgx-drug pgx-drug-ok">Propafenone</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antithrombotics / anticoagulants <span class="pgx-class-pt">(Antitrombóticos / anticoagulantes)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Eltrombopag</span><span class="pgx-drug pgx-drug-ok">Rivaroxaban</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Acenocoumarol</span><span class="pgx-drug pgx-drug-watch">Clopidogrel</span><span class="pgx-drug pgx-drug-watch">Phenprocoumon</span></div>
+    </div>
+    <div class="pgx-band pgx-band-flag">
+      <span class="pgx-band-label">Use with caution</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-flag">Dabigatran</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">PPAR activators <span class="pgx-class-pt">(Ativadores do PPAR)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Fenofibrate</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Beta-blockers <span class="pgx-class-pt">(Betabloqueadores)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Atenolol</span><span class="pgx-drug pgx-drug-ok">Carvedilol</span><span class="pgx-drug pgx-drug-ok">Metoprolol</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Calcium-channel blockers <span class="pgx-class-pt">(Bloqueadores de canais de cálcio)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Amlodipine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Diuretics <span class="pgx-class-pt">(Diuréticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Hydrochlorothiazide</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Bumetanide</span><span class="pgx-drug pgx-drug-watch">Furosemide</span><span class="pgx-drug pgx-drug-watch">Torsemide</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Statins <span class="pgx-class-pt">(Estatinas)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Atorvastatin</span><span class="pgx-drug pgx-drug-ok">Lovastatin</span><span class="pgx-drug pgx-drug-ok">Pitavastatin</span><span class="pgx-drug pgx-drug-ok">Rosuvastatin</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Pravastatin</span></div>
+    </div>
+    <div class="pgx-band pgx-band-flag">
+      <span class="pgx-band-label">Use with caution</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-flag">Simvastatin</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">ACE inhibitors <span class="pgx-class-pt">(Inibidores da Enzima Conversora de ECA)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Captopril</span><span class="pgx-drug pgx-drug-ok">Perindopril</span><span class="pgx-drug pgx-drug-ok">Quinapril</span></div>
+    </div>
+    <div class="pgx-band pgx-band-flag">
+      <span class="pgx-band-label">Use with caution</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-flag">Benazepril</span></div>
+    </div>
+  </div>
+</div>
+<div class="alert alert-watch mt-3">
+<strong>Warfarin dosing.</strong> 
+Consider an alternative anticoagulant. If warfarin is required, calculate the starting dose using a published, validated PGx algorithm (e.g. GAGE / warfarindosing.org). For non-African-descent patients, increase the calculated dose by 5–10% if the algorithm does not include CYP4F2.
+</div>
+<h4 class="pgx-block-title">Metabolism genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CES1 (rs2244613)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Reduced metaboliser — elevated dabigatran bleeding risk in atrial fibrillation</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CES1 (rs8192935)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Elevated metaboliser — may reduce dabigatran plasma concentration</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CES1 (rs71647871)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Elevated metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C (rs12777823)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Non-carrier of rs12777823 A (warfarin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C9</div>
+  <div class="pgx-gene-genotype">*1/*2</div>
+  <div class="pgx-gene-pheno">Intermediate metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C19</div>
+  <div class="pgx-gene-genotype">*1C/*1C</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2D6</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP3A4</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP4F2 (rs2108622)</div>
+  <div class="pgx-gene-genotype">*3/*3</div>
+  <div class="pgx-gene-pheno">Homozygous carrier of rs2108622 T allele — warfarin dose increase 5–10%</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">SLCO1B1</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal hepatic statin transport</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Response &amp; toxicity genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs1045642)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Elevated metaboliser (digoxin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs2032582)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Drug-dependent metabolism/response (reduced response to simvastatin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCG2 (rs2231142)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Normal metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ACE (rs1799752)</div>
+  <div class="pgx-gene-genotype">WT(DEL)/Ins</div>
+  <div class="pgx-gene-pheno">Favourable response to captopril/quinapril</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ADRB2 (rs1042714)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Reduced risk of atenolol-induced hypertriglyceridaemia</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">AGT (rs5051)</div>
+  <div class="pgx-gene-genotype">C/T</div>
+  <div class="pgx-gene-pheno">Reduced response (benazepril)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">AGT (rs7079)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Favourable response (benazepril)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">AGTR1 (rs275651)</div>
+  <div class="pgx-gene-genotype">T/T</div>
+  <div class="pgx-gene-pheno">Favourable response (perindopril)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">APOA5 (rs662799)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Favourable LDL response to atorvastatin / lovastatin / simvastatin</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">APOA5 (rs3135506)</div>
+  <div class="pgx-gene-genotype">G/C</div>
+  <div class="pgx-gene-pheno">Favourable triglyceride/HDL response to fenofibrate</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">BDKRB1 (rs12050217)</div>
+  <div class="pgx-gene-genotype">A/A</div>
+  <div class="pgx-gene-pheno">Favourable response to perindopril</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">F5 (rs6025)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Factor V Leiden absent</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">G6PD</div>
+  <div class="pgx-gene-genotype">B/-</div>
+  <div class="pgx-gene-pheno">Normal G6PD activity</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">GNB3 (rs5443)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Favourable response to loop diuretics</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">HMGCR (rs17244841)</div>
+  <div class="pgx-gene-genotype">A/T</div>
+  <div class="pgx-gene-pheno">Reduced response (pravastatin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">KIF6 (rs20455)</div>
+  <div class="pgx-gene-genotype">A/G</div>
+  <div class="pgx-gene-pheno">Favourable response (pravastatin)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">NEDD4L (rs4149601)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Favourable hydrochlorothiazide response</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">NOS1AP (rs10800397)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Reduced amiodarone-induced arrhythmia / QT prolongation risk</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">NOS1AP (rs10919035)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Reduced amiodarone-induced QT prolongation risk</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">SLC12A3 (rs1529927)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Reduced loop-diuretic response (lower diuresis)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">VKORC1 (rs9923231)</div>
+  <div class="pgx-gene-genotype">*1/*2</div>
+  <div class="pgx-gene-pheno">Increased sensitivity to warfarin (normal sensitivity to phenprocoumon and acenocoumarol)</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">YEATS4 (rs7297610)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Favourable hydrochlorothiazide response</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Key recommendations</h4>
+<ul class="pgx-recs">
+<li>Warfarin: CYP2C9 *1/*2 + VKORC1 *1/*2 + CYP4F2 *3/*3 — prefer alternative anticoagulant; if used, dose via PGx algorithm with +5–10% adjustment.</li>
+<li>Simvastatin (red): ABCB1 rs2032582 C/C predicts reduced LDL response — prefer atorvastatin or rosuvastatin (both green with favourable APOA5).</li>
+<li>Benazepril (red): AGT rs5051 C/T predicts reduced response — prefer captopril, perindopril or quinapril.</li>
+<li>Dabigatran (red): CES1 rs2244613 T/T — elevated bleeding risk in atrial fibrillation; prefer rivaroxaban (green).</li>
+<li>Clopidogrel (amber): CYP2C19 normal but CES1 reduced metaboliser — lower active metabolite, possibly higher residual platelet aggregation.</li>
+<li>Loop diuretics (bumetanide, furosemide, torsemide): SLC12A3 G/G predicts lower diuresis but GNB3 C/C predicts favourable response (mixed signal).</li>
+<li>Losartan/irbesartan: CYP2C9 intermediate — slower clearance, larger antihypertensive effect possible (no formal dose adjustment).</li>
+<li>F5 (Factor V Leiden) absent — no inherited thrombophilia from this variant.</li>
+</ul>
+</div>
+<div class="pgx-module" data-module="InfectoGene" hidden>
+<p class="pgx-summary">Infectious-disease PGx panel: antibiotics, antifungals, antiparasitics, antivirals, appetite stimulants. Patient has normal G6PD (so anti-malarials, sulfas, dapsone, primaquine, tafenoquine, nitrofurantoin, fluoroquinolones are all green for haemolytic-anaemia risk), normal CYP2C19 (voriconazole green), CYP2B6 *1/*4 rapid metaboliser (efavirenz: slightly lower plasma levels but standard 600 mg/day suggested), and UGT1A1 *1/*1 normal. Two amber flags: atazanavir (CYP2C19 + UGT1A1 interaction with ritonavir/voriconazole co-prescription) and nevirapine (ABCB1 G/G — elevated hepatotoxicity risk). No red flags.</p>
+<h4 class="pgx-block-title">Drug classes</h4>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antibiotics <span class="pgx-class-pt">(Antibióticos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Nalidixic acid</span><span class="pgx-drug pgx-drug-ok">Ceftriaxone</span><span class="pgx-drug pgx-drug-ok">Ciprofloxacin</span><span class="pgx-drug pgx-drug-ok">Dapsone</span><span class="pgx-drug pgx-drug-ok">Erythromycin + Sulfisoxazole</span><span class="pgx-drug pgx-drug-ok">Mafenide</span><span class="pgx-drug pgx-drug-ok">Moxifloxacin</span><span class="pgx-drug pgx-drug-ok">Nitrofurantoin</span><span class="pgx-drug pgx-drug-ok">Norfloxacin</span><span class="pgx-drug pgx-drug-ok">Ofloxacin</span><span class="pgx-drug pgx-drug-ok">Sulfadiazine</span><span class="pgx-drug pgx-drug-ok">Trimethoprim + Sulfamethoxazole</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Azithromycin</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antifungals <span class="pgx-class-pt">(Antifúngicos)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Voriconazole</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antiparasitics <span class="pgx-class-pt">(Antiparasitários)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Chloroquine</span><span class="pgx-drug pgx-drug-ok">Hydroxychloroquine</span><span class="pgx-drug pgx-drug-ok">Primaquine</span><span class="pgx-drug pgx-drug-ok">Quinine sulfate</span><span class="pgx-drug pgx-drug-ok">Tafenoquine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Antivirals <span class="pgx-class-pt">(Antivirais)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Efavirenz</span></div>
+    </div>
+    <div class="pgx-band pgx-band-watch">
+      <span class="pgx-band-label">Use with attention</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Atazanavir</span><span class="pgx-drug pgx-drug-watch">Nevirapine</span></div>
+    </div>
+  </div>
+</div>
+<div class="pgx-class">
+  <div class="pgx-class-name">Appetite stimulants <span class="pgx-class-pt">(Estimulante do apetite)</span></div>
+  <div class="pgx-class-bands">
+    <div class="pgx-band pgx-band-ok">
+      <span class="pgx-band-label">Use as labelled</span>
+<div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Dronabinol</span></div>
+    </div>
+  </div>
+</div>
+<h4 class="pgx-block-title">Metabolism genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2B6</div>
+  <div class="pgx-gene-genotype">*1/*4</div>
+  <div class="pgx-gene-pheno">Rapid metaboliser — mildly reduced efavirenz plasma levels</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C9</div>
+  <div class="pgx-gene-genotype">*1/*2</div>
+  <div class="pgx-gene-pheno">Intermediate metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">CYP2C19</div>
+  <div class="pgx-gene-genotype">*1C/*1C</div>
+  <div class="pgx-gene-pheno">Normal metaboliser — normal voriconazole dosing</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">UGT1A1</div>
+  <div class="pgx-gene-genotype">*1/*1</div>
+  <div class="pgx-gene-pheno">Normal metaboliser — reduced atazanavir-induced jaundice risk</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Response &amp; toxicity genes</h4>
+<div class="pgx-genes-grid">
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs1045642)</div>
+  <div class="pgx-gene-genotype">G/G</div>
+  <div class="pgx-gene-pheno">Drug-dependent toxicity/metabolism — elevated nevirapine hepatotoxicity risk</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">ABCB1 (rs2032582)</div>
+  <div class="pgx-gene-genotype">C/C</div>
+  <div class="pgx-gene-pheno">Reduced metaboliser</div>
+</div>
+<div class="pgx-gene">
+  <div class="pgx-gene-name">G6PD</div>
+  <div class="pgx-gene-genotype">B/-</div>
+  <div class="pgx-gene-pheno">Normal G6PD activity — no haemolytic anaemia risk with primaquine, dapsone, sulfas, nitrofurantoin, antimalarials</div>
+</div>
+</div>
+<h4 class="pgx-block-title">Key recommendations</h4>
+<ul class="pgx-recs">
+<li>Antimalarials and sulfa antibiotics: normal G6PD — no special precautions.</li>
+<li>Voriconazole: CYP2C19 normal metaboliser — standard dose; if used with atazanavir + ritonavir, expect reduced atazanavir/voriconazole exposure.</li>
+<li>Efavirenz: CYP2B6 rapid metaboliser — start at standard 600 mg/day, monitor virologic response.</li>
+<li>Nevirapine: ABCB1 rs1045642 G/G — increased hepatotoxicity risk; closer LFT monitoring if used.</li>
+<li>Atazanavir: increased risk of pharmacokinetic interaction when combined with ritonavir + voriconazole.</li>
+</ul>
+</div>
+
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="footer-brand">
+    <img src="assets/logo.svg" alt="">
+    <span>JC Advisory · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
+  </div>
+  <div>Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</div>
+</footer>
+
+<script src="assets/app.js?v=22"></script>
+<script src="assets/data.js?v=22"></script>
+
+</body>
+</html>

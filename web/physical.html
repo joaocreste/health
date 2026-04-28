@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physical Health Overview · JC Advisory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=22">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+</head>
+<body>
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html" class="active"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+  
+  <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+</div>
+
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="container">
+    
+    <div class="page-eyebrow"><span class="lang-en">Section I · Physical health</span><span class="lang-pt">Seção I · Saúde física</span></div>
+    <h1 class="page-title">Physical Health Overview</h1>
+    <p class="page-desc"><span class="lang-en">Joao Victor Creste · 33 · London · prepared 25 April 2026. The clinical picture is split into three views — daily biometrics (Vitals), point-in-time exams &amp; lab results (Exams), and the inherited genetic profile that shapes drug response (Genetics).</span><span class="lang-pt">João Victor Creste · 33 anos · Londres · preparado em 25 de abril de 2026. O quadro clínico é dividido em três visões — biometria diária (Sinais vitais), exames pontuais e resultados laboratoriais (Exames), e o perfil genético hereditário que modula a resposta a medicamentos (Genética).</span></p>
+  </div>
+</header>
+
+<!-- APRIL 2026 DETERIORATION CALLOUT -->
+<section class="report-section" id="browse">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">Browse</span><span class="lang-pt">Navegar</span></div>
+    <h2 class="section-title"><span class="lang-en">Vitals · Exams · Genetics</span><span class="lang-pt">Sinais vitais · Exames · Genética</span></h2>
+    <p class="section-desc"><span class="lang-en">Three views of the same patient — daily biometrics from wearables, point-in-time exams and lab results, and the inherited genetic profile that shapes drug response.</span><span class="lang-pt">Três visões do mesmo paciente — biometria diária de wearables, exames pontuais e resultados laboratoriais, e o perfil genético hereditário que modula a resposta a medicamentos.</span></p>
+
+    <div class="entry-grid entry-grid-overview">
+
+      <a class="entry-card entry-card-overview" href="physical-vitals.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="32" cy="32" r="22" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>
+          <polyline points="14,32 22,32 26,22 30,42 34,28 38,36 42,32 50,32"
+                stroke="#3E7CA3" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Vitals</span><span class="lang-pt">Sinais vitais</span></div>
+        <div class="entry-status">
+          <span class="pill pill-flag">2 flagged</span>
+          <span class="pill pill-watch">3 watch</span>
+        </div>
+        <ul class="entry-bullets">
+          <li>Body composition · sleep · cardiovascular</li>
+          <li>Blood pressure · movement · exercise</li>
+          <li>Latest osteopath assessment</li>
+        </ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+
+      <a class="entry-card entry-card-overview" href="physical-exams.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="20" y1="8" x2="44" y2="8" stroke="#244E6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M22 8 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 8 Z"
+                fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M22 34 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 34 Z"
+                fill="#3E7CA3"/>
+          <circle cx="28" cy="44" r="2" fill="#FFFFFF" opacity="0.8"/>
+          <circle cx="35" cy="50" r="1.5" fill="#FFFFFF" opacity="0.8"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Exams</span><span class="lang-pt">Exames</span></div>
+        <div class="entry-status">
+          <span class="pill pill-flag">1 flagged</span>
+          <span class="pill pill-watch">4 watch</span>
+        </div>
+        <ul class="entry-bullets">
+          <li>Imaging · CT facial sinuses (Jan 2026)</li>
+          <li>71 lab markers · alcohol assessment</li>
+          <li>Gut microbiota · injury &amp; surgical history</li>
+        </ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+
+      <a class="entry-card entry-card-overview" href="physical-genetics.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22 8 C22 18 42 22 42 32 C42 42 22 46 22 56"
+                fill="none" stroke="#244E6E" stroke-width="2" stroke-linecap="round"/>
+          <path d="M42 8 C42 18 22 22 22 32 C22 42 42 46 42 56"
+                fill="none" stroke="#3E7CA3" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="14" x2="40" y2="14" stroke="#8BB8D2" stroke-width="1.5"/>
+          <line x1="22" y1="22" x2="42" y2="22" stroke="#8BB8D2" stroke-width="1.5"/>
+          <line x1="24" y1="32" x2="40" y2="32" stroke="#8BB8D2" stroke-width="1.5"/>
+          <line x1="22" y1="42" x2="42" y2="42" stroke="#8BB8D2" stroke-width="1.5"/>
+          <line x1="24" y1="50" x2="40" y2="50" stroke="#8BB8D2" stroke-width="1.5"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Genetics</span><span class="lang-pt">Genética</span></div>
+        <div class="entry-status">
+          <span class="pill pill-ok">Current meds: green</span>
+          <span class="pill pill-info">MTHFR · warfarin flags</span>
+        </div>
+        <ul class="entry-bullets">
+          <li>Pharmacogenetic profile (TotalGene · 2023)</li>
+          <li>Four sub-modules · 71 gene–drug interactions</li>
+          <li>Patient's current meds × PGx</li>
+        </ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="april-alert" style="padding-top:3rem;padding-bottom:2.5rem;background:var(--red-50);">
+  <div class="container">
+    <div class="section-label" style="color:var(--red-600);"><span class="lang-en">⚠ April 2026 deterioration</span><span class="lang-pt">⚠ Deterioração em abril de 2026</span></div>
+    <h2 class="section-title" style="margin-bottom:1rem;"><span class="lang-en">Three signals converging — worth raising at the next clinical visit</span><span class="lang-pt">Três sinais convergindo — vale levantar na próxima consulta clínica</span></h2>
+    <p class="section-desc"><span class="lang-en">
+      Across three independent data streams below, April 2026 is the worst month
+      of the recorded period. Each signal alone is explainable; the three together suggest
+      a stress / pain / pharmacology episode that is undoing the gains of January–March.
+    </span><span class="lang-pt">
+      Em três fluxos de dados independentes abaixo, abril de 2026 é o pior mês
+      do período registrado. Cada sinal isoladamente é explicável; os três juntos sugerem
+      um episódio de estresse / dor / farmacologia que está revertendo os ganhos de janeiro a março.
+    </span></p>
+
+    <div class="three-col">
+      <a href="#bp" class="metric-card" style="text-decoration:none;border-left:3px solid var(--red-600);background:#FFFFFF;">
+        <div class="metric-label"><span class="lang-en">Blood pressure (Withings)</span><span class="lang-pt">Pressão arterial (Withings)</span></div>
+        <div class="metric-value" style="color:var(--red-600);">155/111</div>
+        <div class="metric-note">
+          Mean of last 4 readings (6 Apr) — Stage 2.<br>
+          Trajectory: Nov 137/91 → Jan 118/78 → <strong>Apr 155/111</strong>.
+        </div>
+      </a>
+      <a href="#cardio" class="metric-card" style="text-decoration:none;border-left:3px solid var(--red-600);background:#FFFFFF;">
+        <div class="metric-label"><span class="lang-en">HRV monthly mean (Oura)</span><span class="lang-pt">Média mensal de VFC (Oura)</span></div>
+        <div class="metric-value" style="color:var(--red-600);">15.1<small>ms</small></div>
+        <div class="metric-note">
+          Lowest month of the period.<br>
+          Trajectory: Jan 24.5 → Feb 24.6 → Mar 23.7 → <strong>Apr 15.1</strong>.
+        </div>
+      </a>
+      <a href="#cardio" class="metric-card" style="text-decoration:none;border-left:3px solid var(--red-600);background:#FFFFFF;">
+        <div class="metric-label"><span class="lang-en">ECG flags (Apple Watch)</span><span class="lang-pt">Sinalizações de ECG (Apple Watch)</span></div>
+        <div class="metric-value" style="color:var(--red-600);">3<small>/4</small></div>
+        <div class="metric-note">
+          Of the four April ECGs, three classified <em>High Heart Rate</em>.<br>
+          Most recent: 16 Apr.
+        </div>
+      </a>
+    </div>
+
+    <div class="alert alert-flag mt-3">
+      <span class="lang-en">
+        <strong>Likely contributors to discuss with Dr. Tischer:</strong>
+        cervical protrusion crisis (March 2026, pain 12/10) and ongoing nerve pain ·
+        Diprospan corticosteroid injection (known transient BP / HR effect) ·
+        Duloxetine reduced 120 → 30&nbsp;mg ·
+        Pregabalin increased 150 → 225&nbsp;mg/day (split in two doses) ·
+        Depakote ER 750&nbsp;mg added ·
+        Diazepam 35&nbsp;mg/day (taper resumed from peak of 40) ·
+        and the alcohol pattern documented under Section 11 below.
+      </span>
+      <span class="lang-pt">
+        <strong>Prováveis contribuintes para discutir com o Dr. Tischer:</strong>
+        crise de protrusão cervical (março 2026, dor 12/10) e dor neuropática contínua ·
+        infiltração de corticosteroide Diprospan (conhecido efeito transitório sobre PA / FC) ·
+        Duloxetina reduzida de 120 → 30&nbsp;mg ·
+        Pregabalina aumentada de 150 → 225&nbsp;mg/dia (em duas tomadas) ·
+        Depakote ER 750&nbsp;mg adicionado ·
+        Diazepam 35&nbsp;mg/dia (desmame retomado a partir do pico de 40) ·
+        e o padrão de consumo de álcool documentado na Seção 11 abaixo.
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- 01 CLINICAL HISTORY -->
+<section class="report-section" id="clinical">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · Clinical history</span><span class="lang-pt">01 · Histórico clínico</span></div>
+    <h2 class="section-title"><span class="lang-en">Recent clinical history</span><span class="lang-pt">Histórico clínico recente</span></h2>
+    <p class="section-desc"><span class="lang-en">Active diagnoses and incidents in the last 18 months that shape current treatment decisions.</span><span class="lang-pt">Diagnósticos ativos e incidentes nos últimos 18 meses que moldam as decisões de tratamento atuais.</span></p>
+
+    <div class="two-col">
+      <div class="list-card">
+        <h4><span class="lang-en">Physical</span><span class="lang-pt">Físicos</span></h4>
+        <ul>
+          <li><span class="lang-en"><strong>Cervical spine.</strong> Multi-level disc degeneration C3–C7; dural compression C5–C6 and C6–C7.</span><span class="lang-pt"><strong>Coluna cervical.</strong> Degeneração discal multinível C3–C7; compressão dural C5–C6 e C6–C7.</span></li>
+          <li><span class="lang-en"><strong>Concussion-like episode (Nov 2025).</strong> Vertigo, memory disturbance, dizziness — ongoing 4-month window.</span><span class="lang-pt"><strong>Episódio similar a concussão (nov 2025).</strong> Vertigem, alterações de memória, tontura — janela de 4 meses em andamento.</span></li>
+          <li><span class="lang-en"><strong>Bicycle accident (Jan 2026).</strong> Concussion, trauma, internal bleeding and oedema. 3 days hospitalised; anti-inflammatories + morphine.</span><span class="lang-pt"><strong>Acidente de bicicleta (jan 2026).</strong> Concussão, trauma, sangramento interno e edema. 3 dias internado; anti-inflamatórios + morfina.</span></li>
+          <li><span class="lang-en"><strong>Plastic surgery</strong> scheduled July 2026 to correct forehead scar.</span><span class="lang-pt"><strong>Cirurgia plástica</strong> agendada para julho de 2026 para corrigir cicatriz na testa.</span></li>
+          <li><span class="lang-en"><strong>Cervical protrusion crisis (Mar 2026).</strong> Pain 12/10 — Diprospan injection.</span><span class="lang-pt"><strong>Crise de protrusão cervical (mar 2026).</strong> Dor 12/10 — infiltração de Diprospan.</span></li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4><span class="lang-en">Mental</span><span class="lang-pt">Mentais</span></h4>
+        <ul>
+          <li><span class="lang-en"><strong>PTSD.</strong> Active diagnosis; ongoing psychiatric care with Dr. Alain Perrier (Paris).</span><span class="lang-pt"><strong>TEPT.</strong> Diagnóstico ativo; acompanhamento psiquiátrico com o Dr. Alain Perrier (Paris).</span></li>
+          <li><span class="lang-en"><strong>Marital trauma.</strong> Sustained emotional abuse within marriage (diagnosed borderline / narcissistic partner). Divorce finalised 2024–2025.</span><span class="lang-pt"><strong>Trauma conjugal.</strong> Abuso emocional sustentado no casamento (parceira diagnosticada como borderline / narcisista). Divórcio concluído em 2024–2025.</span></li>
+          <li><span class="lang-en"><strong>Prolonged grief and identity disruption</strong> following separation.</span><span class="lang-pt"><strong>Luto prolongado e ruptura de identidade</strong> após a separação.</span></li>
+          <li><span class="lang-en"><strong>Benzodiazepine dependency.</strong> Diazepam 35 mg/day per the current regimen (28 Apr 2026), down from a recent peak of 40 mg/day; taper resumed.</span><span class="lang-pt"><strong>Dependência de benzodiazepínico.</strong> Diazepam 35 mg/dia conforme o regime atual (28 abr 2026), reduzido em relação ao pico recente de 40 mg/dia; desmame retomado.</span></li>
+          <li><span class="lang-en"><strong>Reactive alcohol use</strong> concurrent with benzodiazepine load — known serious combined risk. AUDIT improved March 29/40 → April 13/40 (Harmful range).</span><span class="lang-pt"><strong>Uso reativo de álcool</strong> concomitante à carga benzodiazepínica — risco combinado grave conhecido. AUDIT melhorou de 29/40 em março → 13/40 em abril (faixa nociva).</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 MEDICATIONS / SUPPLEMENTS -->
+<section class="report-section" id="meds">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">02 · Pharmacology</span><span class="lang-pt">02 · Farmacologia</span></div>
+    <h2 class="section-title"><span class="lang-en">Prescribed medications &amp; supplementation</span><span class="lang-pt">Medicações prescritas e suplementação</span></h2>
+    <p class="section-desc"><span class="lang-en">Current regimen as of <strong>28 April 2026</strong> — sourced from <code>data/medications.csv</code>. Day-to-day dose adjustments coordinated with Dr. Eduardo Tischer.</span><span class="lang-pt">Regime atual em <strong>28 de abril de 2026</strong> — baseado em <code>data/medications.csv</code>. Ajustes de dose do dia a dia coordenados com o Dr. Eduardo Tischer.</span></p>
+
+    <table class="data-table mb-3">
+      <thead>
+        <tr><th><span class="lang-en">Medication</span><span class="lang-pt">Medicação</span></th><th><span class="lang-en">Dose</span><span class="lang-pt">Dose</span></th><th><span class="lang-en">Class</span><span class="lang-pt">Classe</span></th><th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th><th><span class="lang-en">Clinical note</span><span class="lang-pt">Observação clínica</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="strong">Depakote ER (divalproex)</td><td class="num">750 mg/day</td><td><span class="lang-en">Mood stabiliser / anti-epileptic</span><span class="lang-pt">Estabilizador de humor / antiepiléptico</span></td><td><span class="pill pill-info"><span class="lang-en">Active</span><span class="lang-pt">Ativo</span></span></td><td><span class="lang-en">Newly added — valproate. Hepatic + UGT clearance; CYP2C9 *1/*2 intermediate metaboliser is relevant for dose-titration.</span><span class="lang-pt">Recém-adicionado — valproato. Depuração hepática + UGT; metabolizador intermediário CYP2C9 *1/*2 é relevante para a titulação da dose.</span></td></tr>
+        <tr><td class="strong">Lyrica (pregabalin)</td><td class="num">225 mg/day</td><td><span class="lang-en">Anticonvulsant / anxiolytic</span><span class="lang-pt">Anticonvulsivante / ansiolítico</span></td><td><span class="pill pill-info"><span class="lang-en">Increased</span><span class="lang-pt">Aumentada</span></span></td><td><span class="lang-en">Increased from 150 → 225 mg/day, split in two doses — addressing nerve pain and anxiety.</span><span class="lang-pt">Aumentada de 150 → 225 mg/dia, dividida em duas tomadas — atuando na dor neuropática e na ansiedade.</span></td></tr>
+        <tr><td class="strong">Quetiapine (Quetros)</td><td class="num">50 mg/day</td><td><span class="lang-en">Antipsychotic</span><span class="lang-pt">Antipsicótico</span></td><td><span class="pill pill-flag"><span class="lang-en">To be reduced soon</span><span class="lang-pt">A ser reduzida em breve</span></span></td><td><span class="lang-en">Appetite stimulation (carbs/sugar); disrupts deep sleep. Reduction planned with Dr. Tischer.</span><span class="lang-pt">Estimulação do apetite (carboidratos/açúcar); compromete o sono profundo. Redução planejada com o Dr. Tischer.</span></td></tr>
+        <tr><td class="strong">Cymbalta (duloxetine)</td><td class="num">30 mg/day</td><td><span class="lang-en">SNRI</span><span class="lang-pt">ISRSN</span></td><td><span class="pill pill-watch">Reduced</span></td><td><span class="lang-en">Down from 120 mg/day — large reduction; monitor mood, energy, withdrawal symptoms.</span><span class="lang-pt">Reduzido de 120 mg/dia — redução acentuada; monitorar humor, energia e sintomas de descontinuação.</span></td></tr>
+        <tr><td class="strong">Valium (diazepam)</td><td class="num">35 mg/day</td><td><span class="lang-en">Benzodiazepine</span><span class="lang-pt">Benzodiazepínico</span></td><td><span class="pill pill-watch"><span class="lang-en">Tapering</span><span class="lang-pt">Em desmame</span></span></td><td><span class="lang-en">Stepped down from 40 → 35 mg/day; taper resumed. <strong>Serious</strong> interaction with alcohol.</span><span class="lang-pt">Reduzido de 40 → 35 mg/dia; desmame retomado. Interação <strong>grave</strong> com álcool.</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:1.5rem 0 1rem;"><span class="lang-en">Supplementation</span><span class="lang-pt">Suplementação</span></h3>
+    <table class="data-table">
+      <thead>
+        <tr><th><span class="lang-en">Supplement</span><span class="lang-pt">Suplemento</span></th><th><span class="lang-en">Dose</span><span class="lang-pt">Dose</span></th><th><span class="lang-en">Clinical note</span><span class="lang-pt">Observação clínica</span></th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="strong"><span class="lang-en">Vitamin B1 (Thiamine)</span><span class="lang-pt">Vitamina B1 (Tiamina)</span></td><td class="num">500 mg/day</td><td><span class="lang-en">Neurological function; critical with concurrent alcohol use — prevents Wernicke's encephalopathy.</span><span class="lang-pt">Função neurológica; crítica com uso concomitante de álcool — previne encefalopatia de Wernicke.</span></td></tr>
+        <tr><td class="strong"><span class="lang-en">Vitamin B12</span><span class="lang-pt">Vitamina B12</span></td><td class="num">1,000 mcg/day</td><td><span class="lang-en">Energy metabolism; nervous-system support.</span><span class="lang-pt">Metabolismo energético; suporte ao sistema nervoso.</span></td></tr>
+        <tr><td class="strong"><span class="lang-en">Vitamin D3</span><span class="lang-pt">Vitamina D3</span></td><td class="num">1,000 IU/day</td><td><span class="lang-en">Likely subtherapeutic for London — physician recommends increase to 4,000 IU.</span><span class="lang-pt">Provavelmente subterapêutica para Londres — médico recomenda aumento para 4.000 UI.</span></td></tr>
+        <tr><td class="strong"><span class="lang-en">Magnesium</span><span class="lang-pt">Magnésio</span></td><td><span class="lang-en">Daily</span><span class="lang-pt">Diário</span></td><td><span class="lang-en">Sleep quality, muscle function, nervous-system regulation.</span><span class="lang-pt">Qualidade do sono, função muscular, regulação do sistema nervoso.</span></td></tr>
+        <tr><td class="strong"><span class="lang-en">Melatonin</span><span class="lang-pt">Melatonina</span></td><td class="num">5 mg/day</td><td><span class="lang-en">Sleep onset support; appropriate given current circadian disruption.</span><span class="lang-pt">Suporte para início do sono; apropriado dada a disrupção circadiana atual.</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- THREE DRILL-DOWN CARDS -->
+<footer class="doc-footer">
+  <div class="footer-brand">
+    <img src="assets/logo.svg" alt="">
+    <span>JC Advisory · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
+  </div>
+  <div>Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</div>
+</footer>
+
+<script src="assets/app.js?v=22"></script>
+
+</body>
+</html>

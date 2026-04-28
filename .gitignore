@@ -1,0 +1,48 @@
+# ==========================================================================
+# Raw data archive — strictly local, never in version control
+# ==========================================================================
+/data/
+
+# ==========================================================================
+# Patient-identifiable source documents at root — keep local
+# ==========================================================================
+example.pdf
+totalgene.pdf
+*.docx
+Doc1.docx
+DATA-PROVENANCE.md
+
+# ==========================================================================
+# Build / OS / editor noise
+# ==========================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+*.log
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+
+# ==========================================================================
+# Local dev artefacts
+# ==========================================================================
+/web/peek*/
+/web/demo/
+*.mp4
+*.mov
+demo-raw*.mp4
+JC-Advisory-demo.mp4
+
+# Old / standalone HTML drafts at repo root that aren't part of the deploy
+/index.html
+/portfolio-report.html
+/branding.html
+/health-palette.html
+/Logo.png
+
+# Local extraction tooling
+/bin/__pycache__/

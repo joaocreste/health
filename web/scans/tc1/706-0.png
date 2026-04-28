@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>Enhanced SR Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="generator" content="OFFIS DCMTK 3.6.6">
+</head>
+<body>
+<table>
+<tr>
+<td><b>Patient:</b></td>
+<td>JOAO VICTOR CRESTE DIAS DE SOUZA (male, *1992-10-17, #0003987255)</td>
+</tr>
+<tr>
+<td><b>Referring Physician:</b></td>
+<td>JOSE ROBERTO CHODRAUI</td>
+</tr>
+<tr>
+<td><b>Study:</b></td>
+<td>TC SEIOS DA FACE (#29879)</td>
+</tr>
+<tr>
+<td><b>Series:</b></td>
+<td>Dose Record (#997)</td>
+</tr>
+<tr>
+<td><b>Manufacturer:</b></td>
+<td>GE Medical Systems (LightSpeed VCT, #*)</td>
+</tr>
+<tr>
+<td><b>Completion Flag:</b></td>
+<td>COMPLETE</td>
+</tr>
+<tr>
+<td><b>Verification Flag:</b></td>
+<td>UNVERIFIED</td>
+</tr>
+<tr>
+<td><b>Content Date/Time:</b></td>
+<td>2026-01-12 20:53:39</td>
+</tr>
+</table>
+<hr>
+<h1>X-Ray Radiation Dose Report</h1>
+<p>
+<small>(observed: 2026-01-12 20:55:58)</small>
+</p>
+<p>
+<small>
+<span class="under">Concept Modifier</span>: Procedure reported [<a name="annex_src_1" >Annex 1</a>]
+<br>
+<span class="under">Observation Context</span>: Observer Type = Device (121007, DCM)
+<br>
+<span class="under">Observation Context</span>: Device Observer UID = 1.2.840.113619.6.437
+<br>
+<span class="under">Observation Context</span>: Device Observer Name = "ctbay99"
+<br>
+<span class="under">Observation Context</span>: Device Observer Manufacturer = "GE Medical Systems"
+<br>
+<span class="under">Observation Context</span>: Device Observer Model Name = "LightSpeed VCT"
+<br>
+<span class="under">Observation Context</span>: Device Observer Serial Number = "*"
+<br>
+<span class="under">Observation Context</span>: Device Role in Procedure = Irradiating Device (113859, DCM)
+<br>
+<span class="under">Observation Context</span>: Device Role in Procedure = Recording (121097, DCM)
+<br>
+<span class="under">Observation Context</span>: Start of X-Ray Irradiation = 2026-01-12 20:53:39
+<br>
+<span class="under">Observation Context</span>: End of X-Ray Irradiation = 2026-01-12 20:55:58
+<br>
+<span class="under">Observation Context</span>: Scope of Accumulation [<a name="annex_src_2" >Annex 2</a>]
+</small>
+</p>
+<div>
+<h2>CT Accumulated Dose Data</h2>
+<span class="under">3 {events}</span>
+<span class="under">507.49 mGy.cm</span>
+</div>
+<p>
+<div>
+<h2>CT Acquisition</h2>
+2.1 SEIOS DA FACE
+<span class="under">Eye region</span>
+<span class="under">Constant Angle Acquisition</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.904</span>
+<h3>CT Acquisition Parameters</h3>
+<span class="under">2.7 s</span>
+<span class="under">278.45 mm</span>
+<span class="under">154.36 mm</span>
+<span class="under">-124.09 mm</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.902.8390.1</span>
+<span class="under">1.25 mm</span>
+<span class="under">278.45 mm</span>
+<span class="under">1 {X-Ray sources}</span>
+<h4>CT X-Ray Source Parameters</h4>
+1
+<span class="under">100.0 kV</span>
+<span class="under">10.0 mA</span>
+<span class="under">10.0 mA</span>
+</div>
+<p>
+<div>
+<h2>CT Acquisition</h2>
+2.1 SEIOS DA FACE
+<span class="under">Eye region</span>
+<span class="under">Constant Angle Acquisition</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.906</span>
+<h3>CT Acquisition Parameters</h3>
+<span class="under">2.7 s</span>
+<span class="under">278.45 mm</span>
+<span class="under">154.36 mm</span>
+<span class="under">-124.09 mm</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.902.8390.1</span>
+<span class="under">1.25 mm</span>
+<span class="under">278.45 mm</span>
+<span class="under">1 {X-Ray sources}</span>
+<h4>CT X-Ray Source Parameters</h4>
+1
+<span class="under">100.0 kV</span>
+<span class="under">10.0 mA</span>
+<span class="under">10.0 mA</span>
+</div>
+<p>
+<div>
+<h2>CT Acquisition</h2>
+2.1 SEIOS DA FACE
+<span class="under">Eye region</span>
+<span class="under">Spiral Acquisition</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.909</span>
+<h3>CT Acquisition Parameters</h3>
+<span class="under">4.99 s</span>
+<span class="under">232.05 mm</span>
+<span class="under">200.0 mm</span>
+<span class="under">245.45 mm</span>
+<span class="under">92.19 mm</span>
+<span class="under">-107.81 mm</span>
+<span class="under">107.96 mm</span>
+<span class="under">-124.09 mm</span>
+<span class="under">1.2.840.113619.2.437.3.2831168256.990.1768213361.902.8390.1</span>
+<span class="under">0.62 mm</span>
+<span class="under">40.0 mm</span>
+<span class="under">0.98 {ratio}</span>
+<span class="under">1 {X-Ray sources}</span>
+<h4>CT X-Ray Source Parameters</h4>
+1
+<span class="under">120.0 kV</span>
+<span class="under">150.0 mA</span>
+<span class="under">150.0 mA</span>
+<span class="under">0.8 s</span>
+<h3>CT Dose</h3>
+<span class="under">21.87 mGy</span>
+<span class="under">IEC Head Dosimetry Phantom</span>
+<span class="under">507.49 mGy.cm</span>
+<h4>Dose Check Alert Details</h4>
+<span class="under">No</span>
+<span class="under">Yes</span>
+<span class="under">1000.0 mGy</span>
+<h4>Dose Check Notification Details</h4>
+<span class="under">No</span>
+<span class="under">No</span>
+</div>
+<p>
+<div>
+<b>Source of Dose Information:</b><br>
+Automated Data Collection (113856, DCM)
+</div>
+<p>
+<h1>Annex</h1>
+<h2><a name="annex_dst_1" >Annex 1</a></h2>
+<div>
+<b>Procedure reported:</b><br>
+Computed Tomography X-Ray (P5-08000, SRT)
+<p>
+<small>
+<span class="under">Concept Modifier</span>: Has Intent = Diagnostic Intent (R-408C3, SRT)
+</small>
+</p>
+</div>
+<p>
+<h2><a name="annex_dst_2" >Annex 2</a></h2>
+<div>
+<b>Scope of Accumulation:</b><br>
+Study (113014, DCM)
+<p>
+<small>
+<span class="under">Properties</span>: Study Instance UID = 1.2.840.113619.2.437.3.2831168256.990.1768213361.901
+</small>
+</p>
+</div>
+<p>
+</body>
+</html>

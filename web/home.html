@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JC Advisory — Health Summary · Joao Victor Creste</title>
+<meta name="description" content="Comprehensive health summary for clinical communication — physical and mental health overview, prepared from wearables, biometrics, and clinical records.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=22">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html" class="active"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+  
+  <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+</div>
+
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow"><span class="lang-en">Health Summary · 25 April 2026</span><span class="lang-pt">Resumo de saúde · 25 de abril de 2026</span></div>
+    <h1 class="hero-title"><span class="lang-en">From scattered data to a clinical picture.</span><span class="lang-pt">Dos dados dispersos a um quadro clínico.</span></h1>
+    <p class="hero-sub">
+      <span class="lang-en">A single, structured view of Joao Victor Creste's physical and mental health — built directly from 184 nights of Oura Ring sleep, 190 days of ring activity, 233 Withings cuff readings, 18 scale readings, 57 single-lead ECGs and clinical records. Designed to give any treating clinician the full landscape in minutes.</span><span class="lang-pt">Uma visão única e estruturada da saúde física e mental de João Victor Creste — construída diretamente a partir de 184 noites de sono do Oura Ring, 190 dias de atividade do anel, 233 leituras de pressão Withings, 18 medições de balança, 57 ECGs de derivação única e prontuários clínicos. Projetado para entregar a qualquer médico assistente o panorama completo em poucos minutos.</span>
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="lang-en">Patient</span><span class="lang-pt">Paciente</span><span>Joao Victor Creste</span></div>
+      <div class="hero-meta-item"><span class="lang-en">Date of birth</span><span class="lang-pt">Data de nascimento</span><span><span class="lang-en">17 October 1992 · age 33</span><span class="lang-pt">17 de outubro de 1992 · 33 anos</span></span></div>
+      <div class="hero-meta-item"><span class="lang-en">Residence</span><span class="lang-pt">Residência</span><span><span class="lang-en">London, United Kingdom</span><span class="lang-pt">Londres, Reino Unido</span></span></div>
+      <div class="hero-meta-item"><span class="lang-en">Prepared</span><span class="lang-pt">Preparado em</span><span><span class="lang-en">25 April 2026</span><span class="lang-pt">25 de abril de 2026</span></span></div>
+      <div class="hero-meta-item"><span class="lang-en">Classification</span><span class="lang-pt">Classificação</span><span><span class="lang-en">Strictly confidential</span><span class="lang-pt">Estritamente confidencial</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- REPORTS -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>
+    <h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>
+
+    <div class="entry-grid entry-grid-visual">
+      <a class="entry-card entry-card-visual" href="physical.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M32 54 L13 36 C7 30 7 22 13 18 C18 13 25 13 29 18 L32 21 L35 18 C39 13 46 13 51 18 C57 22 57 30 51 36 L32 54 Z"
+                fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>
+          <polyline points="6,36 18,36 22,28 27,44 32,30 37,38 42,36 58,36"
+                    stroke="#3E7CA3" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Physical Health Overview</span><span class="lang-pt">Visão geral da saúde física</span></div>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+
+      <a class="entry-card entry-card-visual" href="mental.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M32 14 C22 14 14 20 14 30 C14 40 22 50 32 50 V14 Z"
+                fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M32 14 C42 14 50 20 50 30 C50 40 42 50 32 50 V14 Z"
+                fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M22 24 Q26 26 22 30 Q26 34 22 38" stroke="#3E7CA3" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M42 24 Q38 26 42 30 Q38 34 42 38" stroke="#3E7CA3" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Mental Health Overview</span><span class="lang-pt">Visão geral da saúde mental</span></div>
+        <span class="entry-cta">Open</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- AT A GLANCE -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">02 · At a glance</span><span class="lang-pt">02 · Em um relance</span></div>
+    <h2 class="section-title"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></h2>
+    <p class="section-desc">
+      <span class="lang-en">Most recent readings drawn from each connected source. Status badges follow a single convention: green is in target, amber is monitor, red is clinically actionable.</span><span class="lang-pt">Leituras mais recentes obtidas de cada fonte conectada. Os marcadores de status seguem uma única convenção: verde está dentro da meta, âmbar requer monitoramento, vermelho exige ação clínica.</span>
+    </p>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Body weight</span><span class="lang-pt">Peso corporal</span></div>
+        <div class="metric-value">81.4<small>kg</small></div>
+        <div class="metric-note"><span class="lang-en">Target 69–70 kg · <span class="pill pill-flag">Above target</span></span><span class="lang-pt">Meta 69–70 kg · <span class="pill pill-flag">Acima da meta</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Body fat</span><span class="lang-pt">Gordura corporal</span></div>
+        <div class="metric-value">24.2<small>%</small></div>
+        <div class="metric-note"><span class="lang-en">Target &lt;18% · <span class="pill pill-watch">Above target</span></span><span class="lang-pt">Meta &lt;18% · <span class="pill pill-watch">Acima da meta</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Muscle mass</span><span class="lang-pt">Massa muscular</span></div>
+        <div class="metric-value">58.6<small>kg</small></div>
+        <div class="metric-note"><span class="lang-en">Flat since October</span><span class="lang-pt">Estável desde outubro</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Resting HR</span><span class="lang-pt">FC em repouso</span></div>
+        <div class="metric-value">65<small>bpm</small></div>
+        <div class="metric-note"><span class="lang-en">Healthy 50–65 · <span class="pill pill-watch">Borderline</span></span><span class="lang-pt">Saudável 50–65 · <span class="pill pill-watch">Limítrofe</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">HRV (median)</span><span class="lang-pt">VFC (mediana)</span></div>
+        <div class="metric-value">17<small>ms</small></div>
+        <div class="metric-note"><span class="lang-en">Age range 55–65 · <span class="pill pill-flag">Critically low</span></span><span class="lang-pt">Faixa etária 55–65 · <span class="pill pill-flag">Criticamente baixa</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Blood pressure (Apr)</span><span class="lang-pt">Pressão arterial (abr)</span></div>
+        <div class="metric-value">155/111</div>
+        <div class="metric-note"><span class="lang-en"><span class="pill pill-flag">Stage 2</span> · last reading 6 Apr</span><span class="lang-pt"><span class="pill pill-flag">Estágio 2</span> · última leitura 6 abr</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Sleep score (median)</span><span class="lang-pt">Índice de sono (mediana)</span></div>
+        <div class="metric-value">82<small>/100</small></div>
+        <div class="metric-note"><span class="lang-en">Total 8h 37m · REM 1h 21m</span><span class="lang-pt">Total 8h 37min · REM 1h 21min</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">AUDIT score (Apr)</span><span class="lang-pt">Pontuação AUDIT (abr)</span></div>
+        <div class="metric-value">13<small>/40</small></div>
+        <div class="metric-note"><span class="lang-en">Down from 29 in Mar · <span class="pill pill-watch">Harmful</span></span><span class="lang-pt">Reduzido de 29 em mar · <span class="pill pill-watch">Nocivo</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEY ALERTS -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">03 · What a clinician should see first</span><span class="lang-pt">03 · O que um clínico deve ver primeiro</span></div>
+    <h2 class="section-title"><span class="lang-en">Active clinical priorities</span><span class="lang-pt">Prioridades clínicas ativas</span></h2>
+    <p class="section-desc"><span class="lang-en">Five concurrent pictures that interact. Reading them as a single system, rather than separate problems, is the point of this report.</span><span class="lang-pt">Cinco quadros simultâneos que interagem. Lê-los como um único sistema, em vez de problemas separados, é o ponto deste relatório.</span></p>
+
+    <div class="alert alert-flag">
+      <span class="lang-en"><strong>Benzodiazepine dependence + alcohol use.</strong>
+      Diazepam 35&nbsp;mg/day (28 Apr 2026 regime; recent peak 40 mg, taper resumed) running concurrently with alcohol use; AUDIT
+      improved 29 → <strong>13</strong> between March and April 2026 (Harmful range, no longer
+      probable dependence). Combined CNS depression risk remains the highest-leverage concern.</span><span class="lang-pt"><strong>Dependência de benzodiazepínico + uso de álcool.</strong>
+      Diazepam 35&nbsp;mg/dia (regime de 28 abr 2026; pico recente de 40 mg, desmame retomado) concomitante ao uso de álcool; AUDIT
+      melhorou de 29 → <strong>13</strong> entre março e abril de 2026 (faixa nociva, não mais
+      provável dependência). O risco combinado de depressão do SNC continua sendo a maior preocupação.</span>
+    </div>
+    <div class="alert alert-flag">
+      <span class="lang-en"><strong>Critically low HRV — median 17&nbsp;ms vs 55–65&nbsp;ms age norm.</strong>
+      59% of 184 nights below 20&nbsp;ms. April 2026 mean (15.1&nbsp;ms) is the lowest of any month tracked — a sharp regression from the January–March improvement.</span><span class="lang-pt"><strong>VFC criticamente baixa — mediana 17&nbsp;ms vs norma 55–65&nbsp;ms para a idade.</strong>
+      59% das 184 noites abaixo de 20&nbsp;ms. A média de abril 2026 (15,1&nbsp;ms) é a mais baixa de qualquer mês registrado — uma forte regressão em relação à melhora de janeiro a março.</span>
+    </div>
+    <div class="alert alert-flag">
+      <span class="lang-en"><strong>Blood pressure regressed in April.</strong> Across 233 readings, mean is 135/89.8&nbsp;mmHg
+      (Stage 1) with peak 172/116. November 137/91 (Stage 2) → January 118/78 (Normal) → <strong>April 155/111 (Stage 2)</strong>. Likely contributors: cervical pain, restarted Diprospan, Depakote ER added (750 mg), Lyrica increased 150 → 225 mg (split in two doses), Duloxetine reduced (30 mg), Diazepam in resumed taper (35 mg), benzo fluctuations.</span><span class="lang-pt"><strong>Pressão arterial regrediu em abril.</strong> Em 233 leituras, a média é 135/89,8&nbsp;mmHg
+      (Estágio 1) com pico 172/116. Novembro 137/91 (Estágio 2) → janeiro 118/78 (Normal) → <strong>abril 155/111 (Estágio 2)</strong>. Prováveis contribuintes: dor cervical, Diprospan reintroduzido, Depakote ER adicionado (750 mg), Lyrica aumentada de 150 → 225 mg (dividida em duas tomadas), Duloxetina reduzida (30 mg), Diazepam em desmame retomado (35 mg), oscilações benzodiazepínicas.</span>
+    </div>
+    <div class="alert alert-watch">
+      <span class="lang-en"><strong>Cervical disc degeneration C3–C7</strong> with dural compression C5–C6 / C6–C7. March 2026 protrusion crisis required Diprospan injection. Exercise programming must exclude overhead loading and barbell back squat.</span><span class="lang-pt"><strong>Degeneração discal cervical C3–C7</strong> com compressão dural C5–C6 / C6–C7. Crise de protrusão em março 2026 exigiu infiltração de Diprospan. A programação de exercícios deve excluir cargas overhead e agachamento com barra nas costas.</span>
+    </div>
+    <div class="alert alert-info">
+      <span class="lang-en"><strong>Active PTSD &amp; grief</strong> following a sustained-abuse marriage (2020–2024) and divorce. Identity restoration is the foundation underneath every other goal.</span><span class="lang-pt"><strong>TEPT ativo e luto</strong> após casamento com abuso sustentado (2020–2024) e divórcio. A restauração da identidade é a base de todos os demais objetivos.</span>
+    </div>
+  </div>
+</section>
+
+<!-- INJURY & SURGICAL HISTORY -->
+<section class="report-section" id="injury">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">04 · Cross-cutting context</span><span class="lang-pt">04 · Contexto transversal</span></div>
+    <h2 class="section-title"><span class="lang-en">Recent injury &amp; surgical history</span><span class="lang-pt">Histórico recente de lesões e cirurgias</span></h2>
+    <p class="section-desc"><span class="lang-en">Events over the last 14 years that materially affect today's clinical picture — sits outside the physical / mental split because the consequences cross both.</span><span class="lang-pt">Eventos dos últimos 14 anos que impactam materialmente o quadro clínico atual — fica fora da divisão física / mental porque as consequências cruzam as duas dimensões.</span></p>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:0 0 1rem;"><span class="lang-en">Injuries</span><span class="lang-pt">Lesões</span></h3>
+    <table class="data-table mb-3">
+      <thead><tr><th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th><th><span class="lang-en">Injury</span><span class="lang-pt">Lesão</span></th><th><span class="lang-en">Location</span><span class="lang-pt">Local</span></th><th><span class="lang-en">Notes</span><span class="lang-pt">Observações</span></th></tr></thead>
+      <tbody>
+        <tr><td>Sep 2014</td><td class="strong">Knife wound — partial laceration RCN</td><td>Hôpital Privé d'Antony, France</td><td>Microsurgeon called; movements recovered within 3 weeks.</td></tr>
+        <tr><td>Jul 2015</td><td class="strong">Piriformis syndrome</td><td>Ospedale San Bassiano, Italy</td><td>5 days IM muscle relaxant + anti-inflammatory.</td></tr>
+        <tr><td>Mar 2020</td><td class="strong">Bladder / urinary tract inflammation</td><td>Hospital Albert Einstein, São Paulo</td><td>Interstitial cystitis / BPS — stress-triggered; no recent recurrence.</td></tr>
+        <tr><td>Aug 2022</td><td class="strong">3 lower-back + 3 cervical protrusions</td><td>Vila Nova Star, São Paulo</td><td>2 days hospitalised; muscle relaxants + morphine + physio.</td></tr>
+        <tr><td>Nov 2025</td><td class="strong">Loss of consciousness — fell down stairs</td><td>Berlin International Airport</td><td><span class="pill pill-flag">Concussion</span> · internal bleeding right hip.</td></tr>
+        <tr><td>Jan 2026</td><td class="strong">Loss of consciousness — fell off bike</td><td>25 Av. Montaigne, Paris (potential hypoglycemia)</td><td><span class="pill pill-flag">Concussion</span> · trauma, oedema; 3 days hospitalised; forehead scar — plastic surgery Jul 2026.</td></tr>
+        <tr><td>Mar 2026</td><td class="strong">Cervical protrusion crisis (pain 12/10)</td><td>London, UK</td><td>Diprospan injection (betamethasone + disodium phosphate).</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;"><span class="lang-en">Surgeries</span><span class="lang-pt">Cirurgias</span></h3>
+    <table class="data-table">
+      <thead><tr><th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th><th><span class="lang-en">Procedure</span><span class="lang-pt">Procedimento</span></th><th><span class="lang-en">Hospital</span><span class="lang-pt">Hospital</span></th><th><span class="lang-en">Notes</span><span class="lang-pt">Observações</span></th></tr></thead>
+      <tbody>
+        <tr><td>Mar 2012</td><td class="strong">Excision subcutaneous lipoma, frontal</td><td>Private clinic, Brazil</td><td>Complicated into fibrosis over 12 months.</td></tr>
+        <tr><td>Feb 2013</td><td class="strong">2nd excision — frontal lipoma</td><td>Private hospital, Brazil</td><td>New fibrosis; decided not to re-operate.</td></tr>
+        <tr><td>Sep 2014</td><td class="strong">Wound debridement + repair RCN digit 2</td><td>Hôpital Privé d'Antony, France</td><td>10% laceration; artery and tendon sheath intact.</td></tr>
+        <tr><td>Mar 2022</td><td class="strong">Septoplasty, turbinectomy, sinusotomy, ethmoidectomy</td><td>Hospital Albert Einstein, São Paulo</td><td>Chronic sinusopathy, septal deviation, turbinate hypertrophy.</td></tr>
+        <tr><td>Mar 2023</td><td class="strong">Biopsy — forehead fibrosis</td><td>Hospital Albert Einstein, São Paulo</td><td>No malignant material; decided not to operate.</td></tr>
+        <tr><td>Nov 2024</td><td class="strong">Cholecystectomy (laparoscopic)</td><td>Vila Nova Star, São Paulo</td><td>Chronic calculous cholecystitis / microlithiasis; no malignancy.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-flag mt-4">
+      <span class="lang-en"><strong>Red-flagged events (Nov 2025, Jan 2026)</strong> involve loss of consciousness. The Jan 2026 bike accident is now thought to be a potential hypoglycemic episode. Combined with weekly blackouts on diazepam, this remains the
+      highest single safety risk in the profile. Plastic surgery for forehead scar scheduled July 2026.</span><span class="lang-pt"><strong>Eventos sinalizados (nov 2025, jan 2026)</strong> envolvem perda de consciência. Acredita-se hoje que o acidente de bicicleta de jan 2026 tenha sido um episódio potencial de hipoglicemia. Combinado com blackouts semanais sob diazepam, este permanece o
+      maior risco isolado de segurança no perfil. Cirurgia plástica para a cicatriz na testa agendada para julho de 2026.</span>
+    </div>
+  </div>
+</section>
+
+<!-- DATA SOURCES -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">05 · Where the data comes from</span><span class="lang-pt">05 · De onde vêm os dados</span></div>
+    <h2 class="section-title"><span class="lang-en">Connected sources</span><span class="lang-pt">Fontes conectadas</span></h2>
+    <p class="section-desc">
+      <span class="lang-en">Continuous biometrics from wearables; intermittent measurements from cuff-based and lab tools; narrative material from the patient's own writings and clinical letters.</span><span class="lang-pt">Biometria contínua de wearables; medições intermitentes de aparelhos manuais e exames laboratoriais; material narrativo dos próprios escritos do paciente e correspondência clínica.</span>
+    </p>
+
+    <div class="three-col">
+      <div class="list-card">
+        <h4><span class="lang-en">Wearables &amp; devices</span><span class="lang-pt">Wearables e dispositivos</span></h4>
+        <ul>
+          <li><strong>Oura Ring</strong> — 184 nights of sleep + HRV, 190 days of activity, SpO₂ median 96%</li>
+          <li><strong>Withings Scale</strong> — 18 bio-impedance readings since Oct 2025</li>
+          <li><strong>Withings BP cuff</strong> — 233 readings, Nov 2025 – Apr 2026</li>
+          <li><strong>Apple Watch</strong> — 57 single-lead ECGs since Oct 2023 (39 sinus, 15 high-HR, 3 poor)</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4><span class="lang-en">Clinical &amp; lab</span><span class="lang-pt">Clínica e laboratório</span></h4>
+        <ul>
+          <li><strong>Probiome</strong> — 16S rRNA gut microbiota sequencing (Apr 2024)</li>
+          <li><strong>Osteopath assessment</strong> — Body Formulae Clinic, London (Apr 2026)</li>
+          <li><span class="lang-en"><strong>Psychiatric care</strong> — Dr. Eduardo Tischer, São Paulo | remote</span><span class="lang-pt"><strong>Acompanhamento psiquiátrico</strong> — Dr. Eduardo Tischer, São Paulo | remoto</span></li>
+          <li><span class="lang-en"><strong>Therapeutic care</strong> — Ageu Heringer Lisboa, remote</span><span class="lang-pt"><strong>Acompanhamento terapêutico</strong> — Ageu Heringer Lisboa, remoto</span></li>
+          <li><span class="lang-en"><strong>GP</strong> — Swiss Cottage Medical Centre, London</span><span class="lang-pt"><strong>Clínico geral</strong> — Swiss Cottage Medical Centre, Londres</span></li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4><span class="lang-en">Patient narrative</span><span class="lang-pt">Narrativa do paciente</span></h4>
+        <ul>
+          <li><strong>Diary entries</strong> — life-history reconstruction</li>
+          <li><strong>"A House of Cards"</strong> — written disclosure to family/friends</li>
+          <li><strong>AUDIT</strong> — March 2026 = 29/40 → April 2026 = 13/40 (Harmful)</li>
+          <li><strong>Self-awareness assignment</strong> — written 30 March 2026</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="footer-brand">
+    <img src="assets/logo.svg" alt="">
+    <span>JC Advisory · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
+  </div>
+  <div><span class="lang-en">Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</span><span class="lang-pt">Estritamente confidencial · Apenas para comunicação clínica · Não substitui aconselhamento médico licenciado.</span></div>
+</footer>
+
+<script src="assets/app.js?v=22"></script>
+</body>
+</html>
