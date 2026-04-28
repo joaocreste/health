@@ -1,0 +1,5 @@
+# JC Advisory — public access, all crawlers welcome.
+User-agent: *
+Allow: /
+
+Sitemap: https://jc-advisory-health.pages.dev/sitemap.xml
