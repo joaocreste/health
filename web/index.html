@@ -250,14 +250,19 @@
       location.replace('home.html');
       return;
     }
+    // ⚠ Demo-only client-side gate — fully visible in source. Decorative only.
+    // Add { user, pass } objects to grant access. Empty = nobody passes.
+    var USERS = [
+      {user: 'joao', pass: 'jcj171092'},
+    ];
     var form = document.getElementById('login-form');
     var err = document.getElementById('login-error');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var u = document.getElementById('username').value.trim();
       var p = document.getElementById('password').value;
-      // ⚠ Demo-only client-side gate — replace with real auth before publishing.
-      if (u === 'admin' && p === 'admin') {
+      var ok = USERS.some(function (cred) { return cred.user === u && cred.pass === p; });
+      if (ok) {
         sessionStorage.setItem('jc_authed', 'true');
         location.href = 'home.html';
       } else {
