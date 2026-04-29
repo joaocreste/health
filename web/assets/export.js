@@ -321,7 +321,8 @@
     } catch (err) {
       console.error('[export] failed', err);
       backToSelector();
-      showError(T('failed'));
+      const detail = (err && (err.message || err.toString())) || '';
+      showError(`${T('failed')} ${detail ? '— ' + detail : ''}`);
     }
   }
 
@@ -357,6 +358,7 @@
       showProgress(`${T('loading')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
 
       const frame = await loadFrame(cat.src);
+      let host = null;
       try {
         const fdoc = frame.contentDocument;
         try { if (fdoc.fonts && fdoc.fonts.ready) await fdoc.fonts.ready; } catch (_) {}
@@ -368,30 +370,41 @@
           });
         }
 
-        // Mirror current language onto iframe document so capture honours EN/PT
-        // (rule lives on html[lang]).
-        fdoc.documentElement.lang = lang();
-
         snapshotCanvases(fdoc);
 
         STRIP_SELECTORS.forEach((sel) => {
           fdoc.querySelectorAll(sel).forEach((el) => el.remove());
         });
 
-        // Force the body to its real content height before capture so
-        // html2canvas knows the full extent. Allow a brief layout settle.
-        fdoc.body.style.minHeight = fdoc.body.scrollHeight + 'px';
-        await wait(150);
+        // Resolve relative URLs (img/href in the cloned content lives in host
+        // page; relative paths still resolve since both pages live in /web/).
+        const baseDir = cat.src.replace(/[^/]+$/, '');
+        rewriteRelativeUrls(fdoc.body, baseDir);
+
+        // Copy iframe body's post-layout HTML into a host-doc container.
+        // String-based round-trip avoids any cross-doc DOM weirdness; canvas
+        // pixels survive because they're already serialized as <img src=data:>.
+        host = mountCaptureHost();
+        host.innerHTML = `<div class="pdf-iframe-wrap" style="width:1024px; background:#FFFFFF;">${fdoc.body.innerHTML}</div>`;
+
+        // Wait for any image inside the host to load (data: URLs resolve
+        // synchronously, but real <img src> for CT slices etc. need a tick).
+        await waitForImages(host);
+        await wait(200);
+
+        const captureEl = host.firstElementChild;
+        debug('host before capture', cat.id, captureEl.offsetWidth, 'x', captureEl.offsetHeight);
 
         showProgress(`${T('capturing')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
-        const canvas = await html2canvas(fdoc.body, {
+        const canvas = await html2canvas(captureEl, {
           scale: 1.5,
           useCORS: true,
+          allowTaint: true,
           backgroundColor: '#FFFFFF',
           windowWidth: 1024,
           width: 1024,
-          height: fdoc.body.scrollHeight,
-          windowHeight: fdoc.body.scrollHeight,
+          height: captureEl.offsetHeight,
+          windowHeight: captureEl.offsetHeight,
           scrollX: 0,
           scrollY: 0,
           logging: !!window.__exportDebug,
@@ -401,6 +414,7 @@
         addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true);
       } finally {
         frame.remove();
+        if (host) host.remove();
       }
     }
 
@@ -465,6 +479,36 @@
 
   function wait(ms) {
     return new Promise((r) => setTimeout(r, ms));
+  }
+
+  function waitForImages(root) {
+    const imgs = Array.from(root.querySelectorAll('img'));
+    if (!imgs.length) return Promise.resolve();
+    return Promise.all(imgs.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise((res) => {
+        const done = () => res();
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+        // Hard cap so a single broken image can't hang the export.
+        setTimeout(done, 4000);
+      });
+    }));
+  }
+
+  function rewriteRelativeUrls(root, baseDir) {
+    if (!baseDir) return;
+    const fix = (val) => {
+      if (!val) return val;
+      if (/^(https?:|data:|blob:|#|\/)/i.test(val)) return val;
+      return baseDir + val;
+    };
+    root.querySelectorAll('img[src]').forEach((el) => {
+      el.setAttribute('src', fix(el.getAttribute('src')));
+    });
+    root.querySelectorAll('a[href]').forEach((el) => {
+      el.setAttribute('href', fix(el.getAttribute('href')));
+    });
   }
 
   function snapshotCanvases(doc) {
