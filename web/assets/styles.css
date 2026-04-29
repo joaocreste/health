@@ -1119,14 +1119,17 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   letter-spacing: 0.04em;
 }
 
-/* ── PDF STAGING (off-screen container that html2pdf rasterises) ── */
+/* ── PDF STAGING (in-viewport container that html2pdf rasterises;
+ *    sits beneath the modal which covers it via z-index:9999) ── */
 .pdf-staging {
-  position: fixed;
-  left: -100000px;
+  position: absolute;
   top: 0;
+  left: 0;
   width: 1024px;
   background: #FFFFFF;
   color: var(--text, #13201F);
+  pointer-events: none;
+  z-index: 0;
 }
 .pdf-staging .pdf-section { padding: 24px 32px; }
 .pdf-staging .pdf-pagebreak { page-break-before: always; break-before: page; }

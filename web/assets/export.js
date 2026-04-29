@@ -340,7 +340,7 @@
 
         // Wait for fonts and any post-load chart drawing.
         try { if (fdoc.fonts && fdoc.fonts.ready) await fdoc.fonts.ready; } catch (_) {}
-        await wait(1400);
+        await wait(1800);
 
         // For exams page, drop sub-sections that weren't selected.
         if (cat.id === 'exams' && sections) {
@@ -361,15 +361,18 @@
         const baseDir = cat.src.replace(/[^/]+$/, ''); // '' for top-level pages → relative
         rewriteRelativeUrls(fdoc.body, baseDir);
 
-        // Wrap and append.
+        // Wrap and import (deep-clone into host document — safer than cross-doc
+        // adoption, which can lose computed styles in some browsers).
         const wrap = document.createElement('section');
         wrap.className = 'pdf-section pdf-pagebreak';
         wrap.dataset.cat = cat.id;
-        // Move children from iframe body
-        while (fdoc.body.firstChild) {
-          wrap.appendChild(fdoc.body.firstChild);
-        }
+        Array.from(fdoc.body.childNodes).forEach((node) => {
+          wrap.appendChild(document.importNode(node, true));
+        });
         staging.appendChild(wrap);
+        if (window.__exportDebug) {
+          console.log('[export] staged', cat.id, '— children:', wrap.childElementCount, '· height:', wrap.offsetHeight);
+        }
       } finally {
         frame.remove();
       }
@@ -467,6 +470,10 @@
   /* ── PDF render ─────────────────────────────────────────────────────── */
 
   function renderPdf(staging) {
+    if (window.__exportDebug) {
+      console.log('[export] staging size before render:', staging.offsetWidth, 'x', staging.offsetHeight,
+                  '· sections:', staging.querySelectorAll('.pdf-section').length);
+    }
     return window.html2pdf()
       .from(staging)
       .set({
@@ -476,11 +483,12 @@
         html2canvas: {
           scale: 2,
           useCORS: true,
-          logging: false,
+          logging: !!window.__exportDebug,
           backgroundColor: '#FFFFFF',
-          // The iframe-loaded body becomes part of staging which is positioned
-          // off-screen via CSS but still 1024px wide for layout fidelity.
+          width: 1024,
           windowWidth: 1024,
+          scrollX: 0,
+          scrollY: 0,
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
         pagebreak: {
