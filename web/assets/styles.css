@@ -947,6 +947,235 @@ html[lang="pt"] .pt-pending-notice { display: block; }
 }
 .signout-btn svg { display: block; }
 
+/* ── EXPORT BUTTON (topnav) ── */
+.export-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-right: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.export-btn:hover {
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
+}
+.export-btn svg { display: block; }
+
+/* ── EXPORT MODAL ── */
+.export-modal[hidden] { display: none; }
+.export-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.export-modal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(15, 27, 38, 0.55);
+  backdrop-filter: blur(2px);
+}
+.export-modal-card {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  background: #FFFFFF;
+  border-radius: 10px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.30), 0 4px 12px rgba(0, 0, 0, 0.10);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.export-modal-head {
+  padding: 22px 24px 8px;
+  border-bottom: 1px solid #E6ECF1;
+}
+.export-modal-title {
+  margin: 0 0 4px;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--blue-800, #244E6E);
+  letter-spacing: -0.005em;
+}
+.export-modal-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #6B7C8A);
+}
+.export-modal-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+}
+.export-cat {
+  padding: 8px 0;
+  border-bottom: 1px solid #F0F4F7;
+}
+.export-cat:last-child { border-bottom: 0; }
+.export-cat-top {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500;
+  color: var(--blue-800, #244E6E);
+  cursor: pointer;
+  user-select: none;
+}
+.export-cat-top input[type="checkbox"] { width: 16px; height: 16px; accent-color: #3E7CA3; }
+.export-cat-sub {
+  display: flex; flex-wrap: wrap; gap: 8px 16px;
+  margin: 8px 0 4px 26px;
+}
+.export-cat-subitem {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px;
+  color: #4A5C6B;
+  cursor: pointer;
+  user-select: none;
+}
+.export-cat-subitem input[type="checkbox"] { width: 14px; height: 14px; accent-color: #3E7CA3; }
+.export-modal-error {
+  margin: 0 24px 8px;
+  padding: 10px 12px;
+  background: #FDECEC;
+  color: #9B2D2D;
+  border-radius: 6px;
+  font-size: 12.5px;
+}
+.export-modal-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 18px;
+  border-top: 1px solid #E6ECF1;
+  gap: 8px;
+}
+.export-modal-foot-left, .export-modal-foot-right {
+  display: inline-flex; gap: 8px; align-items: center;
+}
+.export-link-btn {
+  background: transparent;
+  border: 0;
+  padding: 4px 6px;
+  color: #3E7CA3;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.export-link-btn:hover { color: #244E6E; text-decoration: underline; }
+.export-btn-ghost {
+  background: transparent;
+  border: 1.5px solid #C9D4DD;
+  color: #4A5C6B;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.export-btn-ghost:hover { border-color: #244E6E; color: #244E6E; }
+.export-btn-primary {
+  background: #3E7CA3;
+  border: 1.5px solid #3E7CA3;
+  color: #FFFFFF;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.export-btn-primary:hover { background: #5B9CC8; border-color: #5B9CC8; }
+.export-modal-progress {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px;
+  padding: 36px 24px 40px;
+  min-height: 160px;
+}
+.export-modal-progress[hidden] { display: none; }
+.export-spinner {
+  width: 38px; height: 38px;
+  border: 3px solid #E6ECF1;
+  border-top-color: #3E7CA3;
+  border-radius: 50%;
+  animation: export-spin 0.9s linear infinite;
+}
+@keyframes export-spin { to { transform: rotate(360deg); } }
+.export-progress-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted, #6B7C8A);
+  letter-spacing: 0.04em;
+}
+
+/* ── PDF STAGING (off-screen container that html2pdf rasterises) ── */
+.pdf-staging {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  width: 1024px;
+  background: #FFFFFF;
+  color: var(--text, #13201F);
+}
+.pdf-staging .pdf-section { padding: 24px 32px; }
+.pdf-staging .pdf-pagebreak { page-break-before: always; break-before: page; }
+.pdf-staging .pdf-cover { page-break-after: always; padding: 64px 56px; }
+.pdf-cover-inner {
+  border-top: 4px solid #3E7CA3;
+  padding-top: 32px;
+}
+.pdf-cover-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 36px; }
+.pdf-cover-brand img { width: 44px; height: 44px; }
+.pdf-cover-brand-name {
+  font-family: 'Raleway', sans-serif; font-weight: 700;
+  font-size: 22px; color: var(--blue-800, #244E6E);
+}
+.pdf-cover-brand-tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-muted, #6B7C8A);
+}
+.pdf-cover-title {
+  font-family: 'Raleway', sans-serif; font-weight: 300;
+  font-size: 44px; line-height: 1.1; margin: 0 0 28px;
+  color: var(--blue-800, #244E6E); letter-spacing: -0.01em;
+}
+.pdf-cover-meta {
+  display: grid; grid-template-columns: max-content 1fr;
+  gap: 6px 18px; margin: 0 0 32px;
+  font-size: 13px;
+}
+.pdf-cover-meta dt {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-muted, #6B7C8A); padding-top: 2px;
+}
+.pdf-cover-meta dd { margin: 0; color: var(--text, #13201F); font-weight: 500; }
+.pdf-cover-sec-title {
+  font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 14px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--blue-800, #244E6E); margin: 0 0 12px;
+}
+.pdf-cover-sec-list { margin: 0 0 28px; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+.pdf-cover-sec-list .pdf-cover-sub { color: var(--text-muted, #6B7C8A); font-size: 12px; }
+.pdf-cover-foot {
+  margin-top: 64px; padding-top: 16px;
+  border-top: 1px solid #E6ECF1;
+  font-size: 11px; color: var(--text-muted, #6B7C8A);
+  font-style: italic;
+}
+
 /* ── PSYCH ARCHITECTURE TABLE OF CONTENTS ── */
 .psych-toc {
   background: var(--surface-raised, rgba(0, 0, 0, 0.02));
