@@ -485,10 +485,41 @@
       // performs a real layout pass (essential for Chart.js sizing).
       f.style.cssText = 'position:fixed; left:-100000px; top:0; width:1024px; height:20000px; border:0; visibility:hidden;';
       f.setAttribute('aria-hidden', 'true');
-      f.addEventListener('load', () => resolve(f), { once: true });
-      f.addEventListener('error', reject, { once: true });
+
+      // Ignore the initial about:blank load that fires when an iframe is
+      // first appended to the DOM. Resolve only when the real URL loads —
+      // otherwise the about:blank document gets detached during navigation
+      // and any reference we captured fails with "Document is not attached
+      // to a Window".
+      let timeoutId;
+      const onLoad = () => {
+        try {
+          const docUrl = (f.contentDocument && f.contentDocument.URL) || '';
+          if (!docUrl || docUrl === 'about:blank') {
+            debug('ignoring about:blank load');
+            return;
+          }
+          f.removeEventListener('load', onLoad);
+          clearTimeout(timeoutId);
+          debug('iframe loaded', docUrl);
+          resolve(f);
+        } catch (e) {
+          reject(e);
+        }
+      };
+      f.addEventListener('load', onLoad);
+      f.addEventListener('error', () => {
+        clearTimeout(timeoutId);
+        reject(new Error('iframe load error: ' + url));
+      }, { once: true });
+
       document.body.appendChild(f);
       f.src = url;
+
+      timeoutId = setTimeout(() => {
+        f.removeEventListener('load', onLoad);
+        reject(new Error('iframe load timeout: ' + url));
+      }, 30000);
     });
   }
 
