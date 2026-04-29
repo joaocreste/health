@@ -3,10 +3,16 @@
  * Wires up the topnav "Export" button. Opens a modal with a checkbox tree of
  * exportable categories; on Continue, loads each selected source page in a
  * hidden iframe, waits for charts/fonts to render, snapshots <canvas> elements
- * to <img>, clones the body content into a staging container, then runs
- * html2pdf to produce a single downloadable PDF.
+ * to <img>, then captures the iframe body directly with html2canvas and
+ * appends each capture into a multi-page PDF via jsPDF.
  *
- * The PDF inherits the host page's stylesheet, so branding matches the site.
+ * Why this design (instead of html2pdf): html2pdf clones the source element
+ * into an internal off-screen container and re-runs html2canvas. That clone
+ * step strips inline-style context that comes from the iframe's stylesheets,
+ * leaving the rasterised result blank. Driving html2canvas + jsPDF directly
+ * keeps each iframe self-contained and isolates failures to a single page.
+ *
+ * Enable verbose logging from devtools:   window.__exportDebug = true
  */
 (function () {
   'use strict';
@@ -34,9 +40,8 @@
     { id: 'mental',   src: 'mental.html',            label: { en: 'Mental health',       pt: 'Saúde mental' } },
   ];
 
-  // Selectors on every page that should be removed from the cloned content
-  // so the PDF doesn't show site chrome (top nav, in-page nav, language
-  // toggle, sign-out button, the export button itself, the bilingual notice).
+  // Selectors stripped from each iframe body before capture (site chrome
+  // shouldn't appear in the PDF).
   const STRIP_SELECTORS = [
     '.topnav',
     '.section-nav',
@@ -59,7 +64,8 @@
       none:     { en: 'Select at least one section.',        pt: 'Selecione ao menos uma seção.' },
       preparing:{ en: 'Preparing report…',                   pt: 'Preparando relatório…' },
       loading:  { en: 'Loading',                             pt: 'Carregando' },
-      rendering:{ en: 'Rendering PDF…',                      pt: 'Renderizando PDF…' },
+      capturing:{ en: 'Capturing',                           pt: 'Capturando' },
+      writing:  { en: 'Writing PDF…',                        pt: 'Escrevendo PDF…' },
       failed:   { en: 'Export failed. Try again.',           pt: 'Falha ao exportar. Tente novamente.' },
       missing:  { en: 'PDF library not loaded.',             pt: 'Biblioteca de PDF não carregada.' },
       reportTitle: { en: 'Health Report',                    pt: 'Relatório de Saúde' },
@@ -95,6 +101,10 @@
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `JC-Advisory-Health-Report-${yyyy}-${mm}-${dd}.pdf`;
+  }
+
+  function debug(...args) {
+    if (window.__exportDebug) console.log('[export]', ...args);
   }
 
   /* ── Modal ──────────────────────────────────────────────────────────── */
@@ -138,7 +148,6 @@
 
     document.body.appendChild(root);
 
-    // Populate body with categories tree
     const body = root.querySelector('.export-modal-body');
     CATEGORIES.forEach((cat) => {
       const row = document.createElement('div');
@@ -146,12 +155,12 @@
 
       const top = document.createElement('label');
       top.className = 'export-cat-top';
+      top.dataset.catId = cat.id;
       top.innerHTML = `
         <input type="checkbox" data-cat="${cat.id}" checked>
         <span class="export-cat-label"></span>
       `;
       top.querySelector('.export-cat-label').textContent = cat.label[lang()];
-      top.dataset.catId = cat.id;
       row.appendChild(top);
 
       if (cat.sections) {
@@ -169,7 +178,6 @@
         });
         row.appendChild(sub);
 
-        // Wire parent → child cascade
         const parent = top.querySelector('input');
         parent.addEventListener('change', () => {
           sub.querySelectorAll('input').forEach((i) => { i.checked = parent.checked; });
@@ -185,10 +193,8 @@
       body.appendChild(row);
     });
 
-    // Localized button text
     refreshModalText(root);
 
-    // Wire actions
     root.querySelectorAll('[data-close]').forEach((el) => {
       el.addEventListener('click', closeModal);
     });
@@ -200,7 +206,6 @@
     });
     root.querySelector('[data-action="continue"]').addEventListener('click', onContinue);
 
-    // ESC to close
     document.addEventListener('keydown', (e) => {
       if (!root.hidden && e.key === 'Escape') closeModal();
     });
@@ -215,7 +220,6 @@
     root.querySelector('[data-action="clear"]').textContent = T('clearAll');
     root.querySelector('[data-close].export-btn-ghost').textContent = T('cancel');
     root.querySelector('[data-action="continue"]').textContent = T('cont');
-    // Re-localize category labels
     CATEGORIES.forEach((cat) => {
       const top = root.querySelector(`.export-cat-top[data-cat-id="${cat.id}"] .export-cat-label`);
       if (top) top.textContent = cat.label[lang()];
@@ -264,6 +268,13 @@
     p.querySelector('.export-progress-text').textContent = text;
   }
 
+  function backToSelector() {
+    const root = document.getElementById('exportModal');
+    root.querySelector('.export-modal-progress').hidden = true;
+    root.querySelector('.export-modal-body').hidden = false;
+    root.querySelector('.export-modal-foot').hidden = false;
+  }
+
   /* ── Selection model ────────────────────────────────────────────────── */
 
   function readSelection() {
@@ -278,7 +289,7 @@
           const cb = root.querySelector(`input[data-cat="${cat.id}"][data-section="${s.id}"]`);
           return cb && cb.checked;
         });
-        if (!enabled.length) return; // top checked but all sub off → skip
+        if (!enabled.length) return;
         if (enabled.length < cat.sections.length) entry.sections = enabled.map((s) => s.id);
       }
       out.push(entry);
@@ -294,42 +305,53 @@
       showError(T('none'));
       return;
     }
-    if (typeof window.html2pdf !== 'function') {
+    const html2canvas = window.html2canvas;
+    const jsPDFCtor = window.jspdf && window.jspdf.jsPDF;
+    if (!html2canvas || !jsPDFCtor) {
       showError(T('missing'));
+      debug('libs missing — html2canvas:', !!html2canvas, 'jsPDF:', !!jsPDFCtor);
       return;
     }
 
     showProgress(T('preparing'));
 
     try {
-      const staging = await composeReport(sel);
-      showProgress(T('rendering'));
-      await renderPdf(staging);
-      cleanupStaging(staging);
+      await generatePdf(sel, html2canvas, jsPDFCtor);
       closeModal();
     } catch (err) {
       console.error('[export] failed', err);
-      // Reset modal UI from progress back to selector
-      const root = document.getElementById('exportModal');
-      root.querySelector('.export-modal-progress').hidden = true;
-      root.querySelector('.export-modal-body').hidden = false;
-      root.querySelector('.export-modal-foot').hidden = false;
+      backToSelector();
       showError(T('failed'));
     }
   }
 
-  /* ── Composition: load each source page in iframe, harvest content ──── */
+  /* ── PDF generation ─────────────────────────────────────────────────── */
 
-  async function composeReport(selection) {
-    const staging = document.createElement('div');
-    staging.id = 'pdfStaging';
-    staging.className = 'pdf-staging';
-    document.body.appendChild(staging);
+  async function generatePdf(selection, html2canvas, jsPDFCtor) {
+    const pdf = new jsPDFCtor({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    const usableW = pageW - 2 * margin;
+    const usableH = pageH - 2 * margin;
 
-    // Cover page
-    staging.appendChild(buildCover(selection));
+    // 1. Cover page
+    showProgress(T('preparing'));
+    const coverEl = buildCover(selection);
+    const coverHost = mountCaptureHost();
+    coverHost.appendChild(coverEl);
+    await wait(150); // let fonts/layout settle
+    const coverCanvas = await html2canvas(coverEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#FFFFFF',
+      logging: !!window.__exportDebug,
+    });
+    debug('cover canvas', coverCanvas.width, 'x', coverCanvas.height);
+    addCanvasToPdf(pdf, coverCanvas, margin, usableW, usableH, false);
+    coverHost.remove();
 
-    // Each selected source page
+    // 2. Each selected source page
     for (let i = 0; i < selection.length; i++) {
       const { cat, sections } = selection[i];
       showProgress(`${T('loading')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
@@ -337,53 +359,101 @@
       const frame = await loadFrame(cat.src);
       try {
         const fdoc = frame.contentDocument;
-
-        // Wait for fonts and any post-load chart drawing.
         try { if (fdoc.fonts && fdoc.fonts.ready) await fdoc.fonts.ready; } catch (_) {}
         await wait(1800);
 
-        // For exams page, drop sub-sections that weren't selected.
         if (cat.id === 'exams' && sections) {
           fdoc.querySelectorAll('.report-section').forEach((sec) => {
             if (!sections.includes(sec.id)) sec.remove();
           });
         }
 
-        // Snapshot canvases (Chart.js, CT viewer) into <img> so cloning preserves pixels.
+        // Mirror current language onto iframe document so capture honours EN/PT
+        // (rule lives on html[lang]).
+        fdoc.documentElement.lang = lang();
+
         snapshotCanvases(fdoc);
 
-        // Strip site chrome.
         STRIP_SELECTORS.forEach((sel) => {
           fdoc.querySelectorAll(sel).forEach((el) => el.remove());
         });
 
-        // Resolve relative urls in src/href so they keep working in the host.
-        const baseDir = cat.src.replace(/[^/]+$/, ''); // '' for top-level pages → relative
-        rewriteRelativeUrls(fdoc.body, baseDir);
+        // Force the body to its real content height before capture so
+        // html2canvas knows the full extent. Allow a brief layout settle.
+        fdoc.body.style.minHeight = fdoc.body.scrollHeight + 'px';
+        await wait(150);
 
-        // Wrap and import (deep-clone into host document — safer than cross-doc
-        // adoption, which can lose computed styles in some browsers).
-        const wrap = document.createElement('section');
-        wrap.className = 'pdf-section pdf-pagebreak';
-        wrap.dataset.cat = cat.id;
-        Array.from(fdoc.body.childNodes).forEach((node) => {
-          wrap.appendChild(document.importNode(node, true));
+        showProgress(`${T('capturing')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
+        const canvas = await html2canvas(fdoc.body, {
+          scale: 1.5,
+          useCORS: true,
+          backgroundColor: '#FFFFFF',
+          windowWidth: 1024,
+          width: 1024,
+          height: fdoc.body.scrollHeight,
+          windowHeight: fdoc.body.scrollHeight,
+          scrollX: 0,
+          scrollY: 0,
+          logging: !!window.__exportDebug,
         });
-        staging.appendChild(wrap);
-        if (window.__exportDebug) {
-          console.log('[export] staged', cat.id, '— children:', wrap.childElementCount, '· height:', wrap.offsetHeight);
-        }
+        debug('captured', cat.id, canvas.width, 'x', canvas.height);
+
+        addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true);
       } finally {
         frame.remove();
       }
     }
 
-    return staging;
+    showProgress(T('writing'));
+    pdf.save(pdfFilename());
+  }
+
+  // Adds a canvas image to the PDF, splitting tall content across pages.
+  // If `newPageFirst` is true, starts the canvas on a new page.
+  function addCanvasToPdf(pdf, canvas, margin, usableW, usableH, newPageFirst) {
+    const ratio = canvas.height / canvas.width;
+    const renderW = usableW;
+    const renderH = renderW * ratio;
+
+    if (renderH <= usableH) {
+      if (newPageFirst) pdf.addPage();
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      pdf.addImage(imgData, 'JPEG', margin, margin, renderW, renderH);
+      return;
+    }
+
+    // Slice the canvas vertically into page-sized chunks.
+    const pxPerMm = canvas.width / renderW;
+    const sliceH = Math.floor(usableH * pxPerMm);
+    let y = 0;
+    let first = true;
+    while (y < canvas.height) {
+      const h = Math.min(sliceH, canvas.height - y);
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = h;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+      if (first) {
+        if (newPageFirst) pdf.addPage();
+        first = false;
+      } else {
+        pdf.addPage();
+      }
+      const imgData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+      const drawH = h / pxPerMm;
+      pdf.addImage(imgData, 'JPEG', margin, margin, renderW, drawH);
+      y += h;
+    }
   }
 
   function loadFrame(url) {
     return new Promise((resolve, reject) => {
       const f = document.createElement('iframe');
+      // Position visibly off-screen but with real dimensions so the iframe
+      // performs a real layout pass (essential for Chart.js sizing).
       f.style.cssText = 'position:fixed; left:-100000px; top:0; width:1024px; height:20000px; border:0; visibility:hidden;';
       f.setAttribute('aria-hidden', 'true');
       f.addEventListener('load', () => resolve(f), { once: true });
@@ -403,32 +473,26 @@
         const url = cv.toDataURL('image/png');
         const img = doc.createElement('img');
         img.src = url;
-        const w = cv.width, h = cv.height;
-        const cw = cv.clientWidth, ch = cv.clientHeight;
-        img.style.cssText = `display:block; width:${cw || w}px; height:${ch || h}px; max-width:100%;`;
+        const cw = cv.clientWidth || cv.width;
+        const ch = cv.clientHeight || cv.height;
+        img.style.cssText = `display:block; width:${cw}px; height:${ch}px; max-width:100%;`;
         img.setAttribute('data-from-canvas', 'true');
         cv.parentNode.replaceChild(img, cv);
       } catch (e) {
-        // Tainted canvas (cross-origin); leave as-is.
+        debug('canvas snapshot failed (likely tainted)', e.message);
       }
     });
   }
 
-  function rewriteRelativeUrls(root, baseDir) {
-    if (!baseDir) return; // already relative to site root
-    const fix = (val) => {
-      if (!val) return val;
-      if (/^(https?:|data:|blob:|#|\/)/i.test(val)) return val;
-      return baseDir + val;
-    };
-    root.querySelectorAll('img[src], source[src], a[href]').forEach((el) => {
-      if (el.tagName === 'A') el.setAttribute('href', fix(el.getAttribute('href')));
-      else el.setAttribute('src', fix(el.getAttribute('src')));
-    });
-  }
+  /* ── Capture-host: in-viewport container the cover page is mounted to,
+   *    so html2canvas sees a fully-laid-out element. The modal at z-index
+   *    9999 keeps it visually hidden. ─────────────────────────────────── */
 
-  function cleanupStaging(staging) {
-    if (staging && staging.parentNode) staging.parentNode.removeChild(staging);
+  function mountCaptureHost() {
+    const host = document.createElement('div');
+    host.style.cssText = 'position:absolute; top:0; left:0; width:1024px; background:#FFFFFF; z-index:0; pointer-events:none;';
+    document.body.appendChild(host);
+    return host;
   }
 
   /* ── Cover page ─────────────────────────────────────────────────────── */
@@ -436,6 +500,7 @@
   function buildCover(selection) {
     const wrap = document.createElement('section');
     wrap.className = 'pdf-section pdf-cover';
+    wrap.style.cssText = 'width:1024px; min-height:1280px; padding:64px 56px; box-sizing:border-box; background:#FFFFFF;';
 
     const items = selection.map(({ cat, sections }) => {
       const labels = sections
@@ -447,7 +512,7 @@
     wrap.innerHTML = `
       <div class="pdf-cover-inner">
         <div class="pdf-cover-brand">
-          <img src="assets/logo.svg" alt="">
+          <img src="assets/logo.svg" alt="" crossorigin="anonymous">
           <div>
             <div class="pdf-cover-brand-name">JC Advisory</div>
             <div class="pdf-cover-brand-tag">${lang() === 'pt' ? 'Dos dados aos insights' : 'From data to insights'}</div>
@@ -465,39 +530,6 @@
       </div>
     `;
     return wrap;
-  }
-
-  /* ── PDF render ─────────────────────────────────────────────────────── */
-
-  function renderPdf(staging) {
-    if (window.__exportDebug) {
-      console.log('[export] staging size before render:', staging.offsetWidth, 'x', staging.offsetHeight,
-                  '· sections:', staging.querySelectorAll('.pdf-section').length);
-    }
-    return window.html2pdf()
-      .from(staging)
-      .set({
-        margin: [12, 12, 14, 12], // mm: top, right, bottom, left
-        filename: pdfFilename(),
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          logging: !!window.__exportDebug,
-          backgroundColor: '#FFFFFF',
-          width: 1024,
-          windowWidth: 1024,
-          scrollX: 0,
-          scrollY: 0,
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-        pagebreak: {
-          mode: ['css', 'legacy'],
-          before: '.pdf-pagebreak',
-          avoid: ['.list-card', '.metric-card', '.lab-test', '.entry-card', 'tr', 'figure'],
-        },
-      })
-      .save();
   }
 
   /* ── Init ───────────────────────────────────────────────────────────── */
