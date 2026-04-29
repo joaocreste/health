@@ -363,9 +363,9 @@
       showProgress(`${T('loading')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
 
       const frame = await loadFrame(cat.src);
-      let host = null;
       try {
         const fdoc = frame.contentDocument;
+        const fwin = frame.contentWindow;
         try { if (fdoc.fonts && fdoc.fonts.ready) await fdoc.fonts.ready; } catch (_) {}
         await wait(1800);
 
@@ -381,42 +381,41 @@
           fdoc.querySelectorAll(sel).forEach((el) => el.remove());
         });
 
-        // Resolve relative URLs (img/href in the cloned content lives in host
-        // page; relative paths still resolve since both pages live in /web/).
-        const baseDir = cat.src.replace(/[^/]+$/, '');
-        rewriteRelativeUrls(fdoc.body, baseDir);
-
-        // Copy iframe body's post-layout HTML into a host-doc container.
-        // String-based round-trip avoids any cross-doc DOM weirdness; canvas
-        // pixels survive because they're already serialized as <img src=data:>.
-        host = mountCaptureHost();
-        host.innerHTML = `<div class="pdf-iframe-wrap" style="width:1024px; background:#FFFFFF;">${fdoc.body.innerHTML}</div>`;
-
-        // Wait for any image inside the host to load (data: URLs resolve
-        // synchronously, but real <img src> for CT slices etc. need a tick).
-        await waitForImages(host);
+        // Wait for any remaining images in the iframe to finish loading.
+        await waitForImages(fdoc.body);
         await wait(200);
 
-        const captureEl = host.firstElementChild;
-        debug('host before capture', cat.id, captureEl.offsetWidth, 'x', captureEl.offsetHeight);
+        debug('iframe body size', cat.id, fdoc.body.scrollWidth, 'x', fdoc.body.scrollHeight);
 
         showProgress(`${T('capturing')}: ${cat.label[lang()]} (${i + 1}/${selection.length})`);
-        const canvas = await html2canvas(captureEl, {
+
+        // Run html2canvas INSIDE the iframe's own window so it sees its own
+        // document, stylesheets, and computed layout natively. This sidesteps
+        // every cross-document edge case we hit running it in the parent.
+        let iframeH2C = fwin.html2canvas;
+        for (let t = 0; t < 30 && typeof iframeH2C !== 'function'; t++) {
+          await wait(100);
+          iframeH2C = fwin.html2canvas;
+        }
+        if (typeof iframeH2C !== 'function') {
+          throw new Error(`html2canvas not loaded in iframe for ${cat.id}`);
+        }
+        const canvas = await iframeH2C(fdoc.body, {
           scale: 1.5,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#FFFFFF',
-          windowWidth: 1024,
-          scrollX: 0,
-          scrollY: 0,
           logging: !!window.__exportDebug,
         });
         debug('captured', cat.id, canvas.width, 'x', canvas.height);
 
-        if (addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true)) pagesAdded++;
+        // Convert the iframe-document canvas to a data URL we can hand to
+        // jsPDF in the host context.
+        if (canvas && canvas.width && canvas.height) {
+          if (addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true)) pagesAdded++;
+        }
       } finally {
         frame.remove();
-        if (host) host.remove();
       }
     }
 
