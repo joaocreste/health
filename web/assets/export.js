@@ -336,20 +336,25 @@
     const usableW = pageW - 2 * margin;
     const usableH = pageH - 2 * margin;
 
+    let pagesAdded = 0;
+
     // 1. Cover page
     showProgress(T('preparing'));
     const coverEl = buildCover(selection);
     const coverHost = mountCaptureHost();
     coverHost.appendChild(coverEl);
-    await wait(150); // let fonts/layout settle
+    await waitForImages(coverHost);
+    await wait(150);
+    debug('cover element size', coverEl.offsetWidth, 'x', coverEl.offsetHeight);
     const coverCanvas = await html2canvas(coverEl, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#FFFFFF',
       logging: !!window.__exportDebug,
     });
     debug('cover canvas', coverCanvas.width, 'x', coverCanvas.height);
-    addCanvasToPdf(pdf, coverCanvas, margin, usableW, usableH, false);
+    if (addCanvasToPdf(pdf, coverCanvas, margin, usableW, usableH, false)) pagesAdded++;
     coverHost.remove();
 
     // 2. Each selected source page
@@ -402,20 +407,21 @@
           allowTaint: true,
           backgroundColor: '#FFFFFF',
           windowWidth: 1024,
-          width: 1024,
-          height: captureEl.offsetHeight,
-          windowHeight: captureEl.offsetHeight,
           scrollX: 0,
           scrollY: 0,
           logging: !!window.__exportDebug,
         });
         debug('captured', cat.id, canvas.width, 'x', canvas.height);
 
-        addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true);
+        if (addCanvasToPdf(pdf, canvas, margin, usableW, usableH, true)) pagesAdded++;
       } finally {
         frame.remove();
         if (host) host.remove();
       }
+    }
+
+    if (pagesAdded === 0) {
+      throw new Error('All captures returned blank — nothing to export');
     }
 
     showProgress(T('writing'));
@@ -424,16 +430,25 @@
 
   // Adds a canvas image to the PDF, splitting tall content across pages.
   // If `newPageFirst` is true, starts the canvas on a new page.
+  // Returns true on success, false if the canvas was blank/invalid (skipped).
   function addCanvasToPdf(pdf, canvas, margin, usableW, usableH, newPageFirst) {
+    if (!canvas || !canvas.width || !canvas.height || !isFinite(canvas.width) || !isFinite(canvas.height)) {
+      debug('skipping blank canvas', canvas && canvas.width, 'x', canvas && canvas.height);
+      return false;
+    }
     const ratio = canvas.height / canvas.width;
     const renderW = usableW;
     const renderH = renderW * ratio;
+    if (!isFinite(renderH) || renderH <= 0) {
+      debug('skipping invalid renderH', renderH);
+      return false;
+    }
 
     if (renderH <= usableH) {
       if (newPageFirst) pdf.addPage();
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
       pdf.addImage(imgData, 'JPEG', margin, margin, renderW, renderH);
-      return;
+      return true;
     }
 
     // Slice the canvas vertically into page-sized chunks.
@@ -461,6 +476,7 @@
       pdf.addImage(imgData, 'JPEG', margin, margin, renderW, drawH);
       y += h;
     }
+    return true;
   }
 
   function loadFrame(url) {
@@ -556,7 +572,7 @@
     wrap.innerHTML = `
       <div class="pdf-cover-inner">
         <div class="pdf-cover-brand">
-          <img src="assets/logo.svg" alt="" crossorigin="anonymous">
+          <img src="assets/logo.svg" alt="">
           <div>
             <div class="pdf-cover-brand-name">JC Advisory</div>
             <div class="pdf-cover-brand-tag">${lang() === 'pt' ? 'Dos dados aos insights' : 'From data to insights'}</div>
