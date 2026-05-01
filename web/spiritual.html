@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spiritual Health · JC Advisory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=24">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<style>
+  body.spiritual-page {
+    background: #0F2238;
+    color: #E6ECF1;
+    min-height: 100vh;
+    margin: 0;
+  }
+  body.spiritual-page .topnav {
+    background: #081726;
+    border-bottom: 1px solid #1B3B54;
+  }
+  .spiritual-stage {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    text-align: center;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 30%, rgba(62,124,163,0.18) 0%, transparent 70%),
+      linear-gradient(180deg, #0F2238 0%, #1B3B54 100%);
+  }
+  .spiritual-icon {
+    width: 132px;
+    height: 132px;
+    margin-bottom: 36px;
+    filter: drop-shadow(0 4px 20px rgba(62,124,163,0.45));
+    animation: spiritual-flicker 3.6s ease-in-out infinite;
+  }
+  @keyframes spiritual-flicker {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.95; }
+    50%      { transform: translateY(-2px) scale(1.02); opacity: 1; }
+  }
+  .spiritual-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 16px;
+  }
+  .spiritual-title {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 64px;
+    line-height: 1.05;
+    margin: 0 0 20px;
+    color: #FFFFFF;
+    letter-spacing: -0.012em;
+  }
+  .spiritual-divider {
+    width: 60px;
+    height: 1px;
+    background: rgba(139,184,210,0.45);
+    margin: 8px 0 28px;
+  }
+  .spiritual-msg {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    color: #C9D4DD;
+    max-width: 540px;
+    margin: 0;
+  }
+  .spiritual-msg em { color: #E6ECF1; font-style: italic; }
+  .spiritual-back {
+    margin-top: 48px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: #C9D4DD;
+    text-decoration: none;
+    border: 1.5px solid rgba(255,255,255,0.20);
+    padding: 9px 20px;
+    border-radius: 6px;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .spiritual-back:hover {
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+    background: rgba(255,255,255,0.05);
+  }
+  @media (max-width: 720px) {
+    .spiritual-title { font-size: 44px; }
+    .spiritual-icon { width: 100px; height: 100px; }
+  }
+</style>
+</head>
+<body class="spiritual-page">
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+
+  <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+</div>
+
+</nav>
+
+<main class="spiritual-stage">
+  <svg class="spiritual-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M32 8 C26 18 20 26 20 36 C20 46 26 54 32 54 C38 54 44 46 44 36 C44 26 38 18 32 8 Z"
+          fill="rgba(216,232,242,0.18)" stroke="#8BB8D2" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M32 22 C29 28 26 32 26 38 C26 44 28 50 32 50 C36 50 38 44 38 38 C38 32 35 28 32 22 Z"
+          fill="#5B9CC8"/>
+    <line x1="32" y1="58" x2="32" y2="60" stroke="#8BB8D2" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+
+  <div class="spiritual-eyebrow"><span class="lang-en">Section III · Spiritual Health</span><span class="lang-pt">Seção III · Saúde Espiritual</span></div>
+  <h1 class="spiritual-title"><span class="lang-en">Coming up soon</span><span class="lang-pt">Em breve</span></h1>
+  <div class="spiritual-divider"></div>
+  <p class="spiritual-msg">
+    <span class="lang-en">A space for the practices and disciplines that hold the rest of the picture together — quieter than data, slower than wearables, but central. <em>In preparation.</em></span>
+    <span class="lang-pt">Um espaço para as práticas e disciplinas que sustentam o restante do quadro — mais quieto que os dados, mais lento que os wearables, mas central. <em>Em preparação.</em></span>
+  </p>
+
+  <a class="spiritual-back" href="home.html">
+    <span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span>
+  </a>
+</main>
+
+<script src="assets/app.js?v=22"></script>
+</body>
+</html>
