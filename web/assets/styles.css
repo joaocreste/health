@@ -1427,11 +1427,16 @@ html[lang="pt"] .pt-pending-notice { display: block; }
 .ct-fs-btn:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 2px; }
 .ct-fs-btn svg { display: block; }
 
-/* The header is flex with space-between; the meta+button sit on the right.
- * Wrap them so the button doesn't push the meta out of alignment. */
-.ct-viewer-head { gap: 8px; flex-wrap: wrap; }
+/* The header is flex with space-between; small gap so the new button
+ * doesn't sit flush against the slice counter. (No wrap — keeps title
+ * and right-side controls on one row at all viewport widths.) */
+.ct-viewer-head { gap: 8px; }
 
-/* ── Fullscreen mode — viewer fills the screen, dark chrome ── */
+/* ── Fullscreen mode — viewer fills the screen, dark chrome.
+ * Driven by the explicit `.is-fullscreen` class set by app.js so the
+ * styles attach and detach deterministically; the :fullscreen pseudo
+ * is kept as a redundant safety net. ── */
+.ct-viewer.is-fullscreen,
 .ct-viewer:fullscreen,
 .ct-viewer:-webkit-full-screen {
   width: 100vw;
@@ -1445,6 +1450,7 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   flex-direction: column;
   box-shadow: none;
 }
+.ct-viewer.is-fullscreen .ct-viewer-head,
 .ct-viewer:fullscreen .ct-viewer-head,
 .ct-viewer:-webkit-full-screen .ct-viewer-head {
   background: rgba(0, 0, 0, 0.78);
@@ -1452,29 +1458,36 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   padding: 14px 22px;
   flex: 0 0 auto;
 }
+.ct-viewer.is-fullscreen .ct-viewer-title,
 .ct-viewer:fullscreen .ct-viewer-title,
 .ct-viewer:-webkit-full-screen .ct-viewer-title { color: #FFFFFF; }
+.ct-viewer.is-fullscreen .ct-viewer-meta,
 .ct-viewer:fullscreen .ct-viewer-meta,
 .ct-viewer:-webkit-full-screen .ct-viewer-meta { color: rgba(255,255,255,0.78); }
+.ct-viewer.is-fullscreen .ct-viewer-meta .ct-idx,
 .ct-viewer:fullscreen .ct-viewer-meta .ct-idx,
 .ct-viewer:-webkit-full-screen .ct-viewer-meta .ct-idx { color: #FFFFFF; }
+.ct-viewer.is-fullscreen .ct-fs-btn,
 .ct-viewer:fullscreen .ct-fs-btn,
 .ct-viewer:-webkit-full-screen .ct-fs-btn {
   border-color: rgba(255, 255, 255, 0.25);
   color: rgba(255, 255, 255, 0.85);
 }
+.ct-viewer.is-fullscreen .ct-fs-btn:hover,
 .ct-viewer:fullscreen .ct-fs-btn:hover,
 .ct-viewer:-webkit-full-screen .ct-fs-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.55);
   color: #FFFFFF;
 }
+.ct-viewer.is-fullscreen .ct-stage,
 .ct-viewer:fullscreen .ct-stage,
 .ct-viewer:-webkit-full-screen .ct-stage {
   flex: 1 1 auto;
   aspect-ratio: auto;
   min-height: 0;
 }
+.ct-viewer.is-fullscreen .ct-slider,
 .ct-viewer:fullscreen .ct-slider,
 .ct-viewer:-webkit-full-screen .ct-slider {
   flex: 0 0 auto;

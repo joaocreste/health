@@ -152,10 +152,22 @@
       });
       head.appendChild(btn);
 
-      // Swap icon when entering / exiting fullscreen so the affordance reads correctly.
+      // Toggle a class explicitly on enter/exit so the styles attach and
+      // detach deterministically. Relying on the :fullscreen pseudo-class
+      // alone left the viewer in a stretched intermediate state in some
+      // browsers after exiting (most likely a transient repaint quirk).
       const onFsChange = () => {
         const cur = document.fullscreenElement || document.webkitFullscreenElement;
-        btn.innerHTML = (cur === viewer) ? FS_EXIT_ICON : FS_ENTER_ICON;
+        const isThis = (cur === viewer);
+        viewer.classList.toggle('is-fullscreen', isThis);
+        btn.innerHTML = isThis ? FS_EXIT_ICON : FS_ENTER_ICON;
+        if (!isThis) {
+          // Page scroll often ends up off-target after fullscreen exit;
+          // bring the viewer back into view so users land where they left.
+          requestAnimationFrame(() => {
+            viewer.scrollIntoView({ block: 'center', behavior: 'instant' });
+          });
+        }
       };
       document.addEventListener('fullscreenchange', onFsChange);
       document.addEventListener('webkitfullscreenchange', onFsChange);
