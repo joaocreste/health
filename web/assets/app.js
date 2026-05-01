@@ -159,13 +159,15 @@
       const onFsChange = () => {
         const cur = document.fullscreenElement || document.webkitFullscreenElement;
         const isThis = (cur === viewer);
+        const wasThis = viewer.classList.contains('is-fullscreen');
         viewer.classList.toggle('is-fullscreen', isThis);
         btn.innerHTML = isThis ? FS_EXIT_ICON : FS_ENTER_ICON;
-        if (!isThis) {
-          // Page scroll often ends up off-target after fullscreen exit;
-          // bring the viewer back into view so users land where they left.
+        // Only the viewer that just exited fullscreen needs to be scrolled
+        // back. Without this guard every viewer on the page would call
+        // scrollIntoView on every fullscreenchange event, fighting each other.
+        if (wasThis && !isThis) {
           requestAnimationFrame(() => {
-            viewer.scrollIntoView({ block: 'center', behavior: 'instant' });
+            viewer.scrollIntoView({ block: 'center' });
           });
         }
       };

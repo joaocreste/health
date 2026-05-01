@@ -1435,10 +1435,20 @@ html[lang="pt"] .pt-pending-notice { display: block; }
 /* ── Fullscreen mode — viewer fills the screen, dark chrome.
  * Driven by the explicit `.is-fullscreen` class set by app.js so the
  * styles attach and detach deterministically; the :fullscreen pseudo
- * is kept as a redundant safety net. ── */
+ * is kept as a redundant safety net.
+ *
+ * `position: fixed` is critical: without it, an element with width:100vw
+ * height:100vh stays IN DOCUMENT FLOW and pushes everything below it
+ * down by a full viewport height — which is exactly what "doesn't go
+ * back to its size after exiting fullscreen" looks like in practice.
+ * Pulling it out of flow means removing the class instantly snaps the
+ * viewer back to its grid cell. ── */
 .ct-viewer.is-fullscreen,
 .ct-viewer:fullscreen,
 .ct-viewer:-webkit-full-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
   width: 100vw;
   height: 100vh;
   max-width: 100vw;
