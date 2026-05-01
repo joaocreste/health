@@ -126,12 +126,19 @@
     const PRELOAD     = 6;
     const cache       = new Map();
 
-    // Inject fullscreen toggle into the header. We deliberately do NOT use
-    // the browser Fullscreen API here — it caused the viewer to come back
-    // at a stretched size after exit on multiple browsers (the exit reflow
-    // never quite snapped layout back). A pure CSS overlay (position:fixed
-    // inset:0 z-index:9999) is fully deterministic and visually identical
-    // since we already cover the whole browser viewport.
+    // Inject fullscreen toggle into the header.
+    //
+    // Approach: when expanding, MOVE the viewer DOM node into a dedicated
+    // overlay div on document.body, and leave a same-size placeholder in
+    // its original spot. When exiting, move the viewer back and remove
+    // the placeholder. The page layout below the viewer never reflows
+    // during the fullscreen period — which is exactly what was producing
+    // the "screen messed up after exit" symptom: with position:fixed the
+    // viewer left its grid cell, every section underneath shifted up,
+    // and the layout snapping back on exit looked broken.
+    //
+    // DOM .appendChild moves nodes (does not clone) — event listeners,
+    // image src, slider value all survive the move intact.
     const head = viewer.querySelector('.ct-viewer-head');
     if (head) {
       const btn = document.createElement('button');
@@ -141,31 +148,60 @@
       btn.title = 'Expand (Esc to close)';
       btn.innerHTML = FS_ENTER_ICON;
 
-      const setFullscreen = (on) => {
-        viewer.classList.toggle('is-fullscreen', on);
-        btn.innerHTML = on ? FS_EXIT_ICON : FS_ENTER_ICON;
-        // Suppress page scroll while overlay is up; restore on exit.
-        document.body.style.overflow = on ? 'hidden' : '';
-        if (!on) {
-          // After exit, bring the viewer back into view if the page scrolled
-          // while the overlay was active.
-          requestAnimationFrame(() => {
-            viewer.scrollIntoView({ block: 'center' });
-          });
-        }
+      let overlay = null;
+      let placeholder = null;
+      let originalParent = null;
+      let originalNext = null;
+
+      const enter = () => {
+        if (overlay) return;
+        const rect = viewer.getBoundingClientRect();
+
+        placeholder = document.createElement('div');
+        placeholder.className = 'ct-viewer-placeholder';
+        placeholder.style.width = rect.width + 'px';
+        placeholder.style.height = rect.height + 'px';
+
+        originalParent = viewer.parentNode;
+        originalNext = viewer.nextSibling;
+        originalParent.insertBefore(placeholder, viewer);
+
+        overlay = document.createElement('div');
+        overlay.className = 'ct-fs-overlay';
+        overlay.appendChild(viewer);
+        document.body.appendChild(overlay);
+
+        viewer.classList.add('is-fullscreen');
+        document.body.classList.add('ct-fs-active');
+        btn.innerHTML = FS_EXIT_ICON;
+      };
+
+      const exit = () => {
+        if (!overlay) return;
+        // Move viewer back to its original spot, drop the placeholder.
+        originalParent.insertBefore(viewer, originalNext);
+        placeholder.remove();
+        overlay.remove();
+        overlay = null;
+        placeholder = null;
+        originalParent = null;
+        originalNext = null;
+
+        viewer.classList.remove('is-fullscreen');
+        document.body.classList.remove('ct-fs-active');
+        btn.innerHTML = FS_ENTER_ICON;
       };
 
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        setFullscreen(!viewer.classList.contains('is-fullscreen'));
+        if (overlay) exit(); else enter();
       });
       head.appendChild(btn);
 
-      // ESC closes the overlay (matches browser-native fullscreen muscle memory).
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && viewer.classList.contains('is-fullscreen')) {
+        if (e.key === 'Escape' && overlay) {
           e.preventDefault();
-          setFullscreen(false);
+          exit();
         }
       });
     }
