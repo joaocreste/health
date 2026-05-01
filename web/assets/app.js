@@ -112,6 +112,9 @@
    *      append each to the prefix. Lets us scrub multi-session DICOM exports
    *      with arbitrary names like `image_s0001_i0001.jpg`.
    */
+  const FS_ENTER_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+  const FS_EXIT_ICON  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>';
+
   const ctViewers = document.querySelectorAll('.ct-viewer');
   ctViewers.forEach((viewer) => {
     const prefix      = viewer.dataset.prefix;
@@ -122,6 +125,41 @@
     const totalEl     = viewer.querySelector('.ct-total');
     const PRELOAD     = 6;
     const cache       = new Map();
+
+    // Inject fullscreen toggle into the header. The Fullscreen API (with ESC
+    // to exit) is widely available; we still feature-detect to avoid showing
+    // a button that wouldn't do anything.
+    const head = viewer.querySelector('.ct-viewer-head');
+    if (head && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ct-fs-btn';
+      btn.setAttribute('aria-label', 'Toggle fullscreen');
+      btn.title = 'Fullscreen (Esc to exit)';
+      btn.innerHTML = FS_ENTER_ICON;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const inFs = (document.fullscreenElement || document.webkitFullscreenElement) === viewer;
+        if (inFs) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        } else {
+          const req = viewer.requestFullscreen || viewer.webkitRequestFullscreen;
+          if (req) {
+            const p = req.call(viewer);
+            if (p && typeof p.catch === 'function') p.catch((err) => console.warn('Fullscreen failed:', err));
+          }
+        }
+      });
+      head.appendChild(btn);
+
+      // Swap icon when entering / exiting fullscreen so the affordance reads correctly.
+      const onFsChange = () => {
+        const cur = document.fullscreenElement || document.webkitFullscreenElement;
+        btn.innerHTML = (cur === viewer) ? FS_EXIT_ICON : FS_ENTER_ICON;
+      };
+      document.addEventListener('fullscreenchange', onFsChange);
+      document.addEventListener('webkitfullscreenchange', onFsChange);
+    }
 
     let max;
     let urlFn;
