@@ -126,53 +126,48 @@
     const PRELOAD     = 6;
     const cache       = new Map();
 
-    // Inject fullscreen toggle into the header. The Fullscreen API (with ESC
-    // to exit) is widely available; we still feature-detect to avoid showing
-    // a button that wouldn't do anything.
+    // Inject fullscreen toggle into the header. We deliberately do NOT use
+    // the browser Fullscreen API here — it caused the viewer to come back
+    // at a stretched size after exit on multiple browsers (the exit reflow
+    // never quite snapped layout back). A pure CSS overlay (position:fixed
+    // inset:0 z-index:9999) is fully deterministic and visually identical
+    // since we already cover the whole browser viewport.
     const head = viewer.querySelector('.ct-viewer-head');
-    if (head && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+    if (head) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ct-fs-btn';
       btn.setAttribute('aria-label', 'Toggle fullscreen');
-      btn.title = 'Fullscreen (Esc to exit)';
+      btn.title = 'Expand (Esc to close)';
       btn.innerHTML = FS_ENTER_ICON;
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const inFs = (document.fullscreenElement || document.webkitFullscreenElement) === viewer;
-        if (inFs) {
-          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-        } else {
-          const req = viewer.requestFullscreen || viewer.webkitRequestFullscreen;
-          if (req) {
-            const p = req.call(viewer);
-            if (p && typeof p.catch === 'function') p.catch((err) => console.warn('Fullscreen failed:', err));
-          }
-        }
-      });
-      head.appendChild(btn);
 
-      // Toggle a class explicitly on enter/exit so the styles attach and
-      // detach deterministically. Relying on the :fullscreen pseudo-class
-      // alone left the viewer in a stretched intermediate state in some
-      // browsers after exiting (most likely a transient repaint quirk).
-      const onFsChange = () => {
-        const cur = document.fullscreenElement || document.webkitFullscreenElement;
-        const isThis = (cur === viewer);
-        const wasThis = viewer.classList.contains('is-fullscreen');
-        viewer.classList.toggle('is-fullscreen', isThis);
-        btn.innerHTML = isThis ? FS_EXIT_ICON : FS_ENTER_ICON;
-        // Only the viewer that just exited fullscreen needs to be scrolled
-        // back. Without this guard every viewer on the page would call
-        // scrollIntoView on every fullscreenchange event, fighting each other.
-        if (wasThis && !isThis) {
+      const setFullscreen = (on) => {
+        viewer.classList.toggle('is-fullscreen', on);
+        btn.innerHTML = on ? FS_EXIT_ICON : FS_ENTER_ICON;
+        // Suppress page scroll while overlay is up; restore on exit.
+        document.body.style.overflow = on ? 'hidden' : '';
+        if (!on) {
+          // After exit, bring the viewer back into view if the page scrolled
+          // while the overlay was active.
           requestAnimationFrame(() => {
             viewer.scrollIntoView({ block: 'center' });
           });
         }
       };
-      document.addEventListener('fullscreenchange', onFsChange);
-      document.addEventListener('webkitfullscreenchange', onFsChange);
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setFullscreen(!viewer.classList.contains('is-fullscreen'));
+      });
+      head.appendChild(btn);
+
+      // ESC closes the overlay (matches browser-native fullscreen muscle memory).
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && viewer.classList.contains('is-fullscreen')) {
+          e.preventDefault();
+          setFullscreen(false);
+        }
+      });
     }
 
     let max;
