@@ -494,14 +494,14 @@
     <div class="section-label"><span class="lang-en">09C · Laboratory</span><span class="lang-pt">09C · Laboratório</span></div>
     <h2 class="section-title"><span class="lang-en">Blood &amp; urine — full panel</span><span class="lang-pt">Sangue e urina — painel completo</span></h2>
     <p class="section-desc"><span class="lang-en">
-      71 laboratory markers across 13 panels. Source document: a clinician-style report
+      83 laboratory markers across 13 panels. Source document: a clinician-style report
       generated for the patient (Portuguese original); panel and test names translated to
       English here, with the Portuguese term shown in parentheses where translation is
       non-obvious. Reference ranges, bar visualisations, per-test commentary and
       "possible contributing factors" preserved from the original report
       <span class="mono" style="color:var(--text-muted);font-size:11px;">(translated)</span>.
     </span><span class="lang-pt">
-      71 marcadores laboratoriais em 13 painéis. Documento de origem: um relatório em estilo clínico
+      83 marcadores laboratoriais em 13 painéis. Documento de origem: um relatório em estilo clínico
       gerado para o paciente (original em português); nomes de painéis e exames traduzidos para
       inglês aqui, com o termo em português mostrado entre parênteses quando a tradução não é
       óbvia. Intervalos de referência, visualizações em barra, comentários por exame e
@@ -510,9 +510,9 @@
     </span></p>
 
     <div class="metric-grid mb-3">
-      <div class="metric-card"><div class="metric-label">Within reference</div><div class="metric-value">65<small>/71</small></div><div class="metric-note">Normal results</div></div>
-      <div class="metric-card"><div class="metric-label">Watch</div><div class="metric-value" style="color:var(--amber-700);">4</div><div class="metric-note">Discuss with physician</div></div>
-      <div class="metric-card"><div class="metric-label">Flagged</div><div class="metric-value" style="color:var(--red-700);">1</div><div class="metric-note">Clinical evaluation indicated</div></div>
+      <div class="metric-card"><div class="metric-label">Within reference</div><div class="metric-value">75<small>/83</small></div><div class="metric-note">Normal results</div></div>
+      <div class="metric-card"><div class="metric-label">Watch</div><div class="metric-value" style="color:var(--amber-700);">5</div><div class="metric-note">Discuss with physician</div></div>
+      <div class="metric-card"><div class="metric-label">Flagged</div><div class="metric-value" style="color:var(--red-700);">2</div><div class="metric-note">Clinical evaluation indicated</div></div>
       <div class="metric-card"><div class="metric-label">Informational</div><div class="metric-value">1</div><div class="metric-note">Qualitative result</div></div>
     </div>
 
@@ -524,6 +524,16 @@
       next follow-up with Dr. Tischer.
     </p>
     <div class="lab-hl-grid">
+<div class="lab-hl-card lab-hl-card-flag">
+  <div class="lab-hl-name">hs-CRP (high-sensitivity)</div>
+  <div class="lab-hl-value">12.10 <span class="lab-hl-unit">mg/L</span></div>
+  <div class="lab-hl-meta">
+    <span class="pill pill-flag">Flagged</span>
+    <span class="lab-hl-panel">Vitamins &amp; Metabolic Markers</span>
+  </div>
+  <div class="lab-hl-ref">Reference: &lt; 3.0 mg/L · &gt; 3.0 = high cardiovascular risk</div>
+  <div class="lab-hl-note">~4× the high-risk threshold. Reflects active systemic inflammation — most likely contributors are reactive alcohol use through April, cervical-spine inflammation (March crisis), body composition, and chronic stress load. Repeat after 4–6 weeks of alcohol abstinence and weight reduction; if it persists, broaden the differential.</div>
+</div>
 <div class="lab-hl-card lab-hl-card-watch">
   <div class="lab-hl-name">Total Cholesterol</div>
   <div class="lab-hl-value">199 <span class="lab-hl-unit">mg/dL</span></div>
@@ -598,13 +608,21 @@
   <li>
     <div class="lab-action-num">01</div>
     <div>
+      <div class="lab-action-title">Investigate elevated hs-CRP <span class="pill pill-flag">Priority</span></div>
+      <p>hs-CRP at 12.10 mg/L is roughly four times the high-cardiovascular-risk threshold (&gt; 3.0 mg/L). Most plausible drivers: chronic systemic inflammation from reactive alcohol use through April, the March 2026 cervical protrusion crisis (with peri-discal inflammation and Diprospan injection), body composition (BMI 26.9, body fat 24.2%), and prolonged sleep deprivation / autonomic load. Combined with elevated homocysteine and estradiol, the inflammatory–lipid–hormonal axis is acting in concert rather than as isolated findings.</p>
+      <p><strong>Action:</strong> repeat hs-CRP after 4–6 weeks of confirmed alcohol abstinence and ongoing weight reduction. If &gt; 3.0 mg/L persists, broaden the differential (occult infection, autoimmune screen, dental/sinus inflammation, gut-axis contribution). Bring to Dr. Tischer for the next review.</p>
+    </div>
+  </li>
+  <li>
+    <div class="lab-action-num">02</div>
+    <div>
       <div class="lab-action-title">Investigate elevated homocysteine <span class="pill pill-flag">Priority</span></div>
       <p>14.40 µmol/L is above reference (5–12) — an independent cardiovascular risk factor. Common causes: functional deficiency of B6, B12 or folate; MTHFR polymorphism; borderline kidney function. Although serum B12 and folate are normal, elevated homocysteine may indicate sub-optimal vitamin metabolism.</p>
       <p><strong>Action:</strong> bring this result to Dr. Tischer. Discuss MTHFR testing (already known: compound heterozygous from TotalGene) and consider methylfolate / methylcobalamine supplementation.</p>
     </div>
   </li>
   <li>
-    <div class="lab-action-num">02</div>
+    <div class="lab-action-num">03</div>
     <div>
       <div class="lab-action-title">Monitor total cholesterol &amp; estradiol <span class="pill pill-watch">Watch</span></div>
       <p>Total cholesterol slightly elevated (199 mg/dL) is offset by excellent HDL (76) and optimal LDL (95) — the actual clinical reading is favourable. Estradiol slightly above the male range (47.62 vs ≤ 39.8) may relate to body weight, prior alcohol use, or medication interaction.</p>
@@ -612,7 +630,7 @@
     </div>
   </li>
   <li>
-    <div class="lab-action-num">03</div>
+    <div class="lab-action-num">04</div>
     <div>
       <div class="lab-action-title">Confirm creatinine trend <span class="pill pill-watch">Watch</span></div>
       <p>Creatinine at 1.30 mg/dL is at the upper limit, but eGFR remains &gt; 60. May reflect muscle mass, hydration or medication. Low urinary specific gravity (1.005) suggests a dilute sample at the time of collection.</p>
@@ -2090,7 +2108,7 @@
   <summary class="lab-panel-head">
     <span class="lab-panel-title">Sex &amp; Adrenal Hormones</span>
     <span class="lab-panel-sub">Equilíbrio endócrino, andrógenos e cortisol</span>
-    <span class="lab-panel-count">9 markers</span>
+    <span class="lab-panel-count">11 markers</span>
   </summary>
   <div class="lab-panel-body">
     
@@ -2342,7 +2360,68 @@
         </div>
         <div class="lab-test-foot"><div class="lab-test-ref">N/A (referência feminina)</div></div>
         <div class="lab-note">Clinical reference is female; no isolated significance in a male. <span class="translated-marker">(translated)</span></div>
-        
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">DHEA-S (sulfate, stable form) <span class="lab-name-pt">(DHEAS — sulfato)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">152.00</span> <span class="lab-val-unit">µg/dL</span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-bar-wrap">
+          <div class="lab-bar">
+            <div class="lab-bar-bg"></div>
+            <div class="lab-bar-range"></div>
+            <div class="lab-bar-tick lab-bar-tick-min"></div>
+            <div class="lab-bar-tick lab-bar-tick-max"></div>
+            <div class="lab-bar-marker lab-bar-marker-normal" style="left: 33%;"></div>
+          </div>
+          <div class="lab-bar-labels">
+            <span>min 5.4</span>
+            <span>max 457.1</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Reference: 5.4 – 457.1 µg/dL (men 30–39)</div></div>
+        <div class="lab-note">Within reference. Sulfated form is the stable, longer-half-life adrenal androgen and is the more clinically useful of the two DHEA measurements. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-watch">
+        <div class="lab-test-head">
+          <div class="lab-test-name">DHEA (free) <span class="lab-name-pt">(DHEA livre)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">2.50</span> <span class="lab-val-unit">ng/mL</span></span>
+            <span class="pill pill-watch">Watch</span>
+          </div>
+        </div>
+        <div class="lab-bar-wrap">
+          <div class="lab-bar">
+            <div class="lab-bar-bg"></div>
+            <div class="lab-bar-range"></div>
+            <div class="lab-bar-tick lab-bar-tick-min"></div>
+            <div class="lab-bar-tick lab-bar-tick-max"></div>
+            <div class="lab-bar-marker lab-bar-marker-watch" style="left: 0%;">
+              <div class="lab-bar-dot"></div>
+            </div>
+          </div>
+          <div class="lab-bar-labels">
+            <span>min 2.50</span>
+            <span>max 12.50</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Reference: 2.50 – 12.50 ng/mL (men)</div></div>
+        <div class="lab-note">Exactly at the lower limit of the male range. Combined with morning cortisol also at the lower bound (7.39 µg/dL), this is a coherent adrenal-axis pattern — chronic stress depletion / sub-clinical adrenal fatigue. <span class="translated-marker">(translated)</span></div>
+
+        <div class="lab-causes">
+          <div class="lab-causes-title">
+            Possible contributing factors
+            <span class="lab-causes-disclaimer">— suggestive only, based on current medication and history. Does not replace clinical evaluation.</span>
+          </div>
+          <ul class="lab-causes-list"><li>Chronic HPA-axis suppression by long-standing diazepam use (12+ years) — well-documented effect</li><li>Sustained sleep deprivation and high autonomic load (HRV median 17 ms, RHR borderline)</li><li>Cumulative chronic stress — academic, financial, post-traumatic load</li><li>Quetiapine and Cymbalta also blunt the adrenal stress response with chronic use</li><li>Combined low-bound cortisol + low-bound DHEA reads as adrenal depletion rather than insufficiency — clinically distinct from primary Addison's</li><li>Useful to recheck both as the diazepam taper progresses and sleep recovers</li></ul>
+        </div>
       </div>
   </div>
 </details>
@@ -2350,10 +2429,45 @@
   <summary class="lab-panel-head">
     <span class="lab-panel-title">Vitamins &amp; Metabolic Markers</span>
     <span class="lab-panel-sub">Status nutricional e fatores de risco cardiovascular</span>
-    <span class="lab-panel-count">4 markers</span>
+    <span class="lab-panel-count">5 markers</span>
   </summary>
   <div class="lab-panel-body">
-    
+
+      <div class="lab-test lab-test-flag">
+        <div class="lab-test-head">
+          <div class="lab-test-name">hs-CRP (high-sensitivity C-reactive protein) <span class="lab-name-pt">(Proteína C Reativa Ultra-Sensível)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">12.10</span> <span class="lab-val-unit">mg/L</span></span>
+            <span class="pill pill-flag">Flagged</span>
+          </div>
+        </div>
+        <div class="lab-bar-wrap">
+          <div class="lab-bar">
+            <div class="lab-bar-bg"></div>
+            <div class="lab-bar-range"></div>
+            <div class="lab-bar-tick lab-bar-tick-min"></div>
+            <div class="lab-bar-tick lab-bar-tick-max"></div>
+            <div class="lab-bar-marker lab-bar-marker-flag" style="left: 95%;">
+              <div class="lab-bar-dot"></div>
+            </div>
+          </div>
+          <div class="lab-bar-labels">
+            <span>min 0</span>
+            <span>max 3</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Reference: &lt; 3.0 mg/L · &lt; 1.0 low CV risk · 1.0–3.0 medium · &gt; 3.0 high CV risk</div></div>
+        <div class="lab-note">~4× the high-cardiovascular-risk threshold. Reflects active systemic inflammation rather than an isolated lab anomaly. <span class="translated-marker">(translated)</span></div>
+
+        <div class="lab-causes">
+          <div class="lab-causes-title">
+            Possible contributing factors
+            <span class="lab-causes-disclaimer">— suggestive only, based on current medication and history. Does not replace clinical evaluation.</span>
+          </div>
+          <ul class="lab-causes-list"><li>Reactive alcohol use through April 2026 — well-known driver of hepatic and systemic CRP elevation</li><li>Cervical disc protrusion crisis (March 2026) with peri-discal inflammation; Diprospan injection administered</li><li>Body composition (BMI 26.9, body fat 24.2%) — adipose tissue produces inflammatory cytokines (IL-6 → CRP)</li><li>Prolonged sleep deprivation and high autonomic load (HRV median 17 ms — chronically suppressed)</li><li>Possible sub-clinical contributors: dental / sinus inflammation, gut dysbiosis (Firmicutes-skewed microbiota); rule out occult infection at follow-up</li><li>Acts in concert with elevated homocysteine and estradiol — the inflammation–lipid–hormonal axis is moving together, not as isolated findings</li></ul>
+        </div>
+      </div>
+
       <div class="lab-test lab-test-normal">
         <div class="lab-test-head">
           <div class="lab-test-name">Vitamin D (25-OH) <span class="lab-name-pt">(Vitamina D (25-OH))</span></div>
@@ -2484,8 +2598,8 @@
 <details class="lab-panel" id="lab-sorologia" open>
   <summary class="lab-panel-head">
     <span class="lab-panel-title">Serology</span>
-    <span class="lab-panel-sub">Marcadores de infecção e imunidade</span>
-    <span class="lab-panel-count">4 markers</span>
+    <span class="lab-panel-sub">Marcadores de infecção e imunidade — hepatites, HIV, sífilis, Chagas</span>
+    <span class="lab-panel-count">12 markers</span>
   </summary>
   <div class="lab-panel-body">
     
@@ -2536,17 +2650,121 @@
             <span class="pill pill-ok">Normal</span>
           </div>
         </div>
-        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente</div></div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente · leitura 0,086</div></div>
         <div class="lab-note">HIV serology negative. <span class="translated-marker">(translated)</span></div>
-        
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">Anti-HBc IgM <span class="lab-name-pt">(Hep B core IgM)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">&lt; 2.00 U/mL — Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente (&lt; 10 U/mL)</div></div>
+        <div class="lab-note">No acute Hepatitis B infection. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">Anti-HBe <span class="lab-name-pt">(Hep B "e" antibody)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente (índice 2,2)</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente (índice &gt; 1,0)</div></div>
+        <div class="lab-note">No active "e" antigen exposure. Consistent with vaccination-only Hep B status. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">HBeAg <span class="lab-name-pt">(Hep B "e" antigen)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">&lt; 0.0100 U PEI/mL — Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente (&lt; 0,09 U PEI/mL)</div></div>
+        <div class="lab-note">No active Hepatitis B viral replication. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">Anti-HCV (Hepatitis C antibody) <span class="lab-name-pt">(Anti-HCV)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente (índice 0,05)</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente (índice &lt; 1,0)</div></div>
+        <div class="lab-note">Hepatitis C serology negative. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">VDRL (Syphilis lipoidic test) <span class="lab-name-pt">(Reação de VDRL)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente</div></div>
+        <div class="lab-note">No syphilis-related antibody reactivity. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">FTA-ABS IgG (Treponema-specific) <span class="lab-name-pt">(Treponema IgG / FTA-ABS)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente</div></div>
+        <div class="lab-note">No prior or current Treponema pallidum exposure. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">FTA-ABS IgM (Treponema acute) <span class="lab-name-pt">(Treponema IgM / FTA-ABS)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente</div></div>
+        <div class="lab-note">No acute syphilis. <span class="translated-marker">(translated)</span></div>
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">Trypanosoma cruzi IgG (Chagas) <span class="lab-name-pt">(Doença de Chagas — IgG)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Não Reagente</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Não reagente · WHO recomenda 2 metodologias para confirmação</div></div>
+        <div class="lab-note">No Chagas disease exposure. <span class="translated-marker">(translated)</span></div>
+
       </div>
   </div>
 </details>
 <details class="lab-panel" id="lab-urina" open>
   <summary class="lab-panel-head">
-    <span class="lab-panel-title">Urinalysis (EAS)</span>
-    <span class="lab-panel-sub">Análise física, química e microscópica</span>
-    <span class="lab-panel-count">6 markers</span>
+    <span class="lab-panel-title">Urinalysis (EAS) &amp; Uroculture</span>
+    <span class="lab-panel-sub">Análise física, química, microscópica e cultura de urina</span>
+    <span class="lab-panel-count">7 markers</span>
   </summary>
   <div class="lab-panel-body">
     
@@ -2662,7 +2880,20 @@
         </div>
         <div class="lab-test-foot"><div class="lab-test-ref">Sedimento normal</div></div>
         <div class="lab-note">No signs of inflammation or calculi. <span class="translated-marker">(translated)</span></div>
-        
+
+      </div>
+
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head">
+          <div class="lab-test-name">Uroculture <span class="lab-name-pt">(Urocultura)</span></div>
+          <div class="lab-test-meta">
+            <span class="lab-test-val"><span class="lab-val-num">Ausência de crescimento bacteriano</span> <span class="lab-val-unit"></span></span>
+            <span class="pill pill-ok">Normal</span>
+          </div>
+        </div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Esperado: Sem crescimento de patógenos após 24h</div></div>
+        <div class="lab-note">No bacterial growth after 24 hours of incubation. No urinary tract infection. <span class="translated-marker">(translated)</span></div>
+
       </div>
   </div>
 </details>
