@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=30">
+<link rel="stylesheet" href="assets/styles.css?v=31">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
@@ -302,6 +302,26 @@
         <div class="chart-card-meta">Withings BP · n=233</div>
       </div>
       <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+    </div>
+
+    <div class="chart-card mt-3">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Daily readings — monthly view</span><span class="lang-pt">Leituras diárias — visão mensal</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Withings BP · daily systolic / diastolic · use ‹ › to navigate</span><span class="lang-pt">Withings BP · sistólica / diastólica diárias · use ‹ › para navegar</span></div>
+      </div>
+      <div class="bp-daily-nav">
+        <button type="button" class="bp-daily-btn" id="bpDailyPrev" aria-label="Previous month">‹</button>
+        <div class="bp-daily-title" id="bpDailyTitle">—</div>
+        <button type="button" class="bp-daily-btn" id="bpDailyNext" aria-label="Next month">›</button>
+      </div>
+      <div class="chart-wrap"><canvas id="bpDailyChart"></canvas></div>
+      <div class="bp-daily-legend">
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3F8A4D"></span> Normal &lt;120/80</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#E5C04A"></span> Elevated 120–129</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#D88B3A"></span> Stage 1 130–139 / 80–89</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#C0392B"></span> Stage 2 ≥140 / 90</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#7A1F1F"></span> Crisis ≥180 / 120</span>
+      </div>
     </div>
 
     <table class="data-table">
@@ -692,6 +712,141 @@ new Chart(document.getElementById('exerciseMixChart'), {
       }
     }
   });
+}
+
+/* 6b — Blood pressure — daily readings, monthly view (Withings-style
+ *      floating bars: thin pill from diastolic to systolic with hollow
+ *      circles at each end, colour-coded by BP category). */
+{
+  // Group BP rows by year-month, keep day-of-month + sys + dia per row.
+  const bpByMonth = {};
+  for (const [d, sys, dia] of BP) {
+    const ym = d.slice(0, 7);
+    const day = parseInt(d.slice(8, 10), 10);
+    if (!bpByMonth[ym]) bpByMonth[ym] = [];
+    bpByMonth[ym].push({ day, sys, dia });
+  }
+  const bpMonths = Object.keys(bpByMonth).sort();
+  let bpIdx = bpMonths.length - 1; // start with most recent month with data
+
+  // ACC/AHA 2017 BP categories — colour by the worst-case (sys or dia).
+  function bpColor(sys, dia) {
+    if (sys >= 180 || dia >= 120) return '#7A1F1F'; // crisis
+    if (sys >= 140 || dia >= 90)  return '#C0392B'; // Stage 2
+    if (sys >= 130 || dia >= 80)  return '#D88B3A'; // Stage 1
+    if (sys >= 120)               return '#E5C04A'; // Elevated
+    return '#3F8A4D';                                 // Normal
+  }
+
+  const monthLabel = (ym) => {
+    const names = ['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'];
+    return names[parseInt(ym.slice(5,7),10)-1] + ' ' + ym.slice(0,4);
+  };
+
+  const bpDailyTitle = document.getElementById('bpDailyTitle');
+  const bpDailyPrev  = document.getElementById('bpDailyPrev');
+  const bpDailyNext  = document.getElementById('bpDailyNext');
+  const bpDailyCanvas = document.getElementById('bpDailyChart');
+  let bpDailyChart = null;
+
+  // Custom plugin: draw hollow circles at the top (systolic) and bottom
+  // (diastolic) of every floating bar. Chart.js doesn't ship with this; we
+  // hand-render after the dataset is drawn.
+  const endpointCirclesPlugin = {
+    id: 'bpEndpointCircles',
+    afterDatasetsDraw(chart) {
+      const ds = chart.data.datasets[0];
+      if (!ds || !ds.data) return;
+      const { ctx, scales: { x, y } } = chart;
+      ds.data.forEach((pt, i) => {
+        if (!pt || !Array.isArray(pt.y)) return;
+        const xPx   = x.getPixelForValue(pt.x);
+        const yLow  = y.getPixelForValue(pt.y[0]); // diastolic (lower number)
+        const yHigh = y.getPixelForValue(pt.y[1]); // systolic (upper number)
+        const color = Array.isArray(ds.borderColor) ? ds.borderColor[i] : ds.borderColor;
+        ctx.save();
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = '#FFFFFF';
+        const r = 3.6;
+        ctx.beginPath(); ctx.arc(xPx, yHigh, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(xPx, yLow,  r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.restore();
+      });
+    }
+  };
+
+  function renderBpDaily() {
+    const ym = bpMonths[bpIdx];
+    const rows = bpByMonth[ym] || [];
+    bpDailyTitle.textContent = monthLabel(ym);
+
+    const dataPts = rows.map(r => ({
+      x: r.day,
+      y: [r.dia, r.sys],
+      sys: r.sys, dia: r.dia,
+    }));
+    const colors = rows.map(r => bpColor(r.sys, r.dia));
+
+    if (bpDailyChart) bpDailyChart.destroy();
+    bpDailyChart = new Chart(bpDailyCanvas, {
+      type: 'bar',
+      data: {
+        datasets: [{
+          label: 'BP',
+          data: dataPts,
+          borderColor: colors,
+          backgroundColor: 'transparent',
+          borderWidth: 1.6,
+          borderRadius: 8,
+          borderSkipped: false,
+          barThickness: 5,
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            displayColors: false,
+            callbacks: {
+              title: (items) => `Day ${items[0].raw.x}`,
+              label: (item) => `${item.raw.sys} / ${item.raw.dia} mmHg`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 0.5, max: 31.5,
+            grid: { display: false },
+            ticks: {
+              color: C.inkSoft,
+              stepSize: 5,
+              callback: (v) => Number.isInteger(v) && v >= 5 && v <= 30 ? v : '',
+            }
+          },
+          y: {
+            ...axisCommon,
+            min: 50, max: 180,
+            ticks: { ...axisCommon.ticks, stepSize: 25 },
+            title: { display: true, text: 'mmHg', color: C.inkSoft }
+          }
+        }
+      },
+      plugins: [endpointCirclesPlugin]
+    });
+
+    bpDailyPrev.disabled = bpIdx <= 0;
+    bpDailyNext.disabled = bpIdx >= bpMonths.length - 1;
+  }
+
+  bpDailyPrev.addEventListener('click', () => { if (bpIdx > 0) { bpIdx--; renderBpDaily(); } });
+  bpDailyNext.addEventListener('click', () => { if (bpIdx < bpMonths.length - 1) { bpIdx++; renderBpDaily(); } });
+
+  renderBpDaily();
 }
 
 /* 8 — ECG table populator (real data: 57 ECGs from Apple Health) */
