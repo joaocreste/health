@@ -65,7 +65,7 @@
   <div class="container">
     <div class="section-label">03 · Body composition</div>
     <h2 class="section-title"><span class="lang-en">Body composition — Withings Scale</span><span class="lang-pt">Composição corporal — balança Withings</span></h2>
-    <p class="section-desc"><span class="lang-en">18 bio-impedance weighings between October 2025 and April 2026 (one failed reading filtered). Height 1.74 m on file. Most recent reading: 1 April 2026.</span><span class="lang-pt">18 pesagens por bioimpedância entre outubro de 2025 e abril de 2026 (uma leitura falha foi filtrada). Altura 1,74 m em ficha. Última leitura: 1º de abril de 2026 — 81,4 kg.</span></p>
+    <p class="section-desc"><span class="lang-en">121 bio-impedance weighings on file (2015 → April 2026), with the dense recent window since October 2025. Height 1.74 m on file. Most recent reading: 1 April 2026 — 81.4 kg.</span><span class="lang-pt">121 pesagens por bioimpedância no histórico (2015 → abril de 2026), com janela densa recente desde outubro de 2025. Altura 1,74 m em ficha. Última leitura: 1º de abril de 2026 — 81,4 kg.</span></p>
 
     <div class="metric-grid">
       <div class="metric-card">
@@ -93,7 +93,7 @@
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-card-title">Body composition trend — Oct 2025 → Apr 2026</div>
-        <div class="chart-card-meta">Withings Scale · n=18 readings</div>
+        <div class="chart-card-meta">Withings Scale · n=121 readings (showing recent 18 in trend)</div>
       </div>
       <div class="chart-wrap"><canvas id="bodyChart"></canvas></div>
     </div>
@@ -258,7 +258,7 @@
       <div class="list-card">
         <h4>What changed in April</h4>
         <ul>
-          <li>April BP also worsens — 154.8 / 110.8 mmHg mean</li>
+          <li>April BP remains in Stage 2 — 135.2 / 90.8 mmHg mean (n=19)</li>
           <li>Coincides with cervical protrusion crisis (March) and ongoing pain</li>
           <li>Suggests the gains of Jan–Mar are not yet stable</li>
         </ul>
@@ -285,21 +285,21 @@
   <div class="container">
     <div class="section-label">08 · Blood pressure</div>
     <h2 class="section-title"><span class="lang-en">Blood pressure — Withings cuff</span><span class="lang-pt">Pressão arterial — monitor Withings</span></h2>
-    <p class="section-desc"><span class="lang-en">233 readings, 13 November 2025 – 6 April 2026.</span><span class="lang-pt">233 leituras, 13 de novembro de 2025 – 6 de abril de 2026.</span></p>
+    <p class="section-desc"><span class="lang-en">249 readings, 13 November 2025 – 3 May 2026.</span><span class="lang-pt">249 leituras, 13 de novembro de 2025 – 3 de maio de 2026.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Systolic mean</div><div class="metric-value">135<small>mmHg</small></div><div class="metric-note">Stage 1 hypertension</div></div>
+      <div class="metric-card"><div class="metric-label">Systolic mean</div><div class="metric-value">134.9<small>mmHg</small></div><div class="metric-note">Stage 1 hypertension</div></div>
       <div class="metric-card"><div class="metric-label">Systolic peak</div><div class="metric-value">172<small>mmHg</small></div><div class="metric-note">Hypertensive spike</div></div>
-      <div class="metric-card"><div class="metric-label">Diastolic mean</div><div class="metric-value">89.8<small>mmHg</small></div><div class="metric-note">Normal &lt;80 · <span class="pill pill-flag">Elevated</span></div></div>
+      <div class="metric-card"><div class="metric-label">Diastolic mean</div><div class="metric-value">89.6<small>mmHg</small></div><div class="metric-note">Normal &lt;80 · <span class="pill pill-flag">Elevated</span></div></div>
       <div class="metric-card"><div class="metric-label">Diastolic peak</div><div class="metric-value">116<small>mmHg</small></div><div class="metric-note">Hypertensive crisis range</div></div>
-      <div class="metric-card"><div class="metric-label">Latest mean (Apr 6)</div><div class="metric-value">155/111</div><div class="metric-note"><span class="pill pill-flag">Stage 2</span> — return after Feb gap</div></div>
-      <div class="metric-card"><div class="metric-label">Cuff HR mean</div><div class="metric-value">91<small>bpm</small></div><div class="metric-note">During measurement</div></div>
+      <div class="metric-card"><div class="metric-label">Latest reading (May 3)</div><div class="metric-value">138/94</div><div class="metric-note"><span class="pill pill-flag">Stage 2</span> — post-discharge</div></div>
+      <div class="metric-card"><div class="metric-label">Cuff HR mean</div><div class="metric-value">91.7<small>bpm</small></div><div class="metric-note">During measurement</div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
         <div class="chart-card-title">Blood pressure — monthly mean</div>
-        <div class="chart-card-meta">Withings BP · n=233</div>
+        <div class="chart-card-meta">Withings BP · n=249</div>
       </div>
       <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
     </div>
@@ -326,16 +326,19 @@
         <tr><td>December 2025</td><td class="num">63</td><td class="num">132.1</td><td class="num">87.0</td><td><span class="pill pill-watch">Stage 1</span></td></tr>
         <tr><td>January 2026</td><td class="num">11</td><td class="num">118.1</td><td class="num">78.1</td><td><span class="pill pill-ok">Normal / Elevated</span></td></tr>
         <tr><td>February 2026</td><td class="num">6</td><td class="num">134.2</td><td class="num">88.8</td><td><span class="pill pill-watch">Stage 1</span></td></tr>
-        <tr><td>April 2026</td><td class="num">4</td><td class="num strong">154.8</td><td class="num strong">110.8</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
+        <tr><td>April 2026</td><td class="num">19</td><td class="num strong">135.2</td><td class="num strong">90.8</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
+        <tr><td>May 2026</td><td class="num">1</td><td class="num">138</td><td class="num">94</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
       </tbody>
     </table>
 
     <div class="alert alert-flag mt-3">
-      <strong>April readings are clinically actionable.</strong> Four readings post the cervical
-      protrusion crisis show systolic 154.8 / diastolic 110.8 mmHg — Stage 2 hypertension territory,
-      with the highest diastolic of the entire dataset (116 mmHg). Pain, restarted Diprospan
-      (corticosteroid), Duloxetine 120 mg, and benzodiazepine fluctuations are known
-      contributors. Worth flagging to GP at the next visit.
+      <strong>April–May readings remain in Stage 2 territory.</strong> Of 19 April readings (around the
+      March cervical protrusion crisis and the 29 April hospital admission), the mean is 135.2 / 90.8 mmHg —
+      with peaks like 28 Apr 146/101 and 29 Apr 135/96. The 27 Apr reading of 89/56 stands out as an
+      anomalously low point (likely captured during the OD episode). The 3 May post-discharge reading is
+      138/94 — still Stage 2. The peak diastolic of the entire dataset remains 116 mmHg. Pain, restarted
+      Diprospan (corticosteroid), Depakote ER added, Lyrica 225 mg, Duloxetine reductions, and
+      benzodiazepine fluctuations are known contributors. Worth flagging to GP at the next visit.
     </div>
   </div>
 </section>
