@@ -1556,6 +1556,7 @@ body.ct-fs-active { overflow: hidden; }
 .lab-cmp-col-head {
   min-width: 180px;
   width: 180px;
+  text-align: center;
 }
 .lab-cmp-col-head .lab-cmp-date {
   font-family: 'Raleway', sans-serif;
@@ -1633,7 +1634,8 @@ body.ct-fs-active { overflow: hidden; }
   color: var(--text-soft, #4A5C6B);
   font-size: 12.5px;
   white-space: nowrap;
-  text-align: right;
+  text-align: center;
+  vertical-align: middle;
 }
 .lab-cmp-latest {
   background: rgba(216, 232, 242, 0.32);
