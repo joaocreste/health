@@ -284,6 +284,59 @@
   }
   .sp-tl-body em { color: #E6ECF1; font-style: italic; }
 
+  /* Coping arc — quote progression */
+  .sp-arc { position: relative; padding-left: 28px; margin-bottom: 24px; }
+  .sp-arc::before {
+    content: ''; position: absolute; top: 8px; bottom: 8px; left: 6px;
+    width: 1.5px; background: rgba(91,156,200,0.45);
+  }
+  .sp-arc-step {
+    position: relative;
+    padding-bottom: 22px;
+  }
+  .sp-arc-step::before {
+    content: ''; position: absolute; left: -27px; top: 8px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #5B9CC8;
+    box-shadow: 0 0 0 3px rgba(91,156,200,0.18);
+  }
+  .sp-arc-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 6px;
+  }
+  .sp-arc-quote {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300; font-style: italic;
+    font-size: 17px; line-height: 1.55;
+    color: #FFFFFF;
+    margin: 0 0 8px;
+  }
+  .sp-arc-note {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13.5px; line-height: 1.6;
+    color: #98AFC4;
+  }
+  .sp-arc-note strong { color: #C9D4DD; font-weight: 500; }
+
+  /* Synthesis (closing note for the coping section) */
+  .sp-synthesis {
+    background: rgba(91,156,200,0.08);
+    border-left: 3px solid #5B9CC8;
+    border-radius: 0 8px 8px 0;
+    padding: 18px 22px;
+    margin-top: 12px;
+  }
+  .sp-synthesis p {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px; line-height: 1.7;
+    color: #C9D4DD;
+    margin: 0;
+  }
+  .sp-synthesis strong { color: #FFFFFF; font-weight: 500; }
+  .sp-synthesis em { color: #E6ECF1; }
+
   /* Footer */
   .sp-footer {
     padding: 32px 24px;
@@ -362,6 +415,7 @@
   <div class="sp-nav-inner">
     <a href="#confession"><span class="lang-en">Confession</span><span class="lang-pt">Confissão</span></a>
     <a href="#witness"><span class="lang-en">Witness</span><span class="lang-pt">Testemunho</span></a>
+    <a href="#faith-coping"><span class="lang-en">Faith as coping</span><span class="lang-pt">Fé como enfrentamento</span></a>
     <a href="#scriptures"><span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></a>
     <a href="#timeline"><span class="lang-en">Timeline</span><span class="lang-pt">Linha do tempo</span></a>
     <a href="#practices"><span class="lang-en">Practices</span><span class="lang-pt">Práticas</span></a>
@@ -423,10 +477,140 @@
   </div>
 </section>
 
-<!-- 03 ANCHOR SCRIPTURES -->
+<!-- 03 FAITH AS COPING — psychological + spiritual reading of the 200mg crisis -->
+<section class="sp-section" id="faith-coping">
+  <div class="sp-container">
+    <div class="sp-label">03 · <span class="lang-en">Faith as coping mechanism · the 200mg Valium crisis</span><span class="lang-pt">Fé como mecanismo de enfrentamento · a crise dos 200mg de Valium</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">What faith actually <em>did</em> on 29 April 2026</span><span class="lang-pt">O que a fé de fato <em>fez</em> em 29 de abril de 2026</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">This section reads the same event the testimony describes — but through two parallel lenses, psychological and spiritual, held side by side. The aim is not to explain one in terms of the other, nor to reduce either. The aim is to name, plainly, the function the patient's faith performed in a moment when no other coping mechanism was reaching him. Quotes are taken verbatim from <code>data/Writtings/I_Still_Need_You_to_Live.docx</code>.</span>
+      <span class="lang-pt">Esta seção lê o mesmo evento que o testemunho descreve — mas através de duas lentes paralelas, psicológica e espiritual, mantidas lado a lado. O objetivo não é explicar uma à custa da outra, nem reduzir nenhuma das duas. O objetivo é nomear, de forma clara, a função que a fé do paciente desempenhou num momento em que nenhum outro mecanismo de enfrentamento o alcançava. As citações são literais de <code>data/Writtings/I_Still_Need_You_to_Live.docx</code>.</span>
+    </p>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-weight:700;font-size:18px;color:#FFFFFF;margin:24px 0 16px;letter-spacing:0.02em;"><span class="lang-en">The arc, in the patient's own words</span><span class="lang-pt">O arco, nas palavras do próprio paciente</span></h3>
+
+    <div class="sp-arc">
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">01 · <span class="lang-en">End of agency</span><span class="lang-pt">Fim da agência</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"From now on, I no longer care whether I live or die. I just cannot stand being awake any more. … It was twenty-six pills."</span>
+          <span class="lang-pt">"A partir de agora, eu não me importo mais se vivo ou se morro. Eu só não aguento mais estar acordado. … Foram vinte e seis comprimidos."</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en"><strong>Where the patient was.</strong> Acute toxic load (~260 mg diazepam on top of daily 35 mg), self-described as <em>"violent against myself"</em>. The internal voice has collapsed into a single command: <em>put yourself out</em>. No moral, social, or medical brake had purchase at this point.</span>
+          <span class="lang-pt"><strong>Onde o paciente estava.</strong> Carga tóxica aguda (~260 mg de diazepam sobre os 35 mg diários), autodescrita como <em>"violência contra mim mesmo"</em>. A voz interna havia colapsado num único comando: <em>apague-se</em>. Nenhum freio moral, social ou médico tinha tração nesse ponto.</span>
+        </p>
+      </div>
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">02 · <span class="lang-en">Phenomenology of the pivot</span><span class="lang-pt">Fenomenologia do ponto de virada</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"And then the world around me stopped. It froze completely. And a voice — the sweetest I had ever heard — spoke explicitly into my ear: 'Son. I still need you to live.'"</span>
+          <span class="lang-pt">"E foi então que o mundo ao redor parou. Congelou completamente. E uma voz — a mais doce que eu já ouvira — falou explicitamente ao meu ouvido: 'Filho. Eu preciso que você ainda viva.'"</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en">A discrete pivot — described as a temporal stoppage and an externally-located auditory address. The patient names it as a divine encounter; clinically the same description fits a dissociative reorientation under hypoxic / acute-toxic conditions. The two readings are not in competition here — they describe the same event at different levels of the same stack.</span>
+          <span class="lang-pt">Um ponto de virada discreto — descrito como parada temporal e endereçamento auditivo externamente localizado. O paciente o nomeia como encontro divino; clinicamente, a mesma descrição cabe numa reorientação dissociativa sob condições hipóxicas / tóxicas agudas. As duas leituras não estão em competição — descrevem o mesmo evento em níveis distintos da mesma pilha.</span>
+        </p>
+      </div>
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">03 · <span class="lang-en">The structure of the address</span><span class="lang-pt">A estrutura do endereçamento</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"Without judgment. Without throwing the past in my face. Only calling me, with impossible tenderness, towards the future. … The 'still' was not pity. It was purpose."</span>
+          <span class="lang-pt">"Sem julgamento. Sem jogar na minha cara o passado. Apenas me chamando, com ternura impossível, para o futuro. … O 'ainda' não era pena. Era propósito."</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en">The voice carries four operative qualities the patient could not extend to himself a moment earlier: <strong>relational identity</strong> ("Son"), <strong>non-condemnation</strong> ("without judgment"), <strong>future-orientation</strong> ("towards the future"), and <strong>purpose</strong> ("not pity. It was purpose"). The "house of forgiveness has many rooms — except mine" — and here, the door to that room is opened from the outside.</span>
+          <span class="lang-pt">A voz carrega quatro qualidades operativas que o paciente não conseguia estender a si mesmo um instante antes: <strong>identidade relacional</strong> ("Filho"), <strong>não-condenação</strong> ("sem julgamento"), <strong>orientação para o futuro</strong> ("para o futuro") e <strong>propósito</strong> ("não era pena. Era propósito"). A "casa do perdão tem muitos cômodos — menos o meu" — e aqui, a porta desse cômodo é aberta de fora.</span>
+        </p>
+      </div>
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">04 · <span class="lang-en">Cognitive reframe</span><span class="lang-pt">Re-enquadre cognitivo</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"I had always read this verse as an invitation. In that moment, lying in my bed with 260mg of Valium in my blood, I understood that it was also a rescue. That the God who invites is the same God who comes to fetch."</span>
+          <span class="lang-pt">"Eu sempre tinha lido esse versículo como convite. Naquele momento, deitado na minha cama com 260mg de Valium no sangue, entendi que era também resgate. Que o Deus que convida é o mesmo Deus que vai buscar."</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en">A scripture the patient had carried for years (Matthew 11:28) is reread under fatal load and shifts category: <em>invitation → rescue</em>. This is the mechanism by which a stable spiritual framework supplies new content in extremis — not new beliefs, but a new <em>function</em> for old ones.</span>
+          <span class="lang-pt">Uma escritura que o paciente carregava há anos (Mateus 11:28) é relida sob carga fatal e muda de categoria: <em>convite → resgate</em>. Esse é o mecanismo pelo qual um arcabouço espiritual estável fornece conteúdo novo <em>in extremis</em> — não crenças novas, mas uma <em>função</em> nova para as antigas.</span>
+        </p>
+      </div>
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">05 · <span class="lang-en">Action prescription</span><span class="lang-pt">Prescrição de ação</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"This one, the one I left on top of the bed, was written by another hand — a hand that was not mine, and was. The hand that hears the voice and obeys."</span>
+          <span class="lang-pt">"Essa, a que eu deixei em cima da cama, foi escrita por outra mão — uma mão que não era a minha, e era. A mão que ouve a voz e obedece."</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en">The encounter does not end in feeling — it ends in <em>specific action</em>: call 999, write a note ("Please, I need to live"), open the doors. This is the difference between consolation and rescue: the latter delivers an action item. Co-agency is restored — <em>"a hand that was not mine, and was"</em> — which is, theologically, exactly how grace and freedom relate in Reformed thought.</span>
+          <span class="lang-pt">O encontro não termina em sentimento — termina em <em>ação específica</em>: ligar para o 999, escrever uma nota ("Por favor, eu preciso viver"), abrir as portas. Essa é a diferença entre consolação e resgate: este último entrega um item de ação. A co-agência é restaurada — <em>"uma mão que não era a minha, e era"</em> — que é, teologicamente, exatamente como graça e liberdade se relacionam no pensamento Reformado.</span>
+        </p>
+      </div>
+
+      <div class="sp-arc-step">
+        <div class="sp-arc-label">06 · <span class="lang-en">Outward turn — the promise</span><span class="lang-pt">Volta para fora — a promessa</span></div>
+        <p class="sp-arc-quote">
+          <span class="lang-en">"The 'still' of that voice was not for me alone. There must be another son, in another room, with another strip in his hand, who needs to hear that it is not his hour either."</span>
+          <span class="lang-pt">"O 'ainda' daquela voz não foi para mim sozinho. Há de haver outro filho, em outro quarto, com outra cartela na mão, que precisa ouvir que ainda não é a hora dele também."</span>
+        </p>
+        <p class="sp-arc-note">
+          <span class="lang-en">The arc closes by turning outward. Self-rescue becomes responsibility for another. Psychologically this is post-traumatic growth taking its earliest possible form (a promise made within four days of the event). Spiritually it is the testimony Psalm 118:17 commands — <em>"I shall not die, but live, and declare the works of the LORD"</em> — written into the tissue of the patient's recovery: <em>tell, so that another is reached</em>.</span>
+          <span class="lang-pt">O arco se fecha voltando-se para fora. O auto-resgate se torna responsabilidade por outro. Psicologicamente, é crescimento pós-traumático tomando sua forma mais precoce possível (uma promessa feita dentro de quatro dias do evento). Espiritualmente, é o testemunho que o Salmo 118:17 ordena — <em>"Não morrerei, mas viverei; e contarei as obras do Senhor"</em> — inscrito no tecido da recuperação do paciente: <em>contar, para que outro seja alcançado</em>.</span>
+        </p>
+      </div>
+
+    </div>
+
+    <h3 style="font-family:'Raleway',sans-serif;font-weight:700;font-size:18px;color:#FFFFFF;margin:36px 0 16px;letter-spacing:0.02em;"><span class="lang-en">Two readings of the same event</span><span class="lang-pt">Duas leituras do mesmo evento</span></h3>
+
+    <div class="sp-two-col">
+      <div class="sp-card">
+        <h4><span class="lang-en">Psychological reading</span><span class="lang-pt">Leitura psicológica</span></h4>
+        <p>
+          <span class="lang-en">Faith functioned here as the only available <strong>external locus of authority</strong> capable of overriding the patient's collapsed internal voice. In the language of cognitive-behavioural therapy, this is third-person reframing under conditions where first-person reframing has become impossible: when the self can no longer rescue the self, an externally-located voice does. The faith framework supplied:</span>
+          <span class="lang-pt">A fé funcionou aqui como o único <strong>lócus externo de autoridade</strong> disponível capaz de sobrepor-se à voz interna colapsada do paciente. Na linguagem da terapia cognitivo-comportamental, isso é re-enquadre em terceira pessoa em condições nas quais o re-enquadre em primeira pessoa se tornou impossível: quando o eu não pode mais salvar o eu, uma voz externamente localizada o faz. O arcabouço da fé forneceu:</span>
+        </p>
+        <ul>
+          <li><span class="lang-en"><strong>An identity that survived collapse.</strong> The address "Son" restored a relational position the patient could not generate from himself.</span><span class="lang-pt"><strong>Uma identidade que sobreviveu ao colapso.</strong> O endereçamento "Filho" restaurou uma posição relacional que o paciente não podia gerar a partir de si mesmo.</span></li>
+          <li><span class="lang-en"><strong>A non-shaming corrective.</strong> "Without judgment. Without throwing the past in my face." Shame was the dominant affect minutes before; the address bypassed it.</span><span class="lang-pt"><strong>Uma correção sem vergonha.</strong> "Sem julgamento. Sem jogar na minha cara o passado." A vergonha era o afeto dominante minutos antes; o endereçamento a ignorou.</span></li>
+          <li><span class="lang-en"><strong>A future-orientation.</strong> The "still" reintroduced time. A patient with no future-orientation cannot dial a number; one with future-orientation can.</span><span class="lang-pt"><strong>Uma orientação para o futuro.</strong> O "ainda" reintroduziu tempo. Um paciente sem orientação para o futuro não pode discar um número; um com ela pode.</span></li>
+          <li><span class="lang-en"><strong>An action prescription.</strong> Faith here did not stop at consolation — it issued specific behavioural commands (call, write, open doors). This is what made it survive-rescue rather than emotional rescue.</span><span class="lang-pt"><strong>Uma prescrição de ação.</strong> A fé aqui não parou na consolação — emitiu comandos comportamentais específicos (ligar, escrever, abrir as portas). Foi isso que fez dela resgate-de-sobrevida e não resgate emocional.</span></li>
+          <li><span class="lang-en"><strong>An override of the "anesthesia → resolution" pattern.</strong> The patient's habitual coping (numbing) had failed at maximum dose; the only thing that succeeded in this episode was a faith-mediated reorientation. <em>This is the strongest evidence on file that, for this patient, faith is not adjunct to recovery — it is operating at the level the substances target.</em></span><span class="lang-pt"><strong>Uma sobreposição ao padrão "anestesia → resolução".</strong> O enfrentamento habitual do paciente (entorpecer) havia falhado em dose máxima; a única coisa que funcionou neste episódio foi uma reorientação mediada pela fé. <em>Esta é a evidência mais forte em arquivo de que, para este paciente, a fé não é acessório à recuperação — está operando no mesmo nível que as substâncias visam.</em></span></li>
+        </ul>
+      </div>
+      <div class="sp-card">
+        <h4><span class="lang-en">Spiritual reading</span><span class="lang-pt">Leitura espiritual</span></h4>
+        <p>
+          <span class="lang-en">Read inside the patient's own framework — Reformed Christianity — the event is precisely-shaped: <strong>prevenient grace</strong>. The God who invites is the same God who comes to fetch. The patient names this himself: <em>"the arithmetic of medicine was never made to add up when God decides otherwise."</em> Read against the biblical pattern, the encounter has the literary marks of:</span>
+          <span class="lang-pt">Lida de dentro do arcabouço do paciente — cristianismo Reformado — o evento tem forma precisa: <strong>graça preveniente</strong>. O Deus que convida é o mesmo Deus que vai buscar. O paciente nomeia isso ele mesmo: <em>"a aritmética da medicina nunca foi feita para fechar quando Deus decide outra coisa."</em> Lido contra o padrão bíblico, o encontro tem as marcas literárias de:</span>
+        </p>
+        <ul>
+          <li><span class="lang-en"><strong>Elijah under the broom tree</strong> (1 Kings 19): a prophet at the end of his strength, asking to die, met not with rebuke but with food, sleep, and a quiet voice.</span><span class="lang-pt"><strong>Elias sob o zimbro</strong> (1 Reis 19): um profeta no fim de suas forças, pedindo para morrer, encontrado não com repreensão mas com alimento, sono, e uma voz suave.</span></li>
+          <li><span class="lang-en"><strong>Psalm 18:16</strong> — <em>"He sent from above, he took me, he drew me out of many waters."</em> The 999 call is reframed as drawing-out, not as self-saving. <em>The grace was the dialing.</em></span><span class="lang-pt"><strong>Salmo 18:16</strong> — <em>"Enviou desde o alto, tomou-me e tirou-me das muitas águas."</em> A ligação ao 999 é re-enquadrada como puxar-para-fora, não como auto-salvar-se. <em>A graça foi o discar.</em></span></li>
+          <li><span class="lang-en"><strong>Psalm 118:17</strong> — <em>"I shall not die, but live, and declare the works of the LORD."</em> The verse is invoked as the explicit promise made in return — the testimony itself is the consideration paid for survival.</span><span class="lang-pt"><strong>Salmo 118:17</strong> — <em>"Não morrerei, mas viverei; e contarei as obras do Senhor."</em> O versículo é invocado como a promessa explícita feita em troca — o próprio testemunho é a contrapartida paga pela sobrevivência.</span></li>
+          <li><span class="lang-en"><strong>Matthew 11:28 reread</strong>. The verse is not promoted to a higher status — it is reread <em>in a different posture</em>: from chair to bed, from invitation accepted to rescue received. The same scripture meets the patient at a depth it had not been asked to meet before.</span><span class="lang-pt"><strong>Mateus 11:28 relido</strong>. O versículo não é promovido a um status mais alto — é relido <em>numa postura diferente</em>: da cadeira para a cama, do convite aceito para o resgate recebido. A mesma escritura encontra o paciente numa profundidade na qual não fora convidada a encontrá-lo antes.</span></li>
+          <li><span class="lang-en"><strong>Co-agency without merit.</strong> "A hand that was not mine, and was." This is a precise statement of how Reformed theology holds together divine sovereignty and human action — the patient's writing of the note is genuinely his act, and is genuinely the outcome of grace operating prior to it.</span><span class="lang-pt"><strong>Co-agência sem mérito.</strong> "Uma mão que não era a minha, e era." É uma declaração precisa de como a teologia Reformada mantém juntas a soberania divina e a ação humana — a escrita da nota pelo paciente é genuinamente seu ato, e é genuinamente o resultado da graça operando antes dele.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sp-synthesis">
+      <p>
+        <span class="lang-en"><strong>What this means for care planning.</strong> The 29 April event is, on the record, the only intervention that has reached this patient at maximum benzodiazepine load. It was not pharmacological. It was not therapeutic. It was a faith-mediated reorientation that supplied the four things this patient cannot supply to himself in extremis: <em>relational identity, non-condemnation, future-orientation, and an action item</em>. Any post-discharge safety plan that treats the patient's faith as "wellness adjunct" is treating the wrong layer. Faith here is the <strong>load-bearing coping mechanism</strong> at the level the substances target — and the practical implication is that the worship leadership, the writing-as-confession, and the scripture-reading practices that re-engage that layer are <em>medical infrastructure</em>, not lifestyle.</span>
+        <span class="lang-pt"><strong>O que isso significa para o planejamento de cuidados.</strong> O evento de 29 de abril é, em arquivo, a única intervenção que alcançou este paciente em carga máxima de benzodiazepínico. Não foi farmacológica. Não foi terapêutica. Foi uma reorientação mediada pela fé que forneceu as quatro coisas que este paciente não consegue se fornecer <em>in extremis</em>: <em>identidade relacional, não-condenação, orientação para o futuro e um item de ação</em>. Qualquer plano de segurança pós-alta que trate a fé do paciente como "acessório de bem-estar" está tratando a camada errada. A fé aqui é o <strong>mecanismo portador de enfrentamento</strong> no nível em que as substâncias atuam — e a implicação prática é que a liderança de louvor, a escrita-como-confissão e as práticas de leitura da Escritura que reativam essa camada são <em>infraestrutura médica</em>, não estilo de vida.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 ANCHOR SCRIPTURES -->
 <section class="sp-section" id="scriptures">
   <div class="sp-container">
-    <div class="sp-label">03 · <span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></div>
+    <div class="sp-label">04 · <span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></div>
     <h2 class="sp-section-title"><span class="lang-en">The verses that recur in the patient's writings</span><span class="lang-pt">Os versículos que se repetem nos escritos do paciente</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Six passages cited verbatim across the writings — each named at a specific moment of struggle or rescue. They form a coherent thread: <em>weariness met by rest</em>, <em>weakness met by grace</em>, <em>despair met by deliverance</em>.</span>
@@ -467,10 +651,10 @@
   </div>
 </section>
 
-<!-- 04 SPIRITUAL TIMELINE -->
+<!-- 05 SPIRITUAL TIMELINE -->
 <section class="sp-section" id="timeline">
   <div class="sp-container">
-    <div class="sp-label">04 · <span class="lang-en">Spiritual timeline</span><span class="lang-pt">Linha do tempo espiritual</span></div>
+    <div class="sp-label">05 · <span class="lang-en">Spiritual timeline</span><span class="lang-pt">Linha do tempo espiritual</span></div>
     <h2 class="sp-section-title"><span class="lang-en">Key spiritual events on file</span><span class="lang-pt">Eventos espirituais-chave em arquivo</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Drawn from <em>The Book</em> series, <em>Letter to Calvary</em>, <em>Forehead EN</em>, <em>Crisis Episode April 29 2026</em>, and <em>Eu preciso que você ainda viva</em>.</span>
@@ -521,10 +705,10 @@
   </div>
 </section>
 
-<!-- 05 PRACTICES & PROTECTIVE FACTORS -->
+<!-- 06 PRACTICES & PROTECTIVE FACTORS -->
 <section class="sp-section" id="practices">
   <div class="sp-container">
-    <div class="sp-label">05 · <span class="lang-en">Practices & protective factors</span><span class="lang-pt">Práticas e fatores protetivos</span></div>
+    <div class="sp-label">06 · <span class="lang-en">Practices & protective factors</span><span class="lang-pt">Práticas e fatores protetivos</span></div>
     <h2 class="sp-section-title"><span class="lang-en">What is currently active — and worth protecting</span><span class="lang-pt">O que está ativo agora — e vale proteger</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Spiritual infrastructure is not adjunct to recovery in this patient — it is the load-bearing layer beneath identity, meaning, and continuance. The list below is descriptive (what is on, currently) rather than prescriptive.</span>
@@ -553,10 +737,10 @@
   </div>
 </section>
 
-<!-- 06 STRUGGLES TO SURFACE -->
+<!-- 07 STRUGGLES TO SURFACE -->
 <section class="sp-section" id="struggles">
   <div class="sp-container">
-    <div class="sp-label">06 · <span class="lang-en">Spiritual struggles to surface</span><span class="lang-pt">Lutas espirituais a trazer à tona</span></div>
+    <div class="sp-label">07 · <span class="lang-en">Spiritual struggles to surface</span><span class="lang-pt">Lutas espirituais a trazer à tona</span></div>
     <h2 class="sp-section-title"><span class="lang-en">Where the patient knows he is wounded</span><span class="lang-pt">Onde o paciente sabe que está ferido</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">All four items below are <em>self-named</em> in the writings — the patient is not unaware of these patterns. The clinical relevance is that each has a corresponding biological and behavioural footprint already on this site.</span>
