@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="assets/styles.css?v=32">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <style>
+  /* ── Spiritual page — dark theme ── */
   body.spiritual-page {
     background: #0F2238;
     color: #E6ECF1;
@@ -20,77 +21,295 @@
     background: #081726;
     border-bottom: 1px solid #1B3B54;
   }
-  .spiritual-stage {
-    min-height: calc(100vh - 60px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 64px 24px;
+  body.spiritual-page a { color: #8BB8D2; }
+  body.spiritual-page a:hover { color: #FFFFFF; }
+
+  /* Hero */
+  .sp-hero {
+    padding: 64px 24px 48px;
     text-align: center;
     background:
-      radial-gradient(ellipse 80% 60% at 50% 30%, rgba(62,124,163,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 70% 55% at 50% 25%, rgba(62,124,163,0.20) 0%, transparent 70%),
       linear-gradient(180deg, #0F2238 0%, #1B3B54 100%);
+    border-bottom: 1px solid rgba(139,184,210,0.12);
   }
-  .spiritual-icon {
-    width: 132px;
-    height: 132px;
-    margin-bottom: 36px;
-    filter: drop-shadow(0 4px 20px rgba(62,124,163,0.45));
+  .sp-icon {
+    width: 88px; height: 88px;
+    margin: 0 auto 24px;
+    display: block;
+    filter: drop-shadow(0 4px 18px rgba(62,124,163,0.45));
   }
-  .spiritual-eyebrow {
+  .sp-eyebrow {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #8BB8D2;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
-  .spiritual-title {
+  .sp-title {
     font-family: 'Raleway', sans-serif;
     font-weight: 300;
-    font-size: 64px;
+    font-size: 48px;
     line-height: 1.05;
-    margin: 0 0 20px;
+    margin: 0 0 18px;
     color: #FFFFFF;
     letter-spacing: -0.012em;
   }
-  .spiritual-divider {
-    width: 60px;
-    height: 1px;
+  .sp-divider {
+    width: 60px; height: 1px;
     background: rgba(139,184,210,0.45);
-    margin: 8px 0 28px;
+    margin: 0 auto 24px;
   }
-  .spiritual-msg {
+  .sp-sub {
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 17px;
+    line-height: 1.6;
+    color: #C9D4DD;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+  .sp-meta {
+    display: inline-flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8BB8D2;
+  }
+  .sp-meta strong { color: #E6ECF1; font-weight: 500; }
+
+  /* In-page nav */
+  .sp-nav {
+    position: sticky; top: 60px; z-index: 10;
+    background: rgba(8,23,38,0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1B3B54;
+    padding: 12px 24px;
+    overflow-x: auto;
+  }
+  .sp-nav-inner {
+    display: flex; gap: 22px; max-width: 1100px; margin: 0 auto;
+    white-space: nowrap;
+  }
+  .sp-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8BB8D2;
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .sp-nav a:hover {
+    color: #FFFFFF;
+    border-bottom-color: #5B9CC8;
+  }
+
+  /* Sections */
+  .sp-section {
+    padding: 56px 24px;
+    border-bottom: 1px solid rgba(139,184,210,0.10);
+  }
+  .sp-container { max-width: 1100px; margin: 0 auto; }
+
+  .sp-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 8px;
+  }
+  .sp-section-title {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: #FFFFFF;
+    margin: 0 0 12px;
+    letter-spacing: -0.005em;
+  }
+  .sp-section-desc {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
     line-height: 1.65;
     color: #C9D4DD;
-    max-width: 540px;
-    margin: 0;
+    margin: 0 0 32px;
+    max-width: 760px;
   }
-  .spiritual-msg em { color: #E6ECF1; font-style: italic; }
-  .spiritual-back {
-    margin-top: 48px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: #C9D4DD;
-    text-decoration: none;
-    border: 1.5px solid rgba(255,255,255,0.20);
-    padding: 9px 20px;
-    border-radius: 6px;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  .sp-section-desc em { color: #E6ECF1; font-style: italic; }
+
+  /* Cards / blocks */
+  .sp-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(139,184,210,0.18);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 16px;
   }
-  .spiritual-back:hover {
+  .sp-card h4 {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
     color: #FFFFFF;
-    border-color: #FFFFFF;
-    background: rgba(255,255,255,0.05);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  .sp-card p {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: #C9D4DD;
+    margin: 0 0 10px;
+  }
+  .sp-card p:last-child { margin-bottom: 0; }
+  .sp-card ul {
+    margin: 0; padding-left: 20px;
+    color: #C9D4DD; font-size: 14.5px; line-height: 1.7;
+  }
+  .sp-card ul li { margin-bottom: 6px; }
+  .sp-card strong { color: #E6ECF1; font-weight: 500; }
+  .sp-card em { color: #E6ECF1; }
+
+  .sp-two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
   }
   @media (max-width: 720px) {
-    .spiritual-title { font-size: 44px; }
-    .spiritual-icon { width: 100px; height: 100px; }
+    .sp-two-col { grid-template-columns: 1fr; }
+  }
+
+  /* Anchor scripture cards */
+  .sp-verses {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .sp-verse {
+    background: rgba(91,156,200,0.06);
+    border: 1px solid rgba(139,184,210,0.20);
+    border-left: 3px solid #5B9CC8;
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .sp-verse-ref {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 8px;
+  }
+  .sp-verse-text {
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px; font-style: italic; font-weight: 300;
+    line-height: 1.55;
+    color: #E6ECF1;
+    margin: 0 0 10px;
+  }
+  .sp-verse-context {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12.5px; line-height: 1.55;
+    color: #98AFC4;
+  }
+  .sp-verse-context em { color: #C9D4DD; font-style: italic; }
+
+  /* Pull-quote / testimony */
+  .sp-witness {
+    background: linear-gradient(180deg, rgba(91,156,200,0.10) 0%, rgba(91,156,200,0.03) 100%);
+    border: 1px solid rgba(139,184,210,0.30);
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 16px;
+  }
+  .sp-witness-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 12px;
+  }
+  .sp-witness h3 {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 32px; line-height: 1.15;
+    color: #FFFFFF;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+  }
+  .sp-witness blockquote {
+    margin: 0 0 18px 0;
+    padding-left: 18px;
+    border-left: 2px solid rgba(91,156,200,0.55);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15.5px; line-height: 1.75;
+    color: #E6ECF1;
+    font-style: italic;
+  }
+  .sp-witness blockquote p { margin: 0 0 12px; }
+  .sp-witness blockquote p:last-child { margin-bottom: 0; }
+  .sp-witness-attr {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8BB8D2;
+  }
+
+  /* Timeline */
+  .sp-timeline { position: relative; padding-left: 28px; }
+  .sp-timeline::before {
+    content: ''; position: absolute; top: 6px; bottom: 6px; left: 6px;
+    width: 1.5px; background: rgba(139,184,210,0.30);
+  }
+  .sp-tl-item {
+    position: relative;
+    padding-bottom: 24px;
+  }
+  .sp-tl-item::before {
+    content: ''; position: absolute; left: -27px; top: 6px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: #0F2238;
+    border: 2px solid #5B9CC8;
+  }
+  .sp-tl-item.anchor::before { background: #5B9CC8; }
+  .sp-tl-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8BB8D2;
+    margin-bottom: 4px;
+  }
+  .sp-tl-title {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 15.5px;
+    color: #FFFFFF;
+    margin: 0 0 6px;
+  }
+  .sp-tl-body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px; line-height: 1.6;
+    color: #C9D4DD;
+  }
+  .sp-tl-body em { color: #E6ECF1; font-style: italic; }
+
+  /* Footer */
+  .sp-footer {
+    padding: 32px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(139,184,210,0.12);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.10em;
+    color: rgba(139,184,210,0.60);
+  }
+  .sp-footer a {
+    color: #8BB8D2;
+    text-decoration: none;
+    border: 1.5px solid rgba(255,255,255,0.18);
+    padding: 6px 14px;
+    border-radius: 4px;
+    margin-top: 14px;
+    display: inline-block;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .sp-footer a:hover { color: #FFFFFF; border-color: #FFFFFF; }
+
+  @media (max-width: 720px) {
+    .sp-title { font-size: 36px; }
+    .sp-section { padding: 40px 18px; }
+    .sp-witness { padding: 24px 22px; }
+    .sp-witness h3 { font-size: 24px; }
   }
 </style>
 </head>
@@ -115,27 +334,272 @@
 
 </nav>
 
-<main class="spiritual-stage">
-  <svg class="spiritual-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<!-- HERO -->
+<header class="sp-hero">
+  <svg class="sp-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M27 8 L37 8 L37 22 L50 22 L50 32 L37 32 L37 56 L27 56 L27 32 L14 32 L14 22 L27 22 Z"
           fill="rgba(216,232,242,0.18)" stroke="#8BB8D2" stroke-width="2" stroke-linejoin="round"/>
     <line x1="32" y1="14" x2="32" y2="54" stroke="#5B9CC8" stroke-width="2" stroke-linecap="round"/>
     <line x1="18" y1="27" x2="46" y2="27" stroke="#5B9CC8" stroke-width="2" stroke-linecap="round"/>
   </svg>
-
-  <div class="spiritual-eyebrow"><span class="lang-en">Section III · Spiritual Health</span><span class="lang-pt">Seção III · Saúde Espiritual</span></div>
-  <h1 class="spiritual-title"><span class="lang-en">Coming up soon</span><span class="lang-pt">Em breve</span></h1>
-  <div class="spiritual-divider"></div>
-  <p class="spiritual-msg">
-    <span class="lang-en">A space for the practices and disciplines that hold the rest of the picture together — quieter than data, slower than wearables, but central. <em>In preparation.</em></span>
-    <span class="lang-pt">Um espaço para as práticas e disciplinas que sustentam o restante do quadro — mais quieto que os dados, mais lento que os wearables, mas central. <em>Em preparação.</em></span>
+  <div class="sp-eyebrow"><span class="lang-en">Section III · Spiritual Health</span><span class="lang-pt">Seção III · Saúde Espiritual</span></div>
+  <h1 class="sp-title"><span class="lang-en">Spiritual Health Overview</span><span class="lang-pt">Visão geral da saúde espiritual</span></h1>
+  <div class="sp-divider"></div>
+  <p class="sp-sub">
+    <span class="lang-en">A clinical-style record of the patient's spiritual life — drawn from his own writings, the scriptures that anchor him, the testimonies he has committed to paper, and the practices that hold him together. Tradition: <strong>Christian, Reformed / Presbyterian</strong>. Communities: Calvary São Paulo, Butantã Presbyterian Church (worship leadership). For pastoral and clinical reading.</span>
+    <span class="lang-pt">Um registro em estilo clínico da vida espiritual do paciente — extraído de seus próprios escritos, das escrituras que o sustentam, dos testemunhos que ele registrou e das práticas que o mantêm de pé. Tradição: <strong>Cristã, Reformada / Presbiteriana</strong>. Comunidades: Calvary São Paulo, Igreja Presbiteriana do Butantã (liderança de louvor). Para leitura pastoral e clínica.</span>
   </p>
+  <div class="sp-meta">
+    <span><span class="lang-en">Patient</span><span class="lang-pt">Paciente</span> · <strong>Joao Victor Creste</strong></span>
+    <span><span class="lang-en">Tradition</span><span class="lang-pt">Tradição</span> · <strong><span class="lang-en">Christian · Reformed</span><span class="lang-pt">Cristã · Reformada</span></strong></span>
+    <span><span class="lang-en">Bible</span><span class="lang-pt">Bíblia</span> · <strong>KJV</strong></span>
+    <span><span class="lang-en">Page prepared</span><span class="lang-pt">Página preparada em</span> · <strong>4 May 2026</strong></span>
+  </div>
+</header>
 
-  <a class="spiritual-back" href="home.html">
-    <span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span>
-  </a>
-</main>
+<!-- IN-PAGE NAV -->
+<div class="sp-nav">
+  <div class="sp-nav-inner">
+    <a href="#confession"><span class="lang-en">Confession</span><span class="lang-pt">Confissão</span></a>
+    <a href="#witness"><span class="lang-en">Witness</span><span class="lang-pt">Testemunho</span></a>
+    <a href="#scriptures"><span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></a>
+    <a href="#timeline"><span class="lang-en">Timeline</span><span class="lang-pt">Linha do tempo</span></a>
+    <a href="#practices"><span class="lang-en">Practices</span><span class="lang-pt">Práticas</span></a>
+    <a href="#struggles"><span class="lang-en">Struggles</span><span class="lang-pt">Lutas</span></a>
+  </div>
+</div>
 
-<script src="assets/app.js?v=27"></script>
+<!-- 01 CONFESSION -->
+<section class="sp-section" id="confession">
+  <div class="sp-container">
+    <div class="sp-label">01 · <span class="lang-en">Confession of faith</span><span class="lang-pt">Confissão de fé</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">Where the patient stands, in his own words</span><span class="lang-pt">Onde o paciente está, em suas próprias palavras</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">From <em>Letter to Calvary</em> (August 2024), written to the patient's home church community at the moment of marital dissolution. The line that follows is the most precise self-statement of his standing before God we have on file.</span>
+      <span class="lang-pt">Da <em>Carta para o Calvary</em> (agosto de 2024), escrita à sua comunidade de igreja no momento da dissolução conjugal. A linha a seguir é a declaração mais precisa de seu posicionamento diante de Deus em arquivo.</span>
+    </p>
+    <div class="sp-card">
+      <p>
+        <span class="lang-en"><em>"I rely solely on God's grace and redemption by Jesus' blood shed for me on that cross. … More than ever I feel like the homeless, the cripple, the blind who desperately need Jesus. That's things as they are today."</em></span>
+        <span class="lang-pt"><em>"Eu confio unicamente na graça de Deus e na redenção pelo sangue de Jesus derramado por mim naquela cruz. … Mais do que nunca, me sinto como o sem-teto, o aleijado, o cego que precisa desesperadamente de Jesus. Assim estão as coisas hoje."</em></span>
+      </p>
+      <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#8BB8D2;margin-top:14px;">— JC, <span class="lang-en">Letter to Calvary, August 2024</span><span class="lang-pt">Carta para o Calvary, agosto de 2024</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 WITNESS — most recent, given prominent placement right after confession -->
+<section class="sp-section" id="witness">
+  <div class="sp-container">
+    <div class="sp-label">02 · <span class="lang-en">Witness · 3 May 2026</span><span class="lang-pt">Testemunho · 3 de maio de 2026</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">"I need you to still live."</span><span class="lang-pt">"Eu preciso que você ainda viva."</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">Written four days after the 29 April intentional benzodiazepine overdose, the patient's testimony names what he experienced at the moment his breathing had begun to slow under ~260 mg of diazepam. The full text is in <code>data/Writtings/Eu_preciso_que_voce_ainda_viva.docx</code>; the pivotal passage is below.</span>
+      <span class="lang-pt">Escrito quatro dias após a sobredose intencional de benzodiazepínico em 29 de abril, o testemunho do paciente nomeia o que ele experimentou no momento em que sua respiração começava a desacelerar sob ~260 mg de diazepam. O texto completo está em <code>data/Writtings/Eu_preciso_que_voce_ainda_viva.docx</code>; a passagem central está abaixo.</span>
+    </p>
+    <div class="sp-witness">
+      <div class="sp-witness-eyebrow"><span class="lang-en">Excerpt · in the patient's own voice</span><span class="lang-pt">Trecho · na voz do paciente</span></div>
+      <h3><span class="lang-en">"The arithmetic of medicine was never made to add up when God decides otherwise."</span><span class="lang-pt">"A aritmética da medicina nunca foi feita para fechar quando Deus decide outra coisa."</span></h3>
+      <blockquote>
+        <p>
+          <span class="lang-en">"And it was then that the world around me stopped. Froze completely. And a voice — the sweetest I had ever heard — spoke explicitly into my ear: <strong>'Son. I need you to still live.'</strong>"</span>
+          <span class="lang-pt">"E foi então que o mundo ao redor parou. Congelou completamente. E uma voz — a mais doce que eu já ouvira — falou explicitamente ao meu ouvido: <strong>'Filho. Eu preciso que você ainda viva.'</strong>"</span>
+        </p>
+        <p>
+          <span class="lang-en">"Someone had called me back to life. In all my self-violence, the largest and most important rebuke I had ever received came in the sweetest of all voices. No judgment. Without throwing the past in my face. Only calling me, with impossible tenderness, towards the future. <em>'I need you to still live.'</em> That <em>'still'</em> said everything. It was not my time. And more — there was something still for me to do here. The 'still' was not pity. It was purpose."</span>
+          <span class="lang-pt">"Alguém me chamara para a vida. Em toda a minha autoviolência, a maior e mais importante bronca que eu recebera veio na mais doce de todas as vozes. Sem julgamento. Sem jogar na minha cara o passado. Apenas me chamando, com ternura impossível, para o futuro. <em>'Eu preciso que você ainda viva.'</em> Esse <em>'ainda'</em> dizia tudo. Não era a minha hora. E mais — havia ainda alguma coisa para eu fazer aqui. O 'ainda' não era pena. Era propósito."</span>
+        </p>
+        <p>
+          <span class="lang-en">"I had always read <em>'Come to me, all you who are weary and burdened, and I will give you rest'</em> as an invitation. Lying in my bed with 260 mg of Valium in my blood, I understood that it was also rescue. The God who invites is the same God who comes to fetch."</span>
+          <span class="lang-pt">"Eu sempre tinha lido <em>'Vinde a mim, todos os que estais cansados e oprimidos, e eu vos aliviarei'</em> como convite. Naquele momento, deitado na minha cama com 260mg de Valium no sangue, entendi que era também resgate. Que o Deus que convida é o mesmo Deus que vai buscar."</span>
+        </p>
+        <p>
+          <span class="lang-en">"Immediately, I called an ambulance. … <em>'Not because the story is beautiful — it is not. But because the 'still' of that voice was not for me alone. There must be another son, in another room, with another blister-pack in his hand, who needs to hear that it is also not yet his time.'</em>"</span>
+          <span class="lang-pt">"Imediatamente, chamei uma ambulância. … <em>'Não porque a história seja bonita — não é. Mas porque o 'ainda' daquela voz não foi para mim sozinho. Há de haver outro filho, em outro quarto, com outra cartela na mão, que precisa ouvir que ainda não é a hora dele também.'</em>"</span>
+        </p>
+      </blockquote>
+      <div class="sp-witness-attr">— JC · <span class="lang-en">London, April 2026</span><span class="lang-pt">Londres, abril de 2026</span> · Psalm 118:17 · Matthew 11:28</div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 ANCHOR SCRIPTURES -->
+<section class="sp-section" id="scriptures">
+  <div class="sp-container">
+    <div class="sp-label">03 · <span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">The verses that recur in the patient's writings</span><span class="lang-pt">Os versículos que se repetem nos escritos do paciente</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">Six passages cited verbatim across the writings — each named at a specific moment of struggle or rescue. They form a coherent thread: <em>weariness met by rest</em>, <em>weakness met by grace</em>, <em>despair met by deliverance</em>.</span>
+      <span class="lang-pt">Seis passagens citadas literalmente ao longo dos escritos — cada uma nomeada em um momento específico de luta ou resgate. Formam um fio coerente: <em>cansaço encontrando descanso</em>, <em>fraqueza encontrando graça</em>, <em>desespero encontrando livramento</em>.</span>
+    </p>
+    <div class="sp-verses">
+      <div class="sp-verse">
+        <div class="sp-verse-ref">Matthew 11:28–30</div>
+        <p class="sp-verse-text">"Come to me, all you who are weary and burdened, and I will give you rest. … For my yoke is easy and my burden is light."</p>
+        <p class="sp-verse-context"><span class="lang-en">Cited in the letter to the wife (2024) and re-read on the bed during the 29 April overdose. The patient now reads it not only as invitation but as <em>rescue</em>.</span><span class="lang-pt">Citado na carta à esposa (2024) e relido na cama durante a sobredose de 29 de abril. O paciente agora a lê não apenas como convite, mas como <em>resgate</em>.</span></p>
+      </div>
+      <div class="sp-verse">
+        <div class="sp-verse-ref">Psalm 18:16</div>
+        <p class="sp-verse-text">"He sent from above, he took me, he drew me out of many waters."</p>
+        <p class="sp-verse-context"><span class="lang-en">Closing line of <em>Crisis Episode · 29 April 2026</em>. Frames the 999 self-rescue as a moment of being drawn out, not of self-saving.</span><span class="lang-pt">Linha de encerramento de <em>Crisis Episode · 29 de abril de 2026</em>. Enquadra o auto-resgate via 999 como momento de ser puxado para fora, não de auto-salvar-se.</span></p>
+      </div>
+      <div class="sp-verse">
+        <div class="sp-verse-ref">Psalm 118:17</div>
+        <p class="sp-verse-text">"I shall not die, but live, and declare the works of the LORD."</p>
+        <p class="sp-verse-context"><span class="lang-en">Anchor verse of the 3 May testimony. Frames the writing itself as part of the promise made <em>in extremis</em>.</span><span class="lang-pt">Versículo-âncora do testemunho de 3 de maio. Enquadra a própria escrita como parte da promessa feita <em>in extremis</em>.</span></p>
+      </div>
+      <div class="sp-verse">
+        <div class="sp-verse-ref">2 Corinthians 12:9</div>
+        <p class="sp-verse-text">"My grace is sufficient for you, for my power is made perfect in weakness."</p>
+        <p class="sp-verse-context"><span class="lang-en">Cited in <em>Forehead</em> (April 2026), in the moment of the 5 January bicycle accident. Names what was held in the three days at Hôpital Bichat.</span><span class="lang-pt">Citado em <em>Forehead</em> (abril de 2026), no momento do acidente de bicicleta em 5 de janeiro. Nomeia o que foi sustentado nos três dias no Hôpital Bichat.</span></p>
+      </div>
+      <div class="sp-verse">
+        <div class="sp-verse-ref">Amos 3:3</div>
+        <p class="sp-verse-text">"Do two walk together unless they have agreed to do so?"</p>
+        <p class="sp-verse-context"><span class="lang-en">Cited in the letter to the wife (2024). The patient's diagnostic of a marriage that had stopped walking in agreement — and his refusal to keep walking against it.</span><span class="lang-pt">Citado na carta à esposa (2024). O diagnóstico do paciente de um casamento que havia parado de caminhar em concordância — e sua recusa em continuar caminhando contra ele.</span></p>
+      </div>
+      <div class="sp-verse">
+        <div class="sp-verse-ref">1 Corinthians 13</div>
+        <p class="sp-verse-text">"Love is patient, love is kind. … Love bears all things, believes all things, hopes all things, endures all things."</p>
+        <p class="sp-verse-context"><span class="lang-en">Cited as the explicit standard for how the patient tried to love his wife — and the standard he confessed he could not meet without Christ.</span><span class="lang-pt">Citado como o padrão explícito de como o paciente tentou amar sua esposa — e o padrão que ele confessou não poder cumprir sem Cristo.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 SPIRITUAL TIMELINE -->
+<section class="sp-section" id="timeline">
+  <div class="sp-container">
+    <div class="sp-label">04 · <span class="lang-en">Spiritual timeline</span><span class="lang-pt">Linha do tempo espiritual</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">Key spiritual events on file</span><span class="lang-pt">Eventos espirituais-chave em arquivo</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">Drawn from <em>The Book</em> series, <em>Letter to Calvary</em>, <em>Forehead EN</em>, <em>Crisis Episode April 29 2026</em>, and <em>Eu preciso que você ainda viva</em>.</span>
+      <span class="lang-pt">Extraído da série <em>The Book</em>, <em>Carta para o Calvary</em>, <em>Forehead EN</em>, <em>Crisis Episode April 29 2026</em>, e <em>Eu preciso que você ainda viva</em>.</span>
+    </p>
+    <div class="sp-timeline">
+      <div class="sp-tl-item anchor">
+        <div class="sp-tl-date"><span class="lang-en">Conversion to Christ</span><span class="lang-pt">Conversão a Cristo</span></div>
+        <div class="sp-tl-title"><span class="lang-en">Foundational reorientation</span><span class="lang-pt">Reorientação fundacional</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Named by the patient as <em>"the greatest achievement of my life"</em> in the letter to his then-wife. Treated as the orienting fact above career, marriage, and identity.</span><span class="lang-pt">Nomeada pelo paciente como <em>"a maior conquista da minha vida"</em> na carta à então esposa. Tratada como o fato orientador acima de carreira, casamento e identidade.</span></div>
+      </div>
+      <div class="sp-tl-item">
+        <div class="sp-tl-date">20 August 2017</div>
+        <div class="sp-tl-title"><span class="lang-en">"You are not guilty, Joao." — Nathanael Fawcett</span><span class="lang-pt">"Você não é culpado, João." — Nathanael Fawcett</span></div>
+        <div class="sp-tl-body"><span class="lang-en">A direct word spoken over the patient during a depressive episode. Recorded verbatim in <em>The Book 2017</em> as a moment of release from self-condemnation.</span><span class="lang-pt">Uma palavra direta dirigida ao paciente durante um episódio depressivo. Registrada literalmente em <em>The Book 2017</em> como um momento de libertação da autocondenação.</span></div>
+      </div>
+      <div class="sp-tl-item">
+        <div class="sp-tl-date">2014–2024</div>
+        <div class="sp-tl-title"><span class="lang-en">Calvary São Paulo · church community</span><span class="lang-pt">Calvary São Paulo · comunidade de igreja</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Long-standing membership; pastoral counseling with Pastor Bill (<em>"forgiveness — daily, on both sides"</em>). Stepped back from worship in 2024 during the marital crisis.</span><span class="lang-pt">Membresia de longa data; aconselhamento pastoral com o Pastor Bill (<em>"perdão — diariamente, dos dois lados"</em>). Afastou-se do louvor em 2024 durante a crise conjugal.</span></div>
+      </div>
+      <div class="sp-tl-item">
+        <div class="sp-tl-date">August 2024</div>
+        <div class="sp-tl-title"><span class="lang-en">Letter to Calvary</span><span class="lang-pt">Carta para o Calvary</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Public confession to the church community at the moment of marital dissolution. Closes with the patient asking for help, naming himself as <em>"the homeless, the cripple, the blind who desperately need Jesus."</em></span><span class="lang-pt">Confissão pública à comunidade da igreja no momento da dissolução conjugal. Encerra com o paciente pedindo ajuda, nomeando-se como <em>"o sem-teto, o aleijado, o cego que precisa desesperadamente de Jesus."</em></span></div>
+      </div>
+      <div class="sp-tl-item anchor">
+        <div class="sp-tl-date">February 2025</div>
+        <div class="sp-tl-title"><span class="lang-en">Return to worship leadership · Butantã Presbyterian Church</span><span class="lang-pt">Retorno à liderança de louvor · Igreja Presbiteriana do Butantã</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Piano at Sunday worship. Documented in the mental health overview as a critical identity-reconnection event — faith re-engaged not as comfort but as active recovery infrastructure.</span><span class="lang-pt">Piano nos cultos dominicais. Documentado na visão geral de saúde mental como evento crítico de reconexão de identidade — fé reativada não como conforto, mas como infraestrutura ativa de recuperação.</span></div>
+      </div>
+      <div class="sp-tl-item">
+        <div class="sp-tl-date">5 January 2026</div>
+        <div class="sp-tl-title"><span class="lang-en">Bicycle accident · Paris</span><span class="lang-pt">Acidente de bicicleta · Paris</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Loss of consciousness; facial impact directly on the forehead fibrosis. Three days at Hôpital Bichat. <em>2 Corinthians 12:9</em> cited as what was held during recovery.</span><span class="lang-pt">Perda de consciência; impacto facial diretamente sobre a fibrose frontal. Três dias no Hôpital Bichat. <em>2 Coríntios 12:9</em> citado como o que foi sustentado durante a recuperação.</span></div>
+      </div>
+      <div class="sp-tl-item anchor">
+        <div class="sp-tl-date">29 April 2026</div>
+        <div class="sp-tl-title"><span class="lang-en">Crisis episode · the dialed call · Psalm 18:16</span><span class="lang-pt">Episódio de crise · a ligação discada · Salmo 18:16</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Intentional benzodiazepine overdose. The patient frames the 999 call as the quieter part of him winning by a single phone call: <em>"The grace was the dialing."</em> Closes with Psalm 18:16.</span><span class="lang-pt">Sobredose intencional de benzodiazepínico. O paciente enquadra a ligação ao 999 como a parte mais quieta dele vencendo por uma única chamada telefônica: <em>"A graça foi o discar."</em> Encerra com Salmo 18:16.</span></div>
+      </div>
+      <div class="sp-tl-item anchor">
+        <div class="sp-tl-date">3 May 2026</div>
+        <div class="sp-tl-title"><span class="lang-en">"Eu preciso que você ainda viva" · the audible voice</span><span class="lang-pt">"Eu preciso que você ainda viva" · a voz audível</span></div>
+        <div class="sp-tl-body"><span class="lang-en">Written four days after the OD. The patient testifies to a voice he describes as <em>"the sweetest I had ever heard,"</em> spoken at the moment his breathing slowed. Promise made in return: <em>"Não morrerei, mas viverei; e contarei as obras do Senhor."</em></span><span class="lang-pt">Escrito quatro dias após a sobredose. O paciente testemunha uma voz que descreve como <em>"a mais doce que eu já ouvira,"</em> falada no momento em que sua respiração desacelerou. Promessa feita em troca: <em>"Não morrerei, mas viverei; e contarei as obras do Senhor."</em></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 PRACTICES & PROTECTIVE FACTORS -->
+<section class="sp-section" id="practices">
+  <div class="sp-container">
+    <div class="sp-label">05 · <span class="lang-en">Practices & protective factors</span><span class="lang-pt">Práticas e fatores protetivos</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">What is currently active — and worth protecting</span><span class="lang-pt">O que está ativo agora — e vale proteger</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">Spiritual infrastructure is not adjunct to recovery in this patient — it is the load-bearing layer beneath identity, meaning, and continuance. The list below is descriptive (what is on, currently) rather than prescriptive.</span>
+      <span class="lang-pt">A infraestrutura espiritual não é um acessório à recuperação neste paciente — é a camada portadora sob identidade, sentido e continuidade. A lista abaixo é descritiva (o que está ativo, atualmente), não prescritiva.</span>
+    </p>
+    <div class="sp-two-col">
+      <div class="sp-card">
+        <h4><span class="lang-en">Active practices</span><span class="lang-pt">Práticas ativas</span></h4>
+        <ul>
+          <li><span class="lang-en"><strong>Worship leadership.</strong> Piano at Butantã Presbyterian Church (resumed Feb 2025) — the patient's primary form of prayer in his own words: <em>"Music is the way God gave me to communicate in my deepest inner being."</em></span><span class="lang-pt"><strong>Liderança de louvor.</strong> Piano na Igreja Presbiteriana do Butantã (retomada em fev 2025) — a forma primária de oração do paciente em suas próprias palavras: <em>"A música é a forma que Deus me deu para me comunicar em meu ser mais profundo."</em></span></li>
+          <li><span class="lang-en"><strong>Scripture (KJV).</strong> Read both as instruction and as voice. The same passages return at points of crisis with shifted meanings.</span><span class="lang-pt"><strong>Escritura (KJV).</strong> Lida tanto como instrução quanto como voz. As mesmas passagens retornam em momentos de crise com significados deslocados.</span></li>
+          <li><span class="lang-en"><strong>Writing as confession.</strong> The journals (<em>The Book</em> series, <em>Forehead</em>, <em>Letter to Calvary</em>, <em>Crisis Episode</em>, <em>Eu preciso que você ainda viva</em>) function as a private confessional — a means of taking off the mask he describes wearing.</span><span class="lang-pt"><strong>Escrita como confissão.</strong> Os diários (série <em>The Book</em>, <em>Forehead</em>, <em>Carta para o Calvary</em>, <em>Crisis Episode</em>, <em>Eu preciso que você ainda viva</em>) funcionam como um confessionário privado — um meio de tirar a máscara que ele descreve usar.</span></li>
+          <li><span class="lang-en"><strong>Daily breathing / prayer / meditation.</strong> Prescribed by the osteopath (Apr 2026, Phase 1) and adopted as a regulated nervous-system practice; spiritually framed by the patient.</span><span class="lang-pt"><strong>Respiração / oração / meditação diárias.</strong> Prescritas pelo osteopata (abr 2026, Fase 1) e adotadas como prática reguladora do sistema nervoso; espiritualmente enquadradas pelo paciente.</span></li>
+        </ul>
+      </div>
+      <div class="sp-card">
+        <h4><span class="lang-en">Protective factors</span><span class="lang-pt">Fatores protetivos</span></h4>
+        <ul>
+          <li><span class="lang-en"><strong>Faith as recovery infrastructure</strong> — not adjunct comfort. Documented as the load-bearing layer in the mental health overview.</span><span class="lang-pt"><strong>Fé como infraestrutura de recuperação</strong> — não conforto adjunto. Documentada como camada portadora na visão geral de saúde mental.</span></li>
+          <li><span class="lang-en"><strong>Public accountability.</strong> The Calvary letter (Aug 2024) and the "House of Cards" letter to friends and family demonstrate moral courage — accountability chosen over concealment.</span><span class="lang-pt"><strong>Responsabilização pública.</strong> A carta para o Calvary (ago 2024) e a carta "House of Cards" a amigos e família demonstram coragem moral — responsabilização escolhida em vez de ocultação.</span></li>
+          <li><span class="lang-en"><strong>Capacity for self-diagnosis through scripture.</strong> The patient identifies his own patterns (anesthesia vs. resolution; the mask; pride) using biblical categories rather than only clinical ones.</span><span class="lang-pt"><strong>Capacidade de autodiagnóstico através da Escritura.</strong> O paciente identifica seus próprios padrões (anestesia vs. resolução; a máscara; orgulho) usando categorias bíblicas, não apenas clínicas.</span></li>
+          <li><span class="lang-en"><strong>Family bonds.</strong> Close relationship with parents; strong Italian-Brazilian family rituals (the Sunday gatherings on Elsa's farm) preserved in <em>The Book 2025</em>.</span><span class="lang-pt"><strong>Vínculos familiares.</strong> Relacionamento próximo com os pais; rituais familiares ítalo-brasileiros fortes (os almoços de domingo na casa de Elsa) preservados em <em>The Book 2025</em>.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 STRUGGLES TO SURFACE -->
+<section class="sp-section" id="struggles">
+  <div class="sp-container">
+    <div class="sp-label">06 · <span class="lang-en">Spiritual struggles to surface</span><span class="lang-pt">Lutas espirituais a trazer à tona</span></div>
+    <h2 class="sp-section-title"><span class="lang-en">Where the patient knows he is wounded</span><span class="lang-pt">Onde o paciente sabe que está ferido</span></h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">All four items below are <em>self-named</em> in the writings — the patient is not unaware of these patterns. The clinical relevance is that each has a corresponding biological and behavioural footprint already on this site.</span>
+      <span class="lang-pt">Todos os quatro itens abaixo são <em>autonomeados</em> nos escritos — o paciente não desconhece esses padrões. A relevância clínica é que cada um tem uma pegada biológica e comportamental correspondente já neste site.</span>
+    </p>
+    <div class="sp-two-col">
+      <div class="sp-card">
+        <h4><span class="lang-en">Anesthesia, not resolution</span><span class="lang-pt">Anestesia, não resolução</span></h4>
+        <p>
+          <span class="lang-en"><em>"I've been looking for anesthesia instead of resolution"</em> (30 Mar 2026, brought voluntarily to therapy). Reframed in <em>Anesthesia and Entropy</em> (28 Apr): <em>"Anesthesia is not negentropic. It is entropic. The only difference is that we feel the effects later."</em> Spiritually: a flight from the cross of one's own pain.</span>
+          <span class="lang-pt"><em>"Tenho buscado anestesia em vez de resolução"</em> (30 mar 2026, trazido voluntariamente à terapia). Re-enquadrado em <em>Anesthesia and Entropy</em> (28 abr): <em>"Anestesia não é negentrópica. É entrópica. A única diferença é que sentimos os efeitos depois."</em> Espiritualmente: uma fuga da cruz da própria dor.</span>
+        </p>
+      </div>
+      <div class="sp-card">
+        <h4><span class="lang-en">The mask</span><span class="lang-pt">A máscara</span></h4>
+        <p>
+          <span class="lang-en">Named in <em>The Book 2025</em>: <em>"I have a very good mask … but maybe from using it so much it ended up stuck to my face and is very hard to remove."</em> Spiritually: the inability to come before God or community as one is. Writing is the patient's current way of taking it off.</span>
+          <span class="lang-pt">Nomeada em <em>The Book 2025</em>: <em>"Eu tenho uma máscara muito boa … mas talvez de tanto usá-la ela acabou ficando colada na minha cara e é muito difícil tirar."</em> Espiritualmente: a incapacidade de comparecer diante de Deus ou da comunidade como se é. A escrita é a forma atual do paciente de tirá-la.</span>
+        </p>
+      </div>
+      <div class="sp-card">
+        <h4><span class="lang-en">The unforgiven self</span><span class="lang-pt">O eu não-perdoado</span></h4>
+        <p>
+          <span class="lang-en">From <em>Eu preciso que você ainda viva</em>: <em>"The house of forgiveness has many rooms. I had learned to enter almost all of them. Except mine."</em> A clinically and pastorally important distinction — the patient extends grace outward but withholds it from himself.</span>
+          <span class="lang-pt">De <em>Eu preciso que você ainda viva</em>: <em>"A casa do perdão tem muitos cômodos. Eu tinha aprendido a entrar em quase todos eles. Menos no meu."</em> Uma distinção clinicamente e pastoralmente importante — o paciente estende graça para fora, mas a retém de si mesmo.</span>
+        </p>
+      </div>
+      <div class="sp-card">
+        <h4><span class="lang-en">Perfectionism collapse</span><span class="lang-pt">Colapso do perfeccionismo</span></h4>
+        <p>
+          <span class="lang-en">The recurring pattern across the writings: <em>high motivation → strong start → pain spike → collapse → shame → rebuild</em>. Spiritually: a refusal of grace's main lesson — that one is loved before performance, not because of it.</span>
+          <span class="lang-pt">O padrão recorrente nos escritos: <em>alta motivação → começo forte → pico de dor → colapso → vergonha → reconstrução</em>. Espiritualmente: uma recusa da lição central da graça — que se é amado antes do desempenho, não por causa dele.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="sp-footer">
+  <div><span class="lang-en">Strictly confidential · For pastoral and clinical communication only · Does not replace spiritual direction or licensed medical advice.</span><span class="lang-pt">Estritamente confidencial · Apenas para comunicação pastoral e clínica · Não substitui direção espiritual nem aconselhamento médico licenciado.</span></div>
+  <a href="home.html"><span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span></a>
+</footer>
+
+<script src="assets/app.js?v=24"></script>
 </body>
 </html>
