@@ -332,6 +332,18 @@ section.report-section:nth-of-type(odd)  { background: var(--surface-base); }
 section.report-section:nth-of-type(even) { background: var(--surface-cool); }
 section.report-section.light             { background: var(--surface-base); } /* legacy */
 
+/* Imagery — sub-blocks within #imagery, each is one of six exams */
+#imagery .imagery-exam {
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  border-top: 1px solid var(--border-subtle);
+}
+#imagery .imagery-exam:first-of-type {
+  /* The first exam follows the section intro, so still needs separation */
+  padding-top: 1.5rem;
+  margin-top: 2rem;
+}
+
 .section-label {
   font-family: var(--font-mono);
   font-size: 11px;
