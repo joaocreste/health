@@ -7,12 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=33">
+<link rel="stylesheet" href="assets/styles.css?v=39">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
-<body>
+<body class="has-side-nav">
 <!-- TOP NAV -->
 <nav class="topnav">
   <a class="brand" href="home.html">
@@ -24,6 +25,7 @@
     <li><a href="physical.html" class="active"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
     <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
     <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+    <li><a href="assessment.html"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></a></li>
   </ul>
   <div class="lang-switch" role="group" aria-label="Language">
     <button type="button" class="export-btn" data-export-btn aria-label="Export to PDF" title="Export to PDF"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="export-label"><span class="lang-en">Export</span><span class="lang-pt">Exportar</span></span></button>
@@ -52,6 +54,7 @@
 <div class="section-nav">
   <div class="section-nav-inner">
     <a href="#body">Body composition</a>
+    <a href="#glucose">Glucose</a>
     <a href="#sleep">Sleep architecture</a>
     <a href="#exercise">Exercise</a>
     <a href="#movement">Movement</a>
@@ -108,10 +111,58 @@
   </div>
 </section>
 
-<!-- 04 SLEEP -->
+<!-- 04 GLUCOSE -->
+<section class="report-section" id="glucose">
+  <div class="container">
+    <div class="section-label">04 · Glucose</div>
+    <h2 class="section-title"><span class="lang-en">Continuous glucose — sensor timeline</span><span class="lang-pt">Glicose contínua — linha do tempo do sensor</span></h2>
+    <p class="section-desc"><span class="lang-en">Continuous glucose monitor — 5-minute readings, 26 April → 2 May 2026.</span><span class="lang-pt">Monitor contínuo de glicose — leituras a cada 5 minutos, 26 de abril → 2 de maio de 2026.</span></p>
+
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Glucose — every reading</span><span class="lang-pt">Glicose — todas as leituras</span></div>
+        <div class="chart-card-meta"><span class="lang-en">CGM · 5-min sampling · drag to zoom, double-click to reset</span><span class="lang-pt">CGM · amostragem 5 min · arraste para zoom, duplo clique para resetar</span></div>
+      </div>
+      <div id="glucoseChart" class="chart-wrap tall"></div>
+    </div>
+
+    <div class="two-col mt-3">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Daily patterns — glucose by time of day</span><span class="lang-pt">Padrões diários — glicose por hora do dia</span></div>
+          <div class="chart-card-meta"><span class="lang-en">All readings folded onto a 24-hour day · median curve · ±1 SD · ±2 SD · target range 60–180 mg/dL</span><span class="lang-pt">Todas as leituras dobradas em 24h · curva mediana · ±1 DP · ±2 DP · faixa-alvo 60–180 mg/dL</span></div>
+        </div>
+        <div id="glucosePatternsChart" class="chart-wrap tall"></div>
+      </div>
+
+      <div class="chart-card ai-comments">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">AI commentary</span><span class="lang-pt">Comentário da IA</span></div>
+          <div class="chart-card-meta"><span class="lang-en">Velocity profile · 1,712 readings · 26 Apr → 2 May 2026</span><span class="lang-pt">Perfil de velocidade · 1.712 leituras · 26 abr → 2 mai 2026</span></div>
+        </div>
+
+        <p class="ai-headline"><span class="lang-en">The mean is fine — the <em>slope</em> is the problem.</span><span class="lang-pt">A média está boa — o <em>declive</em> é o problema.</span></p>
+
+        <p class="ai-body"><span class="lang-en">Mean 91.6 mg/dL, median 90, CV 16.6%, time-in-range (60–180) <strong>98.9%</strong>. On levels alone, control looks textbook. The interesting story is in the velocity.</span><span class="lang-pt">Média 91,6 mg/dL, mediana 90, CV 16,6%, tempo em alvo (60–180) <strong>98,9%</strong>. Olhando só nos níveis, o controle parece exemplar. A história interessante está na velocidade.</span></p>
+
+        <ul class="ai-list">
+          <li><span class="lang-en"><strong>Peak rate of change: +3.0 mg/dL/min rising, –3.4 falling</strong> — the ±2/min "rapid change" threshold (the double-arrow icon on most CGMs) was crossed in <strong>28 distinct excursions</strong> over 7 days. Falls are slightly steeper than rises, and that asymmetry is what produces sweating, palpitations and lightheadedness.</span><span class="lang-pt"><strong>Pico de variação: +3,0 mg/dL/min subindo, –3,4 caindo</strong> — o limiar de ±2/min ("variação rápida", ícone de seta dupla na maioria dos CGMs) foi cruzado em <strong>28 excursões distintas</strong> em 7 dias. As quedas são ligeiramente mais íngremes que as subidas — e essa assimetria é o que produz sudorese, palpitações e tontura.</span></li>
+          <li><span class="lang-en"><strong>Stand-out event — Mon 27 Apr 15:00–16:30:</strong> 70 → 195 → 130 mg/dL in 90 min. A 125-point rise followed by a 65-point crash, with the steepest 5-min slopes of the entire dataset. Two days later (29 Apr) you were admitted to hospital — worth checking what was eaten around 15:00 that day.</span><span class="lang-pt"><strong>Episódio destacado — seg 27 abr 15:00–16:30:</strong> 70 → 195 → 130 mg/dL em 90 min. Subida de 125 pontos seguida de queda de 65, com as inclinações de 5 min mais íngremes de todo o período. Dois dias depois (29 abr) houve internação — vale revisar o que foi consumido por volta das 15:00 daquele dia.</span></li>
+          <li><span class="lang-en"><strong>Nocturnal lows cluster 02:00–06:00.</strong> Minimum of 55 mg/dL recorded at 02:00, 05:00 and 06:00. Floor sits just 5 points above severe-hypo (54). Asleep and unable to compensate behaviourally.</span><span class="lang-pt"><strong>Hipoglicemias noturnas concentram-se entre 02:00–06:00.</strong> Mínimo de 55 mg/dL registrado às 02:00, 05:00 e 06:00. O piso fica a apenas 5 pontos da hipoglicemia severa (54). Em sono, sem capacidade de compensar comportamentalmente.</span></li>
+          <li><span class="lang-en"><strong>Late-afternoon spike zone (15:00–22:00).</strong> Six different hours each peaked above 145 mg/dL. Pattern is consistent with a late-afternoon snack or early dinner skewed toward refined carbohydrate.</span><span class="lang-pt"><strong>Zona de pico no fim da tarde (15:00–22:00).</strong> Seis horas distintas com picos acima de 145 mg/dL. Padrão consistente com lanche da tarde ou jantar precoce com viés para carboidrato refinado.</span></li>
+          <li><span class="lang-en"><strong>3:00 AM bounce on 28 Apr</strong> (58 → 95 in 30 min, +3/min). Either Somogyi rebound — counter-regulatory cortisol/glucagon dump after an unseen lower trough — or a deliberate 3 AM snack. If Somogyi, the actual nadir was lower than 58.</span><span class="lang-pt"><strong>Rebote às 3h da manhã em 28 abr</strong> (58 → 95 em 30 min, +3/min). Ou rebote Somogyi — descarga contrarregulatória de cortisol/glucagon após um vale ainda mais baixo, não capturado — ou lanche às 3h. Se Somogyi, o piso real foi abaixo de 58.</span></li>
+        </ul>
+
+        <p class="ai-footer"><span class="lang-en"><strong>Bottom line:</strong> levels stay in range &gt;98% of the time, but the curve has whip-fast 2–3 mg/dL/min transitions on both sides. That velocity profile — not the absolute values — is what produces vasovagal/fainting symptomatology and is exactly what the osteopath's Phase 1 plan (protein 90–100 g/day, eat every 3–4 h, no refined carbs on empty stomach, no empty-stomach tea or alcohol) is designed to flatten.</span><span class="lang-pt"><strong>Conclusão:</strong> os níveis permanecem em alvo &gt;98% do tempo, mas a curva apresenta transições rápidas de 2–3 mg/dL/min em ambas as direções. Esse perfil de velocidade — não os valores absolutos — é o que gera a sintomatologia vasovagal e de desmaios, e é exatamente o que o plano da Fase 1 do osteopata (proteína 90–100 g/dia, comer a cada 3–4 h, sem carboidratos refinados em jejum, sem chá ou álcool em jejum) busca achatar.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 SLEEP -->
 <section class="report-section" id="sleep">
   <div class="container">
-    <div class="section-label">04 · Sleep architecture</div>
+    <div class="section-label">05 · Sleep architecture</div>
     <h2 class="section-title"><span class="lang-en">Sleep architecture — Oura Ring</span><span class="lang-pt">Arquitetura do sono — Oura Ring</span></h2>
     <p class="section-desc"><span class="lang-en">184 long-sleep nights (≥3h) tracked between 18 October 2025 and 24 April 2026.</span><span class="lang-pt">184 noites de sono prolongado (≥3h) registradas entre 18 de outubro de 2025 e 24 de abril de 2026.</span></p>
 
@@ -147,10 +198,10 @@
   </div>
 </section>
 
-<!-- 05 EXERCISE -->
+<!-- 06 EXERCISE -->
 <section class="report-section" id="exercise">
   <div class="container">
-    <div class="section-label">05 · Exercise</div>
+    <div class="section-label">06 · Exercise</div>
     <h2 class="section-title"><span class="lang-en">Exercise track</span><span class="lang-pt">Atividade física estruturada</span></h2>
     <p class="section-desc"><span class="lang-en">
       157 structured workouts auto-recorded by Oura Ring between October 2025 and April 2026. All
@@ -185,10 +236,10 @@
   </div>
 </section>
 
-<!-- 06 MOVEMENT -->
+<!-- 07 MOVEMENT -->
 <section class="report-section" id="movement">
   <div class="container">
-    <div class="section-label">06 · Movement</div>
+    <div class="section-label">07 · Movement</div>
     <h2 class="section-title"><span class="lang-en">Movement track</span><span class="lang-pt">Atividade ambiente</span></h2>
     <p class="section-desc"><span class="lang-en">190 days of Oura ambient activity, 17 October 2025 → 24 April 2026.</span><span class="lang-pt">190 dias de atividade ambiente do Oura, 17 de outubro de 2025 → 24 de abril de 2026.</span></p>
 
@@ -208,19 +259,17 @@
       </div>
       <div class="chart-wrap"><canvas id="stepsChart"></canvas></div>
       <div class="chart-legend mt-2">
-        <span style="--c:#9b3535;color:#F1A0A0;">&lt;3,000</span>
-        <span style="color:#E5C77B;">3–5k</span>
-        <span style="color:var(--blue-200);">5–7k</span>
-        <span style="color:#9CD9B0;">≥7k</span>
+        <span style="--c:rgba(139,184,210,0.55);color:var(--blue-400);">Daily steps</span>
+        <span style="--c:var(--blue-700);color:var(--blue-700);">Weekly median</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 07 CARDIOVASCULAR -->
+<!-- 08 CARDIOVASCULAR -->
 <section class="report-section" id="cardio">
   <div class="container">
-    <div class="section-label">07 · Cardiovascular &amp; recovery</div>
+    <div class="section-label">08 · Cardiovascular &amp; recovery</div>
     <h2 class="section-title"><span class="lang-en">Cardiovascular health</span><span class="lang-pt">Saúde cardiovascular</span></h2>
     <p class="section-desc"><span class="lang-en">184 nights of Oura HRV / lowest-RHR readings, October 2025 → April 2026.</span><span class="lang-pt">184 noites de leituras de VFC e FC em repouso mínima do Oura, outubro de 2025 → abril de 2026.</span></p>
 
@@ -281,10 +330,10 @@
   </div>
 </section>
 
-<!-- 08 BP -->
+<!-- 09 BP -->
 <section class="report-section" id="bp">
   <div class="container">
-    <div class="section-label">08 · Blood pressure</div>
+    <div class="section-label">09 · Blood pressure</div>
     <h2 class="section-title"><span class="lang-en">Blood pressure — Withings cuff</span><span class="lang-pt">Pressão arterial — monitor Withings</span></h2>
     <p class="section-desc"><span class="lang-en">249 readings, 13 November 2025 – 3 May 2026.</span><span class="lang-pt">249 leituras, 13 de novembro de 2025 – 3 de maio de 2026.</span></p>
 
@@ -428,7 +477,7 @@
 </footer>
 
 <script src="assets/app.js?v=27"></script>
-<script src="assets/data.js?v=22"></script>
+<script src="assets/data.js?v=24"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -577,31 +626,70 @@ new Chart(document.getElementById('exerciseMixChart'), {
   }
 });
 
-/* 4 — Steps (real data: 190 days from Oura dailyactivity.csv) */
+/* 4 — Steps — pastel-blue bars at 25% opacity + weekly-median step line.
+   Median is computed per ISO week (Mon–Sun). The line is held flat across
+   each week and steps to the next value at the week boundary. */
 {
   const stepsArr = STEPS.map(r => r[1]);
+
+  /* Map every date to its ISO-week Monday, then bucket and median. */
+  const isoMonday = (s) => {
+    const d = new Date(s + 'T12:00:00Z');
+    const dayIdx = (d.getUTCDay() + 6) % 7; // Mon=0 .. Sun=6
+    d.setUTCDate(d.getUTCDate() - dayIdx);
+    return d.toISOString().slice(0, 10);
+  };
+  const buckets = {};
+  for (const [d, v] of STEPS) (buckets[isoMonday(d)] ||= []).push(v);
+  const med = (a) => {
+    const s = [...a].sort((x, y) => x - y);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  };
+  const weeklyMed = {};
+  for (const w in buckets) weeklyMed[w] = Math.round(med(buckets[w]));
+  const medianSeries = STEPS.map(([d]) => weeklyMed[isoMonday(d)]);
+
   new Chart(document.getElementById('stepsChart'), {
     type: 'bar',
     data: {
       labels: STEPS.map(r => r[0]),
-      datasets: [{
-        label: 'Steps',
-        data: stepsArr,
-        backgroundColor: stepsArr.map(v =>
-          v >= 7000 ? C.green500 :
-          v >= 5000 ? C.blue400 :
-          v >= 3000 ? C.amber200 : C.red500),
-        borderRadius: 1,
-        barPercentage: 0.95,
-        categoryPercentage: 1.0,
-      }]
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Steps',
+          data: stepsArr,
+          backgroundColor: 'rgba(139, 184, 210, 0.25)',  // blue-300 @ 25%
+          borderColor:     'rgba(139, 184, 210, 0.55)',
+          borderWidth: 1,
+          borderRadius: 1,
+          barPercentage: 0.95,
+          categoryPercentage: 1.0,
+        },
+        {
+          type: 'line',
+          label: 'Weekly median',
+          data: medianSeries,
+          borderColor: C.blue700,
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          fill: false,
+          tension: 0,
+          stepped: 'middle',
+        }
+      ]
     },
     options: {
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { title: (items) => items[0].label,
-                                label: (ctx) => `${ctx.parsed.y.toLocaleString()} steps` } }
+        tooltip: { callbacks: {
+          title: (items) => items[0].label,
+          label: (ctx) => ctx.datasetIndex === 0
+            ? `${ctx.parsed.y.toLocaleString()} steps`
+            : `Weekly median: ${ctx.parsed.y.toLocaleString()}`
+        }}
       },
       scales: {
         x: { ...axisCommon, ticks: { ...axisCommon.ticks, maxTicksLimit: 14, maxRotation: 0 } },
@@ -823,6 +911,247 @@ new Chart(document.getElementById('exerciseMixChart'), {
     },
     plugins: [endpointCirclesPlugin]
   });
+}
+
+/* 7 — Glucose — Plotly line with a continuous colorscale on the value
+   (red <60 / >180, green at 90, smooth gradient through amber). */
+function renderGlucoseChart() {
+  const el = document.getElementById('glucoseChart');
+  if (!el) return;
+  const showErr = (msg) => {
+    el.innerHTML = '<div style="padding:1rem;color:#9b3535;font-size:13px;">'
+      + 'Glucose chart failed to load: ' + msg + '</div>';
+    console.error('[glucose]', msg);
+  };
+  if (typeof GLUCOSE === 'undefined') return showErr('GLUCOSE data not loaded');
+  if (typeof Plotly  === 'undefined') return showErr('Plotly library not loaded');
+
+  try {
+    const xs = GLUCOSE.map(r => r[0]);
+    const ys = GLUCOSE.map(r => r[1]);
+
+    /* Continuous colorscale anchored at the danger thresholds:
+         40 deep red · 60 red · 75 amber · 90 green · 120 green ·
+         140 amber · 180 red · 220 deep red.
+       Plotly interpolates RGB between stops, giving a smooth red → amber
+       → green → amber → red traffic-light gradient with green peaking at 90. */
+    const CMIN = 40, CMAX = 220;
+    const t = (v) => (v - CMIN) / (CMAX - CMIN);
+    const colorscale = [
+      [t(40),  'rgb(122, 31, 31)'],
+      [t(60),  'rgb(192, 57, 43)'],
+      [t(75),  'rgb(216,139, 58)'],
+      [t(90),  'rgb( 63,138, 77)'],
+      [t(120), 'rgb( 63,138, 77)'],
+      [t(140), 'rgb(216,139, 58)'],
+      [t(180), 'rgb(192, 57, 43)'],
+      [t(220), 'rgb(122, 31, 31)'],
+    ];
+
+    /* One trace, lines+markers. The line is a faint neutral connector for
+       continuity at zoom-out; the densely-packed colour-graded markers
+       carry the gradient — at normal zoom they overlap into a continuous
+       coloured ribbon. */
+    const trace = {
+      x: xs, y: ys,
+      type: 'scatter',
+      mode: 'lines+markers',
+      line:   { color: 'rgba(62, 73, 86, 0.18)', width: 1, shape: 'spline' },
+      marker: {
+        size: 5,
+        color: ys,
+        colorscale,
+        cmin: CMIN,
+        cmax: CMAX,
+        line: { width: 0 },
+        showscale: false,
+      },
+      hovertemplate: '%{x|%a %d %b · %H:%M}<br><b>%{y} mg/dL</b><extra></extra>',
+      showlegend: false,
+    };
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 50 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      xaxis: {
+        type: 'date',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickformat: '%d %b\n%H:%M',
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: 'mg/dL', font: { color: C.inkSoft } },
+        range: [40, 220],
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft },
+        tickvals: [60, 70, 90, 140, 180]
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false,
+      responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, [trace], layout, config);
+    console.log('[glucose] rendered', xs.length, 'points');
+  } catch (e) {
+    showErr(e.message || String(e));
+  }
+}
+
+/* 7b — Glucose daily patterns — every reading folded onto a 24-hour day,
+   binned at 5-min slots; rendered as median + ±1 SD + ±2 SD bands. */
+function renderGlucosePatternsChart() {
+  const el = document.getElementById('glucosePatternsChart');
+  if (!el) return;
+  if (typeof GLUCOSE === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    /* Bin every reading into one of 288 five-minute slots (0..287). */
+    const N = 288;
+    const slots = Array.from({ length: N }, () => []);
+    for (const [ts, v] of GLUCOSE) {
+      const h = parseInt(ts.slice(11, 13), 10);
+      const m = parseInt(ts.slice(14, 16), 10);
+      const k = Math.floor((h * 60 + m) / 5);
+      if (k >= 0 && k < N) slots[k].push(v);
+    }
+
+    const median = (a) => {
+      if (!a.length) return NaN;
+      const s = [...a].sort((x, y) => x - y);
+      const m = Math.floor(s.length / 2);
+      return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+    };
+    const mean = (a) => a.length ? a.reduce((s, v) => s + v, 0) / a.length : NaN;
+    const stdev = (a, m) => {
+      if (a.length < 2) return 0;
+      const v = a.reduce((s, x) => s + (x - m) ** 2, 0) / a.length;
+      return Math.sqrt(v);
+    };
+
+    const rawMed  = slots.map(median);
+    const rawMean = slots.map(mean);
+    const rawSd   = slots.map((a, i) => stdev(a, rawMean[i]));
+
+    /* Circular rolling mean — only ~7 days of data, so smooth aggressively
+       (±6 slots ≈ 65-min window) and let midnight wrap. */
+    const smooth = (arr, w) => {
+      const n = arr.length;
+      const out = new Array(n);
+      for (let i = 0; i < n; i++) {
+        let sum = 0, cnt = 0;
+        for (let k = -w; k <= w; k++) {
+          const j = (i + k + n) % n;
+          if (!isNaN(arr[j])) { sum += arr[j]; cnt++; }
+        }
+        out[i] = cnt ? sum / cnt : NaN;
+      }
+      return out;
+    };
+    const W = 6;
+    const med = smooth(rawMed,  W);
+    const m1  = smooth(rawMean, W);
+    const sd1 = smooth(rawSd,   W);
+
+    const xs = Array.from({ length: N }, (_, i) => i * 5); // minutes since midnight
+
+    /* Two stacked fill bands: ±2 SD outer (lighter), ±1 SD inner (darker).
+       Plotly fills between consecutive traces with `fill: 'tonexty'`. */
+    const lower2 = m1.map((m, i) => m - 2 * sd1[i]);
+    const upper2 = m1.map((m, i) => m + 2 * sd1[i]);
+    const lower1 = m1.map((m, i) => m - sd1[i]);
+    const upper1 = m1.map((m, i) => m + sd1[i]);
+
+    const noLine = { width: 0, color: 'rgba(0,0,0,0)' };
+    const traces = [
+      { x: xs, y: lower2, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: upper2, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(94, 151, 188, 0.25)',
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: lower1, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: upper1, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(47, 100, 137, 0.45)',
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: med, type: 'scatter', mode: 'lines',
+        line: { color: '#1A2129', width: 2.5, shape: 'spline' },
+        customdata: xs.map(min => {
+          const h = Math.floor(min / 60), mm = min % 60;
+          const ampm = h < 12 ? 'am' : 'pm';
+          const h12 = (h % 12) === 0 ? 12 : (h % 12);
+          return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
+        }),
+        hovertemplate: '%{customdata}<br>Median <b>%{y:.0f} mg/dL</b><extra></extra>',
+        showlegend: false }
+    ];
+
+    /* Target-range reference lines at 60 and 180 mg/dL. */
+    const refLines = [
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 60,  y1: 60,
+        line: { color: '#3D9460', width: 1.2 } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 180, y1: 180,
+        line: { color: '#3D9460', width: 1.2 } },
+    ];
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 50 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      shapes: refLines,
+      xaxis: {
+        tickmode: 'array',
+        tickvals: [0, 180, 360, 540, 720, 900, 1080, 1260, 1440],
+        ticktext: ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+        range: [0, 1440],
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: 'mg/dL', font: { color: C.inkSoft } },
+        range: [40, 220],
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft },
+        tickvals: [50, 60, 100, 150, 180, 200]
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, traces, layout, config);
+    console.log('[glucose-patterns] rendered', xs.length, 'slots');
+  } catch (e) {
+    console.error('[glucose-patterns]', e);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    renderGlucoseChart();
+    renderGlucosePatternsChart();
+  });
+} else {
+  renderGlucoseChart();
+  renderGlucosePatternsChart();
 }
 
 /* 8 — ECG table populator (real data: 57 ECGs from Apple Health) */

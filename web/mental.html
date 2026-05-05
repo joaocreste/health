@@ -7,10 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=33">
+<link rel="stylesheet" href="assets/styles.css?v=39">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 </head>
-<body>
+<body class="has-side-nav">
 
 <!-- TOP NAV -->
 <nav class="topnav">
@@ -23,6 +23,7 @@
     <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
     <li><a href="mental.html" class="active"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
     <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+    <li><a href="assessment.html"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></a></li>
   </ul>
   <div class="lang-switch" role="group" aria-label="Language">
     <button type="button" class="export-btn" data-export-btn aria-label="Export to PDF" title="Export to PDF"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="export-label"><span class="lang-en">Export</span><span class="lang-pt">Exportar</span></span></button>
@@ -91,6 +92,7 @@
     <a href="#substance"><span class="lang-en">Substance abuse</span><span class="lang-pt">Uso de substâncias</span></a>
     <a href="#psych-architecture"><span class="lang-en">Psych architecture</span><span class="lang-pt">Arquitetura psicológica</span></a>
     <a href="#timeline"><span class="lang-en">Life history</span><span class="lang-pt">História de vida</span></a>
+    <a href="#three-pyramids"><span class="lang-en">Three Pyramids</span><span class="lang-pt">Três Pirâmides</span></a>
   </div>
 </div>
 
@@ -1638,7 +1640,45 @@
   </div>
 </section>
 
-<!-- 02 SELF-AWARENESS -->
+<!-- 08 THREE PYRAMIDS — external read of the mental structure -->
+<section class="report-section" id="three-pyramids" style="background:var(--blue-50);">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">Insight · As Três Pirâmides</span><span class="lang-pt">Insight · As Três Pirâmides</span></div>
+    <h2 class="section-title"><span class="lang-en">External read of the mental structure</span><span class="lang-pt">Leitura externa da estrutura mental</span></h2>
+    <p class="section-desc">
+      <span class="lang-en">London, 4 April 2026. A three-hour first lunch with Professor Rui (Sorbonne; sixteen years global marketing director at Nestlé; eight at Audi) ended with him drawing a three-tier pyramid on a napkin. The pyramid is the parallel external read of the same machinery this page maps from the inside.</span>
+      <span class="lang-pt">Londres, 4 de abril de 2026. Um primeiro almoço de três horas com o Professor Rui (Sorbonne; dezesseis anos como diretor global de marketing da Nestlé; oito anos na Audi) terminou com ele desenhando uma pirâmide de três níveis num guardanapo. A pirâmide é a leitura externa paralela da mesma máquina que esta página mapeia por dentro.</span>
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:1rem 0 1.25rem;">
+      <div class="list-card">
+        <h4>1 · <span class="lang-en">Hard skills · base</span><span class="lang-pt">Hard skills · base</span></h4>
+        <p style="margin:0.5rem 0 0;font-size:14px;line-height:1.55;font-style:italic;">"Tudo aquilo que você adquiriu numa boa escola de engenharia. Toda a parte técnica, tudo aquilo que você sabe fazer. Hoje, é praticamente uma commodity."</p>
+      </div>
+      <div class="list-card">
+        <h4>2 · <span class="lang-en">Soft skills · middle</span><span class="lang-pt">Soft skills · meio</span></h4>
+        <p style="margin:0.5rem 0 0;font-size:14px;line-height:1.55;font-style:italic;">"O que conecta o técnico com o ambiente. Quase todo mundo na sua sala de MBA está tentando aprender a fazer isso."</p>
+      </div>
+      <div class="list-card" style="border:2px solid var(--blue-500);">
+        <h4>3 · <span class="lang-en">Inner skills · top</span><span class="lang-pt">Inner skills · topo</span></h4>
+        <p style="margin:0.5rem 0 0;font-size:14px;line-height:1.55;font-style:italic;">"Aquilo que é intrínseco à pessoa. Eu te chamei para esse almoço porque queria te mostrar as suas inner skills — as que você não vê."</p>
+      </div>
+    </div>
+
+    <blockquote style="border-left:3px solid var(--blue-500);padding:12px 16px;margin:1.25rem 0;background:#FFFFFF;font-family:'IBM Plex Sans',sans-serif;font-style:italic;color:var(--text-default);font-size:15px;line-height:1.6;">
+      <span class="lang-en">"You have a very strong mental structure. Very good. Put it to work for you, from now on."</span>
+      <span class="lang-pt">"Você tem uma estrutura mental muito forte. Muito boa. Coloca-a a seu favor, a partir de agora."</span>
+      <div style="font-style:normal;color:var(--text-muted);font-size:12px;margin-top:8px;">— Prof. Rui · <span class="mono">As Três Pirâmides · 4 April 2026 · London</span></div>
+    </blockquote>
+
+    <div class="alert alert-info">
+      <strong><span class="lang-en">For this pillar:</span><span class="lang-pt">Para este pilar:</span></strong>
+      <span class="lang-en"> the fifteen categories above describe <em>how</em> the structure works from the inside. The pyramid names <em>that it is strong</em> from the outside. Both readings belong on the same page — internal architecture and external recognition tend to disagree more often than they agree, and when they do agree (as here), it is worth recording.</span>
+      <span class="lang-pt"> as quinze categorias acima descrevem <em>como</em> a estrutura funciona por dentro. A pirâmide nomeia <em>que ela é forte</em> por fora. Ambas as leituras pertencem à mesma página — arquitetura interna e reconhecimento externo costumam discordar mais do que concordar, e quando concordam (como aqui), vale registrar.</span>
+    </div>
+  </div>
+</section>
+
 <footer class="doc-footer">
   <div class="footer-brand">
     <img src="assets/logo.svg" alt="">

@@ -7,11 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=33">
+<link rel="stylesheet" href="assets/styles.css?v=39">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
-<body>
+<body class="has-side-nav">
 <!-- TOP NAV -->
 <nav class="topnav">
   <a class="brand" href="home.html">
@@ -23,6 +23,7 @@
     <li><a href="physical.html" class="active"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
     <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
     <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+    <li><a href="assessment.html"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></a></li>
   </ul>
   <div class="lang-switch" role="group" aria-label="Language">
     <button type="button" class="export-btn" data-export-btn aria-label="Export to PDF" title="Export to PDF"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="export-label"><span class="lang-en">Export</span><span class="lang-pt">Exportar</span></span></button>
@@ -62,7 +63,7 @@
   <div class="container">
     <div class="section-label"><span class="lang-en">09A · Imagery</span><span class="lang-pt">09A · Imagem</span></div>
     <h2 class="section-title"><span class="lang-en">Imaging exams</span><span class="lang-pt">Exames de imagem</span></h2>
-    <p class="section-desc"><span class="lang-en">Six imaging studies on file, ordered most recent first. Each viewer supports slider, scroll, click-and-drag, and arrow-key navigation. The 29 October 2024 pair (lumbar MRI + CT) is shown side-by-side because the studies were acquired on the same day during the same admission.</span><span class="lang-pt">Seis estudos de imagem em arquivo, ordenados do mais recente ao mais antigo. Cada visualizador aceita controle deslizante, rolagem do mouse, clicar-e-arrastar e teclas de seta. O par de 29 de outubro de 2024 (RM lombar + TC) é exibido lado a lado por terem sido adquiridos no mesmo dia, na mesma internação.</span></p>
+    <p class="section-desc"><span class="lang-en">Seven imaging studies grouped into six entries, ordered most recent first. Each viewer supports slider, scroll, click-and-drag, and arrow-key navigation. Two side-by-side pairs: the 29 October 2024 lumbar MRI + CT (same-day, same-admission), and the head/face workup grouping the 12 January 2026 CT facial sinuses with the 16 March 2023 US-guided biopsy.</span><span class="lang-pt">Sete estudos de imagem agrupados em seis entradas, ordenados do mais recente ao mais antigo. Cada visualizador aceita controle deslizante, rolagem do mouse, clicar-e-arrastar e teclas de seta. Dois pares lado a lado: a RM lombar + TC de 29 de outubro de 2024 (mesmo dia, mesma internação) e o agrupamento da região da cabeça e face que reúne a TC dos seios da face de 12 de janeiro de 2026 com a biópsia guiada por US de 16 de março de 2023.</span></p>
   </div>
 
   <!-- 1 of 6 · MRI cervical spine · 26 Mar 2026 -->
@@ -81,6 +82,9 @@
       role sobre a imagem, clique e arraste verticalmente, ou use as setas para navegar.
     </span></p>
 
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/mri-cervical-spine-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export report (PDF)</span><span class="lang-pt">Exportar laudo (PDF)</span></a>
+    </div>
     <div class="ct-grid ct-grid-single">
       <div class="ct-viewer"
            data-prefix="scans/mri-cervical-spine/"
@@ -151,26 +155,26 @@
   </div>
   </div>
 
-  <!-- 2 of 6 · CT facial sinuses · 12 Jan 2026 -->
+  <!-- 2 of 6 · CT facial sinuses (12 Jan 2026) + US-guided biopsy (16 Mar 2023) -->
   <div class="imagery-exam" id="imaging"><div class="container">
     <div class="section-label"><span class="lang-en">09A · Imaging</span><span class="lang-pt">09A · Imagem</span></div>
-    <h2 class="section-title"><span class="lang-en">CT scan — facial sinuses · 12 January 2026</span><span class="lang-pt">TC dos seios da face · 12 de janeiro de 2026</span></h2>
+    <h2 class="section-title"><span class="lang-en">CT facial sinuses (12 Jan 2026) + US-guided biopsy (16 Mar 2023)</span><span class="lang-pt">TC dos seios da face (12 jan 2026) + Biópsia guiada por US (16 mar 2023)</span></h2>
     <p class="section-desc"><span class="lang-en">
-      Volumetric multi-detector CT, no IV contrast. Indication: facial trauma (post bicycle
-      accident, 5 January 2026). Requesting physician: Dr. José Roberto Chodraui (CRM 54911).
-      707 axial slices — scrub the slider, scroll over the image, click-and-drag vertically,
-      or use the arrow keys to navigate.
+      Two head/face localised procedures grouped here for comparison. The 12 January 2026 CT was ordered after a bicycle facial trauma; the 16 March 2023
+      ultrasound-guided core-needle biopsy targeted soft-tissue thickening in the left frontal region. Both viewers below — drag, scroll, or use the slider on each.
     </span><span class="lang-pt">
-      Tomografia computadorizada multidetector volumétrica, sem contraste endovenoso. Indicação: trauma facial (após acidente de bicicleta,
-      5 de janeiro de 2026). Médico solicitante: Dr. José Roberto Chodraui (CRM 54911).
-      707 cortes axiais — arraste o controle, role o cursor sobre a imagem, clique e arraste verticalmente,
-      ou use as setas do teclado para navegar.
+      Dois procedimentos localizados na região da cabeça e face, agrupados aqui para comparação. A TC de 12 de janeiro de 2026 foi solicitada após trauma facial em acidente
+      de bicicleta; a biópsia por agulha grossa guiada por ultrassom de 16 de março de 2023 visou espessamento de partes moles na região frontal esquerda. Visualizadores lado a lado abaixo — arraste, role ou use o controle de cada um.
     </span></p>
 
-    <div class="ct-grid ct-grid-single">
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/tc1-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export CT facial sinuses report (PDF)</span><span class="lang-pt">Exportar laudo da TC dos seios da face (PDF)</span></a>
+      <a class="export-btn-primary" href="scans/punction-2023-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export US-guided biopsy report (PDF)</span><span class="lang-pt">Exportar laudo da biópsia guiada por US (PDF)</span></a>
+    </div>
+    <div class="ct-grid">
       <div class="ct-viewer" data-prefix="scans/tc1/" data-max="706">
         <div class="ct-viewer-head">
-          <div class="ct-viewer-title">Axial slice viewer</div>
+          <div class="ct-viewer-title">CT facial sinuses · axial slices</div>
           <div class="ct-viewer-meta">Slice <span class="ct-idx">353</span> / 707</div>
         </div>
         <div class="ct-stage">
@@ -178,52 +182,60 @@
         </div>
         <input class="ct-slider" type="range" min="0" max="706" value="353" aria-label="CT slice">
       </div>
+
+      <div class="ct-viewer"
+           data-prefix="scans/punction-2023/"
+           data-manifest="scans/punction-2023-manifest.json">
+        <div class="ct-viewer-head">
+          <div class="ct-viewer-title">US-guided biopsy · procedure frames</div>
+          <div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">303</span></div>
+        </div>
+        <div class="ct-stage">
+          <img class="ct-img" alt="US-guided biopsy image" loading="eager">
+        </div>
+        <input class="ct-slider" type="range" min="0" max="302" value="151" aria-label="Ultrasound image">
+      </div>
     </div>
 
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">
-      Radiologist's report <span class="mono" style="color:var(--text-muted);font-size:11px;font-weight:400;letter-spacing:0.06em;">(translated)</span>
+      Radiologist &amp; procedure reports <span class="mono" style="color:var(--text-muted);font-size:11px;font-weight:400;letter-spacing:0.06em;">(translated)</span>
     </h3>
 
     <div class="two-col mb-3">
       <div class="list-card">
-        <h4><span class="lang-en">Identifiers</span><span class="lang-pt">Identificadores</span></h4>
+        <h4><span class="lang-en">CT facial sinuses · 12 Jan 2026</span><span class="lang-pt">TC dos seios da face · 12 jan 2026</span></h4>
         <ul>
-          <li><strong>Patient.</strong> Joao Victor Creste Dias de Souza</li>
-          <li><strong>DOB.</strong> 17 October 1992</li>
-          <li><strong>Exam date.</strong> 12 January 2026</li>
-          <li><strong>Exam.</strong> Computed tomography of the facial sinuses</li>
+          <li><strong>Patient.</strong> Joao Victor Creste Dias de Souza · MRN 3402824</li>
           <li><strong>Requesting physician.</strong> Dr. José Roberto Chodraui · CRM 54911</li>
-          <li><strong>Reference / Code.</strong> 4506971 / 0013393450323001</li>
+          <li><strong>Indication.</strong> Facial trauma (post bicycle accident, 5 January 2026).</li>
+          <li><strong>Technique.</strong> Volumetric multi-detector CT, no IV contrast.</li>
+          <li><strong>Findings.</strong> Discrete bulging and soft-tissue irregularities in the right frontal region; regional bone structures intact. Mucosal thickening of the left sphenoid lateral wall and right maxillary sinus (with ostiomeatal-complex obliteration); focal thickening of the floor of the left maxillary sinus. Accessory ostium in the medial wall of the right maxillary sinus. Asymmetric inferior nasal turbinates (smaller on the right).</li>
+          <li><strong>Impression.</strong> Left sphenoidal and bilateral maxillary sinusopathy (chronic?). Soft-tissue findings on the right frontal region consistent with the recent facial trauma; bone structures preserved.</li>
         </ul>
       </div>
-      <div class="list-card">
-        <h4><span class="lang-en">Indication &amp; technique</span><span class="lang-pt">Indicação e técnica</span></h4>
-        <ul>
-          <li><strong>Clinical indication.</strong> Facial trauma.</li>
-          <li><strong>Technique.</strong> Volumetric acquisition of the facial sinuses on a multi-detector scanner, without venous contrast administration.</li>
-        </ul>
-      </div>
-    </div>
 
-    <div class="list-card mb-3">
-      <h4><span class="lang-en">Findings</span><span class="lang-pt">Achados</span></h4>
-      <ul>
-        <li>Discrete bulging and soft-tissue irregularities in the right frontal region.</li>
-        <li>Regional bone structures intact.</li>
-        <li>Mucosal thickening of the left lateral wall of the sphenoid sinus, in the right maxillary sinus with obliteration of the ostiomeatal complex, and focal thickening of the floor of the left maxillary sinus. Normal transparency of the remaining facial sinuses. Left ostiomeatal complex unobstructed. Presence of an accessory ostium in the medial wall of the right maxillary sinus.</li>
-        <li>Asymmetric inferior nasal turbinates — smaller on the right side.</li>
-      </ul>
+      <div class="list-card">
+        <h4><span class="lang-en">US-guided biopsy · 16 Mar 2023</span><span class="lang-pt">Biópsia guiada por US · 16 mar 2023</span></h4>
+        <ul>
+          <li><strong>Patient.</strong> Joao Victor Creste Dias de Souza · MRN 3402824</li>
+          <li><strong>Reviewed &amp; signed.</strong> Dr. Rodrigo Gobbo Garcia · CRM 93948</li>
+          <li><strong>Target.</strong> Soft-tissue thickening, left frontal region — no clivage plane with the muscle thickness.</li>
+          <li><strong>Technique.</strong> Real-time ultrasound guidance · local anaesthetic block (Xylestesin / lidocaine 2%) + sedation by anaesthesia team · 18G semi-automatic coaxial cutting needle (tru-cut).</li>
+          <li><strong>Procedure.</strong> Access-route planning, asepsis and sterile field, local infiltration; <strong>3 core fragments</strong> retrieved and sent for anatomopathological study.</li>
+          <li><strong>Outcome.</strong> Post-procedure ultrasound check showed <strong>no complications</strong>; patient monitored per institutional protocol and discharged uneventfully.</li>
+        </ul>
+      </div>
     </div>
 
     <div class="alert alert-info">
-      <strong>Diagnostic Impression:</strong> Left sphenoidal and bilateral maxillary sinusopathy
-      (chronic?). Soft-tissue findings in the right frontal region consistent with the recent
-      facial trauma; bone structures preserved.
+      <strong><span class="lang-en">Combined impression:</span><span class="lang-pt">Impressão combinada:</span></strong>
+      <span class="lang-en"> Two distinct head/face workups three years apart. The 2026 CT documents post-traumatic right-frontal soft-tissue findings against a background of chronic-pattern sinusopathy with bone structures preserved. The 2023 ultrasound-guided core-needle biopsy of a left-frontal soft-tissue thickening completed without complications, with histopathology being the actionable downstream result.</span>
+      <span class="lang-pt"> Dois exames localizados na região da cabeça e face, separados por três anos. A TC de 2026 documenta achados de partes moles frontal direito pós-traumáticos sobre um padrão crônico de sinusopatia, com estruturas ósseas preservadas. A biópsia por agulha grossa guiada por ultrassom de 2023, sobre espessamento de partes moles frontal esquerdo, foi concluída sem intercorrências, com a histopatologia sendo o resultado acionável a jusante.</span>
     </div>
   </div>
   </div>
 
-  <!-- 3 of 6 · MRI lumbar + CT lumbar/sacral · 29 Oct 2024 (new) -->
+  <!-- 3 of 6 · MRI lumbar + CT lumbar/sacral · 29 Oct 2024 -->
   <div class="imagery-exam" id="lumbar-2024">  <div class="container">
     <div class="section-label"><span class="lang-en">09A · Imagery</span><span class="lang-pt">09A · Imagem</span></div>
     <h2 class="section-title"><span class="lang-en">MRI lumbar spine + CT lumbar / sacral spine · 29 October 2024</span><span class="lang-pt">RM da coluna lombar + TC da coluna lombar / sacral · 29 de outubro de 2024</span></h2>
@@ -237,6 +249,10 @@
       role ou use o controle de cada um.
     </span></p>
 
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/mri-lumbar-spine-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export MRI lumbar report (PDF)</span><span class="lang-pt">Exportar laudo da RM lombar (PDF)</span></a>
+      <a class="export-btn-primary" href="scans/ct-lumbar-sacral-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export CT lumbar/sacral report (PDF)</span><span class="lang-pt">Exportar laudo da TC lombar/sacral (PDF)</span></a>
+    </div>
     <div class="ct-grid">
       <div class="ct-viewer"
            data-prefix="scans/mri-lumbar-spine/"
@@ -318,6 +334,9 @@
       para navegar.
     </span></p>
 
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/tc-heart-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export report (PDF)</span><span class="lang-pt">Exportar laudo (PDF)</span></a>
+    </div>
     <div class="ct-grid ct-grid-single">
       <div class="ct-viewer"
            data-prefix="scans/tc-heart/"
@@ -426,6 +445,9 @@
       ou use as setas para avançar.
     </span></p>
 
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/eeg-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export report (PDF)</span><span class="lang-pt">Exportar laudo (PDF)</span></a>
+    </div>
     <div class="ct-grid ct-grid-single">
       <div class="ct-viewer"
            data-prefix="scans/eeg/"
@@ -494,27 +516,30 @@
     <p class="section-desc"><span class="lang-en">
       Multiplanar T1, T2 (with fat suppression), FLAIR, susceptibility and diffusion sequences,
       followed by 3D / 2D T1 with gadolinium. TOF and contrast-phase angiographic acquisitions
-      of the intracranial arteries and veins. 717 frames across 14 acquired series — scrub the
+      of the intracranial arteries and veins. 2,862 frames across 29 acquired series — scrub the
       slider, scroll over the image, click-and-drag vertically, or use the arrow keys.
     </span><span class="lang-pt">
       Sequências multiplanares T1, T2 (com supressão de gordura), FLAIR, suscetibilidade magnética e difusão,
       seguidas de aquisições 3D / 2D em T1 com gadolínio. Aquisições angiográficas TOF e fase de contraste
-      das artérias e veias intracranianas. 717 imagens em 14 séries adquiridas — arraste o
+      das artérias e veias intracranianas. 2.862 imagens em 29 séries adquiridas — arraste o
       controle, role sobre a imagem, clique e arraste verticalmente ou use as setas.
     </span></p>
 
+    <div class="report-export-row">
+      <a class="export-btn-primary" href="scans/mri-head-report.pdf" download><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lang-en">Export report (PDF)</span><span class="lang-pt">Exportar laudo (PDF)</span></a>
+    </div>
     <div class="ct-grid ct-grid-single">
       <div class="ct-viewer"
            data-prefix="scans/mri-head/"
            data-manifest="scans/mri-head-manifest.json">
         <div class="ct-viewer-head">
           <div class="ct-viewer-title">Multi-sequence viewer</div>
-          <div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">717</span></div>
+          <div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">2862</span></div>
         </div>
         <div class="ct-stage">
           <img class="ct-img" alt="MRI brain image" loading="eager">
         </div>
-        <input class="ct-slider" type="range" min="0" max="716" value="358" aria-label="MRI image">
+        <input class="ct-slider" type="range" min="0" max="2861" value="1430" aria-label="MRI image">
       </div>
     </div>
 

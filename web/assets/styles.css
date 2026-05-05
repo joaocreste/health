@@ -323,6 +323,179 @@ code, .mono, .tabular { font-family: var(--font-mono); }
   border-bottom-color: var(--blue-400);
 }
 
+/* ── SIDE NAV (vertical sidebar variant) ──
+   Activated by `has-side-nav` on body. The sidebar is `position: fixed`
+   (out of flow, so it can't stretch sibling content) and the rest of the
+   page is shifted right by `margin-left` to clear it. */
+:root {
+  --side-nav-w: 240px;
+  --topnav-h: 60px;
+}
+
+/* Sidebar: fixed-position rail on the left. Doesn't participate in normal
+   document flow, so it doesn't stretch any sibling content. The page
+   content is then shifted right by `margin-left` to clear it. */
+body.has-side-nav > .section-nav,
+body.has-side-nav > .sp-nav {
+  position: fixed;
+  left: 0;
+  top: var(--topnav-h);
+  bottom: 0;
+  width: var(--side-nav-w);
+  background: linear-gradient(180deg, #0F2238 0%, #1B3B54 55%, #244E6E 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: none;
+  padding: 26px 14px 22px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: normal;
+  z-index: 30;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.10);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* "On this page" label at the top of the sidebar */
+body.has-side-nav > .section-nav::before,
+body.has-side-nav > .sp-nav::before {
+  content: "On this page";
+  display: block;
+  padding: 0 14px 12px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.36);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.has-side-nav .section-nav-inner,
+body.has-side-nav .sp-nav-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  max-width: none;
+  margin: 0;
+}
+
+body.has-side-nav .section-nav a,
+body.has-side-nav .sp-nav a {
+  display: block;
+  padding: 11px 14px;
+  border-radius: 6px;
+  border-bottom: none;
+  color: rgba(255, 255, 255, 0.66);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+body.has-side-nav .section-nav a:hover,
+body.has-side-nav .sp-nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+  border-bottom: none;
+  border-bottom-color: transparent;
+}
+body.has-side-nav .section-nav a.active,
+body.has-side-nav .sp-nav a.active {
+  background: rgba(94, 151, 188, 0.20);
+  color: #FFFFFF;
+  border-left: 3px solid var(--blue-400);
+  padding-left: 11px;
+}
+
+/* Shift all main page content right to clear the fixed sidebar. The
+   topnav and the sidebar itself are intentionally excluded from this rule. */
+body.has-side-nav > .page-header,
+body.has-side-nav > .sp-hero,
+body.has-side-nav > section.report-section,
+body.has-side-nav > section.sp-section,
+body.has-side-nav > .doc-footer,
+body.has-side-nav > .sp-footer,
+body.has-side-nav > .container {
+  margin-left: var(--side-nav-w);
+}
+
+/* On narrow viewports collapse the grid back to a single column and
+   restore the original horizontal sticky-top nav. */
+@media (max-width: 880px) {
+  body.has-side-nav {
+    display: block;
+  }
+  body.has-side-nav > .section-nav,
+  body.has-side-nav > .sp-nav {
+    position: sticky;
+    top: var(--topnav-h);
+    width: auto;
+    height: auto;
+    border-right: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    white-space: nowrap;
+    box-shadow: none;
+    padding: 0.75rem 1rem;
+  }
+  body.has-side-nav > .section-nav {
+    background: rgba(252, 253, 254, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  body.has-side-nav > .sp-nav {
+    background: rgba(8, 23, 38, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1B3B54;
+    padding: 12px 24px;
+  }
+  body.has-side-nav > .section-nav::before,
+  body.has-side-nav > .sp-nav::before {
+    display: none;
+  }
+  body.has-side-nav .section-nav-inner,
+  body.has-side-nav .sp-nav-inner {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+  body.has-side-nav .section-nav a {
+    padding: 0.25rem 0;
+    border-radius: 0;
+    border-bottom: 1px solid transparent;
+    color: var(--text-muted);
+    background: none;
+    text-transform: uppercase;
+  }
+  body.has-side-nav .sp-nav a {
+    padding: 4px 0;
+    border-radius: 0;
+    border-bottom: 1.5px solid transparent;
+    color: #8BB8D2;
+    background: none;
+  }
+  body.has-side-nav .section-nav a:hover,
+  body.has-side-nav .section-nav a.active {
+    background: transparent;
+    color: var(--blue-700);
+    border-left: none;
+    padding-left: 0;
+    border-bottom-color: var(--blue-400);
+  }
+  body.has-side-nav .sp-nav a:hover,
+  body.has-side-nav .sp-nav a.active {
+    background: transparent;
+    color: #FFFFFF;
+    border-left: none;
+    padding-left: 0;
+    border-bottom-color: #5B9CC8;
+  }
+}
+
 /* ── SECTIONS ── alternate base / cool ── */
 section.report-section {
   padding: 4rem 2rem;
@@ -767,6 +940,59 @@ section.report-section.light             { background: var(--surface-base); } /*
   .two-col, .three-col { grid-template-columns: 1fr; }
 }
 
+/* ── GLUCOSE TWO-COL: stretch the chart card to match the AI card height ── */
+#glucose .two-col > .chart-card {
+  display: flex;
+  flex-direction: column;
+}
+#glucose .two-col > .chart-card > .chart-wrap {
+  flex: 1 1 auto;
+  min-height: 420px;
+}
+
+/* ── AI COMMENTARY CARD ── */
+.ai-comments .ai-headline {
+  font-family: 'Raleway', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue-800);
+  margin: 6px 0 12px;
+  line-height: 1.35;
+}
+.ai-comments .ai-headline em {
+  font-style: italic;
+  color: var(--blue-600);
+}
+.ai-comments .ai-body,
+.ai-comments .ai-footer {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-mid, #3E4956);
+  margin: 0 0 12px;
+}
+.ai-comments .ai-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+}
+.ai-comments .ai-list li {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-mid, #3E4956);
+  padding: 8px 0 8px 14px;
+  border-left: 2px solid var(--blue-200, #B5D2E5);
+  margin-bottom: 6px;
+}
+.ai-comments .ai-list li strong {
+  color: var(--blue-800);
+}
+.ai-comments .ai-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  font-size: 12.5px;
+  color: var(--ink-soft, #6E7B8A);
+}
+
 /* ── LIST CARD ── */
 .list-card {
   background: var(--surface-raised);
@@ -1109,6 +1335,22 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   transition: background 0.15s, border-color 0.15s;
 }
 .export-btn-primary:hover { background: #5B9CC8; border-color: #5B9CC8; }
+
+/* ── PER-EXAM REPORT EXPORT (download original radiologist PDF) ── */
+.report-export-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 1rem 0 1.5rem;
+}
+.report-export-row .export-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.report-export-row .export-btn-primary svg { display: block; }
+
 .export-modal-progress {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 14px;
