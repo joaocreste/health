@@ -7,8 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=39">
+<link rel="stylesheet" href="assets/styles.css?v=43">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   /* ── Spiritual page — dark theme ── */
   body.spiritual-page {
@@ -41,7 +42,7 @@
   }
   .sp-eyebrow {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #8BB8D2;
@@ -72,7 +73,7 @@
   .sp-meta {
     display: inline-flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
     color: #8BB8D2;
   }
   .sp-meta strong { color: #E6ECF1; font-weight: 500; }
@@ -93,7 +94,7 @@
   }
   .sp-nav a {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
     color: #8BB8D2;
     text-decoration: none;
     padding: 4px 0;
@@ -114,7 +115,7 @@
 
   .sp-label {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
     color: #8BB8D2;
     margin-bottom: 8px;
   }
@@ -128,7 +129,7 @@
   }
   .sp-section-desc {
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.65;
     color: #C9D4DD;
     margin: 0 0 32px;
@@ -190,20 +191,20 @@
   }
   .sp-verse-ref {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
     color: #8BB8D2;
     margin-bottom: 8px;
   }
   .sp-verse-text {
     font-family: 'Raleway', sans-serif;
-    font-size: 15px; font-style: italic; font-weight: 300;
+    font-size: 16px; font-style: italic; font-weight: 300;
     line-height: 1.55;
     color: #E6ECF1;
     margin: 0 0 10px;
   }
   .sp-verse-context {
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 12.5px; line-height: 1.55;
+    font-size: 14px; line-height: 1.55;
     color: #98AFC4;
   }
   .sp-verse-context em { color: #C9D4DD; font-style: italic; }
@@ -218,7 +219,7 @@
   }
   .sp-witness-eyebrow {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
     color: #8BB8D2;
     margin-bottom: 12px;
   }
@@ -243,7 +244,7 @@
   .sp-witness blockquote p:last-child { margin-bottom: 0; }
   .sp-witness-attr {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
     color: #8BB8D2;
   }
 
@@ -266,7 +267,7 @@
   .sp-tl-item.anchor::before { background: #5B9CC8; }
   .sp-tl-date {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
     color: #8BB8D2;
     margin-bottom: 4px;
   }
@@ -302,7 +303,7 @@
   }
   .sp-arc-label {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
     color: #8BB8D2;
     margin-bottom: 6px;
   }
@@ -343,7 +344,7 @@
     text-align: center;
     border-top: 1px solid rgba(139,184,210,0.12);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px; letter-spacing: 0.10em;
+    font-size: 11px; letter-spacing: 0.10em;
     color: rgba(139,184,210,0.60);
   }
   .sp-footer a {
@@ -363,6 +364,64 @@
     .sp-section { padding: 40px 18px; }
     .sp-witness { padding: 24px 22px; }
     .sp-witness h3 { font-size: 24px; }
+  }
+
+  /* Wheel of life — radar chart + category legend */
+  .sp-wheel-wrap {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(139,184,210,0.18);
+    border-radius: 12px;
+    padding: 28px 24px 18px;
+    margin: 0 0 24px;
+    height: 540px;
+    position: relative;
+  }
+  .sp-wheel-legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .sp-wheel-cat {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(139,184,210,0.18);
+    border-left-width: 3px;
+    border-radius: 8px;
+    padding: 16px 18px 14px;
+  }
+  .sp-wheel-cat.cat-spiritual { border-left-color: #BE965A; }
+  .sp-wheel-cat.cat-personal  { border-left-color: #5B9CC8; }
+  .sp-wheel-cat.cat-life      { border-left-color: #7DBE9E; }
+  .sp-wheel-cat.cat-rel       { border-left-color: #D88A8A; }
+  .sp-wheel-cat-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin: 0 0 12px;
+  }
+  .sp-wheel-cat ul { list-style: none; margin: 0; padding: 0; }
+  .sp-wheel-cat li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 14px;
+    color: #C9D4DD;
+    border-bottom: 1px dashed rgba(139,184,210,0.10);
+  }
+  .sp-wheel-cat li:last-child { border-bottom: none; }
+  .sp-wheel-cat li .score {
+    font-family: 'IBM Plex Mono', monospace;
+    color: #FFFFFF;
+    font-weight: 500;
+    min-width: 24px;
+    text-align: right;
+  }
+  .sp-wheel-cat li.zero .score { color: #F0A0A0; }
+  .sp-wheel-cat li.zero { color: #E0B5B5; }
+  @media (max-width: 720px) {
+    .sp-wheel-wrap { height: 420px; padding: 18px 14px 12px; }
   }
 </style>
 </head>
@@ -416,6 +475,7 @@
 <div class="sp-nav">
   <div class="sp-nav-inner">
     <a href="#confession"><span class="lang-en">Confession</span><span class="lang-pt">Confissão</span></a>
+    <a href="#wheel-of-life"><span class="lang-en">Wheel of life</span><span class="lang-pt">Roda da vida</span></a>
     <a href="#witness"><span class="lang-en">Witness</span><span class="lang-pt">Testemunho</span></a>
     <a href="#faith-coping"><span class="lang-en">Faith as coping</span><span class="lang-pt">Fé como enfrentamento</span></a>
     <a href="#scriptures"><span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></a>
@@ -440,15 +500,76 @@
         <span class="lang-en"><em>"I rely solely on God's grace and redemption by Jesus' blood shed for me on that cross. … More than ever I feel like the homeless, the cripple, the blind who desperately need Jesus. That's things as they are today."</em></span>
         <span class="lang-pt"><em>"Eu confio unicamente na graça de Deus e na redenção pelo sangue de Jesus derramado por mim naquela cruz. … Mais do que nunca, me sinto como o sem-teto, o aleijado, o cego que precisa desesperadamente de Jesus. Assim estão as coisas hoje."</em></span>
       </p>
-      <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#8BB8D2;margin-top:14px;">— JC, <span class="lang-en">Letter to Calvary, August 2024</span><span class="lang-pt">Carta para o Calvary, agosto de 2024</span></p>
+      <p style="font-family:'IBM Plex Mono',monospace;font-size: 12px;letter-spacing:0.06em;color:#8BB8D2;margin-top:14px;">— JC, <span class="lang-en">Letter to Calvary, August 2024</span><span class="lang-pt">Carta para o Calvary, agosto de 2024</span></p>
     </div>
   </div>
 </section>
 
-<!-- 02 WITNESS — most recent, given prominent placement right after confession -->
+<!-- 02 WHEEL OF LIFE -->
+<section class="sp-section" id="wheel-of-life">
+  <div class="sp-container">
+    <div class="sp-label">02 · <span class="lang-en">Wheel of life</span><span class="lang-pt">Roda da vida</span></div>
+    <h2 class="sp-section-title">
+      <span class="lang-en">Sixteen-dimension life snapshot</span>
+      <span class="lang-pt">Snapshot da vida em dezesseis dimensões</span>
+    </h2>
+    <p class="sp-section-desc">
+      <span class="lang-en">Self-rated 0–10 across four life categories. Each spoke is a single dimension; the polygon shows current scores; point and edge colours indicate category. The marital axis at <strong>1</strong> is the most decisive data point on the wheel.</span>
+      <span class="lang-pt">Auto-avaliação de 0 a 10 em quatro categorias da vida. Cada raio é uma dimensão; o polígono mostra as pontuações atuais; as cores dos pontos e das arestas indicam a categoria. O eixo conjugal em <strong>1</strong> é o ponto de dado mais decisivo da roda.</span>
+    </p>
+
+    <div class="sp-wheel-wrap">
+      <canvas id="wheelChart"></canvas>
+    </div>
+
+    <div class="sp-wheel-legend">
+      <div class="sp-wheel-cat cat-spiritual">
+        <div class="sp-wheel-cat-title"><span class="lang-en">Spiritual Discipline</span><span class="lang-pt">Disciplina Espiritual</span></div>
+        <ul>
+          <li><span><span class="lang-en">Biblical Reading</span><span class="lang-pt">Leitura Bíblica</span></span><span class="score">5</span></li>
+          <li><span><span class="lang-en">Communion</span><span class="lang-pt">Comunhão</span></span><span class="score">4</span></li>
+          <li><span><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></span><span class="score">5</span></li>
+          <li><span><span class="lang-en">Prayer</span><span class="lang-pt">Oração</span></span><span class="score">5</span></li>
+        </ul>
+      </div>
+
+      <div class="sp-wheel-cat cat-personal">
+        <div class="sp-wheel-cat-title"><span class="lang-en">Personal</span><span class="lang-pt">Pessoal</span></div>
+        <ul>
+          <li><span><span class="lang-en">Professional</span><span class="lang-pt">Profissional</span></span><span class="score">5</span></li>
+          <li><span><span class="lang-en">Academic</span><span class="lang-pt">Acadêmico</span></span><span class="score">7</span></li>
+          <li><span><span class="lang-en">Financial</span><span class="lang-pt">Financeiro</span></span><span class="score">6</span></li>
+          <li><span><span class="lang-en">Emotional</span><span class="lang-pt">Emocional</span></span><span class="score">8</span></li>
+        </ul>
+      </div>
+
+      <div class="sp-wheel-cat cat-life">
+        <div class="sp-wheel-cat-title"><span class="lang-en">Life Quality</span><span class="lang-pt">Qualidade de Vida</span></div>
+        <ul>
+          <li><span><span class="lang-en">Health</span><span class="lang-pt">Saúde</span></span><span class="score">4</span></li>
+          <li><span><span class="lang-en">Rest</span><span class="lang-pt">Descanso</span></span><span class="score">6</span></li>
+          <li><span><span class="lang-en">Leisure</span><span class="lang-pt">Lazer</span></span><span class="score">6</span></li>
+          <li><span><span class="lang-en">Future Plan</span><span class="lang-pt">Plano Futuro</span></span><span class="score">9</span></li>
+        </ul>
+      </div>
+
+      <div class="sp-wheel-cat cat-rel">
+        <div class="sp-wheel-cat-title"><span class="lang-en">Relationships</span><span class="lang-pt">Relacionamentos</span></div>
+        <ul>
+          <li><span><span class="lang-en">Family</span><span class="lang-pt">Família</span></span><span class="score">7</span></li>
+          <li><span><span class="lang-en">Solidarity</span><span class="lang-pt">Solidariedade</span></span><span class="score">5</span></li>
+          <li><span><span class="lang-en">Marital</span><span class="lang-pt">Conjugal</span></span><span class="score">1</span></li>
+          <li><span><span class="lang-en">Social</span><span class="lang-pt">Social</span></span><span class="score">7</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 WITNESS — most recent, given prominent placement right after confession -->
 <section class="sp-section" id="witness">
   <div class="sp-container">
-    <div class="sp-label">02 · <span class="lang-en">Witness · 3 May 2026</span><span class="lang-pt">Testemunho · 3 de maio de 2026</span></div>
+    <div class="sp-label">03 · <span class="lang-en">Witness · 3 May 2026</span><span class="lang-pt">Testemunho · 3 de maio de 2026</span></div>
     <h2 class="sp-section-title"><span class="lang-en">"I need you to still live."</span><span class="lang-pt">"Eu preciso que você ainda viva."</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Written four days after the 29 April intentional benzodiazepine overdose, the patient's testimony names what he experienced at the moment his breathing had begun to slow under ~260 mg of diazepam. The full text is in <code>data/Writtings/Eu_preciso_que_voce_ainda_viva.docx</code>; the pivotal passage is below.</span>
@@ -480,10 +601,10 @@
   </div>
 </section>
 
-<!-- 03 FAITH AS COPING — psychological + spiritual reading of the 200mg crisis -->
+<!-- 04 FAITH AS COPING — psychological + spiritual reading of the 200mg crisis -->
 <section class="sp-section" id="faith-coping">
   <div class="sp-container">
-    <div class="sp-label">03 · <span class="lang-en">Faith as coping mechanism · the 200mg Valium crisis</span><span class="lang-pt">Fé como mecanismo de enfrentamento · a crise dos 200mg de Valium</span></div>
+    <div class="sp-label">04 · <span class="lang-en">Faith as coping mechanism · the 200mg Valium crisis</span><span class="lang-pt">Fé como mecanismo de enfrentamento · a crise dos 200mg de Valium</span></div>
     <h2 class="sp-section-title"><span class="lang-en">What faith actually <em>did</em> on 29 April 2026</span><span class="lang-pt">O que a fé de fato <em>fez</em> em 29 de abril de 2026</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">This section reads the same event the testimony describes — but through two parallel lenses, psychological and spiritual, held side by side. The aim is not to explain one in terms of the other, nor to reduce either. The aim is to name, plainly, the function the patient's faith performed in a moment when no other coping mechanism was reaching him. Quotes are taken verbatim from <code>data/Writtings/I_Still_Need_You_to_Live.docx</code>.</span>
@@ -610,10 +731,10 @@
   </div>
 </section>
 
-<!-- 04 ANCHOR SCRIPTURES -->
+<!-- 05 ANCHOR SCRIPTURES -->
 <section class="sp-section" id="scriptures">
   <div class="sp-container">
-    <div class="sp-label">04 · <span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></div>
+    <div class="sp-label">05 · <span class="lang-en">Anchor scriptures</span><span class="lang-pt">Escrituras-âncora</span></div>
     <h2 class="sp-section-title"><span class="lang-en">The verses that recur in the patient's writings</span><span class="lang-pt">Os versículos que se repetem nos escritos do paciente</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Six passages cited verbatim across the writings — each named at a specific moment of struggle or rescue. They form a coherent thread: <em>weariness met by rest</em>, <em>weakness met by grace</em>, <em>despair met by deliverance</em>.</span>
@@ -654,10 +775,10 @@
   </div>
 </section>
 
-<!-- 05 SPIRITUAL TIMELINE -->
+<!-- 06 SPIRITUAL TIMELINE -->
 <section class="sp-section" id="timeline">
   <div class="sp-container">
-    <div class="sp-label">05 · <span class="lang-en">Spiritual timeline</span><span class="lang-pt">Linha do tempo espiritual</span></div>
+    <div class="sp-label">06 · <span class="lang-en">Spiritual timeline</span><span class="lang-pt">Linha do tempo espiritual</span></div>
     <h2 class="sp-section-title"><span class="lang-en">Key spiritual events on file</span><span class="lang-pt">Eventos espirituais-chave em arquivo</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Drawn from <em>The Book</em> series, <em>Letter to Calvary</em>, <em>Forehead EN</em>, <em>Crisis Episode April 29 2026</em>, and <em>Eu preciso que você ainda viva</em>.</span>
@@ -708,10 +829,10 @@
   </div>
 </section>
 
-<!-- 06 PRACTICES & PROTECTIVE FACTORS -->
+<!-- 07 PRACTICES & PROTECTIVE FACTORS -->
 <section class="sp-section" id="practices">
   <div class="sp-container">
-    <div class="sp-label">06 · <span class="lang-en">Practices & protective factors</span><span class="lang-pt">Práticas e fatores protetivos</span></div>
+    <div class="sp-label">07 · <span class="lang-en">Practices & protective factors</span><span class="lang-pt">Práticas e fatores protetivos</span></div>
     <h2 class="sp-section-title"><span class="lang-en">What is currently active — and worth protecting</span><span class="lang-pt">O que está ativo agora — e vale proteger</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Spiritual infrastructure is not adjunct to recovery in this patient — it is the load-bearing layer beneath identity, meaning, and continuance. The list below is descriptive (what is on, currently) rather than prescriptive.</span>
@@ -740,10 +861,10 @@
   </div>
 </section>
 
-<!-- 07 STRUGGLES TO SURFACE -->
+<!-- 08 STRUGGLES TO SURFACE -->
 <section class="sp-section" id="struggles">
   <div class="sp-container">
-    <div class="sp-label">07 · <span class="lang-en">Spiritual struggles to surface</span><span class="lang-pt">Lutas espirituais a trazer à tona</span></div>
+    <div class="sp-label">08 · <span class="lang-en">Spiritual struggles to surface</span><span class="lang-pt">Lutas espirituais a trazer à tona</span></div>
     <h2 class="sp-section-title"><span class="lang-en">Where the patient knows he is wounded</span><span class="lang-pt">Onde o paciente sabe que está ferido</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">All four items below are <em>self-named</em> in the writings — the patient is not unaware of these patterns. The clinical relevance is that each has a corresponding biological and behavioural footprint already on this site.</span>
@@ -782,10 +903,10 @@
   </div>
 </section>
 
-<!-- 08 THREE PYRAMIDS — inheritance, gratitude, humility -->
+<!-- 09 THREE PYRAMIDS — inheritance, gratitude, humility -->
 <section class="sp-section" id="three-pyramids">
   <div class="sp-container">
-    <div class="sp-label">08 · <span class="lang-en">As Três Pirâmides · 4 April 2026 · London</span><span class="lang-pt">As Três Pirâmides · 4 de abril de 2026 · Londres</span></div>
+    <div class="sp-label">09 · <span class="lang-en">As Três Pirâmides · 4 April 2026 · London</span><span class="lang-pt">As Três Pirâmides · 4 de abril de 2026 · Londres</span></div>
     <h2 class="sp-section-title"><span class="lang-en">The third pyramid · inheritance, gratitude, humility</span><span class="lang-pt">A terceira pirâmide · herança, gratidão, humildade</span></h2>
     <p class="sp-section-desc">
       <span class="lang-en">Three hours into a first lunch in London, Professor Rui — sixteen years global marketing director at Nestlé, eight at Audi — drew a three-tier pyramid on a napkin (hard skills · soft skills · inner skills) and named the rare top of it as the reason he had invited the patient. The patient's reflexive answer, before he could think it through, is the spiritual centre of this entire piece.</span>
@@ -850,6 +971,149 @@
   <a href="home.html"><span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span></a>
 </footer>
 
+<script>
+/* Wheel of Life — radar chart with 16 dimensions across 4 categories.
+   Re-renders on bilingual switch so axis labels track the current language. */
+(function () {
+  if (typeof Chart === 'undefined') return;
+
+  const DIMS = [
+    {en: 'Biblical Reading', pt: 'Leitura Bíblica',  score: 5, cat: 'spiritual'},
+    {en: 'Communion',        pt: 'Comunhão',         score: 4, cat: 'spiritual'},
+    {en: 'Spiritual',        pt: 'Espiritual',       score: 5, cat: 'spiritual'},
+    {en: 'Prayer',           pt: 'Oração',           score: 5, cat: 'spiritual'},
+    {en: 'Professional',     pt: 'Profissional',     score: 5, cat: 'personal'},
+    {en: 'Academic',         pt: 'Acadêmico',        score: 7, cat: 'personal'},
+    {en: 'Financial',        pt: 'Financeiro',       score: 6, cat: 'personal'},
+    {en: 'Emotional',        pt: 'Emocional',        score: 8, cat: 'personal'},
+    {en: 'Health',           pt: 'Saúde',            score: 4, cat: 'life'},
+    {en: 'Rest',             pt: 'Descanso',         score: 6, cat: 'life'},
+    {en: 'Leisure',          pt: 'Lazer',            score: 6, cat: 'life'},
+    {en: 'Future Plan',      pt: 'Plano Futuro',     score: 9, cat: 'life'},
+    {en: 'Family',           pt: 'Família',          score: 7, cat: 'rel'},
+    {en: 'Solidarity',       pt: 'Solidariedade',    score: 5, cat: 'rel'},
+    {en: 'Marital',          pt: 'Conjugal',         score: 1, cat: 'rel'},
+    {en: 'Social',           pt: 'Social',           score: 7, cat: 'rel'},
+  ];
+  const COLOR = {
+    spiritual: '#BE965A',
+    personal:  '#5B9CC8',
+    life:      '#7DBE9E',
+    rel:       '#D88A8A',
+  };
+
+  let chart = null;
+  function render() {
+    const canvas = document.getElementById('wheelChart');
+    if (!canvas) return;
+    const lang = (document.documentElement.lang === 'pt') ? 'pt' : 'en';
+    const labels = DIMS.map(d => d[lang]);
+    const data   = DIMS.map(d => d.score);
+    const points = DIMS.map(d => COLOR[d.cat]);
+
+    if (chart) chart.destroy();
+    chart = new Chart(canvas, {
+      type: 'radar',
+      plugins: [{
+        id: 'wheelSegments',
+        afterDraw(c) {
+          const meta = c.getDatasetMeta(0);
+          const pts = meta && meta.data;
+          if (!pts || pts.length < 2) return;
+          const ctx2 = c.ctx;
+          const xy = pts.map(p => (typeof p.getCenterPoint === 'function') ? p.getCenterPoint() : { x: p.x, y: p.y });
+          ctx2.save();
+          ctx2.lineWidth = 3;
+          ctx2.lineJoin = 'round';
+          ctx2.lineCap = 'round';
+          for (let i = 0; i < xy.length; i++) {
+            const a = xy[i], b = xy[(i + 1) % xy.length];
+            ctx2.strokeStyle = COLOR[DIMS[i].cat];
+            ctx2.beginPath();
+            ctx2.moveTo(a.x, a.y);
+            ctx2.lineTo(b.x, b.y);
+            ctx2.stroke();
+          }
+          for (let i = 0; i < xy.length; i++) {
+            ctx2.fillStyle = COLOR[DIMS[i].cat];
+            ctx2.strokeStyle = '#0F2238';
+            ctx2.lineWidth = 1.5;
+            ctx2.beginPath();
+            ctx2.arc(xy[i].x, xy[i].y, 5.5, 0, Math.PI * 2);
+            ctx2.fill();
+            ctx2.stroke();
+          }
+          ctx2.restore();
+        }
+      }],
+      data: {
+        labels: labels,
+        datasets: [{
+          label: lang === 'pt' ? 'Pontuação' : 'Score',
+          data: data,
+          fill: true,
+          backgroundColor: 'rgba(91, 156, 200, 0.10)',
+          borderColor: 'rgba(0, 0, 0, 0)',
+          borderWidth: 0,
+          pointBackgroundColor: points,
+          pointBorderColor: points,
+          pointBorderWidth: 1.5,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(15, 34, 56, 0.96)',
+            borderColor: 'rgba(139, 184, 210, 0.40)',
+            borderWidth: 1,
+            titleColor: '#FFFFFF',
+            bodyColor: '#C9D4DD',
+            displayColors: true,
+            callbacks: {
+              label: (ctx) => `${ctx.label}: ${ctx.parsed.r}/10`
+            }
+          }
+        },
+        scales: {
+          r: {
+            min: 0, max: 10,
+            ticks: {
+              stepSize: 2,
+              color: '#5B7B95',
+              backdropColor: 'transparent',
+              font: { size: 11 }
+            },
+            grid:       { color: 'rgba(139, 184, 210, 0.18)' },
+            angleLines: { color: 'rgba(139, 184, 210, 0.20)' },
+            pointLabels: {
+              color: '#E6ECF1',
+              font: { family: "'IBM Plex Sans', sans-serif", size: 12, weight: '500' }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+
+  /* The bilingual switcher is bound by app.js; re-render after it has run
+     so the radar's axis labels track the chosen language. */
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => setTimeout(render, 50));
+  });
+})();
+</script>
 <script src="assets/app.js?v=24"></script>
+<script src="assets/chatbot.js?v=1" defer></script>
 </body>
 </html>

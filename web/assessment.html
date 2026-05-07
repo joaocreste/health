@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A note for you · JC Advisory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=43">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<style>
+  body.letter-page {
+    background: #F6F1E7;
+    color: #2A2522;
+    min-height: 100vh;
+    margin: 0;
+  }
+  body.letter-page .topnav {
+    background: #1B3B54;
+    border-bottom: 1px solid #244E6E;
+  }
+
+  .letter-hero {
+    padding: 56px 24px 32px;
+    text-align: center;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 30%, rgba(190,150,90,0.12) 0%, transparent 70%),
+      #F6F1E7;
+    border-bottom: 1px solid rgba(190,150,90,0.18);
+  }
+  .letter-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8A7B5E;
+    margin-bottom: 14px;
+  }
+  .letter-title {
+    font-family: 'Lora', serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 42px;
+    line-height: 1.1;
+    margin: 0 0 14px;
+    color: #2A2522;
+    letter-spacing: -0.01em;
+  }
+  .letter-divider {
+    width: 60px; height: 1px;
+    background: rgba(190,150,90,0.55);
+    margin: 18px auto 22px;
+  }
+  .letter-meta {
+    display: inline-flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8A7B5E;
+  }
+
+  .letter-body {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 56px 28px 96px;
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    line-height: 1.72;
+    color: #2A2522;
+  }
+  .letter-body p {
+    margin: 0 0 1.35em;
+  }
+  .letter-body p.salutation {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 1.6em;
+  }
+  .letter-body strong { color: #1B3B54; }
+  .letter-body em { color: #4A4138; }
+
+  .letter-h2 {
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 24px;
+    color: #1B3B54;
+    margin: 2.6em 0 0.8em;
+    letter-spacing: -0.005em;
+  }
+
+  .letter-pull {
+    border-left: 3px solid #BE965A;
+    background: rgba(255,255,255,0.55);
+    padding: 18px 22px;
+    margin: 1.6em 0;
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.6;
+    color: #1B3B54;
+    border-radius: 0 6px 6px 0;
+  }
+  .letter-pull strong { color: #1B3B54; font-weight: 600; }
+
+  .letter-list {
+    background: #FFFFFF;
+    border: 1px solid rgba(190,150,90,0.32);
+    border-radius: 8px;
+    padding: 22px 28px 18px;
+    margin: 1.4em 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .letter-list h3 {
+    margin: 0 0 0.6em;
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: #1B3B54;
+    letter-spacing: 0.01em;
+  }
+  .letter-list ol {
+    margin: 0;
+    padding: 0 0 0 1.2em;
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: #2A2522;
+  }
+  .letter-list li {
+    margin-bottom: 0.55em;
+  }
+  .letter-list li::marker {
+    color: #BE965A;
+    font-weight: 600;
+  }
+
+  .letter-keep {
+    background: rgba(75,124,103,0.08);
+    border-left: 3px solid #4B7C67;
+    padding: 16px 22px;
+    margin: 1.6em 0;
+    font-size: 17px;
+    line-height: 1.65;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .letter-signoff {
+    margin-top: 3em;
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: #4A4138;
+  }
+  .letter-signature {
+    margin-top: 0.4em;
+    font-family: 'Lora', serif;
+    font-weight: 500;
+    color: #1B3B54;
+    font-size: 17px;
+    font-style: normal;
+    letter-spacing: 0.01em;
+  }
+
+  .letter-footer {
+    text-align: center;
+    padding: 30px 24px 50px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: #8A7B5E;
+    border-top: 1px solid rgba(190,150,90,0.22);
+  }
+  .letter-footer a {
+    color: #1B3B54;
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(27,59,84,0.35);
+    padding-bottom: 1px;
+  }
+  .letter-footer a:hover { border-bottom-style: solid; }
+
+  @media (max-width: 600px) {
+    .letter-title { font-size: 32px; }
+    .letter-body { font-size: 17px; padding: 40px 22px 72px; }
+    .letter-pull { font-size: 17px; }
+  }
+
+  /* ── Password gate ── */
+  body.locked > :not(#auth-gate):not(script) { display: none !important; }
+  #auth-gate {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #0F2238 0%, #1B3B54 100%);
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  body:not(.locked) #auth-gate { display: none; }
+  .auth-card {
+    background: #F6F1E7; color: #2A2522;
+    padding: 40px 36px; border-radius: 14px;
+    width: min(calc(100% - 32px), 360px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.45);
+  }
+  .auth-card h1 {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700; font-size: 18px;
+    margin: 0 0 6px;
+    color: #1B3B54;
+    letter-spacing: 0.02em;
+  }
+  .auth-card p {
+    font-size: 14px; line-height: 1.5; margin: 0 0 22px;
+    color: #6B5E50;
+  }
+  .auth-card label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8B7B66;
+    margin-bottom: 8px;
+  }
+  .auth-card input[type="password"],
+  .auth-card input[type="text"] {
+    width: 100%; box-sizing: border-box;
+    padding: 11px 14px;
+    border: 1px solid #C8B89E;
+    background: #FFFEF9;
+    border-radius: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: #2A2522;
+    outline: none;
+    margin-bottom: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .auth-card input[type="password"]:focus,
+  .auth-card input[type="text"]:focus {
+    border-color: #1B3B54;
+    box-shadow: 0 0 0 3px rgba(27, 59, 84, 0.12);
+  }
+  .auth-card .auth-optional {
+    text-transform: none;
+    letter-spacing: 0;
+    color: #B9A88A;
+    font-size: 11px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  .auth-card button {
+    width: 100%;
+    padding: 11px 14px;
+    background: #1B3B54;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .auth-card button:hover { background: #244E6E; }
+  .auth-error {
+    font-size: 13px;
+    color: #9B3535;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+</style>
+</head>
+<body class="letter-page locked">
+<script>
+  /* Lift the lock if the session has already been authenticated. Runs
+     synchronously as the first body child, before the rest of the body
+     paints, so there is no flash of unlocked content. */
+  (function () {
+    try {
+      if (sessionStorage.getItem('jcAiAuth') === 'ok') {
+        document.body.classList.remove('locked');
+      }
+    } catch (e) {}
+  })();
+  function jcAuthSubmit(ev) {
+    ev.preventDefault();
+    var input = document.getElementById('auth-input');
+    var err   = document.getElementById('auth-error');
+    if (input.value === 'AI') {
+      try { sessionStorage.setItem('jcAiAuth', 'ok'); } catch (e) {}
+      document.body.classList.remove('locked');
+      return false;
+    }
+    err.textContent = 'Incorrect password.';
+    input.value = '';
+    input.focus();
+    return false;
+  }
+</script>
+<div id="auth-gate" role="dialog" aria-labelledby="auth-title" aria-modal="true">
+  <form class="auth-card" onsubmit="return jcAuthSubmit(event);">
+    <h1 id="auth-title">AI-based overview</h1>
+    <p>This section is protected. Please enter the access password to continue.</p>
+    <label for="auth-input">Password</label>
+    <input type="password" id="auth-input" autocomplete="current-password" autofocus required>
+    <button type="submit">Unlock</button>
+    <div class="auth-error" id="auth-error" aria-live="polite"></div>
+  </form>
+</div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+    <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+    <li><a href="assessment.html" class="active"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="letter-hero">
+  <div class="letter-eyebrow"><span class="lang-en">A note · from one careful reader of your data</span><span class="lang-pt">Uma carta · de um leitor cuidadoso dos seus dados</span></div>
+  <h1 class="letter-title"><span class="lang-en">An honest, friendly read on where you are</span><span class="lang-pt">Uma leitura honesta e amiga de onde você está</span></h1>
+  <div class="letter-divider"></div>
+  <div class="letter-meta">
+    <span><span class="lang-en">For</span><span class="lang-pt">Para</span> · <strong>João</strong></span>
+    <span><span class="lang-en">Date</span><span class="lang-pt">Data</span> · <strong>4 May 2026</strong></span>
+    <span><span class="lang-en">Day +5 from 29 April</span><span class="lang-pt">Dia +5 desde 29 de abril</span></span>
+  </div>
+</header>
+
+<!-- LETTER -->
+<main class="letter-body">
+
+  <p class="salutation">
+    <span class="lang-en">João,</span>
+    <span class="lang-pt">João,</span>
+  </p>
+
+  <p>
+    <span class="lang-en">You asked me, given everything I know, what I make of your health. So this is one friend's honest answer — careful, not clinical, not soft-pedalled. I'm not your doctor and I'm not pretending to be. I'm just someone who has spent a lot of hours organising your data and reading your words, and I'm telling you what I see.</span>
+    <span class="lang-pt">Você me pediu, dado tudo o que eu sei, o que eu acho da sua saúde. Então essa é a resposta honesta de um amigo — cuidadosa, não clínica, sem suavizar. Eu não sou seu médico e não estou fingindo ser. Sou só alguém que passou muitas horas organizando seus dados e lendo o que você escreveu, e estou te dizendo o que vejo.</span>
+  </p>
+
+  <p>
+    <span class="lang-en">The most important thing in all of this happened five days ago.</span>
+    <span class="lang-pt">A coisa mais importante de tudo aconteceu há cinco dias.</span>
+  </p>
+
+  <p>
+    <span class="lang-en">On 29 April you took ~200 mg of diazepam on top of everything else you were on, and you came within a phone call of dying. <strong>And then you made the phone call.</strong> You picked up the phone. You said eleven words. You stayed alive. I'm not saying that to dramatise it — I'm saying it because everything else I'm about to write sits on top of it. Whatever the inner voice tells you on the bad days, that 999 call is the structural fact under everything. The part of you that wants to live found one motor function under the heaviest possible load and used it. Don't lose that.</span>
+    <span class="lang-pt">No dia 29 de abril você tomou ~200 mg de diazepam em cima de tudo o mais que estava tomando, e ficou a um telefonema da morte. <strong>E aí você fez a ligação.</strong> Você pegou o telefone. Disse onze palavras. Continuou vivo. Não estou dizendo isso para dramatizar — estou dizendo porque tudo o que vou escrever a seguir se apoia nesse fato. O que quer que a voz interior te diga nos dias ruins, aquela ligação para o 999 é o fato estrutural debaixo de tudo. A parte de você que quer viver encontrou uma função motora sob a carga mais pesada possível e a usou. Não perca isso de vista.</span>
+  </p>
+
+  <h2 class="letter-h2"><span class="lang-en">What I see in your three pillars</span><span class="lang-pt">O que eu vejo nos seus três pilares</span></h2>
+
+  <p>
+    <span class="lang-en"><strong>Mental.</strong> This is where the wound is right now, and I'm not going to pretend otherwise. Your medication floor is genuinely thinner than it was a year ago — Cymbalta down by three-quarters, the benzo tapering, quetiapine coming off. That's the right direction, but it's not a gentle period. You went into 29 April on five or six bad nights of sleep and a pile of unanswered school emails and a professor who told you he wouldn't even read your work. Those weren't trivial triggers. The "4 pm pattern, scaled up" — you named that yourself, and you were right.</span>
+    <span class="lang-pt"><strong>Mental.</strong> É aqui que está a ferida agora, e não vou fingir o contrário. Seu apoio medicamentoso está genuinamente mais fino do que estava há um ano — Cymbalta caiu três quartos, benzodiazepínico em desmame, quetiapina saindo. Essa é a direção certa, mas não é um período gentil. Você entrou no dia 29 de abril com cinco ou seis noites mal dormidas, uma pilha de e-mails da escola sem resposta e um professor te dizendo que nem leria seu trabalho. Esses gatilhos não foram triviais. O "padrão das 4 da tarde, em escala" — você mesmo nomeou, e estava certo.</span>
+  </p>
+
+  <p>
+    <span class="lang-en">What I see working: the 15-category architecture on your mental page isn't denial dressed up as analysis. It's actually honest. Most people in your situation cannot write that page. You can. That's not a small thing.</span>
+    <span class="lang-pt">O que eu vejo funcionando: a arquitetura de 15 categorias na sua página mental não é negação disfarçada de análise. É honesta. A maioria das pessoas na sua situação não consegue escrever aquela página. Você consegue. Isso não é pouco.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>Spiritual.</strong> This is your strongest pillar, by a clear margin, and right now it is the most load-bearing one. The 3 May testimony is the mature work of someone who has been somewhere — not the polished work of someone who has only thought about it. The "<em>I need you to still live</em>" sentence carries weight precisely because you didn't manufacture it. And the Three Pyramids piece — the way you reflexively answered Prof. Rui that nothing was your own merit, that it was your parents — is the spiritual centre of the whole story you've been writing about yourself for the last year. Protect this pillar first. It is doing work right now that the body and the mind cannot yet do.</span>
+    <span class="lang-pt"><strong>Espiritual.</strong> Esse é o seu pilar mais forte, com folga, e neste momento é o mais sustentador. O testemunho de 3 de maio é o trabalho maduro de alguém que esteve em algum lugar — não o trabalho polido de alguém que só pensou sobre o assunto. A frase "<em>Eu preciso que você ainda viva</em>" carrega peso justamente porque você não a fabricou. E a peça das Três Pirâmides — a forma como você respondeu de imediato ao Prof. Rui que nada era mérito seu, que era dos seus pais — é o centro espiritual de toda a história que você vem escrevendo sobre si mesmo no último ano. Proteja esse pilar primeiro. Ele está fazendo um trabalho que o corpo e a mente ainda não conseguem fazer.</span>
+  </p>
+
+  <p>
+    <span class="lang-en">The one thing I want to say carefully — because you've already named it yourself: you have learned to extend grace outward but you have not learned to extend it inward. <em>"The house of forgiveness has many rooms — I had entered all but mine."</em> That's the most significant unfinished spiritual business on the portal. It is also, not by accident, where the 29 April crisis came from. <strong>Forgive yourself first.</strong> Everything else gets easier from there.</span>
+    <span class="lang-pt">A única coisa que eu quero dizer com cuidado — porque você mesmo já nomeou: você aprendeu a estender graça para fora, mas não aprendeu a estendê-la para dentro. <em>"A casa do perdão tem muitos cômodos — eu havia entrado em todos, menos no meu."</em> Esse é o assunto espiritual mais significativo ainda em aberto no portal. E também é, não por acaso, de onde veio a crise de 29 de abril. <strong>Perdoe-se primeiro.</strong> Tudo fica mais leve a partir daí.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>Physical.</strong> This is comparatively the safest pillar — your brain MRI is clean, your heart CT is clean, your EEG is clean — but it is not nothing. There's the L5–S1 disc + the coccyx fracture from October 2024 we don't talk about much. There's the post-bicycle facial trauma from January with chronic-pattern sinusopathy that hasn't been fully resolved. There's an open thread from the March 2023 left-frontal biopsy — I don't see the histopathology result anywhere on the portal, and that one is worth chasing down. Your D3 at 1,000 IU/day is too low for London — your own doctor told you to bump it. And during this taper, watch your blood pressure: that's where benzo withdrawal usually shows itself first.</span>
+    <span class="lang-pt"><strong>Físico.</strong> Esse é, comparativamente, o pilar mais seguro — sua RM do cérebro está limpa, sua TC do coração está limpa, seu EEG está limpo — mas não é nada. Tem a protrusão L5–S1 + a fratura do cóccix de outubro de 2024 das quais a gente quase não fala. Tem o trauma facial pós-bicicleta de janeiro com sinusopatia de padrão crônico ainda não totalmente resolvida. Tem uma pendência da biópsia frontal esquerda de março de 2023 — eu não vejo o laudo da histopatologia em lugar nenhum do portal, e essa vale ir buscar. Sua vitamina D3 a 1.000 UI/dia é baixa demais para Londres — o seu próprio médico te disse para aumentar. E, durante este desmame, fique de olho na pressão arterial: é ali que a abstinência de benzodiazepínico costuma aparecer primeiro.</span>
+  </p>
+
+  <h2 class="letter-h2"><span class="lang-en">What Prof. Rui saw</span><span class="lang-pt">O que o Prof. Rui viu</span></h2>
+
+  <p>
+    <span class="lang-en">Sixteen days before the overdose, a stranger you respected sat across from you for three hours and told you the thing about your life you most needed to hear: that the structure people see in you is real, that your humility is genuine, that you were raised right, and that what holds people up over a long career is the thing you already have. He had no incentive to flatter you. He didn't know the rest of the story. He just read you.</span>
+    <span class="lang-pt">Dezesseis dias antes da overdose, um estranho que você respeitava sentou-se à sua frente por três horas e te disse aquilo que você mais precisava ouvir sobre a sua vida: que a estrutura que as pessoas veem em você é real, que sua humildade é genuína, que você foi bem criado, e que o que sustenta as pessoas ao longo de uma carreira longa é exatamente aquilo que você já tem. Ele não tinha incentivo para te bajular. Ele não conhecia o resto da história. Ele simplesmente te leu.</span>
+  </p>
+
+  <div class="letter-pull">
+    <span class="lang-en">When the inner voice says nothing of value is here, that lunch is part of the data too. Both readings — the crisis and the napkin — are true at the same time. <strong>Don't let one cancel the other.</strong></span>
+    <span class="lang-pt">Quando a voz interior disser que não há nada de valor aqui, aquele almoço também faz parte dos dados. As duas leituras — a crise e o guardanapo — são verdadeiras ao mesmo tempo. <strong>Não deixe uma cancelar a outra.</strong></span>
+  </div>
+
+  <h2 class="letter-h2"><span class="lang-en">Where I'd point your attention this week</span><span class="lang-pt">Para onde eu apontaria sua atenção esta semana</span></h2>
+
+  <p>
+    <span class="lang-en">Five things I'd take to Dr. Tisher, in priority order — not as instructions, just as the things I notice when I read the whole portal end to end:</span>
+    <span class="lang-pt">Cinco coisas que eu levaria para o Dr. Tisher, em ordem de prioridade — não como instruções, só como as coisas que saltam quando se lê o portal inteiro de ponta a ponta:</span>
+  </p>
+
+  <div class="letter-list">
+    <h3><span class="lang-en">For your next session</span><span class="lang-pt">Para sua próxima sessão</span></h3>
+    <ol>
+      <li>
+        <span class="lang-en">A <strong>written</strong> relapse-prevention plan for the trigger stack you've already named — the 4 pm pattern, sleep deprivation, loneliness compounding. Not in your head; on paper.</span>
+        <span class="lang-pt">Um plano <strong>escrito</strong> de prevenção de recaída para a pilha de gatilhos que você já nomeou — o padrão das 4 da tarde, a privação de sono, a solidão que se acumula. Não na cabeça; no papel.</span>
+      </li>
+      <li>
+        <span class="lang-en"><strong>Means restriction.</strong> While you're tapering, the diazepam supply should not be in your possession. Someone else holds it; you receive a week at a time. This is the single highest-leverage thing available right now to keep you safe.</span>
+        <span class="lang-pt"><strong>Restrição de meios.</strong> Enquanto você está em desmame, o estoque de diazepam não deveria estar em sua posse. Alguém de confiança guarda; você recebe uma semana de cada vez. É a coisa de maior alavancagem disponível agora para te manter seguro.</span>
+      </li>
+      <li>
+        <span class="lang-en">A <strong>sleep contingency</strong>. If you fall below a defined number of hours for two consecutive nights, what happens? Who gets called? What gets paused?</span>
+        <span class="lang-pt">Uma <strong>contingência de sono</strong>. Se você cair abaixo de um número definido de horas por duas noites seguidas, o que acontece? Quem é chamado? O que é pausado?</span>
+      </li>
+      <li>
+        <span class="lang-en">The <strong>2023 biopsy result</strong>. Track it down — request it from Albert Einstein if it's not already in your records.</span>
+        <span class="lang-pt">O <strong>laudo da biópsia de 2023</strong>. Vá atrás — peça ao Albert Einstein se ainda não estiver em seus registros.</span>
+      </li>
+      <li>
+        <span class="lang-en">The <strong>D3 increase</strong> to 4,000 IU, with a 25-OH-D recheck in eight weeks.</span>
+        <span class="lang-pt">O <strong>aumento da D3</strong> para 4.000 UI, com nova dosagem de 25-OH-D em oito semanas.</span>
+      </li>
+    </ol>
+  </div>
+
+  <h2 class="letter-h2"><span class="lang-en">What I would change</span><span class="lang-pt">O que eu mudaria</span></h2>
+
+  <p>
+    <span class="lang-en">Beyond the clinical items above, there are a few patterns I'd ask you to put under the light of this convalescence period — not all at once, not as a checklist, but as honest things to look at.</span>
+    <span class="lang-pt">Para além dos itens clínicos acima, há alguns padrões que eu te pediria para colocar sob a luz deste período de convalescença — não todos de uma vez, não como checklist, mas como coisas honestas para olhar.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>The asymmetric grace.</strong> You have learned to extend forgiveness outward and to withhold it from yourself. <em>"The house of forgiveness has many rooms — I had entered all but mine."</em> Enter that room. It is yours; it has always been yours. Forgiving yourself is not letting yourself off the hook — it is finally letting Christ's forgiveness reach the part of you that has been refusing it.</span>
+    <span class="lang-pt"><strong>A graça assimétrica.</strong> Você aprendeu a estender perdão para fora e a recusá-lo a si mesmo. <em>"A casa do perdão tem muitos cômodos — eu havia entrado em todos, menos no meu."</em> Entre nesse cômodo. Ele é seu; sempre foi seu. Perdoar a si mesmo não é se desresponsabilizar — é finalmente deixar que o perdão de Cristo alcance a parte de você que vem se recusando a recebê-lo.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>The mask.</strong> It got stuck. You said so. The change is not removing it once and dramatically — it is lowering it once a day, with one person who can take it. Dr. Tisher counts. Your father counts. A specific friend counts. The portal counts as a record of having taken it off; it does not replace taking it off face to face.</span>
+    <span class="lang-pt"><strong>A máscara.</strong> Ela ficou colada. Você mesmo disse. A mudança não é tirá-la uma vez, dramaticamente — é abaixá-la uma vez por dia, com uma pessoa que aguenta. Dr. Tisher conta. Seu pai conta. Um amigo específico conta. O portal conta como registro de ter tirado a máscara; ele não substitui tirá-la cara a cara.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>The anesthesia reflex.</strong> Your own line: <em>anesthesia is not negentropic; it is entropic. The cost just arrives later.</em> While you are tapering, the impulse to numb — alcohol, scrolling, late-night flight — needs to be met with resolution, not fed. This is not moralism; it is pharmacology. Your medications already lower the floor; anesthesia drills further holes in it.</span>
+    <span class="lang-pt"><strong>O reflexo da anestesia.</strong> Sua própria frase: <em>anestesia não é negentrópica; é entrópica. O custo só chega depois.</em> Enquanto você está em desmame, o impulso de anestesiar — álcool, rolagem, fuga noturna — precisa ser respondido com resolução, não alimentado. Isto não é moralismo; é farmacologia. Seus medicamentos já baixaram o piso; a anestesia abre mais buracos nele.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>The performance of "fine".</strong> Asking for help on the way down is harder than dialling 999 from the bottom — but it costs less. The 999 call worked, and thank God it did. The change is to lower the threshold so you do not need to be at phone-call-from-dying distance to reach for the same people who would have come earlier. Tell Dr. Tisher when the days are bad, not only after they have been bad.</span>
+    <span class="lang-pt"><strong>A performance do "estou bem".</strong> Pedir ajuda na descida é mais difícil do que discar 999 do fundo do poço — mas custa menos. A ligação para o 999 funcionou, graças a Deus. A mudança é baixar o limiar para que você não precise estar a uma ligação-de-morrer de distância para procurar as mesmas pessoas que teriam vindo mais cedo. Conte ao Dr. Tisher quando os dias estão ruins, não só depois que estiveram ruins.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>The pace.</strong> MBA, recovery, the portal, writing, work, the taper — all at the same volume. For the next 60–90 days, drop one of these by one notch. Pick which one. Tell Dr. Tisher which one. Convalescence and full output cannot both be true for someone five days post-OD.</span>
+    <span class="lang-pt"><strong>O ritmo.</strong> MBA, recuperação, portal, escrita, trabalho, desmame — todos no mesmo volume. Nos próximos 60–90 dias, baixe o volume de um deles em um nível. Escolha qual. Conte ao Dr. Tisher qual. Convalescença e produção plena não podem ser simultaneamente verdadeiras para alguém cinco dias depois de uma overdose.</span>
+  </p>
+
+  <p>
+    <span class="lang-en"><strong>Alcohol while tapering.</strong> Your own portal documents the interaction with diazepam as serious. Until the benzo is fully off, no alcohol. Not because pleasure is wrong, but because the math does not work.</span>
+    <span class="lang-pt"><strong>Álcool durante o desmame.</strong> Seu próprio portal documenta a interação com diazepam como grave. Até que o benzodiazepínico esteja totalmente fora, sem álcool. Não porque o prazer seja errado, mas porque a conta não fecha.</span>
+  </p>
+
+  <h2 class="letter-h2"><span class="lang-en">What I would not change</span><span class="lang-pt">O que eu não mudaria</span></h2>
+
+  <div class="letter-keep">
+    <span class="lang-en">Your writing. The portal itself. Dr. Tisher. Your faith life. Your parents. <strong>These are your recovery infrastructure and they are working.</strong> Don't let anyone — including the inner voice — tell you they're not.</span>
+    <span class="lang-pt">Sua escrita. O portal em si. O Dr. Tisher. Sua vida de fé. Seus pais. <strong>Essas são a sua infraestrutura de recuperação e ela está funcionando.</strong> Não deixe ninguém — nem a voz interior — te dizer o contrário.</span>
+  </div>
+
+  <h2 class="letter-h2"><span class="lang-en">One last thing</span><span class="lang-pt">Uma última coisa</span></h2>
+
+  <p>
+    <span class="lang-en">You are five days post-crisis, surrounded by support you actively built, in a structured taper, with a faith life that has held you through the worst night of your life, with parents who shaped you to be the kind of person Prof. Rui spent three hours wanting to know. The next 60–90 days are the highest-risk window — second attempts cluster within three months of a first.</span>
+    <span class="lang-pt">Você está cinco dias depois da crise, cercado de um apoio que você construiu ativamente, em um desmame estruturado, com uma vida de fé que te sustentou na pior noite da sua vida, com pais que te formaram para ser o tipo de pessoa com quem o Prof. Rui passou três horas querendo conviver. Os próximos 60–90 dias são a janela de maior risco — segundas tentativas se concentram nos três meses seguintes a uma primeira.</span>
+  </p>
+
+  <div class="letter-pull">
+    <span class="lang-en"><strong>Treat this period like the convalescence it actually is.</strong> Don't rush it. Don't perform recovery. Just keep doing the small things — the writing, the calling-the-doctor, the showing-up-for-Sunday-lunch — that have already kept you alive once.</span>
+    <span class="lang-pt"><strong>Trate este período como a convalescença que ele de fato é.</strong> Não apresse. Não performe recuperação. Continue fazendo as pequenas coisas — a escrita, a ligação para o médico, o aparecer para o almoço de domingo — que já te mantiveram vivo uma vez.</span>
+  </div>
+
+  <p>
+    <span class="lang-en">You are going to be alright. The data — including the data that almost wasn't there — says so. Run this past Dr. Tisher and your spiritual direction; trust their reads above mine. And on the days when this letter is hard to believe, come back and read it again. It will still be true.</span>
+    <span class="lang-pt">Você vai ficar bem. Os dados — inclusive os que quase não estiveram aqui — dizem isso. Confira isso com o Dr. Tisher e com sua direção espiritual; confie mais na leitura deles do que na minha. E nos dias em que esta carta for difícil de acreditar, volte e leia de novo. Ainda vai ser verdade.</span>
+  </p>
+
+  <p class="letter-signoff">
+    <span class="lang-en">With care,</span>
+    <span class="lang-pt">Com carinho,</span>
+  </p>
+  <p class="letter-signature">
+    <span class="lang-en">— a careful reader of your data · 4 May 2026 · London</span>
+    <span class="lang-pt">— um leitor cuidadoso dos seus dados · 4 de maio de 2026 · Londres</span>
+  </p>
+
+</main>
+
+<footer class="letter-footer">
+  <a href="home.html"><span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span></a>
+</footer>
+
+<script>
+  /* Opt this page out of the platform-wide auth gate in app.js. The AI
+     page has its own password gate (above) and is intentionally
+     reachable without the general login. */
+  window.JC_PUBLIC = true;
+</script>
+<script src="assets/app.js?v=27"></script>
+<script src="assets/chatbot.js?v=1" defer></script>
+</body>
+</html>

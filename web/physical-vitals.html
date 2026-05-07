@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=39">
+<link rel="stylesheet" href="assets/styles.css?v=43">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
@@ -141,7 +141,7 @@
           <div class="chart-card-meta"><span class="lang-en">Velocity profile · 1,712 readings · 26 Apr → 2 May 2026</span><span class="lang-pt">Perfil de velocidade · 1.712 leituras · 26 abr → 2 mai 2026</span></div>
         </div>
 
-        <p class="ai-headline"><span class="lang-en">The mean is fine — the <em>slope</em> is the problem.</span><span class="lang-pt">A média está boa — o <em>declive</em> é o problema.</span></p>
+        <p class="ai-headline"><span class="lang-en">The mean is fine — the <em>slope</em> is the problem.</span><span class="lang-pt">A média está boa — a <em>inclinação</em> é o problema.</span></p>
 
         <p class="ai-body"><span class="lang-en">Mean 91.6 mg/dL, median 90, CV 16.6%, time-in-range (60–180) <strong>98.9%</strong>. On levels alone, control looks textbook. The interesting story is in the velocity.</span><span class="lang-pt">Média 91,6 mg/dL, mediana 90, CV 16,6%, tempo em alvo (60–180) <strong>98,9%</strong>. Olhando só nos níveis, o controle parece exemplar. A história interessante está na velocidade.</span></p>
 
@@ -288,6 +288,14 @@
       <div class="chart-wrap"><canvas id="cardioChart"></canvas></div>
     </div>
 
+    <div class="chart-card mt-3">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Daily patterns — heart rate by time of day</span><span class="lang-pt">Padrões diários — frequência cardíaca por hora do dia</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura wrist HR · 231,451 readings folded onto a 24-hour day · median curve · ±1 SD · ±2 SD · Oct 2025 → Apr 2026</span><span class="lang-pt">FC do Oura · 231.451 leituras dobradas em 24h · curva mediana · ±1 DP · ±2 DP · out 2025 → abr 2026</span></div>
+      </div>
+      <div id="hrPatternsChart" class="chart-wrap tall"></div>
+    </div>
+
     <div class="three-col mt-3">
       <div class="list-card">
         <h4>HRV findings</h4>
@@ -322,7 +330,7 @@
       <div class="metric-card"><div class="metric-label">Poor recording</div><div class="metric-value">3<small>/57</small></div><div class="metric-note">Re-record needed</div></div>
       <div class="metric-card"><div class="metric-label">Atrial fibrillation</div><div class="metric-value">0</div><div class="metric-note"><span class="pill pill-ok">None detected</span></div></div>
     </div>
-    <p class="text-soft mb-2" style="font-size:13px;">Most recent eight ECGs:</p>
+    <p class="text-soft mb-2" style="font-size: 14px;">Most recent eight ECGs:</p>
     <table class="data-table">
       <thead><tr><th>Date</th><th>Classification</th><th>File</th></tr></thead>
       <tbody id="ecgTbody"><!-- populated by JS --></tbody>
@@ -452,7 +460,7 @@
         <tr><td><span class="pill pill-watch">Phase 2*</span></td><td class="strong">Zinc</td><td>1 cap lunch</td><td>Improves GABA receptor function.</td></tr>
       </tbody>
     </table>
-    <p class="text-faint" style="font-size:11.5px;">* Phase 2 supplementation introduction depends on benzodiazepine taper progress and psychiatrist's directions.</p>
+    <p class="text-faint" style="font-size: 12px;">* Phase 2 supplementation introduction depends on benzodiazepine taper progress and psychiatrist's directions.</p>
 
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;">Clinical formulation (31 March 2026)</h3>
     <div class="list-card">
@@ -477,7 +485,7 @@
 </footer>
 
 <script src="assets/app.js?v=27"></script>
-<script src="assets/data.js?v=24"></script>
+<script src="assets/data.js?v=25"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -919,7 +927,7 @@ function renderGlucoseChart() {
   const el = document.getElementById('glucoseChart');
   if (!el) return;
   const showErr = (msg) => {
-    el.innerHTML = '<div style="padding:1rem;color:#9b3535;font-size:13px;">'
+    el.innerHTML = '<div style="padding:1rem;color:#9b3535;font-size: 14px;">'
       + 'Glucose chart failed to load: ' + msg + '</div>';
     console.error('[glucose]', msg);
   };
@@ -1144,14 +1152,128 @@ function renderGlucosePatternsChart() {
   }
 }
 
+/* 7c — Heart-rate daily patterns — Oura wrist-HR pre-aggregated into
+   288 five-minute slots in HR_BY_TOD: [count, median, mean, sd] per slot.
+   Same band shape as the glucose chart, painted in the red palette. */
+function renderHrPatternsChart() {
+  const el = document.getElementById('hrPatternsChart');
+  if (!el) return;
+  if (typeof HR_BY_TOD === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    const N = HR_BY_TOD.length;
+    const rawMed  = HR_BY_TOD.map(r => r[1]);
+    const rawMean = HR_BY_TOD.map(r => r[2]);
+    const rawSd   = HR_BY_TOD.map(r => r[3]);
+
+    /* Circular rolling mean to smooth midnight wrap (±3 slots ≈ 35-min). */
+    const smooth = (arr, w) => {
+      const n = arr.length;
+      const out = new Array(n);
+      for (let i = 0; i < n; i++) {
+        let sum = 0, cnt = 0;
+        for (let k = -w; k <= w; k++) {
+          const j = (i + k + n) % n;
+          const v = arr[j];
+          if (v != null && !isNaN(v)) { sum += v; cnt++; }
+        }
+        out[i] = cnt ? sum / cnt : NaN;
+      }
+      return out;
+    };
+    const W = 3;
+    const med = smooth(rawMed,  W);
+    const m1  = smooth(rawMean, W);
+    const sd1 = smooth(rawSd,   W);
+
+    const xs = Array.from({ length: N }, (_, i) => i * 5); // minutes since midnight
+
+    /* Two stacked fill bands in red — outer ±2 SD lighter, inner ±1 SD darker. */
+    const lower2 = m1.map((m, i) => m - 2 * sd1[i]);
+    const upper2 = m1.map((m, i) => m + 2 * sd1[i]);
+    const lower1 = m1.map((m, i) => m - sd1[i]);
+    const upper1 = m1.map((m, i) => m + sd1[i]);
+
+    const noLine = { width: 0, color: 'rgba(0,0,0,0)' };
+    const traces = [
+      { x: xs, y: lower2, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: upper2, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(220, 89, 89, 0.22)',  /* red-400 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: lower1, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: upper1, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(165, 48, 48, 0.42)',  /* red-600 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: med, type: 'scatter', mode: 'lines',
+        line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },  /* red-800 */
+        customdata: xs.map(min => {
+          const h = Math.floor(min / 60), mm = min % 60;
+          const ampm = h < 12 ? 'am' : 'pm';
+          const h12 = (h % 12) === 0 ? 12 : (h % 12);
+          return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
+        }),
+        hovertemplate: '%{customdata}<br>Median <b>%{y:.0f} bpm</b><extra></extra>',
+        showlegend: false }
+    ];
+
+    /* Resting-zone reference lines (80 / 100 bpm). */
+    const refLines = [
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 80,  y1: 80,
+        line: { color: '#3D9460', width: 1.2 } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 100, y1: 100,
+        line: { color: '#C29327', width: 1.2, dash: 'dot' } },
+    ];
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 50 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      shapes: refLines,
+      xaxis: {
+        tickmode: 'array',
+        tickvals: [0, 180, 360, 540, 720, 900, 1080, 1260, 1440],
+        ticktext: ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+        range: [0, 1440],
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: 'bpm', font: { color: C.inkSoft } },
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, traces, layout, config);
+    console.log('[hr-patterns] rendered', xs.length, 'slots');
+  } catch (e) {
+    console.error('[hr-patterns]', e);
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     renderGlucoseChart();
     renderGlucosePatternsChart();
+    renderHrPatternsChart();
   });
 } else {
   renderGlucoseChart();
   renderGlucosePatternsChart();
+  renderHrPatternsChart();
 }
 
 /* 8 — ECG table populator (real data: 57 ECGs from Apple Health) */
@@ -1165,7 +1287,7 @@ if (document.readyState === 'loading') {
       `<span class="pill">${cls}</span>`;
 
     const rows = ECG.slice(0, 8).map(([date, cls, file]) =>
-      `<tr><td>${date}</td><td>${pillFor(cls)}</td><td class="text-faint" style="font-size:11px;">${file}</td></tr>`
+      `<tr><td>${date}</td><td>${pillFor(cls)}</td><td class="text-faint" style="font-size: 12px;">${file}</td></tr>`
     );
     tbody.innerHTML = rows.join('');
   }
@@ -1175,6 +1297,7 @@ if (document.readyState === 'loading') {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="assets/export.js?v=7"></script>
+<script src="assets/chatbot.js?v=1" defer></script>
 
 </body>
 </html>

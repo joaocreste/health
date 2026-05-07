@@ -1,0 +1,234 @@
+<!-- PWA / iOS -->
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Radar de Vida">
+
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Radar de Vida – 16 Dimensões</title>
+
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  input {
+    width: 60px;
+  }
+
+  button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+
+  #grafico {
+    margin-top: 30px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Radar de Vida – 16 Dimensões</h1>
+
+  <div class="grid" id="formulario"></div>
+
+  <button onclick="atualizarGrafico()">Atualizar Gráfico</button>
+  <button onclick="exportarPNG()">Exportar PNG</button>
+
+  <div id="grafico"></div>
+</div>
+
+<script>
+/* =====================================================
+   DEFINIÇÃO DOS GRUPOS (EXATAMENTE COMO NA IMAGEM)
+===================================================== */
+
+const grupos = [
+  {
+    nome: "DISCIPLINAS ESPIRITUAIS",
+    dimensoes: ["Leitura Bíblica", "Oração", "Comunhão", "Solidariedade"]
+  },
+  {
+    nome: "RELACIONAMENTO",
+    dimensoes: ["Espiritual", "Conjugal", "Familiar", "Social"]
+  },
+  {
+    nome: "PESSOAL",
+    dimensoes: ["Profissional", "Financeira", "Acadêmica", "Emocional"]
+  },
+  {
+    nome: "QUALIDADE DE VIDA",
+    dimensoes: ["Saúde", "Lazer", "Descanso", "Plano Futuro"]
+  }
+];
+
+const dimensoes = grupos.flatMap(g => g.dimensoes);
+
+/* =====================================================
+   FORMULÁRIO
+===================================================== */
+
+const form = document.getElementById("formulario");
+
+dimensoes.forEach(nome => {
+  const label = document.createElement("label");
+  label.innerHTML = `
+    ${nome}
+    <input type="number" min="0" max="10" value="5">
+  `;
+  form.appendChild(label);
+});
+
+/* =====================================================
+   FUNÇÕES GEOMÉTRICAS
+===================================================== */
+
+function polarToCartesian(cx, cy, r, angle) {
+  const rad = angle * Math.PI / 180;
+  return {
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad)
+  };
+}
+
+function describeArc(cx, cy, r, startAngle, endAngle) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  return [
+    "M", start.x, start.y,
+    "A", r, r, 0, largeArcFlag, 0, end.x, end.y
+  ].join(" ");
+}
+
+/* =====================================================
+   GRÁFICO
+===================================================== */
+
+function atualizarGrafico() {
+  const valores = [...form.querySelectorAll("input")].map(i => Number(i.value));
+
+  const trace = {
+    type: "scatterpolar",
+    r: [...valores, valores[0]],
+    theta: [...dimensoes, dimensoes[0]],
+    fill: "toself",
+    fillcolor: "rgba(40,120,160,0.45)",
+    line: { color: "#1f4e5f", width: 2 },
+    name: "Avaliação"
+  };
+
+  const shapes = [];
+  const annotations = [];
+
+  const total = dimensoes.length;
+  const passo = 360 / total;
+
+  let indice = 0;
+
+  grupos.forEach(grupo => {
+    const inicio = indice * passo;
+    const fim = (indice + grupo.dimensoes.length) * passo;
+    const meio = (inicio + fim) / 2;
+
+    // Arco externo
+    shapes.push({
+      type: "path",
+      path: describeArc(0.5, 0.5, 0.47, inicio - 90, fim - 90),
+      xref: "paper",
+      yref: "paper",
+      line: { color: "#000", width: 2 }
+    });
+
+    // Texto do grupo
+    annotations.push({
+      text: grupo.nome,
+      x: 0.5 + 0.52 * Math.cos(meio * Math.PI / 180),
+      y: 0.5 + 0.52 * Math.sin(meio * Math.PI / 180),
+      showarrow: false,
+      font: { size: 13, color: "#000" }
+    });
+
+    indice += grupo.dimensoes.length;
+  });
+
+  Plotly.newPlot("grafico", [trace], {
+    polar: {
+      radialaxis: {
+        range: [0, 10],
+        tickfont: { size: 10 },
+        gridcolor: "#ccc"
+      },
+      angularaxis: {
+        tickfont: { size: 10 }
+      }
+    },
+    shapes,
+    annotations,
+    showlegend: false,
+    margin: { t: 40, b: 40, l: 40, r: 40 }
+  });
+}
+
+/* =====================================================
+   EXPORTAÇÃO
+===================================================== */
+
+function exportarPNG() {
+  Plotly.toImage("grafico", {
+    format: "png",
+    width: 1000,
+    height: 1000
+  }).then(url => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "radar_vida.png";
+    a.click();
+  });
+}
+
+atualizarGrafico();
+</script>
+
+</body>
+</html>
