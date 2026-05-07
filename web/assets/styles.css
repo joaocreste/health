@@ -1628,6 +1628,95 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   font-size: 14px;
 }
 
+/* ── PSYCH ARCHITECTURE V2 — DIMENSION CARD GRID ── */
+.psych-architecture-v2 {
+  margin-top: 1.5rem;
+}
+.psych-dim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.psych-dim-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 18px 18px 16px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+.psych-dim-card:hover {
+  border-color: var(--blue-400);
+  box-shadow: var(--shadow-md);
+}
+.psych-dim-card.is-open {
+  border-color: var(--blue-600);
+  background: var(--blue-50);
+  box-shadow: var(--shadow-md);
+}
+.psych-dim-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+.psych-dim-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--blue-900);
+  line-height: 1.25;
+}
+.psych-dim-card.is-open .psych-dim-name { color: var(--blue-700); }
+.psych-dim-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+
+.psych-dim-panel {
+  background: var(--surface-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 24px 24px 20px;
+  margin-bottom: 1.5rem;
+  scroll-margin-top: 24px;
+}
+.psych-dim-panel-head {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+.psych-dim-panel-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--blue-900);
+  margin-bottom: 6px;
+  letter-spacing: -0.005em;
+}
+.psych-dim-panel-blurb {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.psych-dim-empty {
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.6;
+  padding: 12px 0;
+}
+.psych-dim-panel .psych-item:last-child { margin-bottom: 0; }
+
 /* ── CT IMAGING VIEWER ── */
 .ct-grid {
   display: grid;
