@@ -46,6 +46,23 @@ export const imagingModality = pgEnum("imaging_modality", [
 export const imagingSourceFormat = pgEnum("imaging_source_format", [
   "DICOM", "JPEG", "PNG", "MIXED",
 ]);
+export const encounterType = pgEnum("encounter_type", [
+  "in_person", "remote", "phone", "er", "admission", "lab_followup", "other",
+]);
+export const taperDirection = pgEnum("taper_direction", [
+  "increase", "decrease", "hold", "stop", "restart",
+]);
+export const ecgClassification = pgEnum("ecg_classification", [
+  "sinus_rhythm", "high_heart_rate", "low_heart_rate",
+  "atrial_fibrillation", "poor_recording", "inconclusive", "other",
+]);
+export const pgxCategory = pgEnum("pgx_category", [
+  "pharmacokinetic", "pharmacodynamic", "condition_risk", "other",
+]);
+export const lifeEventCategory = pgEnum("life_event_category", [
+  "birth", "move", "marriage", "divorce", "job",
+  "education", "hospitalization", "diagnosis", "loss", "crisis", "other",
+]);
 
 /* ───── 1. Identity & access ──────────────────────── */
 
@@ -355,4 +372,215 @@ export const auditLog = pgTable("audit_log", {
 }, (t) => [
   index("audit_actor_at_idx").on(t.actorUserId, t.at),
   index("audit_patient_at_idx").on(t.patientContext, t.at),
+]);
+
+/* ───── 7. Mental health — psychological architecture ─ */
+
+/* Reference table — the 13 AMPD-aligned dimensions are global, not patient-scoped.
+   Seeded by db/migrations/0002_psych_dimensions_seed.sql. */
+export const psychDimensions = pgTable("psych_dimensions", {
+  id: text("id").primaryKey(),               // 'identity', 'self_direction', ...
+  rank: integer("rank").notNull(),           // 1..13 display order
+  framework: text("framework").default("AMPD").notNull(),
+  nameEn: text("name_en").notNull(),
+  namePt: text("name_pt"),
+  blurb: text("blurb"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+/* One row per item in a patient's psych architecture (84 for Patient Zero).
+   Re-derivable from the personal-writings corpus by an LLM pass; therefore
+   stamped with `generatedBy` so we know which run produced it. */
+export const psychItems = pgTable("psych_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  dimensionId: text("dimension_id").notNull().references(() => psychDimensions.id),
+  legacyAnchor: text("legacy_anchor"),       // 'psych-1-3' — backward compat with HTML anchors
+  title: text("title").notNull(),
+  synthesis: text("synthesis").notNull(),
+  rank: integer("rank"),                     // display order within dimension
+  generatedAt: timestamp("generated_at", { withTimezone: true }),
+  generatedBy: text("generated_by"),         // 'manual' | 'llm:opus-4-7' | ...
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("psych_items_patient_dim_idx").on(t.patientId, t.dimensionId),
+  index("psych_items_legacy_anchor_idx").on(t.legacyAnchor),
+]);
+
+/* Quoted evidence drawn from a writing (or any patient document). The
+   citation pair (sourceFilename, sourceParagraph) lets us round-trip
+   to the on-disk corpus even if the writingId FK is later nulled out. */
+export const psychEvidence = pgTable("psych_evidence", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  psychItemId: uuid("psych_item_id").notNull().references(() => psychItems.id, { onDelete: "cascade" }),
+  writingId: uuid("writing_id").references(() => writings.id, { onDelete: "set null" }),
+  quote: text("quote").notNull(),
+  sourceFilename: text("source_filename"),   // 'Forehead_EN.txt'
+  sourceParagraph: text("source_paragraph"), // 'p0035'
+  isTranslated: boolean("is_translated").default(false).notNull(),
+  originalLanguage: text("original_language"), // 'pt' | 'fr' | ... when translated
+  rank: integer("rank"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("psych_evidence_item_idx").on(t.psychItemId)]);
+
+/* ───── 8. Mental health — subjective state & events ── */
+
+export const moodEntries = pgTable("mood_entries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ts: timestamp("ts", { withTimezone: true }).notNull(),
+  valence: integer("valence"),               // -5..+5
+  arousal: integer("arousal"),               // 0..10
+  primaryEmotion: text("primary_emotion"),   // 'sadness' | 'anxiety' | 'anger' | ...
+  note: text("note"),
+  source: text("source").default("manual").notNull(), // 'manual' | 'app_import' | ...
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("mood_patient_ts_idx").on(t.patientId, t.ts),
+  check("mood_valence_range", sql`valence is null or (valence between -5 and 5)`),
+  check("mood_arousal_range", sql`arousal is null or (arousal between 0 and 10)`),
+]);
+
+export const panicEvents = pgTable("panic_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+  durationMinutes: integer("duration_minutes"),
+  severity: integer("severity"),             // 1..10
+  triggers: text("triggers"),
+  symptoms: jsonb("symptoms"),               // {tachycardia: true, sweating: true, ...}
+  location: text("location"),
+  preBpSys: integer("pre_bp_sys"),
+  preBpDia: integer("pre_bp_dia"),
+  intervention: text("intervention"),        // free-text — too long a tail for an enum
+  notes: text("notes"),
+  sourceBlobKey: text("source_blob_key"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("panic_patient_ts_idx").on(t.patientId, t.occurredAt),
+  check("panic_severity_range", sql`severity is null or (severity between 1 and 10)`),
+]);
+
+/* ───── 9. Clinical encounters & prescriptions ──────── */
+
+export const encounters = pgTable("encounters", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  doctorUserId: uuid("doctor_user_id").references(() => users.id, { onDelete: "set null" }),
+  doctorName: text("doctor_name"),           // for external doctors not in our users table
+  doctorSpecialty: text("doctor_specialty"),
+  encounterType: encounterType("encounter_type").notNull(),
+  occurredOn: date("occurred_on").notNull(),
+  durationMinutes: integer("duration_minutes"),
+  reasonForVisit: text("reason_for_visit"),
+  assessment: text("assessment"),
+  plan: text("plan"),
+  notes: text("notes"),
+  followUpOn: date("follow_up_on"),
+  sourceBlobKey: text("source_blob_key"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("encounters_patient_date_idx").on(t.patientId, t.occurredOn),
+  index("encounters_doctor_date_idx").on(t.doctorUserId, t.occurredOn),
+]);
+
+/* `medications` (table above) is the *current state* — what the patient is on
+   right now and roughly when they started/stopped. `prescriptions` is the
+   *audit trail* — every individual prescription event, who ordered it, and
+   from which encounter. The two tables can coexist; one current `medications`
+   row may be backed by many `prescriptions` rows over time. */
+export const prescriptions = pgTable("prescriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  medicationId: uuid("medication_id").references(() => medications.id, { onDelete: "set null" }),
+  drugName: text("drug_name").notNull(),     // denormalised — prescription stands alone
+  prescriberUserId: uuid("prescriber_user_id").references(() => users.id, { onDelete: "set null" }),
+  prescriberName: text("prescriber_name"),   // for external doctors
+  encounterId: uuid("encounter_id").references(() => encounters.id, { onDelete: "set null" }),
+  prescribedOn: date("prescribed_on").notNull(),
+  dose: text("dose").notNull(),              // '1 mg' (free-text — units vary by drug)
+  route: text("route"),                      // 'oral' | 'sublingual' | 'IM' | ...
+  frequency: text("frequency"),              // 'BID', 'PRN', '2x/day'
+  durationDays: integer("duration_days"),
+  refills: integer("refills"),
+  reason: text("reason"),                    // indication
+  notes: text("notes"),
+  sourceBlobKey: text("source_blob_key"),    // R2 key of the prescription scan
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("prescriptions_patient_date_idx").on(t.patientId, t.prescribedOn),
+  index("prescriptions_med_idx").on(t.medicationId),
+  index("prescriptions_encounter_idx").on(t.encounterId),
+]);
+
+export const taperHistory = pgTable("taper_history", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  medicationId: uuid("medication_id").references(() => medications.id, { onDelete: "set null" }),
+  drugName: text("drug_name").notNull(),     // denormalised so the row stands alone
+  effectiveOn: date("effective_on").notNull(),
+  doseMg: real("dose_mg"),                   // numeric — for plotting
+  doseLabel: text("dose_label"),             // '35 mg/day diazepam'
+  changeDirection: taperDirection("change_direction").notNull(),
+  prescriberUserId: uuid("prescriber_user_id").references(() => users.id, { onDelete: "set null" }),
+  encounterId: uuid("encounter_id").references(() => encounters.id, { onDelete: "set null" }),
+  reason: text("reason"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("taper_patient_med_date_idx").on(t.patientId, t.medicationId, t.effectiveOn),
+]);
+
+/* ───── 10. ECG, PGx, life-event timeline ───────────── */
+
+/* Apple Watch / Kardia / Withings ECGs are discrete events with a
+   classification — fundamentally different from a multi-slice imaging study,
+   so they live in their own table rather than cramming `imaging_studies`. */
+export const ecgEvents = pgTable("ecg_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull(),
+  classification: ecgClassification("classification"),
+  averageHr: integer("average_hr"),
+  durationSeconds: integer("duration_seconds"),
+  source: text("source"),                    // 'apple_watch' | 'kardia' | 'withings'
+  blobKey: text("blob_key"),                 // R2 key of CSV/PDF
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("ecg_patient_ts_idx").on(t.patientId, t.recordedAt)]);
+
+export const pgxFindings = pgTable("pgx_findings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  gene: text("gene").notNull(),              // 'CYP2D6'
+  variant: text("variant"),                  // '*1/*4'
+  phenotype: text("phenotype"),              // 'Intermediate metabolizer'
+  category: pgxCategory("category"),
+  drugClassImpact: text("drug_class_impact"), // 'SSRIs', 'opioids', 'benzodiazepines' (long tail → text)
+  recommendation: text("recommendation"),
+  confidence: text("confidence"),            // 'high' | 'moderate' | 'low'
+  assayName: text("assay_name"),             // 'TotalGene Panel', '23andMe', ...
+  reportedOn: date("reported_on"),
+  sourceBlobKey: text("source_blob_key"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("pgx_patient_gene_idx").on(t.patientId, t.gene),
+  index("pgx_patient_drug_idx").on(t.patientId, t.drugClassImpact),
+]);
+
+export const lifeEvents = pgTable("life_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  occurredOn: date("occurred_on").notNull(),
+  category: lifeEventCategory("category").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  location: text("location"),
+  significance: integer("significance"),     // 1..5 — for timeline weight/density
+  sourceBlobKey: text("source_blob_key"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("life_events_patient_date_idx").on(t.patientId, t.occurredOn),
+  index("life_events_patient_cat_idx").on(t.patientId, t.category),
+  check("life_events_sig_range", sql`significance is null or (significance between 1 and 5)`),
 ]);
