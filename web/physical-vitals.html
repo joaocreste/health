@@ -377,6 +377,18 @@
       </div>
     </div>
 
+    <div class="chart-card mt-3">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Weekly patterns — blood pressure variability</span><span class="lang-pt">Padrões semanais — variabilidade da pressão arterial</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Withings BP · 249 readings folded into 16 ISO weeks · median · ±1 SD · ±2 SD · 13 Nov 2025 → 3 May 2026</span><span class="lang-pt">Withings PA · 249 leituras agrupadas em 16 semanas ISO · mediana · ±1 DP · ±2 DP · 13 nov 2025 → 3 mai 2026</span></div>
+      </div>
+      <div id="bpPatternsChart" class="chart-wrap tall"></div>
+      <div class="bp-daily-legend">
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E1D1D"></span> Systolic</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#1B3B54"></span> Diastolic</span>
+      </div>
+    </div>
+
     <table class="data-table">
       <thead><tr><th>Month</th><th class="num">Readings</th><th class="num">Systolic mean</th><th class="num">Diastolic mean</th><th>Classification</th></tr></thead>
       <tbody>
@@ -485,7 +497,7 @@
 </footer>
 
 <script src="assets/app.js?v=27"></script>
-<script src="assets/data.js?v=25"></script>
+<script src="assets/data.js?v=26"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -1264,16 +1276,130 @@ function renderHrPatternsChart() {
   }
 }
 
+/* 7d — Blood-pressure weekly variability — BP_BY_WEEK rows are
+   [weekStart, n, sysMed, sysMean, sysSd, diaMed, diaMean, diaSd].
+   Two stacked-band-and-spline series: systolic in red, diastolic in blue. */
+function renderBpPatternsChart() {
+  const el = document.getElementById('bpPatternsChart');
+  if (!el) return;
+  if (typeof BP_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    const xs       = BP_BY_WEEK.map(r => r[0]);
+    const sysMed   = BP_BY_WEEK.map(r => r[2]);
+    const sysMean  = BP_BY_WEEK.map(r => r[3]);
+    const sysSd    = BP_BY_WEEK.map(r => r[4]);
+    const diaMed   = BP_BY_WEEK.map(r => r[5]);
+    const diaMean  = BP_BY_WEEK.map(r => r[6]);
+    const diaSd    = BP_BY_WEEK.map(r => r[7]);
+
+    const sysL2 = sysMean.map((m, i) => m - 2 * sysSd[i]);
+    const sysU2 = sysMean.map((m, i) => m + 2 * sysSd[i]);
+    const sysL1 = sysMean.map((m, i) => m - sysSd[i]);
+    const sysU1 = sysMean.map((m, i) => m + sysSd[i]);
+    const diaL2 = diaMean.map((m, i) => m - 2 * diaSd[i]);
+    const diaU2 = diaMean.map((m, i) => m + 2 * diaSd[i]);
+    const diaL1 = diaMean.map((m, i) => m - diaSd[i]);
+    const diaU1 = diaMean.map((m, i) => m + diaSd[i]);
+
+    const noLine = { width: 0, color: 'rgba(0,0,0,0)' };
+    const traces = [
+      /* Systolic — red palette */
+      { x: xs, y: sysL2, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: sysU2, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(220, 89, 89, 0.20)',  /* red-400 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: sysL1, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: sysU1, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(165, 48, 48, 0.38)',  /* red-600 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: sysMed, type: 'scatter', mode: 'lines+markers',
+        line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },  /* red-800 */
+        marker: { color: '#5E1D1D', size: 5 },
+        customdata: BP_BY_WEEK.map(r => r[1]),
+        hovertemplate: 'Week of %{x}<br>Systolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+        showlegend: false },
+
+      /* Diastolic — blue palette */
+      { x: xs, y: diaL2, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: diaU2, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(94, 151, 188, 0.20)',  /* blue-400 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: diaL1, type: 'scatter', mode: 'lines', line: noLine,
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: diaU1, type: 'scatter', mode: 'lines', line: noLine,
+        fill: 'tonexty', fillcolor: 'rgba(47, 100, 137, 0.38)',  /* blue-600 */
+        showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: diaMed, type: 'scatter', mode: 'lines+markers',
+        line: { color: '#1B3B54', width: 2.5, shape: 'spline' },  /* blue-800 */
+        marker: { color: '#1B3B54', size: 5 },
+        customdata: BP_BY_WEEK.map(r => r[1]),
+        hovertemplate: 'Week of %{x}<br>Diastolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+        showlegend: false }
+    ];
+
+    /* AHA stage thresholds, drawn faintly. */
+    const refLines = [
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 140, y1: 140,
+        line: { color: '#A53030', width: 1, dash: 'dot' } },  /* Stage 2 sys */
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 130, y1: 130,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },  /* Stage 1 sys */
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 90,  y1: 90,
+        line: { color: '#A53030', width: 1, dash: 'dot' } },  /* Stage 2 dia */
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 80,  y1: 80,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },  /* Stage 1 dia */
+    ];
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      shapes: refLines,
+      xaxis: {
+        type: 'date',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: 'mmHg', font: { color: C.inkSoft } },
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, traces, layout, config);
+    console.log('[bp-patterns] rendered', xs.length, 'weeks');
+  } catch (e) {
+    console.error('[bp-patterns]', e);
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     renderGlucoseChart();
     renderGlucosePatternsChart();
     renderHrPatternsChart();
+    renderBpPatternsChart();
   });
 } else {
   renderGlucoseChart();
   renderGlucosePatternsChart();
   renderHrPatternsChart();
+  renderBpPatternsChart();
 }
 
 /* 8 — ECG table populator (real data: 57 ECGs from Apple Health) */
