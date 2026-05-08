@@ -530,7 +530,11 @@ section.report-section.light             { background: var(--surface-base); } /*
 .section-label::after {
   content: ''; height: 1px; width: 44px;
   background: var(--blue-300);
+  flex: none;
 }
+.section-label .ai-pill { margin-left: auto; flex: none; }
+.section-label:has(.ai-pill)::after { width: 24px; }
+.archetype-eyebrow .ai-pill { margin-left: 10px; }
 .section-title {
   font-family: var(--font-display);
   font-size: 28px;
@@ -614,6 +618,53 @@ section.report-section.light             { background: var(--surface-base); } /*
 .pill-ok,      .badge-success { background: var(--green-50); color: var(--green-700); border-color: var(--green-200); }
 .pill-watch,   .badge-warning { background: var(--amber-50); color: var(--amber-700); border-color: var(--amber-200); }
 .pill-flag,    .badge-danger  { background: var(--red-50);   color: var(--red-700);   border-color: var(--red-200);   }
+
+/* AI-inference badge — distinguishes interpretive synthesis from raw patient data.
+   Reason: therapist feedback (Ageu, May 2026) flagged the risk of conflating
+   patient testimony with machine inference. */
+.ai-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #f4ecff 0%, #ede2ff 100%);
+  color: #6b3fb5;
+  border: 1px solid #d9c6f5;
+  white-space: nowrap;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+.ai-pill::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b3fb5' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3 L13.6 9 L20 10.6 L13.6 12.2 L12 18 L10.4 12.2 L4 10.6 L10.4 9 Z'/></svg>");
+  background-repeat: no-repeat;
+  background-size: contain;
+  flex: none;
+}
+.ai-pill--inverse {
+  background: rgba(255,255,255,0.92);
+  color: #6b3fb5;
+  border-color: #d9c6f5;
+}
+.ai-disclaimer {
+  margin: 1.25rem 0 1.5rem;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #faf6ff;
+  border: 1px dashed #d9c6f5;
+  color: #4a3275;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.ai-disclaimer strong { color: #4a3275; font-weight: 600; }
 
 /* ── TABLES ── */
 .data-table {
@@ -1632,6 +1683,19 @@ html[lang="pt"] .pt-pending-notice { display: block; }
 .psych-architecture-v2 {
   margin-top: 1.5rem;
 }
+.psych-grid-hint {
+  margin: 0 0 1rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--surface-cool);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--blue-400);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 64ch;
+}
+.psych-grid-hint strong { color: var(--text-primary); font-weight: 600; }
 .psych-dim-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
