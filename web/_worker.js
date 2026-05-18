@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
@@ -147,6 +148,29 @@ async function handleMe(request, env) {
   });
 }
 
+async function handlePatients(request, env) {
+  if (!env.DATABASE_URL) {
+    return jsonError(500, "DATABASE_URL not configured.");
+  }
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const rows = await sql`
+      SELECT id, full_name, role
+      FROM users
+      WHERE archived_at IS NULL
+      ORDER BY role, full_name
+    `;
+    return new Response(JSON.stringify({ users: rows }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (e) {
+    return jsonError(500, `DB query failed: ${e.message}`);
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -155,6 +179,9 @@ export default {
     }
     if (url.pathname === "/api/me") {
       return handleMe(request, env);
+    }
+    if (url.pathname === "/api/patients") {
+      return handlePatients(request, env);
     }
     return env.ASSETS.fetch(request);
   },

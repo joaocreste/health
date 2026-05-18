@@ -9,7 +9,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { neon } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+
+// Node 22+ has native WebSocket — wire it for the Neon Pool driver.
+neonConfig.webSocketConstructor = globalThis.WebSocket;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SEEDS_DIR = path.resolve(__dirname, '..', 'db', 'seeds');
@@ -28,19 +31,22 @@ if (files.length === 0) {
   process.exit(0);
 }
 
-const sql = neon(process.env.DATABASE_URL);
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-for (const f of files) {
-  const full = path.join(SEEDS_DIR, f);
-  const body = fs.readFileSync(full, 'utf8');
-  console.log(`▸ applying ${f} (${body.length} bytes)`);
-  try {
-    await sql.unsafe(body);
-    console.log(`  ✓ ${f}`);
-  } catch (e) {
-    console.error(`  ✗ ${f} — ${e.message}`);
-    process.exit(1);
+try {
+  for (const f of files) {
+    const full = path.join(SEEDS_DIR, f);
+    const body = fs.readFileSync(full, 'utf8');
+    console.log(`▸ applying ${f} (${body.length} bytes)`);
+    try {
+      await pool.query(body);
+      console.log(`  ✓ ${f}`);
+    } catch (e) {
+      console.error(`  ✗ ${f} — ${e.message}`);
+      process.exit(1);
+    }
   }
+  console.log(`Done — ${files.length} seed file(s) applied.`);
+} finally {
+  await pool.end();
 }
-
-console.log(`Done — ${files.length} seed file(s) applied.`);
