@@ -72,6 +72,9 @@ export const users = pgTable(
     role: userRole("role").notNull(),
     locale: text("locale").default("en").notNull(), // 'en' | 'pt' | ...
     fullName: text("full_name"),
+    // Who created this row. Null for self-signup and for the original seed
+    // (chicken-and-egg). Admin-created rows carry the admin's id.
+    createdBy: uuid("created_by").references((): any => users.id, { onDelete: "set null" }),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

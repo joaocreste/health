@@ -4,6 +4,19 @@
 -- replaced with real Clerk IDs once the Clerk integration is wired.
 
 ------------------------------------------------------------
+-- Admin (system operator). Same email as the patient Joao because
+-- they're the same human; once Clerk lands, this will likely become a
+-- separate Clerk account or a role flag on one account.
+------------------------------------------------------------
+INSERT INTO users (clerk_user_id, email, role, full_name, locale)
+VALUES ('pending:admin', 'joaocreste@gmail.com', 'admin', 'Admin', 'en')
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email      = EXCLUDED.email,
+  full_name  = EXCLUDED.full_name,
+  role       = EXCLUDED.role,
+  updated_at = now();
+
+------------------------------------------------------------
 -- Patient: João Victor Creste
 ------------------------------------------------------------
 INSERT INTO users (clerk_user_id, email, role, full_name, locale)
