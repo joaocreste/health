@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JC Advisory — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=45">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<style>
+  body.admin-page { background: #F9F7F4; color: #0D1B2A; }
+
+  .admin-topbar {
+    background: #0D1B2A;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .admin-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+  }
+  .admin-brand img { width: 22px; height: 22px; }
+  .admin-brand small {
+    display: block;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .admin-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .admin-viewer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .admin-link {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: background 0.15s;
+  }
+  .admin-link:hover { background: rgba(255, 255, 255, 0.08); }
+
+  .admin-main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  .admin-heading {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 28px;
+    margin: 0 0 4px;
+  }
+  .admin-sub { color: #7A8FA6; font-size: 14px; margin: 0 0 32px; }
+
+  .admin-section {
+    background: #FFFFFF;
+    border: 1px solid #E5E2DC;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .admin-section h2 {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #0D1B2A;
+    margin: 0 0 16px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  .form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #7A8FA6;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .form-grid input, .form-grid select {
+    padding: 8px 10px;
+    border: 1px solid #DDD8CC;
+    border-radius: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: #0D1B2A;
+    background: #FFFFFF;
+  }
+  .form-grid input:focus, .form-grid select:focus {
+    outline: none;
+    border-color: #244E6E;
+  }
+  .form-actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .btn-primary { background: #0D1B2A; color: #FFFFFF; }
+  .btn-primary:hover { background: #1E2D3D; }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-ghost {
+    background: transparent;
+    color: #7A2E22;
+    border: 1px solid #E5B5AB;
+  }
+  .btn-ghost:hover { background: #FBE9E7; }
+  .btn-gold {
+    background: #B8954A;
+    color: #FFFFFF;
+  }
+  .btn-gold:hover { background: #A07F3D; }
+
+  .feedback {
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #7A8FA6;
+  }
+  .feedback.ok { color: #1F6A3E; }
+  .feedback.err { color: #7A2E22; }
+
+  .patient-row {
+    border-top: 1px solid #EFEBE3;
+    padding: 16px 0;
+  }
+  .patient-row:first-child { border-top: none; padding-top: 0; }
+  .patient-row .row-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .patient-row .name {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .patient-row .meta {
+    font-size: 11px;
+    color: #7A8FA6;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .access-list {
+    margin-top: 10px;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .access-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #F4F1EA;
+    border: 1px solid #DDD8CC;
+    font-size: 12px;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .access-pill.self {
+    background: #E8F1EA;
+    border-color: #B5D5BD;
+    color: #1F6A3E;
+  }
+  .access-pill .role-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #7A8FA6;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .access-pill button {
+    background: none;
+    border: none;
+    color: #7A2E22;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .grant-form {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .grant-form select, .grant-form input {
+    padding: 6px 10px;
+    border: 1px solid #DDD8CC;
+    border-radius: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    color: #0D1B2A;
+  }
+  .grant-form .btn { padding: 6px 12px; font-size: 12px; }
+</style>
+</head>
+<body class="admin-page">
+
+<header class="admin-topbar">
+  <a href="patients.html" class="admin-brand">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small>Admin console</small></span>
+  </a>
+  <div class="admin-actions">
+    <span class="admin-viewer" id="admin-viewer">…</span>
+    <a href="patients.html" class="admin-link">← Patient picker</a>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label">Sign out</span></button>
+  </div>
+</header>
+
+<main class="admin-main">
+  <h1 class="admin-heading">Admin console</h1>
+  <p class="admin-sub">Create patients and manage which users can see each record.</p>
+
+  <section class="admin-section">
+    <h2>Create patient</h2>
+    <form id="create-form">
+      <div class="form-grid">
+        <label>Full name *
+          <input name="full_name" type="text" required autocomplete="off">
+        </label>
+        <label>Email
+          <input name="email" type="email" autocomplete="off" placeholder="optional">
+        </label>
+        <label>Date of birth
+          <input name="date_of_birth" type="date">
+        </label>
+        <label>Sex
+          <select name="sex">
+            <option value="">—</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </label>
+        <label>Native language
+          <input name="native_language" type="text" placeholder="pt, en, fr…">
+        </label>
+        <label>Country
+          <input name="country_of_residence" type="text" placeholder="BR, GB, FR…">
+        </label>
+        <label>Locale
+          <select name="locale">
+            <option value="en">English</option>
+            <option value="pt">Portuguese</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create patient</button>
+        <span class="feedback" id="create-feedback"></span>
+      </div>
+    </form>
+  </section>
+
+  <section class="admin-section">
+    <h2>Patients &amp; access (<span id="patient-count">…</span>)</h2>
+    <div id="patients-list"></div>
+  </section>
+</main>
+
+<script src="assets/app.js?v=28"></script>
+<script>
+  (function () {
+    'use strict';
+
+    if (sessionStorage.getItem('jc_authed') !== 'true') {
+      location.replace('index.html');
+      return;
+    }
+    var viewerClerk = sessionStorage.getItem('jc_viewer_clerk') || '';
+    var viewerName  = sessionStorage.getItem('jc_viewer_username') || '';
+    document.getElementById('admin-viewer').textContent = viewerName || viewerClerk;
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function api(path, opts) {
+      opts = opts || {};
+      opts.headers = Object.assign({
+        'Content-Type': 'application/json',
+        'X-Viewer-Clerk': viewerClerk,
+      }, opts.headers || {});
+      return fetch(path, opts).then(function (r) {
+        return r.json().then(function (data) {
+          if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+          return data;
+        });
+      });
+    }
+
+    var state = { patients: [], users: [], access: [] };
+
+    function renderPatients() {
+      var listEl = document.getElementById('patients-list');
+      document.getElementById('patient-count').textContent = state.patients.length;
+      if (state.patients.length === 0) {
+        listEl.innerHTML = '<p style="color:#7A8FA6;font-size:14px;">No patients yet. Create one above.</p>';
+        return;
+      }
+      var byPatient = {};
+      state.access.forEach(function (a) {
+        (byPatient[a.patient_clerk] = byPatient[a.patient_clerk] || []).push(a);
+      });
+      // Build the user dropdown (everyone except admins; self-access is implicit, but we still allow it)
+      var userOptions = state.users
+        .filter(function (u) { return u.role !== 'admin'; })
+        .map(function (u) {
+          return '<option value="' + escapeHtml(u.clerk_user_id) + '">' +
+                 escapeHtml(u.full_name || u.clerk_user_id) + ' (' + u.role + ')</option>';
+        }).join('');
+
+      listEl.innerHTML = state.patients.map(function (p) {
+        var meta = [];
+        if (p.date_of_birth) meta.push('DOB ' + p.date_of_birth);
+        if (p.sex) meta.push(p.sex);
+        if (p.country_of_residence) meta.push(p.country_of_residence);
+        meta.push('clerk: ' + p.clerk_user_id);
+        var rows = (byPatient[p.clerk_user_id] || []);
+        var pills = rows.map(function (a) {
+          var isSelf = a.user_clerk === a.patient_clerk;
+          return '<li class="access-pill' + (isSelf ? ' self' : '') + '">' +
+                   '<span>' + escapeHtml(a.user_name || a.user_clerk) + '</span>' +
+                   '<span class="role-tag">' + escapeHtml(a.user_role) + (a.notes ? ' · ' + escapeHtml(a.notes) : '') + '</span>' +
+                   (isSelf ? '' :
+                     '<button type="button" title="Revoke" data-action="revoke" ' +
+                       'data-user="' + escapeHtml(a.user_clerk) + '" ' +
+                       'data-patient="' + escapeHtml(a.patient_clerk) + '">×</button>') +
+                 '</li>';
+        }).join('');
+        return (
+          '<div class="patient-row">' +
+            '<div class="row-head">' +
+              '<span class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</span>' +
+              '<span class="meta">' + escapeHtml(meta.join(' · ')) + '</span>' +
+            '</div>' +
+            '<ul class="access-list">' + (pills || '<li class="access-pill">No access rows</li>') + '</ul>' +
+            '<form class="grant-form" data-patient="' + escapeHtml(p.clerk_user_id) + '">' +
+              '<select name="user_clerk" required><option value="">Grant access to…</option>' + userOptions + '</select>' +
+              '<input name="notes" type="text" placeholder="relation (e.g. psychiatrist)">' +
+              '<button class="btn btn-gold" type="submit">Grant</button>' +
+            '</form>' +
+          '</div>'
+        );
+      }).join('');
+
+      // Wire revoke buttons
+      Array.prototype.forEach.call(listEl.querySelectorAll('button[data-action="revoke"]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var user = btn.getAttribute('data-user');
+          var patient = btn.getAttribute('data-patient');
+          if (!confirm('Revoke access from this user?')) return;
+          api('/api/admin/access', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'revoke', user_clerk: user, patient_clerk: patient }),
+          }).then(reload).catch(function (e) { alert('Revoke failed: ' + e.message); });
+        });
+      });
+
+      // Wire grant forms
+      Array.prototype.forEach.call(listEl.querySelectorAll('form.grant-form'), function (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var fd = new FormData(form);
+          var user = String(fd.get('user_clerk') || '');
+          var notes = String(fd.get('notes') || '').trim();
+          var patient = form.getAttribute('data-patient');
+          if (!user) return;
+          api('/api/admin/access', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'grant', user_clerk: user, patient_clerk: patient, notes: notes || null }),
+          }).then(reload).catch(function (e) { alert('Grant failed: ' + e.message); });
+        });
+      });
+    }
+
+    function reload() {
+      return api('/api/admin/everything').then(function (data) {
+        state.patients = data.patients || [];
+        state.users    = data.users    || [];
+        state.access   = data.access   || [];
+        renderPatients();
+      }).catch(function (e) {
+        document.getElementById('patients-list').innerHTML =
+          '<p style="color:#7A2E22;font-size:14px;">Failed to load: ' + escapeHtml(e.message) + '</p>';
+      });
+    }
+
+    document.getElementById('create-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fb = document.getElementById('create-feedback');
+      fb.className = 'feedback';
+      fb.textContent = 'Creating…';
+      var fd = new FormData(e.target);
+      var body = {};
+      fd.forEach(function (v, k) { if (v) body[k] = v; });
+      api('/api/admin/patients', { method: 'POST', body: JSON.stringify(body) })
+        .then(function (data) {
+          fb.className = 'feedback ok';
+          fb.textContent = 'Created: ' + data.patient.full_name + ' (' + data.patient.clerk_user_id + ')';
+          e.target.reset();
+          return reload();
+        })
+        .catch(function (err) {
+          fb.className = 'feedback err';
+          fb.textContent = 'Error: ' + err.message;
+        });
+    });
+
+    reload();
+  })();
+</script>
+
+</body>
+</html>

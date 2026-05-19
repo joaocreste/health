@@ -187,24 +187,41 @@ async function handlePatients(request, env) {
       });
     }
 
-    const patients = await sql`
-      SELECT
-        u.id,
-        u.clerk_user_id,
-        u.full_name,
-        u.locale,
-        pp.date_of_birth,
-        pp.sex,
-        pp.country_of_residence,
-        pa.notes AS relation
-      FROM patient_access pa
-      JOIN users u ON u.id = pa.patient_id
-      LEFT JOIN patient_profiles pp ON pp.user_id = u.id
-      WHERE pa.user_id = ${viewer[0].id}
-        AND u.archived_at IS NULL
-        AND u.role = 'patient'
-      ORDER BY u.full_name
-    `;
+    // Admins see every patient; everyone else is gated by patient_access.
+    const patients = viewer[0].role === "admin"
+      ? await sql`
+          SELECT
+            u.id,
+            u.clerk_user_id,
+            u.full_name,
+            u.locale,
+            pp.date_of_birth,
+            pp.sex,
+            pp.country_of_residence,
+            'admin' AS relation
+          FROM users u
+          LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+          WHERE u.role = 'patient' AND u.archived_at IS NULL
+          ORDER BY u.full_name
+        `
+      : await sql`
+          SELECT
+            u.id,
+            u.clerk_user_id,
+            u.full_name,
+            u.locale,
+            pp.date_of_birth,
+            pp.sex,
+            pp.country_of_residence,
+            pa.notes AS relation
+          FROM patient_access pa
+          JOIN users u ON u.id = pa.patient_id
+          LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+          WHERE pa.user_id = ${viewer[0].id}
+            AND u.archived_at IS NULL
+            AND u.role = 'patient'
+          ORDER BY u.full_name
+        `;
     return new Response(JSON.stringify({
       viewer: viewer[0],
       patients,
@@ -214,6 +231,182 @@ async function handlePatients(request, env) {
   } catch (e) {
     return jsonError(500, `DB query failed: ${e.message}`);
   }
+}
+
+/**
+ * Demo-phase admin gate. Looks up the viewer's clerk_user_id (sent via the
+ * `X-Viewer-Clerk` header or `?viewer=` query param) in the DB and verifies
+ * role='admin'. When Clerk lands, swap this for requireAuth(['admin']) from
+ * lib/auth.js. Trust model is identical to /api/patients?for=: the client
+ * asserts its own clerk_user_id; this is fine for personal-demo phase only.
+ */
+async function getAdminViewer(request, sql) {
+  const url = new URL(request.url);
+  const viewerClerk =
+    request.headers.get("x-viewer-clerk") ||
+    url.searchParams.get("viewer") ||
+    "";
+  if (!viewerClerk) return { error: jsonError(401, "viewer_required") };
+  const rows = await sql`
+    SELECT id, clerk_user_id, role, full_name
+    FROM users
+    WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL
+    LIMIT 1
+  `;
+  if (rows.length === 0) return { error: jsonError(401, "viewer_not_in_db") };
+  if (rows[0].role !== "admin") return { error: jsonError(403, "not_admin") };
+  return { viewer: rows[0] };
+}
+
+function slugifyForClerkPlaceholder(name) {
+  const base = String(name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 24) || "patient";
+  // 6-hex random suffix → unique even across same-name collisions
+  const suffix = crypto.randomUUID().replace(/-/g, "").slice(0, 6);
+  return `pending:${base}-${suffix}`;
+}
+
+async function handleAdmin(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const sql = neon(env.DATABASE_URL);
+
+  const gate = await getAdminViewer(request, sql);
+  if (gate.error) return gate.error;
+  const admin = gate.viewer;
+
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  // GET /api/admin/everything — single-shot bundle for the admin UI
+  if (path === "/api/admin/everything" && request.method === "GET") {
+    try {
+      const [patients, users, access] = await Promise.all([
+        sql`
+          SELECT u.id, u.clerk_user_id, u.full_name, u.email, u.locale, u.created_at,
+                 pp.date_of_birth, pp.sex, pp.country_of_residence, pp.native_language
+          FROM users u
+          LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+          WHERE u.role = 'patient' AND u.archived_at IS NULL
+          ORDER BY u.full_name
+        `,
+        sql`
+          SELECT id, clerk_user_id, full_name, email, role
+          FROM users
+          WHERE archived_at IS NULL
+          ORDER BY role, full_name
+        `,
+        sql`
+          SELECT
+            pa.user_id, pa.patient_id, pa.notes, pa.granted_at,
+            u_user.clerk_user_id   AS user_clerk,
+            u_user.full_name       AS user_name,
+            u_user.role            AS user_role,
+            u_pat.clerk_user_id    AS patient_clerk,
+            u_pat.full_name        AS patient_name
+          FROM patient_access pa
+          JOIN users u_user ON u_user.id = pa.user_id
+          JOIN users u_pat  ON u_pat.id  = pa.patient_id
+          ORDER BY u_pat.full_name, u_user.full_name
+        `,
+      ]);
+      return new Response(JSON.stringify({ admin, patients, users, access }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `DB query failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/patients — create a new patient
+  if (path === "/api/admin/patients" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const fullName = String(body?.full_name || "").trim();
+    if (!fullName) return jsonError(400, "full_name_required");
+    const email = String(body?.email || "").trim() || `${slugifyForClerkPlaceholder(fullName).replace(/^pending:/, "")}@placeholder.local`;
+    const locale = body?.locale === "pt" ? "pt" : "en";
+    const dob = body?.date_of_birth || null;
+    const sex = body?.sex || null;
+    const nativeLanguage = body?.native_language || null;
+    const country = body?.country_of_residence || null;
+    const clerk = slugifyForClerkPlaceholder(fullName);
+
+    try {
+      const inserted = await sql`
+        INSERT INTO users (clerk_user_id, email, role, full_name, locale, created_by)
+        VALUES (${clerk}, ${email}, 'patient', ${fullName}, ${locale}, ${admin.id})
+        RETURNING id, clerk_user_id, full_name, email, locale, created_at
+      `;
+      const patient = inserted[0];
+      await sql`
+        INSERT INTO patient_profiles
+          (user_id, date_of_birth, sex, native_language, country_of_residence)
+        VALUES (${patient.id}, ${dob}, ${sex}, ${nativeLanguage}, ${country})
+        ON CONFLICT (user_id) DO NOTHING
+      `;
+      // Self-access row so the patient can see their own record
+      await sql`
+        INSERT INTO patient_access (user_id, patient_id, notes, granted_by)
+        VALUES (${patient.id}, ${patient.id}, 'self', ${admin.id})
+        ON CONFLICT (user_id, patient_id) DO NOTHING
+      `;
+      return new Response(JSON.stringify({ ok: true, patient }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return jsonError(500, `Insert failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/access — { action: 'grant' | 'revoke', user_clerk, patient_clerk, notes? }
+  if (path === "/api/admin/access" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const action = body?.action;
+    const userClerk = String(body?.user_clerk || "").trim();
+    const patientClerk = String(body?.patient_clerk || "").trim();
+    if (!userClerk || !patientClerk) return jsonError(400, "user_and_patient_required");
+    if (action !== "grant" && action !== "revoke") return jsonError(400, "action_must_be_grant_or_revoke");
+
+    try {
+      const [userRow, patRow] = await Promise.all([
+        sql`SELECT id, role FROM users WHERE clerk_user_id = ${userClerk} AND archived_at IS NULL LIMIT 1`,
+        sql`SELECT id, role FROM users WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1`,
+      ]);
+      if (userRow.length === 0) return jsonError(404, "user_not_found");
+      if (patRow.length === 0) return jsonError(404, "patient_not_found");
+      if (patRow[0].role !== "patient") return jsonError(400, "target_must_be_patient");
+
+      if (action === "grant") {
+        const notes = String(body?.notes || "").trim() || null;
+        await sql`
+          INSERT INTO patient_access (user_id, patient_id, notes, granted_by)
+          VALUES (${userRow[0].id}, ${patRow[0].id}, ${notes}, ${admin.id})
+          ON CONFLICT (user_id, patient_id) DO UPDATE SET
+            notes = COALESCE(EXCLUDED.notes, patient_access.notes),
+            granted_by = EXCLUDED.granted_by,
+            granted_at = now()
+        `;
+      } else {
+        await sql`
+          DELETE FROM patient_access
+          WHERE user_id = ${userRow[0].id} AND patient_id = ${patRow[0].id}
+        `;
+      }
+      return new Response(JSON.stringify({ ok: true, action }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return jsonError(500, `Access change failed: ${e.message}`);
+    }
+  }
+
+  return jsonError(404, "unknown_admin_route");
 }
 
 export default {
@@ -227,6 +420,9 @@ export default {
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
+    }
+    if (url.pathname.startsWith("/api/admin/")) {
+      return handleAdmin(request, env);
     }
     if (url.pathname === "/api/ingest") {
       return handleIngest(request, env);
