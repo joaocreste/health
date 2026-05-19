@@ -25,7 +25,16 @@
   /* Expose a simple sign-out helper for the topnav button */
   window.jcSignOut = function () {
     sessionStorage.removeItem('jc_authed');
+    sessionStorage.removeItem('jc_viewer_clerk');
+    sessionStorage.removeItem('jc_viewer_username');
+    sessionStorage.removeItem('jc_current_patient');
     location.replace('index.html');
+  };
+
+  /* Return to the patient picker without signing out. */
+  window.jcChangePatient = function () {
+    sessionStorage.removeItem('jc_current_patient');
+    location.href = 'patients.html';
   };
 
   /* ── BILINGUAL TOGGLE ──

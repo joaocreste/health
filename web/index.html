@@ -245,24 +245,26 @@
 <script>
   (function () {
     'use strict';
-    // If we're already authenticated, jump straight to the dashboard.
+    // If we're already authenticated, jump straight to the picker.
     if (sessionStorage.getItem('jc_authed') === 'true') {
-      location.replace('home.html');
+      location.replace('patients.html');
       return;
     }
     // ⚠ Demo-only client-side gate — fully visible in source. Decorative only.
-    // Add { user, pass } objects to grant access. Empty = nobody passes.
+    // `clerk` maps to a user row in the DB (users.clerk_user_id); the picker
+    // queries /api/patients?for=<clerk> to determine which patients this
+    // viewer can see.
     var USERS = [
-      {user: 'joao', pass: 'jcj171092'},
-      {user: 'ageu', pass: 'ageu9203'},
-      {user: 'er', pass: 'er123'},
-      {user: 'tisher', pass: 'tisher123'},
-      {user: 'dimas', pass: 'dimas123'},
-      {user: 'drdimas', pass: 'drdimas123'},
-      {user: 'bodyformulae', pass: 'bodyformulae123'},
-      {user: 'laercio', pass: 'laercio123'},
-      {user: 'milenne', pass: 'milenne1978'},
-      {user: 'andrecreste', pass: 'andrecreste6480'},
+      {user: 'joao',         pass: 'jcj171092',         clerk: 'pending:joao'},
+      {user: 'ageu',         pass: 'ageu9203',          clerk: 'pending:ageu'},
+      {user: 'er',           pass: 'er123',             clerk: 'pending:er'},
+      {user: 'tisher',       pass: 'tisher123',         clerk: 'pending:tisher'},
+      {user: 'dimas',        pass: 'dimas123',          clerk: 'pending:drdimas'},
+      {user: 'drdimas',      pass: 'drdimas123',        clerk: 'pending:drdimas'},
+      {user: 'bodyformulae', pass: 'bodyformulae123',   clerk: 'pending:bodyformulae'},
+      {user: 'laercio',      pass: 'laercio123',        clerk: 'pending:laercio'},
+      {user: 'milenne',      pass: 'milenne1978',       clerk: 'pending:milenne'},
+      {user: 'andrecreste',  pass: 'andrecreste6480',   clerk: 'pending:andrecreste'},
     ];
     var form = document.getElementById('login-form');
     var err = document.getElementById('login-error');
@@ -270,10 +272,13 @@
       e.preventDefault();
       var u = document.getElementById('username').value.trim();
       var p = document.getElementById('password').value;
-      var ok = USERS.some(function (cred) { return cred.user === u && cred.pass === p; });
-      if (ok) {
+      var match = USERS.find(function (cred) { return cred.user === u && cred.pass === p; });
+      if (match) {
         sessionStorage.setItem('jc_authed', 'true');
-        location.href = 'home.html';
+        sessionStorage.setItem('jc_viewer_clerk', match.clerk);
+        sessionStorage.setItem('jc_viewer_username', match.user);
+        sessionStorage.removeItem('jc_current_patient');
+        location.href = 'patients.html';
       } else {
         err.classList.add('visible');
       }

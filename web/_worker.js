@@ -152,19 +152,63 @@ async function handlePatients(request, env) {
   if (!env.DATABASE_URL) {
     return jsonError(500, "DATABASE_URL not configured.");
   }
+  const url = new URL(request.url);
+  const forClerkId = url.searchParams.get("for");
+
   try {
     const sql = neon(env.DATABASE_URL);
-    const rows = await sql`
-      SELECT id, full_name, role
+
+    if (!forClerkId) {
+      const rows = await sql`
+        SELECT id, full_name, role, clerk_user_id
+        FROM users
+        WHERE archived_at IS NULL
+        ORDER BY role, full_name
+      `;
+      return new Response(JSON.stringify({ users: rows }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    }
+
+    const viewer = await sql`
+      SELECT id, full_name, role, clerk_user_id
       FROM users
-      WHERE archived_at IS NULL
-      ORDER BY role, full_name
+      WHERE clerk_user_id = ${forClerkId} AND archived_at IS NULL
+      LIMIT 1
     `;
-    return new Response(JSON.stringify({ users: rows }), {
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store",
-      },
+    if (viewer.length === 0) {
+      return new Response(JSON.stringify({
+        viewer: null,
+        patients: [],
+        reason: "viewer_not_in_db",
+      }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    }
+
+    const patients = await sql`
+      SELECT
+        u.id,
+        u.clerk_user_id,
+        u.full_name,
+        u.locale,
+        pp.date_of_birth,
+        pp.sex,
+        pp.country_of_residence,
+        pa.notes AS relation
+      FROM patient_access pa
+      JOIN users u ON u.id = pa.patient_id
+      LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+      WHERE pa.user_id = ${viewer[0].id}
+        AND u.archived_at IS NULL
+        AND u.role = 'patient'
+      ORDER BY u.full_name
+    `;
+    return new Response(JSON.stringify({
+      viewer: viewer[0],
+      patients,
+    }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     });
   } catch (e) {
     return jsonError(500, `DB query failed: ${e.message}`);

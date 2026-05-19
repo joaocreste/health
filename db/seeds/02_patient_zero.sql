@@ -13,9 +13,13 @@ ON CONFLICT (clerk_user_id) DO UPDATE SET
   full_name  = EXCLUDED.full_name,
   updated_at = now();
 
-INSERT INTO patient_profiles (user_id, native_language, country_of_residence)
-SELECT id, 'pt', 'BR' FROM users WHERE clerk_user_id = 'pending:joao'
-ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO patient_profiles (user_id, date_of_birth, sex, native_language, country_of_residence)
+SELECT id, '1992-10-17'::date, 'male', 'pt', 'GB' FROM users WHERE clerk_user_id = 'pending:joao'
+ON CONFLICT (user_id) DO UPDATE SET
+  date_of_birth = EXCLUDED.date_of_birth,
+  sex = EXCLUDED.sex,
+  country_of_residence = EXCLUDED.country_of_residence,
+  updated_at = now();
 
 ------------------------------------------------------------
 -- Patient: Milenne

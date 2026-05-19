@@ -3,106 +3,432 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JC Advisory — Patients</title>
+<title>JC Advisory — Choose patient</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=43">
+<link rel="stylesheet" href="assets/styles.css?v=44">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <style>
-  .patients-wrap { max-width: 880px; margin: 64px auto; padding: 0 24px; font-family: 'IBM Plex Sans', sans-serif; }
-  .patients-wrap h1 { font-family: 'Raleway', sans-serif; font-weight: 300; font-size: 32px; margin: 0 0 8px; color: #0D1B2A; }
-  .patients-wrap p.sub { color: #7A8FA6; margin: 0 0 32px; font-size: 14px; }
-  .live-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; margin-left: 8px; vertical-align: middle; }
-  .live-pill.ok { background: #E8F1EA; color: #1F6A3E; border: 1px solid #B5D5BD; }
-  .live-pill.err { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }
-  .live-pill.pending { background: #F0EEE9; color: #7A8FA6; border: 1px solid #DDD8CC; }
-  .role-group { margin-top: 24px; }
-  .role-group h2 { font-family: 'Raleway', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; color: #B8954A; margin: 0 0 8px; }
-  .person-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid #E5E2DC; border-radius: 6px; background: #FFFFFF; margin-bottom: 6px; }
-  .person-row .name { font-weight: 500; color: #0D1B2A; }
-  .person-row .uuid { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #7A8FA6; }
-  .meta-line { margin-top: 32px; font-size: 12px; color: #7A8FA6; font-family: 'IBM Plex Mono', monospace; }
-  .back-link { display: inline-block; margin-bottom: 24px; font-size: 13px; color: #7A8FA6; text-decoration: none; }
-  .back-link:hover { color: #0D1B2A; }
+  body.picker-page { background: #F9F7F4; }
+
+  .picker-topbar {
+    background: #0D1B2A;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .picker-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #FFFFFF;
+    text-decoration: none;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+  }
+  .picker-brand img { width: 22px; height: 22px; }
+  .picker-brand small {
+    display: block;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .picker-search-wrap {
+    flex: 1;
+    max-width: 420px;
+    position: relative;
+  }
+  .picker-search {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+    color: #FFFFFF;
+    padding: 8px 12px 8px 36px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .picker-search::placeholder { color: rgba(255, 255, 255, 0.45); }
+  .picker-search:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .picker-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+  }
+  .picker-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .picker-viewer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+
+  .picker-main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  .picker-heading {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 28px;
+    color: #0D1B2A;
+    margin: 0 0 4px;
+  }
+  .picker-sub {
+    color: #7A8FA6;
+    font-size: 14px;
+    margin: 0 0 32px;
+  }
+  .picker-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .picker-pill.ok { background: #E8F1EA; color: #1F6A3E; border: 1px solid #B5D5BD; }
+  .picker-pill.warn { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }
+  .picker-pill.pending { background: #F0EEE9; color: #7A8FA6; border: 1px solid #DDD8CC; }
+
+  .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .patient-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E2DC;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+  }
+  .patient-card:hover {
+    border-color: #244E6E;
+    box-shadow: 0 4px 14px rgba(13, 27, 42, 0.08);
+  }
+  .patient-card:active { transform: translateY(1px); }
+  .patient-card .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #244E6E;
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .patient-card .name {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #0D1B2A;
+    line-height: 1.3;
+  }
+  .patient-card .meta {
+    font-size: 12px;
+    color: #7A8FA6;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.5;
+  }
+  .patient-card .relation {
+    font-size: 11px;
+    color: #B8954A;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .picker-empty {
+    background: #FFFFFF;
+    border: 1px dashed #DDD8CC;
+    border-radius: 10px;
+    padding: 48px 32px;
+    text-align: center;
+    color: #7A8FA6;
+    font-size: 14px;
+    line-height: 1.6;
+    grid-column: 1 / -1;
+  }
+  .picker-empty strong {
+    display: block;
+    color: #0D1B2A;
+    font-family: 'Raleway', sans-serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .picker-meta {
+    margin-top: 32px;
+    font-size: 11px;
+    color: #7A8FA6;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.04em;
+  }
 </style>
 </head>
-<body>
+<body class="picker-page">
 
-<main class="patients-wrap">
-  <a href="home.html" class="back-link">← Back to summary</a>
-  <h1>Patients in record<span class="live-pill pending" id="db-pill">checking DB…</span></h1>
-  <p class="sub">Live read from the database. Source of truth for who exists in the system.</p>
+<script>
+  window.JC_PICKER_PAGE = true;
+</script>
 
-  <div id="patients-list">Loading…</div>
+<header class="picker-topbar">
+  <a href="patients.html" class="picker-brand">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>JC Advisory<small><span class="lang-en">Patient picker</span><span class="lang-pt">Selecionar paciente</span></small></span>
+  </a>
 
-  <div class="meta-line" id="meta-line"></div>
+  <div class="picker-search-wrap">
+    <svg class="picker-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"/>
+      <line x1="21" y1="21" x2="16.5" y2="16.5"/>
+    </svg>
+    <input type="search" id="picker-search" class="picker-search" autocomplete="off" spellcheck="false" placeholder="">
+  </div>
+
+  <div class="picker-actions">
+    <span class="picker-viewer" id="picker-viewer">…</span>
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</header>
+
+<main class="picker-main">
+  <h1 class="picker-heading">
+    <span class="lang-en">Choose a patient</span><span class="lang-pt">Escolha um paciente</span>
+    <span class="picker-pill pending" id="picker-pill"><span class="lang-en">loading…</span><span class="lang-pt">carregando…</span></span>
+  </h1>
+  <p class="picker-sub">
+    <span class="lang-en">Records available to your account. Search by name or date of birth.</span>
+    <span class="lang-pt">Prontuários disponíveis para sua conta. Busque por nome ou data de nascimento.</span>
+  </p>
+
+  <div id="picker-grid" class="picker-grid" aria-live="polite"></div>
+
+  <div class="picker-meta" id="picker-meta"></div>
 </main>
 
+<script src="assets/app.js?v=28"></script>
 <script>
   (function () {
     'use strict';
+
     if (sessionStorage.getItem('jc_authed') !== 'true') {
       location.replace('index.html');
       return;
     }
 
-    var pill = document.getElementById('db-pill');
-    var listEl = document.getElementById('patients-list');
-    var metaEl = document.getElementById('meta-line');
+    var viewerClerk = sessionStorage.getItem('jc_viewer_clerk') || '';
+    var viewerName  = sessionStorage.getItem('jc_viewer_username') || '';
+    document.getElementById('picker-viewer').textContent = viewerName ? viewerName : viewerClerk;
 
-    fetch('/api/patients', { headers: { 'Accept': 'application/json' } })
+    var searchInput = document.getElementById('picker-search');
+    var gridEl  = document.getElementById('picker-grid');
+    var pillEl  = document.getElementById('picker-pill');
+    var metaEl  = document.getElementById('picker-meta');
+
+    function placeholderFor(l) {
+      return l === 'pt' ? 'Buscar por nome ou data de nascimento…' : 'Search by name or date of birth…';
+    }
+    function applyPlaceholder() {
+      var l = (document.documentElement.lang || 'en').toLowerCase();
+      searchInput.placeholder = placeholderFor(l);
+    }
+    applyPlaceholder();
+    new MutationObserver(applyPlaceholder).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+    var allPatients = [];
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function initials(name) {
+      if (!name) return '?';
+      var parts = String(name).trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function formatDob(iso) {
+      if (!iso) return null;
+      var m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!m) return iso;
+      var y = +m[1], mo = +m[2], d = +m[3];
+      var l = (document.documentElement.lang || 'en').toLowerCase();
+      var months = l === 'pt'
+        ? ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+        : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return (l === 'pt')
+        ? (d + ' ' + months[mo - 1] + ' ' + y)
+        : (months[mo - 1] + ' ' + d + ', ' + y);
+    }
+
+    function ageFromDob(iso) {
+      if (!iso) return null;
+      var d = new Date(iso);
+      if (isNaN(d)) return null;
+      var t = new Date();
+      var age = t.getFullYear() - d.getFullYear();
+      var pre = (t.getMonth() < d.getMonth()) || (t.getMonth() === d.getMonth() && t.getDate() < d.getDate());
+      if (pre) age--;
+      return age;
+    }
+
+    function matchesQuery(p, q) {
+      if (!q) return true;
+      q = q.toLowerCase().trim();
+      var name = (p.full_name || '').toLowerCase();
+      var dob = (p.date_of_birth || '').toLowerCase();
+      var qAlt = q.replace(/[\/.]/g, '-');
+      var m = qAlt.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+      if (m) qAlt = m[3] + '-' + m[2] + '-' + m[1];
+      return name.indexOf(q) !== -1 || dob.indexOf(q) !== -1 || (qAlt && dob.indexOf(qAlt) !== -1);
+    }
+
+    function render(list) {
+      if (!list.length) {
+        gridEl.innerHTML =
+          '<div class="picker-empty">' +
+            '<strong>' +
+              '<span class="lang-en">No patients to show</span>' +
+              '<span class="lang-pt">Sem pacientes para exibir</span>' +
+            '</strong>' +
+            '<span class="lang-en">Your account has no records linked yet, or the search returned no matches.</span>' +
+            '<span class="lang-pt">Sua conta ainda não tem prontuários vinculados, ou a busca não retornou resultados.</span>' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+      list.forEach(function (p) {
+        var dobIso = p.date_of_birth || '';
+        var dobLabel = formatDob(dobIso);
+        var age = ageFromDob(dobIso);
+        var meta = [];
+        if (dobLabel) {
+          meta.push('<span class="lang-en">DOB ' + escapeHtml(dobLabel) + (age != null ? ' · ' + age + ' yrs' : '') + '</span>' +
+                    '<span class="lang-pt">Nasc. ' + escapeHtml(dobLabel) + (age != null ? ' · ' + age + ' anos' : '') + '</span>');
+        } else {
+          meta.push('<span class="lang-en">DOB —</span><span class="lang-pt">Nasc. —</span>');
+        }
+        if (p.sex) meta.push('<span>' + escapeHtml(p.sex) + '</span>');
+        if (p.country_of_residence) meta.push('<span>' + escapeHtml(p.country_of_residence) + '</span>');
+
+        var relation = '';
+        if (p.relation && p.relation !== 'self') relation = '<div class="relation">' + escapeHtml(p.relation) + '</div>';
+        else if (p.relation === 'self') relation = '<div class="relation"><span class="lang-en">Self</span><span class="lang-pt">Você</span></div>';
+
+        html +=
+          '<button type="button" class="patient-card" data-clerk="' + escapeHtml(p.clerk_user_id) + '">' +
+            '<div class="avatar">' + escapeHtml(initials(p.full_name)) + '</div>' +
+            '<div class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</div>' +
+            '<div class="meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>' +
+            relation +
+          '</button>';
+      });
+      gridEl.innerHTML = html;
+
+      Array.prototype.forEach.call(gridEl.querySelectorAll('.patient-card'), function (card) {
+        card.addEventListener('click', function () {
+          var clerk = card.getAttribute('data-clerk');
+          if (!clerk) return;
+          sessionStorage.setItem('jc_current_patient', clerk);
+          location.href = 'home.html?patient=' + encodeURIComponent(clerk);
+        });
+      });
+    }
+
+    function applyFilter() {
+      var q = searchInput.value || '';
+      var filtered = allPatients.filter(function (p) { return matchesQuery(p, q); });
+      render(filtered);
+    }
+    searchInput.addEventListener('input', applyFilter);
+
+    var url = '/api/patients' + (viewerClerk ? ('?for=' + encodeURIComponent(viewerClerk)) : '');
+    fetch(url, { headers: { 'Accept': 'application/json' } })
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
       .then(function (data) {
-        var users = data.users || [];
-        var patients = users.filter(function (u) { return u.role === 'patient'; });
-        var doctors  = users.filter(function (u) { return u.role === 'doctor'; });
-        var admins   = users.filter(function (u) { return u.role === 'admin'; });
-
-        pill.textContent = 'DB live · ' + users.length + ' rows';
-        pill.className = 'live-pill ok';
-
-        var html = '';
-        if (patients.length) {
-          html += '<div class="role-group"><h2>Patients (' + patients.length + ')</h2>';
-          patients.forEach(function (p) {
-            html += '<div class="person-row"><span class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</span><span class="uuid">' + escapeHtml(p.id) + '</span></div>';
-          });
-          html += '</div>';
+        var patients = data.patients || [];
+        if (data.reason === 'viewer_not_in_db') {
+          pillEl.className = 'picker-pill warn';
+          pillEl.innerHTML = '<span class="lang-en">Account not in DB</span><span class="lang-pt">Conta não está no DB</span>';
+          metaEl.innerHTML = '<span class="lang-en">Sign-in is recognised but your viewer record was not found in the database. No patients are linked to this account.</span>' +
+                             '<span class="lang-pt">O login foi reconhecido, mas seu registro de visualizador não foi encontrado no banco. Nenhum paciente vinculado a esta conta.</span>';
+        } else {
+          pillEl.className = 'picker-pill ok';
+          pillEl.innerHTML = '<span class="lang-en">' + patients.length + ' patient' + (patients.length === 1 ? '' : 's') + '</span>' +
+                             '<span class="lang-pt">' + patients.length + ' paciente' + (patients.length === 1 ? '' : 's') + '</span>';
+          metaEl.textContent = 'Viewer · ' + (data.viewer ? data.viewer.full_name : viewerClerk);
         }
-        if (doctors.length) {
-          html += '<div class="role-group"><h2>Doctors &amp; therapists (' + doctors.length + ')</h2>';
-          doctors.forEach(function (d) {
-            html += '<div class="person-row"><span class="name">' + escapeHtml(d.full_name || '(unnamed)') + '</span><span class="uuid">' + escapeHtml(d.id) + '</span></div>';
-          });
-          html += '</div>';
-        }
-        if (admins.length) {
-          html += '<div class="role-group"><h2>Admins (' + admins.length + ')</h2>';
-          admins.forEach(function (a) {
-            html += '<div class="person-row"><span class="name">' + escapeHtml(a.full_name || '(unnamed)') + '</span><span class="uuid">' + escapeHtml(a.id) + '</span></div>';
-          });
-          html += '</div>';
-        }
-
-        listEl.innerHTML = html || '<p class="sub">No rows yet.</p>';
-        metaEl.textContent = 'Source: Neon Postgres (Frankfurt) · /api/patients · ' + new Date().toISOString();
+        allPatients = patients;
+        applyFilter();
       })
       .catch(function (e) {
-        pill.textContent = 'DB error';
-        pill.className = 'live-pill err';
-        listEl.innerHTML = '<p class="sub">Could not load patients: ' + escapeHtml(e.message) + '</p>';
+        pillEl.className = 'picker-pill warn';
+        pillEl.innerHTML = '<span class="lang-en">DB unreachable</span><span class="lang-pt">DB indisponível</span>';
+        gridEl.innerHTML =
+          '<div class="picker-empty">' +
+            '<strong>' +
+              '<span class="lang-en">Could not load patients</span>' +
+              '<span class="lang-pt">Não foi possível carregar os pacientes</span>' +
+            '</strong>' +
+            escapeHtml(e.message) +
+          '</div>';
       });
-
-    function escapeHtml(s) {
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-      });
-    }
   })();
 </script>
+
 </body>
 </html>

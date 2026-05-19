@@ -1304,6 +1304,103 @@ html[lang="pt"] .pt-pending-notice { display: block; }
 }
 .signout-btn svg { display: block; }
 
+/* ── CHANGE-PATIENT BUTTON (topnav) ── */
+.changepatient-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.changepatient-btn:hover {
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.05);
+}
+.changepatient-btn svg { display: block; }
+
+/* ── EMPTY-PATIENT SHELL (for non-Patient-Zero records) ── */
+.jc-empty-shell {
+  max-width: 720px;
+  margin: 96px auto;
+  padding: 0 24px;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.jc-empty-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E2DC;
+  border-radius: 10px;
+  padding: 48px 40px;
+  text-align: left;
+}
+.jc-empty-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #B8954A;
+  margin-bottom: 12px;
+}
+.jc-empty-title {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1.25;
+  color: #0D1B2A;
+  margin: 0 0 16px;
+}
+.jc-empty-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #1E2D3D;
+  margin: 0 0 24px;
+}
+.jc-empty-body em {
+  font-style: normal;
+  color: #B8954A;
+  font-weight: 600;
+}
+.jc-empty-id {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #7A8FA6;
+  padding: 4px 10px;
+  border: 1px solid #DDD8CC;
+  border-radius: 999px;
+  margin-bottom: 24px;
+}
+.jc-empty-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1.5px solid #244E6E;
+  color: #244E6E;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.jc-empty-back:hover {
+  background: #244E6E;
+  color: #FFFFFF;
+}
+
 /* ── EXPORT BUTTON (topnav) ── */
 .export-btn {
   background: transparent;
