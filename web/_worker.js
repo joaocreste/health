@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
+import { handleIngest } from "../lib/ingest.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
 
@@ -226,6 +227,9 @@ export default {
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
+    }
+    if (url.pathname === "/api/ingest") {
+      return handleIngest(request, env);
     }
     return env.ASSETS.fetch(request);
   },
