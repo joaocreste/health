@@ -28,9 +28,6 @@ import {
 
 export const userRole = pgEnum("user_role", ["admin", "doctor", "patient"]);
 export const sex = pgEnum("sex", ["male", "female", "other", "unknown"]);
-export const linkRole = pgEnum("doctor_patient_role", [
-  "primary", "specialist", "consulting",
-]);
 export const importStatus = pgEnum("import_status", [
   "pending", "uploading", "processing", "completed", "failed", "partial",
 ]);
@@ -109,22 +106,22 @@ export const patientProfiles = pgTable("patient_profiles", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const doctorPatientLinks = pgTable(
-  "doctor_patient_links",
+/* Generic access: one row per (user, patient) pair. Covers self-access,
+   family-proxy access, and clinical access uniformly. The `kind` of the
+   relationship is not tracked at the row level — `users.role` gates UX,
+   but access itself is purely a list of patient_ids per user. */
+export const patientAccess = pgTable(
+  "patient_access",
   {
-    doctorId: uuid("doctor_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    role: linkRole("role").default("specialist").notNull(),
-    since: date("since").defaultNow().notNull(),
-    until: date("until"),
-    active: boolean("active").default(true).notNull(),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
     notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [
-    primaryKey({ columns: [t.doctorId, t.patientId] }),
-    index("dpl_patient_idx").on(t.patientId),
-    index("dpl_active_idx").on(t.active),
+    primaryKey({ columns: [t.userId, t.patientId] }),
+    index("patient_access_patient_idx").on(t.patientId),
   ],
 );
 

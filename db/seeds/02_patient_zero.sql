@@ -60,26 +60,38 @@ SELECT id, 'psychotherapy', 'BR' FROM users WHERE clerk_user_id = 'pending:ageu'
 ON CONFLICT (user_id) DO NOTHING;
 
 ------------------------------------------------------------
--- Doctor ↔ patient links (both currently anchored to Joao)
+-- Access rows: one row per (user, patient) pair.
+-- Self-access is just (user_id = patient_id). No relationship kind tracked
+-- at the row level — users.role gates UX; this table is purely "who can
+-- see whose data".
 ------------------------------------------------------------
-INSERT INTO doctor_patient_links (doctor_id, patient_id, role, notes)
+
+-- Self-access: every patient sees themselves
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'self'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:milenne'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:milenne'),
+  'self'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+-- Clinical access to Joao
+INSERT INTO patient_access (user_id, patient_id, notes)
 VALUES (
   (SELECT id FROM users WHERE clerk_user_id = 'pending:drdimas'),
   (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
-  'primary'::doctor_patient_role,
-  'Primary care physician'
-)
-ON CONFLICT (doctor_id, patient_id) DO UPDATE SET
-  role   = EXCLUDED.role,
-  active = true;
+  'primary care physician'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
 
-INSERT INTO doctor_patient_links (doctor_id, patient_id, role, notes)
+INSERT INTO patient_access (user_id, patient_id, notes)
 VALUES (
   (SELECT id FROM users WHERE clerk_user_id = 'pending:ageu'),
   (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
-  'specialist'::doctor_patient_role,
-  'Psychotherapist'
-)
-ON CONFLICT (doctor_id, patient_id) DO UPDATE SET
-  role   = EXCLUDED.role,
-  active = true;
+  'psychotherapist'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
