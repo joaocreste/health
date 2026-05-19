@@ -99,3 +99,73 @@ VALUES (
   (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
   'psychotherapist'
 ) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+------------------------------------------------------------
+-- Additional clinicians and family with access to João.
+-- Role / relation assignments are first-pass; edit and re-seed to update.
+------------------------------------------------------------
+
+-- Eduardo Tisher (prescribing psychiatrist, São Paulo)
+INSERT INTO users (clerk_user_id, email, role, full_name, locale)
+VALUES ('pending:tisher', 'tisher@placeholder.local', 'doctor', 'Eduardo Tisher', 'pt')
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email = EXCLUDED.email, full_name = EXCLUDED.full_name, updated_at = now();
+INSERT INTO doctor_profiles (user_id, specialty, license_country)
+SELECT id, 'psychiatry', 'BR' FROM users WHERE clerk_user_id = 'pending:tisher'
+ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:tisher'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'psychiatrist'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+-- The Body Formulae (body-composition / fitness service)
+INSERT INTO users (clerk_user_id, email, role, full_name, locale)
+VALUES ('pending:bodyformulae', 'bodyformulae@placeholder.local', 'doctor', 'The Body Formulae', 'en')
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email = EXCLUDED.email, full_name = EXCLUDED.full_name, updated_at = now();
+INSERT INTO doctor_profiles (user_id, specialty)
+SELECT id, 'body_composition' FROM users WHERE clerk_user_id = 'pending:bodyformulae'
+ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:bodyformulae'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'body composition'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+-- Laercio Galvan (practitioner — role and relation provisional)
+INSERT INTO users (clerk_user_id, email, role, full_name, locale)
+VALUES ('pending:laercio', 'laercio@placeholder.local', 'doctor', 'Laercio Galvan', 'pt')
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email = EXCLUDED.email, full_name = EXCLUDED.full_name, updated_at = now();
+INSERT INTO doctor_profiles (user_id, license_country)
+SELECT id, 'BR' FROM users WHERE clerk_user_id = 'pending:laercio'
+ON CONFLICT (user_id) DO NOTHING;
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:laercio'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'practitioner'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+-- Andre Creste (family — relation provisional)
+INSERT INTO users (clerk_user_id, email, role, full_name, locale)
+VALUES ('pending:andrecreste', 'andrecreste@placeholder.local', 'patient', 'Andre Creste', 'pt')
+ON CONFLICT (clerk_user_id) DO UPDATE SET
+  email = EXCLUDED.email, full_name = EXCLUDED.full_name, updated_at = now();
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:andrecreste'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'family'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+-- Milenne (existing user) — grant access to João (relation provisional)
+INSERT INTO patient_access (user_id, patient_id, notes)
+VALUES (
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:milenne'),
+  (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
+  'family'
+) ON CONFLICT (user_id, patient_id) DO NOTHING;
