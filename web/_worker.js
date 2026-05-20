@@ -198,7 +198,7 @@ async function handlePatients(request, env) {
             pp.date_of_birth,
             pp.sex,
             pp.country_of_residence,
-            'admin' AS relation
+            NULL::text AS relation
           FROM users u
           LEFT JOIN patient_profiles pp ON pp.user_id = u.id
           WHERE u.role = 'patient' AND u.archived_at IS NULL
