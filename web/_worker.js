@@ -168,15 +168,35 @@ async function handlePatientSummary(request, env) {
     const patient = patientRows[0];
     const pid = patient.id;
 
-    const [counts, recentDocs, recentLabs, pendingFiles] = await Promise.all([
+    // Single multi-pillar count query — saves round trips.
+    const [pillars, recentDocs, recentLabs, pendingFiles] = await Promise.all([
       sql`
-        SELECT 'documents'       AS t, count(*)::int AS n FROM documents       WHERE patient_id = ${pid} UNION ALL
-        SELECT 'lab_results'     AS t, count(*)::int AS n FROM lab_results     WHERE patient_id = ${pid} UNION ALL
-        SELECT 'imaging_studies' AS t, count(*)::int AS n FROM imaging_studies WHERE patient_id = ${pid} UNION ALL
-        SELECT 'medications'     AS t, count(*)::int AS n FROM medications     WHERE patient_id = ${pid} UNION ALL
-        SELECT 'writings'        AS t, count(*)::int AS n FROM writings        WHERE patient_id = ${pid} UNION ALL
-        SELECT 'encounters'      AS t, count(*)::int AS n FROM encounters      WHERE patient_id = ${pid} UNION ALL
-        SELECT 'imports'         AS t, count(*)::int AS n FROM imports         WHERE patient_id = ${pid}
+        SELECT
+          -- Physical
+          (SELECT count(*)::int FROM lab_results      WHERE patient_id = ${pid}) AS lab_results,
+          (SELECT count(*)::int FROM imaging_studies  WHERE patient_id = ${pid}) AS imaging_studies,
+          (SELECT count(*)::int FROM medications      WHERE patient_id = ${pid}) AS medications,
+          (SELECT count(*)::int FROM supplements      WHERE patient_id = ${pid}) AS supplements,
+          (SELECT count(*)::int FROM encounters       WHERE patient_id = ${pid}) AS encounters,
+          (SELECT count(*)::int FROM prescriptions    WHERE patient_id = ${pid}) AS prescriptions,
+          (SELECT count(DISTINCT day)::int FROM vitals_daily WHERE patient_id = ${pid}) AS vitals_days,
+          (SELECT count(*)::int FROM ecg_events       WHERE patient_id = ${pid}) AS ecg_events,
+          (SELECT count(*)::int FROM pgx_findings     WHERE patient_id = ${pid}) AS pgx_findings,
+          (SELECT count(*)::int FROM surgeries        WHERE patient_id = ${pid}) AS surgeries,
+          (SELECT count(*)::int FROM injuries         WHERE patient_id = ${pid}) AS injuries,
+          (SELECT count(*)::int FROM clinical_history WHERE patient_id = ${pid}) AS clinical_history,
+          -- Mental
+          (SELECT count(*)::int FROM psych_items      WHERE patient_id = ${pid}) AS psych_items,
+          (SELECT count(*)::int FROM mood_entries     WHERE patient_id = ${pid}) AS mood_entries,
+          (SELECT count(*)::int FROM panic_events     WHERE patient_id = ${pid}) AS panic_events,
+          (SELECT count(*)::int FROM risk_assessments WHERE patient_id = ${pid}) AS risk_assessments,
+          (SELECT count(*)::int FROM writings         WHERE patient_id = ${pid}) AS writings,
+          -- Spiritual
+          (SELECT count(*)::int FROM wheel_of_life_assessments WHERE patient_id = ${pid}) AS wheel_of_life,
+          (SELECT count(*)::int FROM life_events      WHERE patient_id = ${pid}) AS life_events,
+          -- Cross-cutting
+          (SELECT count(*)::int FROM documents        WHERE patient_id = ${pid}) AS documents,
+          (SELECT count(*)::int FROM imports          WHERE patient_id = ${pid}) AS imports
       `,
       sql`
         SELECT id, kind, title, original_filename, document_date, created_at
@@ -202,18 +222,117 @@ async function handlePatientSummary(request, env) {
       `,
     ]);
 
-    const countsObj = {};
-    counts.forEach((r) => { countsObj[r.t] = r.n; });
+    const c = pillars[0] || {};
+    const physicalKeys = [
+      "lab_results", "imaging_studies", "medications", "supplements",
+      "encounters", "prescriptions", "vitals_days", "ecg_events",
+      "pgx_findings", "surgeries", "injuries", "clinical_history",
+    ];
+    const mentalKeys = ["psych_items", "mood_entries", "panic_events", "risk_assessments", "writings"];
+    const spiritualKeys = ["wheel_of_life", "life_events"];
+    const totalIn = (keys) => keys.reduce((acc, k) => acc + (c[k] || 0), 0);
 
     return new Response(JSON.stringify({
       patient,
-      counts: countsObj,
+      pillars: {
+        physical: { total: totalIn(physicalKeys), breakdown: pick(c, physicalKeys) },
+        mental:   { total: totalIn(mentalKeys),   breakdown: pick(c, mentalKeys) },
+        spiritual:{ total: totalIn(spiritualKeys),breakdown: pick(c, spiritualKeys) },
+      },
+      counts: { documents: c.documents || 0, imports: c.imports || 0 },
       recent_documents: recentDocs,
       recent_labs: recentLabs,
       pending_files: pendingFiles,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Summary failed: ${e.message}`);
+  }
+}
+
+function pick(obj, keys) {
+  const out = {};
+  keys.forEach((k) => { out[k] = obj[k] || 0; });
+  return out;
+}
+
+async function handlePatientExams(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const patientRows = await sql`
+      SELECT u.id, u.clerk_user_id, u.full_name
+      FROM users u
+      WHERE u.clerk_user_id = ${clerk} AND u.role = 'patient' AND u.archived_at IS NULL
+      LIMIT 1
+    `;
+    if (patientRows.length === 0) return jsonError(404, "patient_not_found");
+    const patient = patientRows[0];
+    const pid = patient.id;
+
+    const [labs, labDocs, imaging] = await Promise.all([
+      sql`
+        SELECT panel, marker, value, value_text, unit, ref_low, ref_high, flag,
+               taken_at, laboratory, source_blob_key
+        FROM lab_results
+        WHERE patient_id = ${pid}
+        ORDER BY COALESCE(panel, 'zz') ASC, marker ASC, taken_at DESC
+      `,
+      sql`
+        SELECT id, kind, title, original_filename, document_date, blob_key, created_at
+        FROM documents
+        WHERE patient_id = ${pid} AND (kind = 'lab_pdf' OR kind = 'unclassified')
+        ORDER BY COALESCE(document_date, created_at::date) DESC, created_at DESC
+      `,
+      sql`
+        SELECT id, modality, body_part, study_date, source_format,
+               file_count, notes, blob_prefix, report_blob_key
+        FROM imaging_studies
+        WHERE patient_id = ${pid}
+        ORDER BY study_date DESC
+      `,
+    ]);
+
+    // Group labs by panel → marker → array of points
+    const panels = {};
+    for (const row of labs) {
+      const panel = row.panel || "Other";
+      if (!panels[panel]) panels[panel] = {};
+      if (!panels[panel][row.marker]) panels[panel][row.marker] = [];
+      panels[panel][row.marker].push(row);
+    }
+    // Convert to ordered arrays with summary per marker
+    const groupedPanels = Object.keys(panels).sort().map((panelName) => {
+      const markers = Object.keys(panels[panelName]).sort().map((markerName) => {
+        const points = panels[panelName][markerName];
+        const latest = points[0]; // already ordered by taken_at DESC
+        return {
+          marker: markerName,
+          latest_value: latest.value,
+          latest_value_text: latest.value_text,
+          unit: latest.unit,
+          ref_low: latest.ref_low,
+          ref_high: latest.ref_high,
+          flag: latest.flag,
+          latest_taken_at: latest.taken_at,
+          laboratory: latest.laboratory,
+          source_blob_key: latest.source_blob_key,
+          points,
+        };
+      });
+      return { panel: panelName, markers };
+    });
+
+    return new Response(JSON.stringify({
+      patient,
+      panels: groupedPanels,
+      lab_documents: labDocs,
+      imaging,
+    }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  } catch (e) {
+    return jsonError(500, `Exams query failed: ${e.message}`);
   }
 }
 
@@ -591,6 +710,9 @@ export default {
     }
     if (url.pathname === "/api/patient-summary") {
       return handlePatientSummary(request, env);
+    }
+    if (url.pathname === "/api/patient-exams") {
+      return handlePatientExams(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
