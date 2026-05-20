@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-03",
+  "generated_at": "2026-05-21",
   "weight": {
     "series_recent": [
       {
@@ -1176,6 +1176,1555 @@
     "n": 179,
     "median": 96.0,
     "min": 90.4
+  },
+  "stress": {
+    "series": [
+      {
+        "d": "2025-10-17",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-18",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-19",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-20",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-21",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-22",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-23",
+        "stress": 90.0,
+        "recovery": 120.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-10-24",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-10-25",
+        "stress": 30.0,
+        "recovery": 165.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2025-10-26",
+        "stress": 180.0,
+        "recovery": 30.0,
+        "score": null,
+        "level": null,
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-10-27",
+        "stress": 15.0,
+        "recovery": 195.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2025-10-28",
+        "stress": 30.0,
+        "recovery": 30.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-10-29",
+        "stress": 45.0,
+        "recovery": 75.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-10-30",
+        "stress": 0.0,
+        "recovery": 150.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2025-10-31",
+        "stress": 165.0,
+        "recovery": 165.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-01",
+        "stress": 285.0,
+        "recovery": 15.0,
+        "score": null,
+        "level": null,
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-11-02",
+        "stress": 75.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-03",
+        "stress": 150.0,
+        "recovery": 195.0,
+        "score": 47.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-04",
+        "stress": 0.0,
+        "recovery": 285.0,
+        "score": 47.2,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-05",
+        "stress": 15.0,
+        "recovery": 225.0,
+        "score": 49.0,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-06",
+        "stress": 45.0,
+        "recovery": 90.0,
+        "score": 47.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-07",
+        "stress": 30.0,
+        "recovery": 45.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-08",
+        "stress": 255.0,
+        "recovery": 30.0,
+        "score": 47.6,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-11-09",
+        "stress": 300.0,
+        "recovery": 30.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-11-10",
+        "stress": 0.0,
+        "recovery": 510.0,
+        "score": 47.3,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-11",
+        "stress": 45.0,
+        "recovery": 45.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-12",
+        "stress": 0.0,
+        "recovery": 210.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-13",
+        "stress": 0.0,
+        "recovery": 180.0,
+        "score": 48.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-14",
+        "stress": 195.0,
+        "recovery": 270.0,
+        "score": 48.6,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-15",
+        "stress": 165.0,
+        "recovery": 45.0,
+        "score": 50.4,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-11-16",
+        "stress": 30.0,
+        "recovery": 15.0,
+        "score": 51.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-17",
+        "stress": 120.0,
+        "recovery": 180.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-18",
+        "stress": 30.0,
+        "recovery": 135.0,
+        "score": 49.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-19",
+        "stress": 165.0,
+        "recovery": 60.0,
+        "score": 49.1,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-11-20",
+        "stress": 15.0,
+        "recovery": 45.0,
+        "score": 49.9,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-21",
+        "stress": 60.0,
+        "recovery": 180.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-22",
+        "stress": 60.0,
+        "recovery": 15.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-23",
+        "stress": 45.0,
+        "recovery": 135.0,
+        "score": 49.5,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-24",
+        "stress": 0.0,
+        "recovery": 345.0,
+        "score": 48.9,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-25",
+        "stress": 15.0,
+        "recovery": 120.0,
+        "score": 48.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-26",
+        "stress": 105.0,
+        "recovery": 105.0,
+        "score": 49.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-27",
+        "stress": 45.0,
+        "recovery": 45.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-28",
+        "stress": 105.0,
+        "recovery": 150.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-11-29",
+        "stress": 0.0,
+        "recovery": 210.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-11-30",
+        "stress": 0.0,
+        "recovery": 135.0,
+        "score": 47.2,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-01",
+        "stress": 15.0,
+        "recovery": 150.0,
+        "score": 48.0,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-02",
+        "stress": 120.0,
+        "recovery": 150.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-03",
+        "stress": 75.0,
+        "recovery": 150.0,
+        "score": 47.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-04",
+        "stress": 0.0,
+        "recovery": 135.0,
+        "score": 46.6,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-05",
+        "stress": 75.0,
+        "recovery": 165.0,
+        "score": 47.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-06",
+        "stress": 135.0,
+        "recovery": 0.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-07",
+        "stress": 120.0,
+        "recovery": 30.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-08",
+        "stress": 120.0,
+        "recovery": 90.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-09",
+        "stress": 105.0,
+        "recovery": 90.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-10",
+        "stress": 30.0,
+        "recovery": 0.0,
+        "score": 48.1,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2025-12-11",
+        "stress": 120.0,
+        "recovery": 60.0,
+        "score": 48.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-12",
+        "stress": 45.0,
+        "recovery": 75.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-13",
+        "stress": 15.0,
+        "recovery": 135.0,
+        "score": 48.2,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-14",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2025-12-15",
+        "stress": 120.0,
+        "recovery": 90.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-16",
+        "stress": 150.0,
+        "recovery": 15.0,
+        "score": 46.3,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-17",
+        "stress": 0.0,
+        "recovery": 75.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2025-12-18",
+        "stress": 90.0,
+        "recovery": 45.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-19",
+        "stress": 90.0,
+        "recovery": 75.0,
+        "score": 47.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-20",
+        "stress": 90.0,
+        "recovery": 135.0,
+        "score": 47.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-21",
+        "stress": 120.0,
+        "recovery": 0.0,
+        "score": 45.9,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-22",
+        "stress": 120.0,
+        "recovery": 60.0,
+        "score": 44.4,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-23",
+        "stress": 105.0,
+        "recovery": 45.0,
+        "score": 43.6,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-24",
+        "stress": 195.0,
+        "recovery": 30.0,
+        "score": 43.7,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2025-12-25",
+        "stress": 75.0,
+        "recovery": 120.0,
+        "score": 44.0,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-26",
+        "stress": 0.0,
+        "recovery": 180.0,
+        "score": 45.4,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-27",
+        "stress": 0.0,
+        "recovery": 150.0,
+        "score": 45.8,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-28",
+        "stress": 15.0,
+        "recovery": 30.0,
+        "score": 47.0,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2025-12-29",
+        "stress": 30.0,
+        "recovery": 195.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-30",
+        "stress": 0.0,
+        "recovery": 360.0,
+        "score": 49.3,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2025-12-31",
+        "stress": 0.0,
+        "recovery": 450.0,
+        "score": 49.4,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-01",
+        "stress": 90.0,
+        "recovery": 225.0,
+        "score": 49.3,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-02",
+        "stress": 90.0,
+        "recovery": 45.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-03",
+        "stress": 270.0,
+        "recovery": 75.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-04",
+        "stress": 15.0,
+        "recovery": 0.0,
+        "score": 49.3,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2026-01-05",
+        "stress": 15.0,
+        "recovery": 450.0,
+        "score": 50.1,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-06",
+        "stress": 0.0,
+        "recovery": 135.0,
+        "score": 50.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-07",
+        "stress": 90.0,
+        "recovery": 15.0,
+        "score": 51.8,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2026-01-08",
+        "stress": 45.0,
+        "recovery": 60.0,
+        "score": 52.2,
+        "level": "strong",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-09",
+        "stress": 45.0,
+        "recovery": 75.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-10",
+        "stress": 150.0,
+        "recovery": 45.0,
+        "score": 51.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-11",
+        "stress": 165.0,
+        "recovery": 30.0,
+        "score": 50.5,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-12",
+        "stress": 90.0,
+        "recovery": 120.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-13",
+        "stress": 45.0,
+        "recovery": 315.0,
+        "score": 48.0,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-01-14",
+        "stress": 255.0,
+        "recovery": 60.0,
+        "score": 48.6,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-15",
+        "stress": 120.0,
+        "recovery": 15.0,
+        "score": 49.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-16",
+        "stress": 30.0,
+        "recovery": 195.0,
+        "score": 51.6,
+        "level": "strong",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-17",
+        "stress": 30.0,
+        "recovery": 135.0,
+        "score": 51.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-18",
+        "stress": 135.0,
+        "recovery": 60.0,
+        "score": 50.9,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-19",
+        "stress": 60.0,
+        "recovery": 105.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-20",
+        "stress": 210.0,
+        "recovery": 30.0,
+        "score": 49.1,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-21",
+        "stress": 60.0,
+        "recovery": 30.0,
+        "score": 49.0,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-22",
+        "stress": 195.0,
+        "recovery": 15.0,
+        "score": 49.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-23",
+        "stress": 180.0,
+        "recovery": 60.0,
+        "score": 50.0,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-24",
+        "stress": 120.0,
+        "recovery": 75.0,
+        "score": 50.0,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-25",
+        "stress": 30.0,
+        "recovery": 90.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-26",
+        "stress": 270.0,
+        "recovery": 15.0,
+        "score": 49.4,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-27",
+        "stress": 180.0,
+        "recovery": 15.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-28",
+        "stress": 330.0,
+        "recovery": 0.0,
+        "score": 49.3,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-29",
+        "stress": 105.0,
+        "recovery": 60.0,
+        "score": 48.0,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-01-30",
+        "stress": 345.0,
+        "recovery": 30.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-01-31",
+        "stress": 195.0,
+        "recovery": 15.0,
+        "score": 47.7,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-01",
+        "stress": 210.0,
+        "recovery": 0.0,
+        "score": 48.4,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-02",
+        "stress": 105.0,
+        "recovery": 90.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-03",
+        "stress": 30.0,
+        "recovery": 30.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-04",
+        "stress": 60.0,
+        "recovery": 15.0,
+        "score": 48.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-05",
+        "stress": 30.0,
+        "recovery": 240.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-06",
+        "stress": 0.0,
+        "recovery": 195.0,
+        "score": 50.0,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-07",
+        "stress": 135.0,
+        "recovery": 0.0,
+        "score": 50.4,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-08",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": 50.9,
+        "level": "strong",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-09",
+        "stress": 30.0,
+        "recovery": 0.0,
+        "score": 50.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-10",
+        "stress": 30.0,
+        "recovery": 105.0,
+        "score": 50.0,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-11",
+        "stress": 15.0,
+        "recovery": 285.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-12",
+        "stress": 390.0,
+        "recovery": 135.0,
+        "score": 49.5,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-13",
+        "stress": 60.0,
+        "recovery": 405.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-14",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": 50.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-15",
+        "stress": 30.0,
+        "recovery": 60.0,
+        "score": 50.4,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-16",
+        "stress": 0.0,
+        "recovery": 180.0,
+        "score": 49.5,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-17",
+        "stress": 30.0,
+        "recovery": 45.0,
+        "score": 50.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-18",
+        "stress": 195.0,
+        "recovery": 45.0,
+        "score": 50.9,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-19",
+        "stress": 30.0,
+        "recovery": 210.0,
+        "score": 49.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-20",
+        "stress": 150.0,
+        "recovery": 105.0,
+        "score": 47.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-21",
+        "stress": 165.0,
+        "recovery": 15.0,
+        "score": 46.4,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-22",
+        "stress": 45.0,
+        "recovery": 0.0,
+        "score": 45.9,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-23",
+        "stress": 75.0,
+        "recovery": 165.0,
+        "score": 44.7,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-24",
+        "stress": 30.0,
+        "recovery": 90.0,
+        "score": 44.2,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-25",
+        "stress": 150.0,
+        "recovery": 60.0,
+        "score": 45.4,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-02-26",
+        "stress": 30.0,
+        "recovery": 0.0,
+        "score": 45.6,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-02-27",
+        "stress": 45.0,
+        "recovery": 225.0,
+        "score": 47.2,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-02-28",
+        "stress": 210.0,
+        "recovery": 195.0,
+        "score": 45.9,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-03-01",
+        "stress": 60.0,
+        "recovery": 0.0,
+        "score": 45.6,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-02",
+        "stress": 105.0,
+        "recovery": 0.0,
+        "score": 45.6,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-03-03",
+        "stress": 30.0,
+        "recovery": 60.0,
+        "score": 44.1,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-04",
+        "stress": 90.0,
+        "recovery": 75.0,
+        "score": 44.6,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-03-05",
+        "stress": 75.0,
+        "recovery": 75.0,
+        "score": 45.2,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-06",
+        "stress": 15.0,
+        "recovery": 90.0,
+        "score": 45.7,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-07",
+        "stress": 15.0,
+        "recovery": 135.0,
+        "score": 46.4,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-08",
+        "stress": 90.0,
+        "recovery": 0.0,
+        "score": 47.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-09",
+        "stress": 60.0,
+        "recovery": 45.0,
+        "score": 47.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-10",
+        "stress": 150.0,
+        "recovery": 225.0,
+        "score": 48.3,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-11",
+        "stress": 30.0,
+        "recovery": 75.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-12",
+        "stress": 0.0,
+        "recovery": 360.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-13",
+        "stress": 150.0,
+        "recovery": 135.0,
+        "score": 48.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-14",
+        "stress": 60.0,
+        "recovery": 0.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-15",
+        "stress": 0.0,
+        "recovery": 120.0,
+        "score": 47.9,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-16",
+        "stress": 165.0,
+        "recovery": 150.0,
+        "score": 47.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-17",
+        "stress": 30.0,
+        "recovery": 285.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-18",
+        "stress": 15.0,
+        "recovery": 60.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-19",
+        "stress": 105.0,
+        "recovery": 90.0,
+        "score": 49.1,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-20",
+        "stress": 120.0,
+        "recovery": 165.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-21",
+        "stress": 0.0,
+        "recovery": 165.0,
+        "score": 48.1,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-22",
+        "stress": 15.0,
+        "recovery": 150.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-23",
+        "stress": 0.0,
+        "recovery": 225.0,
+        "score": 48.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-24",
+        "stress": 45.0,
+        "recovery": 105.0,
+        "score": 47.9,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-25",
+        "stress": 0.0,
+        "recovery": 75.0,
+        "score": 46.9,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-26",
+        "stress": 120.0,
+        "recovery": 165.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-27",
+        "stress": 30.0,
+        "recovery": 105.0,
+        "score": 46.8,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-28",
+        "stress": 120.0,
+        "recovery": 15.0,
+        "score": 46.5,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-29",
+        "stress": 45.0,
+        "recovery": 60.0,
+        "score": 47.4,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-03-30",
+        "stress": 45.0,
+        "recovery": 165.0,
+        "score": 47.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-03-31",
+        "stress": 135.0,
+        "recovery": 45.0,
+        "score": 46.1,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-01",
+        "stress": 0.0,
+        "recovery": 195.0,
+        "score": 46.4,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-04-02",
+        "stress": 15.0,
+        "recovery": 15.0,
+        "score": 45.0,
+        "level": "adequate",
+        "summary": null
+      },
+      {
+        "d": "2026-04-03",
+        "stress": 0.0,
+        "recovery": 105.0,
+        "score": 45.2,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-04",
+        "stress": 60.0,
+        "recovery": 45.0,
+        "score": 45.3,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-05",
+        "stress": 0.0,
+        "recovery": 135.0,
+        "score": 45.7,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-04-06",
+        "stress": 525.0,
+        "recovery": 105.0,
+        "score": 46.2,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-07",
+        "stress": 180.0,
+        "recovery": 75.0,
+        "score": null,
+        "level": null,
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-08",
+        "stress": 465.0,
+        "recovery": 0.0,
+        "score": 46.1,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-09",
+        "stress": 105.0,
+        "recovery": 15.0,
+        "score": 44.6,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-10",
+        "stress": 300.0,
+        "recovery": 75.0,
+        "score": 44.9,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-11",
+        "stress": 465.0,
+        "recovery": 0.0,
+        "score": 43.8,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-12",
+        "stress": 75.0,
+        "recovery": 45.0,
+        "score": 43.3,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-13",
+        "stress": 240.0,
+        "recovery": 105.0,
+        "score": 42.9,
+        "level": "adequate",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-14",
+        "stress": 45.0,
+        "recovery": 120.0,
+        "score": 42.0,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-15",
+        "stress": 105.0,
+        "recovery": 15.0,
+        "score": 41.9,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-16",
+        "stress": 60.0,
+        "recovery": 120.0,
+        "score": 41.0,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-17",
+        "stress": 60.0,
+        "recovery": 150.0,
+        "score": 40.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-18",
+        "stress": 90.0,
+        "recovery": 0.0,
+        "score": 40.2,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-04-19",
+        "stress": 0.0,
+        "recovery": 30.0,
+        "score": 39.6,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-20",
+        "stress": 60.0,
+        "recovery": 0.0,
+        "score": 37.8,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-21",
+        "stress": 0.0,
+        "recovery": 75.0,
+        "score": 37.4,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-04-22",
+        "stress": 0.0,
+        "recovery": 30.0,
+        "score": 37.1,
+        "level": "limited",
+        "summary": null
+      },
+      {
+        "d": "2026-04-23",
+        "stress": 15.0,
+        "recovery": 75.0,
+        "score": 37.1,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-24",
+        "stress": 0.0,
+        "recovery": 150.0,
+        "score": 36.2,
+        "level": "limited",
+        "summary": "normal"
+      }
+    ],
+    "n_stress_days": 190,
+    "n_resilience_days": 166,
+    "stress_median_min": 60.0,
+    "stress_mean_min": 84.8,
+    "stress_peak": {
+      "d": "2026-04-06",
+      "stress_min": 525.0
+    },
+    "score_median": 48.1,
+    "score_mean": 47.4,
+    "level_counts": {
+      "solid": 118,
+      "adequate": 36,
+      "strong": 3,
+      "limited": 9
+    },
+    "summary_counts": {
+      "normal": 96,
+      "restored": 42,
+      "stressful": 38
+    },
+    "range": [
+      "2025-10-17",
+      "2026-04-24"
+    ]
   },
   "bp": {
     "n_total": 249,

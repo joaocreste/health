@@ -59,6 +59,7 @@
     <a href="#exercise">Exercise</a>
     <a href="#movement">Movement</a>
     <a href="#cardio">Cardiovascular</a>
+    <a href="#stress">Stress &amp; resilience</a>
     <a href="#bp">Blood pressure</a>
     <a href="#assessment">Physician assessment</a>
   </div>
@@ -338,10 +339,77 @@
   </div>
 </section>
 
-<!-- 09 BP -->
+<!-- 09 STRESS & RESILIENCE -->
+<section class="report-section" id="stress">
+  <div class="container">
+    <div class="section-label">09 · Stress &amp; resilience</div>
+    <h2 class="section-title"><span class="lang-en">Stress &amp; resilience — Oura</span><span class="lang-pt">Estresse e resiliência — Oura</span></h2>
+    <p class="section-desc"><span class="lang-en">190 days of daily stress accumulation and 166 days of resilience scoring from the Oura Ring (October 2025 → April 2026). The chart pairs cumulative high-stress minutes per day with the composite resilience score (mean of daytime-recovery, sleep-recovery and stress contributors, 0–100).</span><span class="lang-pt">190 dias de acúmulo diário de estresse e 166 dias de pontuação de resiliência do Oura Ring (outubro de 2025 → abril de 2026). O gráfico cruza minutos cumulativos de alto estresse por dia com a pontuação composta de resiliência (média de contribuintes de recuperação diurna, recuperação no sono e estresse, 0–100).</span></p>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">High-stress (median/day)</span><span class="lang-pt">Alto estresse (mediana/dia)</span></div>
+        <div class="metric-value">60<small>min</small></div>
+        <div class="metric-note"><span class="lang-en">Mean 87 min · 190 days · <span class="pill pill-watch">Elevated load</span></span><span class="lang-pt">Média 87 min · 190 dias · <span class="pill pill-watch">Carga elevada</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Peak stress day</span><span class="lang-pt">Dia de pico</span></div>
+        <div class="metric-value">525<small>min</small></div>
+        <div class="metric-note"><span class="lang-en">6 April 2026 — 8h 45m · <span class="pill pill-flag">Crisis-adjacent</span></span><span class="lang-pt">6 de abril de 2026 — 8h45 · <span class="pill pill-flag">Pré-crise</span></span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Resilience score (median)</span><span class="lang-pt">Pontuação de resiliência (mediana)</span></div>
+        <div class="metric-value">48<small>/100</small></div>
+        <div class="metric-note"><span class="lang-en">Mean 48.2 · adequate-to-solid band</span><span class="lang-pt">Média 48,2 · faixa adequada-sólida</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">Level distribution</span><span class="lang-pt">Distribuição de níveis</span></div>
+        <div class="metric-value">71<small>% solid</small></div>
+        <div class="metric-note"><span class="lang-en">adequate 22% · limited 5% · strong 2%</span><span class="lang-pt">adequada 22% · limitada 5% · forte 2%</span></div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Daily high-stress minutes &amp; resilience score</span><span class="lang-pt">Minutos diários de alto estresse e pontuação de resiliência</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura Ring · 190 stress days · 166 resilience days · 7-day rolling mean overlays</span><span class="lang-pt">Oura Ring · 190 dias de estresse · 166 dias de resiliência · médias móveis de 7 dias</span></div>
+      </div>
+      <div class="chart-wrap tall"><canvas id="stressChart"></canvas></div>
+    </div>
+
+    <div class="three-col mt-3">
+      <div class="list-card">
+        <h4><span class="lang-en">Stress signal</span><span class="lang-pt">Sinal de estresse</span></h4>
+        <ul>
+          <li><span class="lang-en">Median 60 min/day high-stress is roughly 2× the published normative band of 30 min for healthy adults on Oura.</span><span class="lang-pt">Mediana de 60 min/dia de alto estresse é cerca de 2× a faixa normativa publicada de 30 min para adultos saudáveis no Oura.</span></li>
+          <li><span class="lang-en">Mean (87 min) sits above the median — distribution is right-skewed by a tail of very high-stress days.</span><span class="lang-pt">A média (87 min) fica acima da mediana — distribuição assimétrica à direita por uma cauda de dias de estresse muito alto.</span></li>
+          <li><span class="lang-en">Peak of 525 min on 6 April 2026 precedes the 29 April overdose by ~3 weeks.</span><span class="lang-pt">Pico de 525 min em 6 de abril de 2026 precede a sobredose de 29 de abril em cerca de 3 semanas.</span></li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4><span class="lang-en">Resilience signal</span><span class="lang-pt">Sinal de resiliência</span></h4>
+        <ul>
+          <li><span class="lang-en">Median score 48 sits in the adequate-to-solid threshold zone — not a robust buffer.</span><span class="lang-pt">A pontuação mediana de 48 fica na zona de limiar entre adequado e sólido — não é um amortecedor robusto.</span></li>
+          <li><span class="lang-en">Only 3 days scored at the "strong" level; 9 days at "limited" — the lower tail tracks acute-stress days.</span><span class="lang-pt">Apenas 3 dias atingiram nível "forte"; 9 dias em "limitado" — a cauda inferior acompanha dias de estresse agudo.</span></li>
+          <li><span class="lang-en">The two lines move counter-cyclically — resilience dips on high-stress days and recovers within ~3 days.</span><span class="lang-pt">As duas linhas se movem em contraciclo — a resiliência cai em dias de alto estresse e recupera em cerca de 3 dias.</span></li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4><span class="lang-en">Reading the chart</span><span class="lang-pt">Como ler o gráfico</span></h4>
+        <ul>
+          <li><span class="lang-en"><strong>Left axis (red).</strong> Daily minutes where Oura classifies the stress state as "high" — typically resting HR elevated above the day's baseline.</span><span class="lang-pt"><strong>Eixo esquerdo (vermelho).</strong> Minutos diários em que o Oura classifica o estado de estresse como "alto" — tipicamente FC em repouso acima da linha de base do dia.</span></li>
+          <li><span class="lang-en"><strong>Right axis (green).</strong> Composite resilience score: mean of three contributors — daytime recovery, sleep recovery, and stress (0–100 each).</span><span class="lang-pt"><strong>Eixo direito (verde).</strong> Pontuação composta de resiliência: média de três contribuintes — recuperação diurna, recuperação no sono, e estresse (0–100 cada).</span></li>
+          <li><span class="lang-en"><strong>Bold lines</strong> are 7-day rolling means; the faint daily lines preserve the underlying volatility.</span><span class="lang-pt"><strong>Linhas em negrito</strong> são médias móveis de 7 dias; as linhas diárias claras preservam a volatilidade subjacente.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 BP -->
 <section class="report-section" id="bp">
   <div class="container">
-    <div class="section-label">09 · Blood pressure</div>
+    <div class="section-label">10 · Blood pressure</div>
     <h2 class="section-title"><span class="lang-en">Blood pressure — Withings cuff</span><span class="lang-pt">Pressão arterial — monitor Withings</span></h2>
     <p class="section-desc"><span class="lang-en">249 readings, 13 November 2025 – 3 May 2026.</span><span class="lang-pt">249 leituras, 13 de novembro de 2025 – 3 de maio de 2026.</span></p>
 
@@ -768,6 +836,91 @@ new Chart(document.getElementById('exerciseMixChart'), {
               title: { display: true, text: 'RHR (bpm)', color: C.inkSoft },
               min: 55, max: 80 },
         x:  { ...axisCommon }
+      }
+    }
+  });
+}
+
+/* 5b — Stress & resilience — daily high-stress minutes (left axis) and the
+ *      composite resilience score (right axis). Daily series is shown as a
+ *      faint line; a 7-day centered rolling mean is overlaid bold so the
+ *      eye reads the trend through the daily volatility. STRESS_RES is
+ *      [day, stress_min, recovery_min, score, level, summary] tuples
+ *      produced by extract_stress() in bin/extract.py.
+ */
+if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
+  const labels  = STRESS_RES.map(r => r[0]);
+  const stress  = STRESS_RES.map(r => (typeof r[1] === 'number' ? r[1] : null));
+  const score   = STRESS_RES.map(r => (typeof r[3] === 'number' ? r[3] : null));
+
+  // Centered 7-day rolling mean. Skips nulls so partial windows still resolve.
+  const rolling = (arr, window) => {
+    const half = Math.floor(window / 2);
+    return arr.map((_, i) => {
+      const slice = arr.slice(Math.max(0, i - half), i + half + 1)
+                       .filter(v => typeof v === 'number');
+      if (!slice.length) return null;
+      return +(slice.reduce((s, v) => s + v, 0) / slice.length).toFixed(1);
+    });
+  };
+  const stressMA = rolling(stress, 7);
+  const scoreMA  = rolling(score,  7);
+
+  new Chart(document.getElementById('stressChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'High-stress (min/day)', data: stress,
+          borderColor: 'rgba(199,62,62,0.28)', backgroundColor: 'rgba(199,62,62,0.06)',
+          tension: 0.25, yAxisID: 'y', fill: true, borderWidth: 1,
+          pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.red500 },
+        { label: 'High-stress · 7-day mean', data: stressMA,
+          borderColor: C.red500, backgroundColor: 'transparent',
+          tension: 0.35, yAxisID: 'y', borderWidth: 2.5,
+          pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.red500 },
+        { label: 'Resilience score (0–100)', data: score,
+          borderColor: 'rgba(61,148,96,0.30)', backgroundColor: 'transparent',
+          tension: 0.25, yAxisID: 'y1', borderWidth: 1,
+          pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.green500 },
+        { label: 'Resilience · 7-day mean', data: scoreMA,
+          borderColor: C.green500, backgroundColor: 'transparent',
+          tension: 0.35, yAxisID: 'y1', borderWidth: 2.5, borderDash: [5,3],
+          pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.green500 },
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: C.inkSoft, boxWidth: 18 } },
+        tooltip: {
+          callbacks: {
+            afterBody: (items) => {
+              const row = STRESS_RES[items[0].dataIndex];
+              const bits = [];
+              if (row[4]) bits.push(`level: ${row[4]}`);
+              if (row[5]) bits.push(`summary: ${row[5]}`);
+              return bits.length ? bits.join(' · ') : '';
+            }
+          }
+        }
+      },
+      scales: {
+        y:  { ...axisCommon, position: 'left',
+              title: { display: true, text: 'High-stress (min/day)', color: C.inkSoft },
+              min: 0, max: 600,
+              ticks: { ...axisCommon.ticks, stepSize: 120 } },
+        y1: { ...axisCommon, position: 'right', grid: { drawOnChartArea: false },
+              title: { display: true, text: 'Resilience score', color: C.inkSoft },
+              min: 0, max: 100,
+              ticks: { ...axisCommon.ticks, stepSize: 20 } },
+        x:  { ...axisCommon,
+              ticks: { ...axisCommon.ticks, autoSkip: true, maxTicksLimit: 12,
+                       callback(value) {
+                         const lbl = this.getLabelForValue(value);
+                         return lbl ? lbl.slice(0, 7) : lbl;
+                       } } },
       }
     }
   });

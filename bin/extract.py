@@ -247,6 +247,106 @@ def extract_readiness():
             'mean': round(statistics.mean(scores), 1)}
 
 
+def extract_stress():
+    """Daily stress + resilience from Oura.
+
+    Reads two CSVs and joins by day:
+      • dailystress.csv     — recovery_high, stress_high (seconds), day_summary
+      • dailyresilience.csv — level (categorical) + contributors JSON
+                              (daytime_recovery, sleep_recovery, stress, each 0-100)
+
+    Daily resilience score = mean of the three contributors (0-100).
+    Daily stress / recovery are returned in MINUTES so the chart axis stays
+    in a human-readable range (0-560 min instead of 0-31500 s).
+    """
+    ds_path = DATA / "Oura" / "App Data" / "dailystress.csv"
+    rs_path = DATA / "Oura" / "App Data" / "dailyresilience.csv"
+    if not ds_path.exists() and not rs_path.exists():
+        return None
+
+    daily = {}  # day -> {stress_min, recovery_min, day_summary, level, score, ...}
+
+    if ds_path.exists():
+        with ds_path.open() as f:
+            for row in csv.DictReader(f, delimiter=';'):
+                day = (row.get('day') or '').strip()
+                if not day:
+                    continue
+                try:
+                    s_sec = int(row.get('stress_high') or 0)
+                    r_sec = int(row.get('recovery_high') or 0)
+                except ValueError:
+                    s_sec = r_sec = 0
+                summary = (row.get('day_summary') or '').strip() or None
+                d = daily.setdefault(day, {})
+                d['stress_min']   = round(s_sec / 60, 1)
+                d['recovery_min'] = round(r_sec / 60, 1)
+                d['day_summary']  = summary
+
+    if rs_path.exists():
+        with rs_path.open() as f:
+            for row in csv.DictReader(f, delimiter=';'):
+                day = (row.get('day') or '').strip()
+                if not day:
+                    continue
+                level = (row.get('level') or '').strip() or None
+                contrib_raw = row.get('contributors') or ''
+                contrib = {}
+                if contrib_raw:
+                    try:
+                        contrib = json.loads(contrib_raw)
+                    except json.JSONDecodeError:
+                        contrib = {}
+                d = daily.setdefault(day, {})
+                d['level']             = level
+                d['daytime_recovery']  = contrib.get('daytime_recovery')
+                d['sleep_recovery']    = contrib.get('sleep_recovery')
+                d['stress_contrib']    = contrib.get('stress')
+                vs = [v for v in (d.get('daytime_recovery'), d.get('sleep_recovery'),
+                                  d.get('stress_contrib')) if isinstance(v, (int, float))]
+                d['score'] = round(statistics.mean(vs), 1) if vs else None
+
+    if not daily:
+        return None
+
+    series = []
+    for day in sorted(daily.keys()):
+        d = daily[day]
+        series.append({
+            'd':          day,
+            'stress':     d.get('stress_min'),
+            'recovery':   d.get('recovery_min'),
+            'score':      d.get('score'),
+            'level':      d.get('level'),
+            'summary':    d.get('day_summary'),
+        })
+
+    stress_vals = [r['stress'] for r in series if isinstance(r['stress'], (int, float))]
+    score_vals  = [r['score']  for r in series if isinstance(r['score'],  (int, float))]
+    levels      = Counter(r['level']   for r in series if r['level'])
+    summaries   = Counter(r['summary'] for r in series if r['summary'])
+
+    peak = None
+    if stress_vals:
+        peak_row = max((r for r in series if isinstance(r['stress'], (int, float))),
+                       key=lambda r: r['stress'])
+        peak = {'d': peak_row['d'], 'stress_min': peak_row['stress']}
+
+    return {
+        'series':             series,
+        'n_stress_days':      len(stress_vals),
+        'n_resilience_days':  len(score_vals),
+        'stress_median_min':  round(statistics.median(stress_vals), 1) if stress_vals else None,
+        'stress_mean_min':    round(statistics.mean(stress_vals), 1)   if stress_vals else None,
+        'stress_peak':        peak,
+        'score_median':       round(statistics.median(score_vals), 1)  if score_vals  else None,
+        'score_mean':         round(statistics.mean(score_vals), 1)    if score_vals  else None,
+        'level_counts':       dict(levels),
+        'summary_counts':     dict(summaries),
+        'range':              [series[0]['d'], series[-1]['d']],
+    }
+
+
 def extract_spo2():
     path = DATA / "Oura" / "App Data" / "dailyspo2.csv"
     vals = []
@@ -607,6 +707,7 @@ def main():
     score     = extract_sleep_score()
     readiness = extract_readiness()
     spo2      = extract_spo2()
+    stress    = extract_stress()
     bp        = extract_bp()
     activity  = extract_activity()
     workouts  = extract_workouts()
@@ -634,6 +735,7 @@ def main():
         'sleep_score':  score,
         'readiness':    readiness,
         'spo2':         spo2,
+        'stress':       stress,
         'bp':           bp,
         'activity':     activity,
         'workouts':     workouts,
@@ -663,6 +765,14 @@ def main():
     blocks.append(f"const STEPS   = {js_array(activity['series'], ['d', 'steps'])};")
     blocks.append(f"const BP      = {js_array(bp['daily_series'], ['d', 'sys', 'dia'])};")
     blocks.append(f"const ECG     = {js_array(ecgs['records'], ['date', 'class', 'file'])};")
+    if stress and stress.get('series'):
+        blocks.append(
+            "const STRESS_RES = "
+            + js_array(stress['series'], ['d', 'stress', 'recovery', 'score', 'level', 'summary'])
+            + ";"
+        )
+    else:
+        blocks.append("const STRESS_RES = [];")
     # Sleep boxplot input (object literal)
     box = sleep['box']
     blocks.append('const SLEEP_BOX = ' + json.dumps({
@@ -688,6 +798,12 @@ def main():
     print(f"Workouts:  {workouts['n_total']} sessions")
     print(f"ECGs:      {ecgs['n_total']} ({ecgs['by_class']})")
     print(f"Tags:      alcohol {tags['alcohol_n']}, valium {tags['valium_n']}")
+    if stress:
+        peak = stress.get('stress_peak') or {}
+        print(f"Stress:    {stress['n_stress_days']} days · median {stress['stress_median_min']} min/day · "
+              f"peak {peak.get('stress_min', '?')} min on {peak.get('d', '?')}")
+        print(f"Resilience:{stress['n_resilience_days']} days · median score {stress['score_median']} · "
+              f"levels {stress['level_counts']}")
 
     print()
     print("─── Manual sources ───")
