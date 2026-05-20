@@ -149,6 +149,74 @@ async function handleMe(request, env) {
   });
 }
 
+async function handlePatientSummary(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const patientRows = await sql`
+      SELECT u.id, u.clerk_user_id, u.full_name, u.email, u.locale, u.created_at,
+             pp.date_of_birth, pp.sex, pp.country_of_residence, pp.native_language
+      FROM users u
+      LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+      WHERE u.clerk_user_id = ${clerk} AND u.role = 'patient' AND u.archived_at IS NULL
+      LIMIT 1
+    `;
+    if (patientRows.length === 0) return jsonError(404, "patient_not_found");
+    const patient = patientRows[0];
+    const pid = patient.id;
+
+    const [counts, recentDocs, recentLabs, pendingFiles] = await Promise.all([
+      sql`
+        SELECT 'documents'       AS t, count(*)::int AS n FROM documents       WHERE patient_id = ${pid} UNION ALL
+        SELECT 'lab_results'     AS t, count(*)::int AS n FROM lab_results     WHERE patient_id = ${pid} UNION ALL
+        SELECT 'imaging_studies' AS t, count(*)::int AS n FROM imaging_studies WHERE patient_id = ${pid} UNION ALL
+        SELECT 'medications'     AS t, count(*)::int AS n FROM medications     WHERE patient_id = ${pid} UNION ALL
+        SELECT 'writings'        AS t, count(*)::int AS n FROM writings        WHERE patient_id = ${pid} UNION ALL
+        SELECT 'encounters'      AS t, count(*)::int AS n FROM encounters      WHERE patient_id = ${pid} UNION ALL
+        SELECT 'imports'         AS t, count(*)::int AS n FROM imports         WHERE patient_id = ${pid}
+      `,
+      sql`
+        SELECT id, kind, title, original_filename, document_date, created_at
+        FROM documents
+        WHERE patient_id = ${pid}
+        ORDER BY COALESCE(document_date, created_at::date) DESC, created_at DESC
+        LIMIT 10
+      `,
+      sql`
+        SELECT panel, marker, value, value_text, unit, ref_low, ref_high, flag, taken_at, laboratory
+        FROM lab_results
+        WHERE patient_id = ${pid}
+        ORDER BY taken_at DESC, created_at DESC
+        LIMIT 10
+      `,
+      sql`
+        SELECT if_.original_path, if_.status, if_.classified_as, if_.error_message, if_.created_at
+        FROM import_files if_
+        JOIN imports i ON i.id = if_.import_id
+        WHERE i.patient_id = ${pid} AND if_.status NOT IN ('parsed', 'classified')
+        ORDER BY if_.created_at DESC
+        LIMIT 20
+      `,
+    ]);
+
+    const countsObj = {};
+    counts.forEach((r) => { countsObj[r.t] = r.n; });
+
+    return new Response(JSON.stringify({
+      patient,
+      counts: countsObj,
+      recent_documents: recentDocs,
+      recent_labs: recentLabs,
+      pending_files: pendingFiles,
+    }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  } catch (e) {
+    return jsonError(500, `Summary failed: ${e.message}`);
+  }
+}
+
 async function handleLogin(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   if (request.method !== "POST") return jsonError(405, "method_not_allowed");
@@ -520,6 +588,9 @@ export default {
     }
     if (url.pathname === "/api/login") {
       return handleLogin(request, env);
+    }
+    if (url.pathname === "/api/patient-summary") {
+      return handlePatientSummary(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
