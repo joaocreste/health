@@ -250,39 +250,33 @@
       location.replace('patients.html');
       return;
     }
-    // ⚠ Demo-only client-side gate — fully visible in source. Decorative only.
-    // `clerk` maps to a user row in the DB (users.clerk_user_id); the picker
-    // queries /api/patients?for=<clerk> to determine which patients this
-    // viewer can see.
-    var USERS = [
-      {user: 'admin',        pass: '#admin3989',        clerk: 'pending:admin'},
-      {user: 'joao',         pass: 'jcj171092',         clerk: 'pending:joao'},
-      {user: 'ageu',         pass: 'ageu9203',          clerk: 'pending:ageu'},
-      {user: 'er',           pass: 'er123',             clerk: 'pending:er'},
-      {user: 'tisher',       pass: 'tisher123',         clerk: 'pending:tisher'},
-      {user: 'dimas',        pass: 'dimas123',          clerk: 'pending:drdimas'},
-      {user: 'drdimas',      pass: 'drdimas123',        clerk: 'pending:drdimas'},
-      {user: 'bodyformulae', pass: 'bodyformulae123',   clerk: 'pending:bodyformulae'},
-      {user: 'laercio',      pass: 'laercio123',        clerk: 'pending:laercio'},
-      {user: 'milenne',      pass: 'milenne1978',       clerk: 'pending:milenne'},
-      {user: 'andrecreste',  pass: 'andrecreste6480',   clerk: 'pending:andrecreste'},
-    ];
+    // Credentials live in the DB (users.demo_username / demo_password);
+    // POST /api/login verifies them. Replaced by Clerk + Google SSO later.
     var form = document.getElementById('login-form');
     var err = document.getElementById('login-error');
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var u = document.getElementById('username').value.trim();
       var p = document.getElementById('password').value;
-      var match = USERS.find(function (cred) { return cred.user === u && cred.pass === p; });
-      if (match) {
-        sessionStorage.setItem('jc_authed', 'true');
-        sessionStorage.setItem('jc_viewer_clerk', match.clerk);
-        sessionStorage.setItem('jc_viewer_username', match.user);
-        sessionStorage.removeItem('jc_current_patient');
-        location.href = 'patients.html';
-      } else {
-        err.classList.add('visible');
-      }
+      err.classList.remove('visible');
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p }),
+      })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+        .then(function (res) {
+          if (!res.ok || !res.data || !res.data.ok) {
+            err.classList.add('visible');
+            return;
+          }
+          sessionStorage.setItem('jc_authed', 'true');
+          sessionStorage.setItem('jc_viewer_clerk', res.data.clerk_user_id);
+          sessionStorage.setItem('jc_viewer_username', res.data.username || u);
+          sessionStorage.removeItem('jc_current_patient');
+          location.href = 'patients.html';
+        })
+        .catch(function () { err.classList.add('visible'); });
     });
   })();
 </script>

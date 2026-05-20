@@ -259,19 +259,39 @@
   <p class="admin-sub">Create patients and manage which users can see each record.</p>
 
   <section class="admin-section">
-    <h2>Create patient</h2>
+    <h2>Create user</h2>
+    <p style="font-size:12px;color:#7A8FA6;margin:-8px 0 16px;">Pick the role; patient-specific or doctor-specific fields appear accordingly. Login is the username + password set here.</p>
     <form id="create-form">
       <div class="form-grid">
+        <label>Role *
+          <select name="role" id="create-role" required>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+          </select>
+        </label>
         <label>Full name *
           <input name="full_name" type="text" required autocomplete="off">
+        </label>
+        <label>Username *
+          <input name="username" type="text" required autocomplete="off" placeholder="lowercase, no spaces">
+        </label>
+        <label>Password *
+          <input name="password" type="text" required autocomplete="off" placeholder="plaintext, demo only">
         </label>
         <label>Email
           <input name="email" type="email" autocomplete="off" placeholder="optional">
         </label>
-        <label>Date of birth
+        <label>Locale
+          <select name="locale">
+            <option value="en">English</option>
+            <option value="pt">Portuguese</option>
+          </select>
+        </label>
+        <!-- Patient-only fields -->
+        <label data-role="patient">Date of birth
           <input name="date_of_birth" type="date">
         </label>
-        <label>Sex
+        <label data-role="patient">Sex
           <select name="sex">
             <option value="">—</option>
             <option value="female">Female</option>
@@ -280,21 +300,22 @@
             <option value="unknown">Unknown</option>
           </select>
         </label>
-        <label>Native language
+        <label data-role="patient">Native language
           <input name="native_language" type="text" placeholder="pt, en, fr…">
         </label>
-        <label>Country
+        <label data-role="patient">Country
           <input name="country_of_residence" type="text" placeholder="BR, GB, FR…">
         </label>
-        <label>Locale
-          <select name="locale">
-            <option value="en">English</option>
-            <option value="pt">Portuguese</option>
-          </select>
+        <!-- Doctor-only fields -->
+        <label data-role="doctor" style="display:none;">Specialty
+          <input name="specialty" type="text" placeholder="psychiatry, general_practice…">
+        </label>
+        <label data-role="doctor" style="display:none;">License country
+          <input name="license_country" type="text" placeholder="BR, FR, US…">
         </label>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Create patient</button>
+        <button type="submit" class="btn btn-primary">Create user</button>
         <span class="feedback" id="create-feedback"></span>
       </div>
     </form>
@@ -436,6 +457,15 @@
       });
     }
 
+    function applyRoleVisibility() {
+      var role = document.getElementById('create-role').value;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-role]'), function (el) {
+        el.style.display = (el.getAttribute('data-role') === role) ? '' : 'none';
+      });
+    }
+    document.getElementById('create-role').addEventListener('change', applyRoleVisibility);
+    applyRoleVisibility();
+
     document.getElementById('create-form').addEventListener('submit', function (e) {
       e.preventDefault();
       var fb = document.getElementById('create-feedback');
@@ -444,11 +474,12 @@
       var fd = new FormData(e.target);
       var body = {};
       fd.forEach(function (v, k) { if (v) body[k] = v; });
-      api('/api/admin/patients', { method: 'POST', body: JSON.stringify(body) })
+      api('/api/admin/users', { method: 'POST', body: JSON.stringify(body) })
         .then(function (data) {
           fb.className = 'feedback ok';
-          fb.textContent = 'Created: ' + data.patient.full_name + ' (' + data.patient.clerk_user_id + ')';
+          fb.textContent = 'Created ' + data.user.role + ': ' + data.user.full_name + ' (login: ' + (body.username || '?') + ')';
           e.target.reset();
+          applyRoleVisibility();
           return reload();
         })
         .catch(function (err) {

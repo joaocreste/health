@@ -149,6 +149,37 @@ async function handleMe(request, env) {
   });
 }
 
+async function handleLogin(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const username = String(body?.username || "").trim();
+  const password = String(body?.password || "");
+  if (!username || !password) return jsonError(400, "username_and_password_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const rows = await sql`
+      SELECT clerk_user_id, role, full_name, demo_password
+      FROM users
+      WHERE demo_username = ${username} AND archived_at IS NULL
+      LIMIT 1
+    `;
+    if (rows.length === 0 || rows[0].demo_password !== password) {
+      return jsonError(401, "invalid_credentials");
+    }
+    return new Response(JSON.stringify({
+      ok: true,
+      clerk_user_id: rows[0].clerk_user_id,
+      role: rows[0].role,
+      full_name: rows[0].full_name,
+      username,
+    }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  } catch (e) {
+    return jsonError(500, `Login failed: ${e.message}`);
+  }
+}
+
 async function handlePatients(request, env) {
   if (!env.DATABASE_URL) {
     return jsonError(500, "DATABASE_URL not configured.");
@@ -363,6 +394,75 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/users — create a user (role: patient | doctor) with login creds
+  if (path === "/api/admin/users" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const fullName = String(body?.full_name || "").trim();
+    const username = String(body?.username || "").trim();
+    const password = String(body?.password || "");
+    const role = body?.role;
+    if (!fullName) return jsonError(400, "full_name_required");
+    if (!username) return jsonError(400, "username_required");
+    if (!password) return jsonError(400, "password_required");
+    if (role !== "patient" && role !== "doctor") return jsonError(400, "role_must_be_patient_or_doctor");
+
+    const email = String(body?.email || "").trim() || `${username}@placeholder.local`;
+    const locale = body?.locale === "pt" ? "pt" : "en";
+    const clerk = slugifyForClerkPlaceholder(fullName);
+
+    try {
+      // Pre-check username uniqueness for a clean 409 instead of a 500
+      const existing = await sql`
+        SELECT 1 FROM users WHERE demo_username = ${username} LIMIT 1
+      `;
+      if (existing.length > 0) return jsonError(409, "username_taken");
+
+      const inserted = await sql`
+        INSERT INTO users
+          (clerk_user_id, email, role, full_name, locale,
+           demo_username, demo_password, created_by)
+        VALUES
+          (${clerk}, ${email}, ${role}, ${fullName}, ${locale},
+           ${username}, ${password}, ${admin.id})
+        RETURNING id, clerk_user_id, full_name, email, role, locale, created_at
+      `;
+      const user = inserted[0];
+
+      if (role === "patient") {
+        const dob = body?.date_of_birth || null;
+        const sex = body?.sex || null;
+        const nativeLanguage = body?.native_language || null;
+        const country = body?.country_of_residence || null;
+        await sql`
+          INSERT INTO patient_profiles
+            (user_id, date_of_birth, sex, native_language, country_of_residence)
+          VALUES (${user.id}, ${dob}, ${sex}, ${nativeLanguage}, ${country})
+          ON CONFLICT (user_id) DO NOTHING
+        `;
+        await sql`
+          INSERT INTO patient_access (user_id, patient_id, notes, granted_by)
+          VALUES (${user.id}, ${user.id}, 'self', ${admin.id})
+          ON CONFLICT (user_id, patient_id) DO NOTHING
+        `;
+      } else {
+        const specialty = body?.specialty || null;
+        const licenseCountry = body?.license_country || null;
+        await sql`
+          INSERT INTO doctor_profiles (user_id, specialty, license_country)
+          VALUES (${user.id}, ${specialty}, ${licenseCountry})
+          ON CONFLICT (user_id) DO NOTHING
+        `;
+      }
+
+      return new Response(JSON.stringify({ ok: true, user }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return jsonError(500, `Create user failed: ${e.message}`);
+    }
+  }
+
   // POST /api/admin/access — { action: 'grant' | 'revoke', user_clerk, patient_clerk, notes? }
   if (path === "/api/admin/access" && request.method === "POST") {
     let body;
@@ -417,6 +517,9 @@ export default {
     }
     if (url.pathname === "/api/me") {
       return handleMe(request, env);
+    }
+    if (url.pathname === "/api/login") {
+      return handleLogin(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);

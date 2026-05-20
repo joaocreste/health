@@ -72,6 +72,10 @@ export const users = pgTable(
     role: userRole("role").notNull(),
     locale: text("locale").default("en").notNull(), // 'en' | 'pt' | ...
     fullName: text("full_name"),
+    // Demo-phase login credentials. Plaintext password is intentional —
+    // this is replaced by Clerk + Google SSO before any real-patient data.
+    demoUsername: text("demo_username").unique(),
+    demoPassword: text("demo_password"),
     // Who created this row. Null for self-signup and for the original seed
     // (chicken-and-egg). Admin-created rows carry the admin's id.
     createdBy: uuid("created_by").references((): any => users.id, { onDelete: "set null" }),

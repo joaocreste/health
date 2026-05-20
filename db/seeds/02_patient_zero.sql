@@ -182,3 +182,18 @@ VALUES (
   (SELECT id FROM users WHERE clerk_user_id = 'pending:joao'),
   'family'
 ) ON CONFLICT (user_id, patient_id) DO NOTHING;
+
+------------------------------------------------------------
+-- Demo credentials (plaintext, temporary). Mirrors what used to live in
+-- the hardcoded USERS array in web/index.html. Replaced wholesale once
+-- Clerk + Google SSO are wired.
+------------------------------------------------------------
+UPDATE users SET demo_username = 'admin',        demo_password = '#admin3989'        WHERE clerk_user_id = 'pending:admin';
+UPDATE users SET demo_username = 'joao',         demo_password = 'jcj171092'         WHERE clerk_user_id = 'pending:joao';
+UPDATE users SET demo_username = 'milenne',      demo_password = 'milenne1978'       WHERE clerk_user_id = 'pending:milenne';
+UPDATE users SET demo_username = 'drdimas',      demo_password = 'drdimas123'        WHERE clerk_user_id = 'pending:drdimas';
+UPDATE users SET demo_username = 'ageu',         demo_password = 'ageu9203'          WHERE clerk_user_id = 'pending:ageu';
+UPDATE users SET demo_username = 'tisher',       demo_password = 'tisher123'         WHERE clerk_user_id = 'pending:tisher';
+UPDATE users SET demo_username = 'bodyformulae', demo_password = 'bodyformulae123'   WHERE clerk_user_id = 'pending:bodyformulae';
+UPDATE users SET demo_username = 'laercio',      demo_password = 'laercio123'        WHERE clerk_user_id = 'pending:laercio';
+UPDATE users SET demo_username = 'andrecreste',  demo_password = 'andrecreste6480'   WHERE clerk_user_id = 'pending:andrecreste';
