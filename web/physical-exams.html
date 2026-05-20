@@ -3056,17 +3056,22 @@
   <summary class="lab-panel-head">
     <span class="lab-panel-title"><span class="lang-en">Historical comparison</span><span class="lang-pt">Comparação histórica</span></span>
     <span class="lab-panel-sub"><span class="lang-en">All exams side-by-side · most recent at left · empty cells where a marker wasn't tested</span><span class="lang-pt">Todos os exames lado a lado · mais recente à esquerda · células vazias onde um marcador não foi dosado</span></span>
-    <span class="lab-panel-count"><span class="lang-en">111 markers · 15 samples</span><span class="lang-pt">111 marcadores · 15 amostras</span></span>
+    <span class="lab-panel-count"><span class="lang-en">111 markers · 16 samples</span><span class="lang-pt">111 marcadores · 16 amostras</span></span>
   </summary>
   <div class="lab-panel-body">
     <p class="lab-cmp-intro">
-      <span class="lang-en">Source PDFs are stored in <code>data/Blood/</code>. The leftmost (bold) column is the most recent panel; the detailed view above always reflects this column. Drag horizontally to scroll older samples into view.</span><span class="lang-pt">Os PDFs originais estão armazenados em <code>data/Blood/</code>. A coluna mais à esquerda (em negrito) é o painel mais recente; a visualização detalhada acima sempre reflete esta coluna. Arraste horizontalmente para visualizar amostras mais antigas.</span>
+      <span class="lang-en">Source PDFs are stored in <code>data/Blood/</code>. The leftmost (bold) column is the most recent panel — the 20 May 2026 Thriva self-administered fingerstick (35 markers, partial scope). The detailed view above still reflects the full 25 April 2026 panel. Drag horizontally to scroll older samples into view.</span><span class="lang-pt">Os PDFs originais estão armazenados em <code>data/Blood/</code>. A coluna mais à esquerda (em negrito) é o painel mais recente — o teste capilar Thriva autoaplicado de 20 de maio de 2026 (35 marcadores, escopo parcial). A visualização detalhada acima continua refletindo o painel completo de 25 de abril de 2026. Arraste horizontalmente para visualizar amostras mais antigas.</span>
     </p>
     <div class="lab-cmp-wrap">
       <table class="lab-cmp-table">
         <thead><tr>
           <th class="lab-cmp-marker-head"><span class="lang-en">Marker</span><span class="lang-pt">Marcador</span></th>
           <th class="lab-cmp-col-head lab-cmp-col-latest">
+            <div class="lab-cmp-date">20 May 2026</div>
+            <div class="lab-cmp-lab">Thriva · Pura UK (capillary)</div>
+            <div class="lab-cmp-md"><span class="lang-en">Self-administered</span><span class="lang-pt">Autoaplicado</span></div>
+          </th>
+          <th class="lab-cmp-col-head">
             <div class="lab-cmp-date">25 Apr 2026</div>
             <div class="lab-cmp-lab">Lab. Behring · Ribeirão Preto</div>
             <div class="lab-cmp-md">Dr. Eduardo Tisher</div>
@@ -3143,10 +3148,11 @@
           </th>
         </tr></thead>
         <tbody>
-          <tr class="lab-cmp-section"><th colspan="16">Complete Blood Count — Erythrogram</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Complete Blood Count — Erythrogram</th></tr>
           <tr>
             <th class="lab-cmp-marker">Red Blood Cells (RBC) <small class="lab-cmp-unit">(mil/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>4.59</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">4.59</td>
             <td class="lab-cmp-val">4.41</td>
             <td class="lab-cmp-val">4.63</td>
             <td class="lab-cmp-val">5.11</td>
@@ -3164,7 +3170,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Hemoglobin <small class="lab-cmp-unit">(g/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>13.80</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">13.80</td>
             <td class="lab-cmp-val">13.1</td>
             <td class="lab-cmp-val">13.2</td>
             <td class="lab-cmp-val">14.8</td>
@@ -3182,7 +3189,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Hematocrit <small class="lab-cmp-unit">(%)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>41.40</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">41.40</td>
             <td class="lab-cmp-val">39.6</td>
             <td class="lab-cmp-val">40.5</td>
             <td class="lab-cmp-val">44.7</td>
@@ -3200,7 +3208,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">MCV <small class="lab-cmp-unit">(fL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>90.19</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">90.19</td>
             <td class="lab-cmp-val">89.8</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3218,7 +3227,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">MCH <small class="lab-cmp-unit">(pg)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>30.06</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">30.06</td>
             <td class="lab-cmp-val">29.7</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3236,7 +3246,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">MCHC <small class="lab-cmp-unit">(g/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>33.33</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">33.33</td>
             <td class="lab-cmp-val">33.1</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3254,7 +3265,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">RDW <small class="lab-cmp-unit">(%)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>13.00</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">13.00</td>
             <td class="lab-cmp-val">14.9</td>
             <td class="lab-cmp-val">15.0</td>
             <td class="lab-cmp-val">13.3</td>
@@ -3270,10 +3282,11 @@
             <td class="lab-cmp-val">12.8</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Complete Blood Count — Leukogram</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Complete Blood Count — Leukogram</th></tr>
           <tr>
             <th class="lab-cmp-marker">Total Leukocytes (WBC) <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>6,760</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">6,760</td>
             <td class="lab-cmp-val">10,600</td>
             <td class="lab-cmp-val">6,100</td>
             <td class="lab-cmp-val">8,100</td>
@@ -3291,7 +3304,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Neutrophils <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>3,536</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">3,536</td>
             <td class="lab-cmp-val">8,703</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3310,6 +3324,7 @@
           <tr>
             <th class="lab-cmp-marker">Neutrophils <small class="lab-cmp-unit">(%)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">82.1</td>
             <td class="lab-cmp-val">65.3</td>
             <td class="lab-cmp-val">65.5</td>
@@ -3327,7 +3342,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Eosinophils <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>150</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">150</td>
             <td class="lab-cmp-val">74.2</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3345,7 +3361,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Basophils <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>14</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">14</td>
             <td class="lab-cmp-val">31.8</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3363,7 +3380,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Lymphocytes <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>2,660</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">2,660</td>
             <td class="lab-cmp-val">1,250.8</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3382,6 +3400,7 @@
           <tr>
             <th class="lab-cmp-marker">Lymphocytes <small class="lab-cmp-unit">(%)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">11.8</td>
             <td class="lab-cmp-val">25.9</td>
             <td class="lab-cmp-val">26.3</td>
@@ -3399,7 +3418,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Monocytes <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>400</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">400</td>
             <td class="lab-cmp-val">540.6</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3415,10 +3435,11 @@
             <td class="lab-cmp-val">650</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Platelets & Coagulation</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Platelets & Coagulation</th></tr>
           <tr>
             <th class="lab-cmp-marker">Platelets <small class="lab-cmp-unit">(/mm³)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>322,300</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">322,300</td>
             <td class="lab-cmp-val">215,000</td>
             <td class="lab-cmp-val">282,000</td>
             <td class="lab-cmp-val">327,000</td>
@@ -3436,7 +3457,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">MPV <small class="lab-cmp-unit">(fL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>9.1</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">9.1</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3454,6 +3476,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Prothrombin Time activity <small class="lab-cmp-unit">(%)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3480,6 +3503,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">0.98</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3488,10 +3512,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Glycemia & Diabetes</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Glycemia & Diabetes</th></tr>
           <tr>
             <th class="lab-cmp-marker">Fasting Glucose <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>80.0</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">80.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3509,7 +3534,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">HbA1c (Glycated Hb) <small class="lab-cmp-unit">(%)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>5.2</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>5.1</strong></td>
+            <td class="lab-cmp-val">5.2</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3527,7 +3553,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Estimated Average Glucose (eAG) <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>102.5</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">102.5</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3545,6 +3572,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Insulin (fasting) <small class="lab-cmp-unit">(mU/L)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3570,6 +3598,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">1.2</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3579,10 +3608,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Lipid Profile</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Lipid Profile</th></tr>
           <tr>
             <th class="lab-cmp-marker">Total Cholesterol <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>199</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>197</strong></td>
+            <td class="lab-cmp-val">199</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3600,7 +3630,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">HDL Cholesterol <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>76</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>66</strong></td>
+            <td class="lab-cmp-val">76</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3618,7 +3649,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">LDL Cholesterol <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>95.3</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>108</strong></td>
+            <td class="lab-cmp-val">95.3</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3636,7 +3668,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Triglycerides <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>141</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>124</strong></td>
+            <td class="lab-cmp-val">141</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3654,7 +3687,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Non-HDL Cholesterol <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>123.5</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>131</strong></td>
+            <td class="lab-cmp-val">123.5</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3672,7 +3706,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">VLDL Cholesterol <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>28.2</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">28.2</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3690,6 +3725,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Lipoprotein(a) <small class="lab-cmp-unit">(nmol/L)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3715,6 +3751,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">155</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3733,6 +3770,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">90</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3742,10 +3780,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Kidney Function</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Kidney Function</th></tr>
           <tr>
             <th class="lab-cmp-marker">Creatinine <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>1.30</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>1.17</strong></td>
+            <td class="lab-cmp-val">1.30</td>
             <td class="lab-cmp-val">1.50</td>
             <td class="lab-cmp-val">1.06</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3763,7 +3802,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">eGFR <small class="lab-cmp-unit">(mL/min/1.73m²)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>> 60</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>85</strong></td>
+            <td class="lab-cmp-val">> 60</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3781,7 +3821,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Uric Acid <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>4.1</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>6.17</strong></td>
+            <td class="lab-cmp-val">4.1</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3799,7 +3840,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Sodium (Na) <small class="lab-cmp-unit">(mEq/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>142.1</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">142.1</td>
             <td class="lab-cmp-val">136</td>
             <td class="lab-cmp-val">139</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3817,7 +3859,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Potassium (K) <small class="lab-cmp-unit">(mEq/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>4.2</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">4.2</td>
             <td class="lab-cmp-val">4.2</td>
             <td class="lab-cmp-val">4.5</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3836,6 +3879,7 @@
           <tr>
             <th class="lab-cmp-marker">Urea (BUN) <small class="lab-cmp-unit">(mg/dL)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">22.0</td>
             <td class="lab-cmp-val">25.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3851,10 +3895,11 @@
             <td class="lab-cmp-val">34</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Liver, Bile & Pancreatic Function</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Liver, Bile & Pancreatic Function</th></tr>
           <tr>
             <th class="lab-cmp-marker">AST / TGO <small class="lab-cmp-unit">(U/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>32</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">32</td>
             <td class="lab-cmp-val">24.0</td>
             <td class="lab-cmp-val">27.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3872,7 +3917,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">ALT / TGP <small class="lab-cmp-unit">(U/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>23</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>27</strong></td>
+            <td class="lab-cmp-val">23</td>
             <td class="lab-cmp-val">16</td>
             <td class="lab-cmp-val">20</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3890,7 +3936,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">GGT <small class="lab-cmp-unit">(U/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>25</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>24</strong></td>
+            <td class="lab-cmp-val">25</td>
             <td class="lab-cmp-val">15</td>
             <td class="lab-cmp-val">15</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3908,7 +3955,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Alkaline Phosphatase <small class="lab-cmp-unit">(U/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>51</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>46</strong></td>
+            <td class="lab-cmp-val">51</td>
             <td class="lab-cmp-val">37</td>
             <td class="lab-cmp-val">52</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3926,6 +3974,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Bilirubin Total <small class="lab-cmp-unit">(mg/dL)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">0.91</td>
             <td class="lab-cmp-val">0.41</td>
@@ -3945,6 +3994,7 @@
           <tr>
             <th class="lab-cmp-marker">Bilirubin Direct <small class="lab-cmp-unit">(mg/dL)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">0.64</td>
             <td class="lab-cmp-val">0.21</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3962,6 +4012,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Bilirubin Indirect <small class="lab-cmp-unit">(mg/dL)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">0.27</td>
             <td class="lab-cmp-val">0.20</td>
@@ -3981,6 +4032,7 @@
           <tr>
             <th class="lab-cmp-marker">Amylase <small class="lab-cmp-unit">(U/L)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">54.0</td>
             <td class="lab-cmp-val">60.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -3999,6 +4051,7 @@
           <tr>
             <th class="lab-cmp-marker">Lipase <small class="lab-cmp-unit">(U/L)</small></th>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">37.0</td>
             <td class="lab-cmp-val">72.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4016,7 +4069,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Total Protein <small class="lab-cmp-unit">(g/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>6.6</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>6.7</strong></td>
+            <td class="lab-cmp-val">6.6</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4034,7 +4088,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Albumin <small class="lab-cmp-unit">(g/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>4.3</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>4.2</strong></td>
+            <td class="lab-cmp-val">4.3</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4052,7 +4107,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Globulin <small class="lab-cmp-unit">(g/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>2.3</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>2.5</strong></td>
+            <td class="lab-cmp-val">2.3</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4070,7 +4126,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">A/G Ratio</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>1.8</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>1.68</strong></td>
+            <td class="lab-cmp-val">1.8</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4086,10 +4143,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Minerals & Electrolytes</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Minerals & Electrolytes</th></tr>
           <tr>
             <th class="lab-cmp-marker">Calcium (total) <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>10.0</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">10.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4107,7 +4165,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Magnesium <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>2.20</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">2.20</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4125,7 +4184,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Phosphorus <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>3.4</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">3.4</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4143,7 +4203,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Iron (serum) <small class="lab-cmp-unit">(µg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>113</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>120</strong></td>
+            <td class="lab-cmp-val">113</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4161,7 +4222,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Ferritin <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>55.30</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>118</strong></td>
+            <td class="lab-cmp-val">55.30</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4179,7 +4241,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Transferrin (total) <small class="lab-cmp-unit">(mg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>311.7</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">311.7</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4197,7 +4260,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Transferrin Saturation <small class="lab-cmp-unit">(%)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>25.3</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>39</strong></td>
+            <td class="lab-cmp-val">25.3</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4215,6 +4279,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">TIBC (Total Iron Binding Capacity) <small class="lab-cmp-unit">(µg/dL)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4241,6 +4306,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">751</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4259,6 +4325,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">226</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4267,10 +4334,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Thyroid</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Thyroid</th></tr>
           <tr>
             <th class="lab-cmp-marker">TSH <small class="lab-cmp-unit">(µIU/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>2.316</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>2.27</strong></td>
+            <td class="lab-cmp-val">2.316</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4288,7 +4356,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Free T4 <small class="lab-cmp-unit">(ng/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>1.29</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>0.87</strong></td>
+            <td class="lab-cmp-val">1.29</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4306,7 +4375,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">T4 Total <small class="lab-cmp-unit">(µg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>6.00</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>4.74</strong></td>
+            <td class="lab-cmp-val">6.00</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4324,7 +4394,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">T3 <small class="lab-cmp-unit">(ng/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>100.32</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">100.32</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4342,6 +4413,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Anti-thyroglobulin <small class="lab-cmp-unit">(UI/mL)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4367,6 +4439,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">< 34</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4376,10 +4449,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Sex & Adrenal Hormones</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Sex & Adrenal Hormones</th></tr>
           <tr>
             <th class="lab-cmp-marker">Total Testosterone <small class="lab-cmp-unit">(ng/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>580.83</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>585</strong></td>
+            <td class="lab-cmp-val">580.83</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4397,6 +4471,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Free Testosterone <small class="lab-cmp-unit">(pmol/L)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4423,6 +4498,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">366.09</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4433,6 +4509,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">SHBG <small class="lab-cmp-unit">(nmol/L)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4451,7 +4528,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Estradiol (E2) <small class="lab-cmp-unit">(pg/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>47.62</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">47.62</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4477,6 +4555,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">< 0.06</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4487,7 +4566,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">LH <small class="lab-cmp-unit">(mIU/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>4.83</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">4.83</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4505,7 +4585,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">FSH <small class="lab-cmp-unit">(mIU/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>6.68</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">6.68</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4523,7 +4604,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Prolactin <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>5.20</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">5.20</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4541,7 +4623,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">PSA Total <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>0.34</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">0.34</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4559,7 +4642,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">PTH (intact) <small class="lab-cmp-unit">(pg/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>42.10</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">42.10</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4577,7 +4661,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Cortisol (morning) <small class="lab-cmp-unit">(µg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>7.39</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">7.39</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4602,6 +4687,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">25</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4613,7 +4699,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Progesterone <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>< 0.21</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">< 0.21</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4631,7 +4718,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">DHEA-S (sulfate) <small class="lab-cmp-unit">(µg/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>152</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">152</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4649,7 +4737,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">DHEA (free) <small class="lab-cmp-unit">(ng/dL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>250</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">250</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4665,10 +4754,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Vitamins & Metabolic Markers</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Vitamins & Metabolic Markers</th></tr>
           <tr>
             <th class="lab-cmp-marker">hs-CRP <small class="lab-cmp-unit">(mg/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>12.10</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>2.28</strong></td>
+            <td class="lab-cmp-val">12.10</td>
             <td class="lab-cmp-val">23.1</td>
             <td class="lab-cmp-val">< 5</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4686,7 +4776,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Vitamin D (25-OH) <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>38.36</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>38.8</strong></td>
+            <td class="lab-cmp-val">38.36</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4704,7 +4795,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Vitamin B12 <small class="lab-cmp-unit">(pg/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>863</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>1099</strong></td>
+            <td class="lab-cmp-val">863</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4722,7 +4814,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Folate (Folic Acid) <small class="lab-cmp-unit">(ng/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>11.93</strong></td>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>5.83</strong></td>
+            <td class="lab-cmp-val">11.93</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4740,7 +4833,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Homocysteine <small class="lab-cmp-unit">(µmol/L)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>14.40</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">14.40</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4758,6 +4852,7 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Serotonin (serum) <small class="lab-cmp-unit">(ng/mL)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4783,6 +4878,7 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val">1.3</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4792,9 +4888,10 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Drug Levels</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Drug Levels</th></tr>
           <tr>
             <th class="lab-cmp-marker">Lithium (serum) <small class="lab-cmp-unit">(mmol/L)</small></th>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4811,10 +4908,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Serology</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Serology</th></tr>
           <tr>
             <th class="lab-cmp-marker">Anti-HBs (Hep B immunity) <small class="lab-cmp-unit">(mIU/mL)</small></th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>333.4</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">333.4</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4832,7 +4930,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">HBsAg (Hep B antigen)</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4850,7 +4949,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Anti-HBc IgG</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4868,7 +4968,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Anti-HBc IgM</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4886,7 +4987,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Anti-HBe</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4904,7 +5006,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">HBeAg</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4922,7 +5025,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Anti-HCV (Hepatitis C)</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4940,7 +5044,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">HIV I & II</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4958,7 +5063,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">VDRL (Syphilis)</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4976,7 +5082,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">FTA-ABS IgG</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -4994,7 +5101,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">FTA-ABS IgM</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5012,7 +5120,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Trypanosoma cruzi IgG (Chagas)</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Não Reagente</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Não Reagente</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5028,10 +5137,11 @@
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
           </tr>
-          <tr class="lab-cmp-section"><th colspan="16">Urinalysis (EAS) & Uroculture</th></tr>
+          <tr class="lab-cmp-section"><th colspan="17">Urinalysis (EAS) & Uroculture</th></tr>
           <tr>
             <th class="lab-cmp-marker">Color</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Amarelo</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Amarelo</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5049,7 +5159,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Aspect</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Límpido</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Límpido</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5067,7 +5178,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Density</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>1.005</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">1.005</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5085,7 +5197,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">pH</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>7.0</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">7.0</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5103,7 +5216,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Chemistry (Glu/Pro/Nit/Ket/Bil/Heme)</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>All negative</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">All negative</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5121,7 +5235,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Microscopy</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>Within expected</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">Within expected</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
@@ -5139,7 +5254,8 @@
           </tr>
           <tr>
             <th class="lab-cmp-marker">Uroculture</th>
-            <td class="lab-cmp-val lab-cmp-latest"><strong>No bacterial growth</strong></td>
+            <td class="lab-cmp-val lab-cmp-empty">—</td>
+            <td class="lab-cmp-val">No bacterial growth</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
             <td class="lab-cmp-val lab-cmp-empty">—</td>
