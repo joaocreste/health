@@ -347,6 +347,173 @@ def extract_stress():
     }
 
 
+def extract_glucose():
+    """Glucose timeline — every 5-min reading from `data/glucose_timeline.csv`.
+
+    Returns rows ready for the Plotly trace on the Vitals page:
+        [["YYYY-MM-DD HH:MM", value_mg_dL], ...]
+    Empty values (sensor gaps) are skipped.
+    """
+    path = DATA / "glucose_timeline.csv"
+    if not path.exists():
+        return None
+    rows = []
+    with path.open() as f:
+        reader = csv.reader(f)
+        next(reader, None)  # header
+        for r in reader:
+            if len(r) < 2:
+                continue
+            ts, v = r[0].strip(), r[1].strip()
+            if not ts or not v:
+                continue
+            try:
+                rows.append([ts, int(v)])
+            except ValueError:
+                try:
+                    rows.append([ts, round(float(v))])
+                except ValueError:
+                    continue
+    if not rows:
+        return None
+    rows.sort(key=lambda x: x[0])
+    return {
+        'rows':     rows,
+        'n':        len(rows),
+        'range':    [rows[0][0], rows[-1][0]],
+    }
+
+
+def extract_hr_by_tod():
+    """Oura wrist HR binned by local-London time of day, 288 × 5-min slots.
+
+    Honours UK DST: BST ends on the last Sunday of October at 01:00 UTC,
+    BST begins on the last Sunday of March at 01:00 UTC. Returns per-slot
+    [count, median_bpm, mean_bpm, sd_bpm].
+    """
+    path = DATA / "Oura" / "App Data" / "heartrate.csv"
+    if not path.exists():
+        return None
+
+    BST_END_2025   = dt.datetime(2025, 10, 26, 1, 0, 0, tzinfo=dt.timezone.utc)
+    BST_START_2026 = dt.datetime(2026,  3, 29, 1, 0, 0, tzinfo=dt.timezone.utc)
+
+    N = 288
+    slots = [[] for _ in range(N)]
+    total = 0
+    first_day = last_day = None
+
+    with path.open() as f:
+        next(f, None)  # header
+        for line in f:
+            line = line.rstrip('\n')
+            if not line or line[0] == '#':
+                continue
+            parts = line.split(';', 2)
+            if len(parts) < 2:
+                continue
+            ts_str = parts[0]
+            try:
+                bpm = int(parts[1])
+            except ValueError:
+                continue
+            try:
+                ts = dt.datetime.strptime(ts_str.replace('Z', '+00:00'),
+                                          '%Y-%m-%dT%H:%M:%S.%f%z')
+            except ValueError:
+                try:
+                    ts = dt.datetime.strptime(ts_str.replace('Z', '+00:00'),
+                                              '%Y-%m-%dT%H:%M:%S%z')
+                except ValueError:
+                    continue
+
+            if ts < BST_END_2025 or ts >= BST_START_2026:
+                offset = dt.timedelta(hours=1)
+            else:
+                offset = dt.timedelta(0)
+            local = ts.astimezone(dt.timezone.utc) + offset
+            h, m = local.hour, local.minute
+            k = (h * 60 + m) // 5
+            if 0 <= k < N:
+                slots[k].append(bpm)
+
+            total += 1
+            day = ts_str[:10]
+            if first_day is None or day < first_day: first_day = day
+            if last_day  is None or day > last_day:  last_day  = day
+
+    out = []
+    for a in slots:
+        if not a:
+            out.append([0, None, None, 0])
+            continue
+        me = statistics.mean(a)
+        md = statistics.median(a)
+        sd_ = statistics.pstdev(a) if len(a) > 1 else 0.0
+        out.append([len(a), round(md), round(me, 2), round(sd_, 2)])
+
+    return {
+        'rows':       out,
+        'n_total':    total,
+        'range':      [first_day, last_day],
+    }
+
+
+def extract_bp_by_week():
+    """Withings BP binned by ISO week (Mon-Sun) with median/mean/sd for
+    systolic + diastolic. Returns per-week
+        [weekStart, n, sysMed, sysMean, sysSd, diaMed, diaMean, diaSd]
+    """
+    path = DATA / "Withings" / "bp.csv"
+    if not path.exists():
+        return None
+
+    def week_start(yyyy_mm_dd):
+        y, m, d = (int(x) for x in yyyy_mm_dd.split('-'))
+        dd = dt.date(y, m, d)
+        return (dd - dt.timedelta(days=dd.weekday())).isoformat()
+
+    buckets = defaultdict(lambda: {'sys': [], 'dia': []})
+    total = 0
+    first_day = last_day = None
+
+    with path.open() as f:
+        for r in csv.DictReader(f):
+            try:
+                ts  = r['Date']
+                sys_ = float(r['Systolic'])
+                dia  = float(r['Diastolic'])
+            except (ValueError, KeyError, TypeError):
+                continue
+            day = ts[:10]
+            wk  = week_start(day)
+            buckets[wk]['sys'].append(sys_)
+            buckets[wk]['dia'].append(dia)
+            total += 1
+            if first_day is None or day < first_day: first_day = day
+            if last_day  is None or day > last_day:  last_day  = day
+
+    rows = []
+    for wk in sorted(buckets.keys()):
+        sys_, dia = buckets[wk]['sys'], buckets[wk]['dia']
+        sm, sM = statistics.mean(sys_), statistics.median(sys_)
+        dm, dM = statistics.mean(dia),  statistics.median(dia)
+        ss = statistics.pstdev(sys_) if len(sys_) > 1 else 0.0
+        ds = statistics.pstdev(dia)  if len(dia)  > 1 else 0.0
+        rows.append([
+            wk, len(sys_),
+            round(sM, 1), round(sm, 2), round(ss, 2),
+            round(dM, 1), round(dm, 2), round(ds, 2),
+        ])
+
+    return {
+        'rows':     rows,
+        'n_weeks':  len(rows),
+        'n_total':  total,
+        'range':    [first_day, last_day],
+    }
+
+
 def extract_spo2():
     path = DATA / "Oura" / "App Data" / "dailyspo2.csv"
     vals = []
@@ -709,6 +876,9 @@ def main():
     spo2      = extract_spo2()
     stress    = extract_stress()
     bp        = extract_bp()
+    glucose   = extract_glucose()
+    hr_tod    = extract_hr_by_tod()
+    bp_weekly = extract_bp_by_week()
     activity  = extract_activity()
     workouts  = extract_workouts()
     tags      = extract_tags()
@@ -773,6 +943,43 @@ def main():
         )
     else:
         blocks.append("const STRESS_RES = [];")
+
+    # ── GLUCOSE — every 5-min reading from glucose_timeline.csv ──────────────
+    if glucose and glucose.get('rows'):
+        body = ','.join(f'[{json.dumps(t)},{v}]' for t, v in glucose['rows'])
+        blocks.append(f"/* GLUCOSE — {glucose['n']} readings · "
+                      f"{glucose['range'][0]} → {glucose['range'][1]} */")
+        blocks.append(f"const GLUCOSE = [{body}];")
+    else:
+        blocks.append("const GLUCOSE = [];")
+
+    # ── HR_BY_TOD — Oura heart-rate binned by local time of day (288 × 5 min) ─
+    if hr_tod and hr_tod.get('rows'):
+        def _fmt(row):
+            n, md, m, s = row
+            return f"[{n},{md if md is not None else 'null'},{m if m is not None else 'null'},{s}]"
+        body = ','.join(_fmt(r) for r in hr_tod['rows'])
+        blocks.append(f"/* HR_BY_TOD — Oura wrist HR, binned by local-London "
+                      f"time of day. Source: data/Oura/App Data/heartrate.csv · "
+                      f"{hr_tod['range'][0]} → {hr_tod['range'][1]} · "
+                      f"{hr_tod['n_total']:,} readings · row: [count, median_bpm, mean_bpm, sd_bpm] */")
+        blocks.append(f"const HR_BY_TOD = [{body}];")
+    else:
+        blocks.append("const HR_BY_TOD = [];")
+
+    # ── BP_BY_WEEK — Withings BP binned by ISO week ──────────────────────────
+    if bp_weekly and bp_weekly.get('rows'):
+        def _fmt(r):
+            wk, n, sM, sm, ss, dM, dm, ds = r
+            return f'["{wk}",{n},{sM},{sm},{ss},{dM},{dm},{ds}]'
+        body = ','.join(_fmt(r) for r in bp_weekly['rows'])
+        blocks.append(f"/* BP_BY_WEEK — Withings BP by ISO week (Mon-Sun). "
+                      f"{bp_weekly['range'][0]} → {bp_weekly['range'][1]} · "
+                      f"{bp_weekly['n_weeks']} weeks · {bp_weekly['n_total']} readings · "
+                      f"row: [weekStart, n, sysMed, sysMean, sysSd, diaMed, diaMean, diaSd] */")
+        blocks.append(f"const BP_BY_WEEK = [{body}];")
+    else:
+        blocks.append("const BP_BY_WEEK = [];")
     # Sleep boxplot input (object literal)
     box = sleep['box']
     blocks.append('const SLEEP_BOX = ' + json.dumps({
@@ -804,6 +1011,13 @@ def main():
               f"peak {peak.get('stress_min', '?')} min on {peak.get('d', '?')}")
         print(f"Resilience:{stress['n_resilience_days']} days · median score {stress['score_median']} · "
               f"levels {stress['level_counts']}")
+    if glucose:
+        print(f"Glucose:   {glucose['n']} readings · {glucose['range'][0]} → {glucose['range'][1]}")
+    if hr_tod:
+        print(f"HR-by-TOD: {hr_tod['n_total']:,} readings · {hr_tod['range'][0]} → {hr_tod['range'][1]}")
+    if bp_weekly:
+        print(f"BP-weekly: {bp_weekly['n_weeks']} weeks · {bp_weekly['n_total']} readings · "
+              f"{bp_weekly['range'][0]} → {bp_weekly['range'][1]}")
 
     print()
     print("─── Manual sources ───")
