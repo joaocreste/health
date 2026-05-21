@@ -360,7 +360,7 @@
       });
     }
 
-    var state = { patients: [], users: [], access: [] };
+    var state = { patients: [], users: [], access: [], pending: {} };
 
     function renderPatients() {
       var listEl = document.getElementById('patients-list');
@@ -387,6 +387,16 @@
         if (p.sex) meta.push(p.sex);
         if (p.country_of_residence) meta.push(p.country_of_residence);
         meta.push('clerk: ' + p.clerk_user_id);
+        var pending = state.pending[p.clerk_user_id] || 0;
+        var reclassifyBtn = pending > 0
+          ? '<button class="btn btn-gold reclassify-btn" type="button" data-patient="' + escapeHtml(p.clerk_user_id) + '" data-pending="' + pending + '" style="padding:4px 10px;font-size:11px;">Reclassify ' + pending + ' pending</button>'
+          : '';
+        var deleteBtn =
+          '<button class="btn delete-patient-btn" type="button" ' +
+            'data-patient="' + escapeHtml(p.clerk_user_id) + '" ' +
+            'data-name="' + escapeHtml(p.full_name || p.clerk_user_id) + '" ' +
+            'title="Archive this patient (soft-delete)" ' +
+            'style="padding:4px 10px;font-size:11px;background:transparent;color:#7A2E22;border:1px solid #C0392B;">Delete</button>';
         var rows = (byPatient[p.clerk_user_id] || []);
         var pills = rows.map(function (a) {
           var isSelf = a.user_clerk === a.patient_clerk;
@@ -404,6 +414,8 @@
             '<div class="row-head">' +
               '<span class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</span>' +
               '<span class="meta">' + escapeHtml(meta.join(' · ')) + '</span>' +
+              reclassifyBtn +
+              deleteBtn +
             '</div>' +
             '<ul class="access-list">' + (pills || '<li class="access-pill">No access rows</li>') + '</ul>' +
             '<form class="grant-form" data-patient="' + escapeHtml(p.clerk_user_id) + '">' +
@@ -414,6 +426,58 @@
           '</div>'
         );
       }).join('');
+
+      // Wire reclassify buttons
+      Array.prototype.forEach.call(listEl.querySelectorAll('button.reclassify-btn'), function (btn) {
+        btn.addEventListener('click', function () {
+          var patient = btn.getAttribute('data-patient');
+          var startedAt = Date.now();
+          btn.disabled = true;
+          var origText = btn.textContent;
+          btn.textContent = 'Reclassifying…';
+          api('/api/admin/reclassify', {
+            method: 'POST',
+            body: JSON.stringify({ patient_clerk: patient, limit: 1 }),
+          }).then(function (data) {
+            var ms = Date.now() - startedAt;
+            var summary = data.processed.map(function (r) {
+              if (r.error) return '  ✗ ' + r.original_path + ' — ' + r.error;
+              var bits = ['→ ' + r.new_class];
+              if (r.lab_rows) bits.push(r.lab_rows + ' lab rows');
+              if (r.writing_inserted) bits.push('writing inserted');
+              return '  ✓ ' + r.original_path + ' (' + bits.join(', ') + ')';
+            }).join('\n');
+            alert('Processed ' + data.processed.length + ' (' + (ms/1000).toFixed(1) + 's). ' + data.remaining + ' remaining.\n\n' + summary);
+            return reload();
+          }).catch(function (e) {
+            alert('Reclassify failed: ' + e.message);
+            btn.disabled = false;
+            btn.textContent = origText;
+          });
+        });
+      });
+
+      // Wire delete buttons (soft-delete via archived_at)
+      Array.prototype.forEach.call(listEl.querySelectorAll('button.delete-patient-btn'), function (btn) {
+        btn.addEventListener('click', function () {
+          var patient = btn.getAttribute('data-patient');
+          var name    = btn.getAttribute('data-name');
+          if (!confirm('Delete patient "' + name + '"?\n\n' +
+                       'The patient row is archived (soft-delete) and disappears from ' +
+                       'the admin + patient-picker views. All access grants for this ' +
+                       'patient are revoked. Lab results, documents and uploads stay ' +
+                       'in the database / R2 — nothing is permanently destroyed.')) return;
+          var orig = btn.textContent;
+          btn.disabled = true; btn.textContent = 'Deleting…';
+          api('/api/admin/patients/delete', {
+            method: 'POST',
+            body: JSON.stringify({ patient_clerk: patient }),
+          }).then(reload).catch(function (e) {
+            alert('Delete failed: ' + e.message);
+            btn.disabled = false; btn.textContent = orig;
+          });
+        });
+      });
 
       // Wire revoke buttons
       Array.prototype.forEach.call(listEl.querySelectorAll('button[data-action="revoke"]'), function (btn) {
@@ -450,6 +514,7 @@
         state.patients = data.patients || [];
         state.users    = data.users    || [];
         state.access   = data.access   || [];
+        state.pending  = data.pending_by_patient || {};
         renderPatients();
       }).catch(function (e) {
         document.getElementById('patients-list').innerHTML =

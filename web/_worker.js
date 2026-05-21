@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
-import { handleIngest } from "../lib/ingest.js";
+import { handleIngest, reclassifyForPatient } from "../lib/ingest.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
 
@@ -503,7 +503,7 @@ async function handleAdmin(request, env) {
   // GET /api/admin/everything — single-shot bundle for the admin UI
   if (path === "/api/admin/everything" && request.method === "GET") {
     try {
-      const [patients, users, access] = await Promise.all([
+      const [patients, users, access, pending] = await Promise.all([
         sql`
           SELECT u.id, u.clerk_user_id, u.full_name, u.email, u.locale, u.created_at,
                  pp.date_of_birth, pp.sex, pp.country_of_residence, pp.native_language
@@ -531,8 +531,33 @@ async function handleAdmin(request, env) {
           JOIN users u_pat  ON u_pat.id  = pa.patient_id
           ORDER BY u_pat.full_name, u_user.full_name
         `,
+        sql`
+          SELECT u.clerk_user_id AS patient_clerk,
+                 sum(t.n)::int   AS pending
+          FROM users u
+          JOIN (
+            SELECT i.patient_id AS pid, count(*)::int AS n
+              FROM import_files if_
+              JOIN imports i ON i.id = if_.import_id
+              WHERE if_.status NOT IN ('parsed', 'classified')
+                AND if_.blob_key IS NOT NULL
+              GROUP BY i.patient_id
+            UNION ALL
+            SELECT patient_id AS pid, count(*)::int AS n
+              FROM documents
+              WHERE kind = 'unclassified'
+              GROUP BY patient_id
+          ) t ON t.pid = u.id
+          WHERE u.role = 'patient' AND u.archived_at IS NULL
+          GROUP BY u.clerk_user_id
+        `,
       ]);
-      return new Response(JSON.stringify({ admin, patients, users, access }), {
+      const pendingMap = {};
+      pending.forEach((r) => { pendingMap[r.patient_clerk] = r.pending; });
+      return new Response(JSON.stringify({
+        admin, patients, users, access,
+        pending_by_patient: pendingMap,
+      }), {
         headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
       });
     } catch (e) {
@@ -650,6 +675,41 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/patients/delete — { patient_clerk }
+  // Soft-delete: sets users.archived_at and removes incoming patient_access rows
+  // so revoked-by-default for any granted viewers. Patient data (lab_results,
+  // documents, imports) is preserved on disk and in R2; the row simply stops
+  // surfacing in admin / patient-picker queries (which all filter archived_at).
+  if (path === "/api/admin/patients/delete" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const patientClerk = String(body?.patient_clerk || "").trim();
+    if (!patientClerk) return jsonError(400, "patient_clerk_required");
+
+    try {
+      const rows = await sql`
+        SELECT id, role, full_name, archived_at
+        FROM users
+        WHERE clerk_user_id = ${patientClerk}
+        LIMIT 1
+      `;
+      if (rows.length === 0)                  return jsonError(404, "patient_not_found");
+      if (rows[0].role !== "patient")         return jsonError(400, "target_must_be_patient");
+      if (rows[0].id === admin.id)            return jsonError(400, "cannot_delete_self");
+      if (rows[0].archived_at !== null)       return jsonError(409, "already_archived");
+
+      await sql`UPDATE users SET archived_at = now() WHERE id = ${rows[0].id}`;
+      await sql`DELETE FROM patient_access WHERE patient_id = ${rows[0].id}`;
+
+      return new Response(JSON.stringify({
+        ok: true,
+        archived: { clerk_user_id: patientClerk, full_name: rows[0].full_name },
+      }), { headers: { "Content-Type": "application/json" } });
+    } catch (e) {
+      return jsonError(500, `Delete patient failed: ${e.message}`);
+    }
+  }
+
   // POST /api/admin/access — { action: 'grant' | 'revoke', user_clerk, patient_clerk, notes? }
   if (path === "/api/admin/access" && request.method === "POST") {
     let body;
@@ -690,6 +750,35 @@ async function handleAdmin(request, env) {
       });
     } catch (e) {
       return jsonError(500, `Access change failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/reclassify — { patient_clerk, limit? } batched re-run of
+  // the ingest classifier (and lab/writing extractor) on stuck import_files
+  // and documents.kind='unclassified'. Call multiple times until remaining=0.
+  if (path === "/api/admin/reclassify" && request.method === "POST") {
+    if (!env.ANTHROPIC_API_KEY) return jsonError(500, "anthropic_api_key_not_configured");
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const patientClerk = String(body?.patient_clerk || "").trim();
+    if (!patientClerk) return jsonError(400, "patient_clerk_required");
+    const limit = Math.min(Math.max(parseInt(body?.limit, 10) || 1, 1), 5);
+
+    try {
+      const patientRows = await sql`
+        SELECT id, role FROM users
+        WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1
+      `;
+      if (patientRows.length === 0 || patientRows[0].role !== "patient") {
+        return jsonError(404, "patient_not_found");
+      }
+      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+      const result = await reclassifyForPatient(sql, anthropic, env, patientRows[0].id, limit);
+      return new Response(JSON.stringify({ ok: true, ...result }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `Reclassify failed: ${e.message}`);
     }
   }
 
