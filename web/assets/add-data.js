@@ -241,15 +241,23 @@
     try {
       resp = await fetch('/api/ingest', { method: 'POST', body: fd });
     } catch (e) {
-      return { ok: false, error: e.message || 'Network error' };
+      return { ok: false, error: 'Network error: ' + (e.message || 'fetch threw') };
     }
+    // Read body as text first so we can surface a useful excerpt when it
+    // isn't JSON (worker timeout / 5xx HTML / empty body, etc).
+    var bodyText;
+    try { bodyText = await resp.text(); }
+    catch (e) { return { ok: false, error: 'HTTP ' + resp.status + ' (body read failed: ' + e.message + ')' }; }
     var data;
-    try { data = await resp.json(); }
-    catch (e) { return { ok: false, error: 'Bad server response' }; }
-    if (!resp.ok || data.error) {
-      return { ok: false, error: data.error || ('HTTP ' + resp.status) };
+    try { data = bodyText ? JSON.parse(bodyText) : null; }
+    catch (e) {
+      var excerpt = (bodyText || '').replace(/\s+/g, ' ').slice(0, 160);
+      return { ok: false, error: 'HTTP ' + resp.status + ' non-JSON body: ' + (excerpt || '(empty)') };
     }
-    var first = (data.results && data.results[0]) || null;
+    if (!resp.ok || (data && data.error)) {
+      return { ok: false, error: (data && data.error) || ('HTTP ' + resp.status) };
+    }
+    var first = (data && data.results && data.results[0]) || null;
     if (first && first.ok) return { ok: true, result: first };
     return { ok: false, error: (first && first.error) || 'Unknown error' };
   }
