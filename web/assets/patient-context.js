@@ -396,6 +396,145 @@
     document.body.appendChild(view);
   }
 
+  /* ── Generic section views ────────────────────────────────────────
+     For every section page other than home + physical-exams we used to
+     just render the "Not built yet" shell. The summary endpoint already
+     gives us per-pillar counts, recent docs and recent labs, so we now
+     render a proper data-driven landing instead.                      */
+
+  function renderMetricGrid(rows) {
+    return (
+      '<section class="ov-section">' +
+        '<div class="ov-metrics">' + rows.map(function (r) {
+          var inner =
+            '<div class="ov-metric-num">' + escapeHtml(String(r.value)) + '</div>' +
+            '<div class="ov-metric-label">' + escapeHtml(r.label) + '</div>';
+          return r.href
+            ? '<a class="ov-metric ov-metric-link" href="' + r.href + '">' + inner + '</a>'
+            : '<div class="ov-metric">' + inner + '</div>';
+        }).join('') + '</div>' +
+      '</section>'
+    );
+  }
+
+  function renderSectionView(opts) {
+    /* opts: { summary, title, eyebrow, metrics, emptyHint } */
+    var p = (opts.summary && opts.summary.patient) || {};
+    var pending = (opts.summary && opts.summary.pending_files) || [];
+    var anyValue = (opts.metrics || []).some(function (m) { return m.value > 0; });
+
+    document.title = 'JC Advisory — ' + opts.title + ' · ' + (p.full_name || 'Patient');
+
+    var view = document.createElement('main');
+    view.className = 'jc-overview jc-section';
+    view.innerHTML =
+      '<div class="ov-shell">' +
+        renderPatientHeader(p) +
+        renderPendingBanner(pending) +
+        '<div class="ov-section-eyebrow">' + escapeHtml(opts.eyebrow) + '</div>' +
+        renderMetricGrid(opts.metrics) +
+        (anyValue ? '' :
+          '<div class="ov-section ov-empty-hint">' +
+            '<p>' + escapeHtml(opts.emptyHint) + '</p>' +
+          '</div>') +
+        (opts.extra || '') +
+      '</div>';
+    document.body.appendChild(view);
+  }
+
+  function renderPhysical(summary) {
+    var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
+    var labs = summary.recent_labs || [];
+    var docs = (summary.recent_documents || []).filter(function (d) {
+      return ['lab_pdf', 'imaging_image', 'dicom_series', 'ecg_pdf', 'doctor_report', 'medication_csv', 'genetics_report'].indexOf(d.kind) !== -1;
+    });
+    var metrics = [
+      { label: 'Lab markers',     value: b.lab_results     || 0, href: 'physical-exams.html' },
+      { label: 'Imaging studies', value: b.imaging_studies || 0, href: 'physical-exams.html' },
+      { label: 'Vitals days',     value: b.vitals_days     || 0, href: 'physical-vitals.html' },
+      { label: 'ECG events',      value: b.ecg_events      || 0, href: 'physical-vitals.html' },
+      { label: 'Genetics (PGx)',  value: b.pgx_findings    || 0, href: 'physical-genetics.html' },
+      { label: 'Medications',     value: b.medications     || 0 },
+      { label: 'Supplements',     value: b.supplements     || 0 },
+      { label: 'Encounters',      value: b.encounters      || 0 },
+      { label: 'Surgeries',       value: b.surgeries       || 0 },
+      { label: 'Injuries',        value: b.injuries        || 0 },
+    ];
+    var extra =
+      (labs.length === 0 ? '' :
+        '<section class="ov-section">' +
+          '<h2>Recent lab results <span class="ov-count-inline">' + labs.length + '</span></h2>' +
+          renderLabList(labs.slice(0, 8)) +
+        '</section>') +
+      (docs.length === 0 ? '' :
+        '<section class="ov-section">' +
+          '<h2>Recent documents <span class="ov-count-inline">' + docs.length + '</span></h2>' +
+          renderDocList(docs.slice(0, 8)) +
+        '</section>');
+    renderSectionView({
+      summary: summary, title: 'Physical', eyebrow: 'Physical',
+      metrics: metrics, extra: extra,
+      emptyHint: 'Nothing physical ingested yet. Drop lab PDFs, ECGs, imaging or vitals exports from Add data.',
+    });
+  }
+
+  function renderVitals(summary) {
+    var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
+    renderSectionView({
+      summary: summary, title: 'Vitals', eyebrow: 'Physical → Vitals',
+      metrics: [
+        { label: 'Vitals days', value: b.vitals_days || 0 },
+        { label: 'ECG events',  value: b.ecg_events  || 0 },
+      ],
+      emptyHint: 'No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
+    });
+  }
+
+  function renderGenetics(summary) {
+    var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
+    renderSectionView({
+      summary: summary, title: 'Genetics', eyebrow: 'Physical → Genetics',
+      metrics: [
+        { label: 'PGx findings', value: b.pgx_findings || 0 },
+      ],
+      emptyHint: 'No genetics data ingested yet. Upload a 23andMe / AncestryDNA raw file or a pharmacogenomic report PDF.',
+    });
+  }
+
+  function renderMental(summary) {
+    var b = (summary.pillars && summary.pillars.mental && summary.pillars.mental.breakdown) || {};
+    var writings = (summary.recent_documents || []).filter(function (d) { return d.kind === 'writing'; });
+    var extra = writings.length === 0 ? '' :
+      '<section class="ov-section">' +
+        '<h2>Recent writings <span class="ov-count-inline">' + writings.length + '</span></h2>' +
+        renderDocList(writings.slice(0, 8)) +
+      '</section>';
+    renderSectionView({
+      summary: summary, title: 'Mental', eyebrow: 'Mental',
+      metrics: [
+        { label: 'Writings',         value: b.writings         || 0 },
+        { label: 'Mood entries',     value: b.mood_entries     || 0 },
+        { label: 'Psych items',      value: b.psych_items      || 0 },
+        { label: 'Panic events',     value: b.panic_events     || 0 },
+        { label: 'Risk assessments', value: b.risk_assessments || 0 },
+      ],
+      extra: extra,
+      emptyHint: 'No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
+    });
+  }
+
+  function renderSpiritual(summary) {
+    var b = (summary.pillars && summary.pillars.spiritual && summary.pillars.spiritual.breakdown) || {};
+    renderSectionView({
+      summary: summary, title: 'Spiritual', eyebrow: 'Spiritual',
+      metrics: [
+        { label: 'Wheel of life',  value: b.wheel_of_life || 0 },
+        { label: 'Life events',    value: b.life_events   || 0 },
+      ],
+      emptyHint: 'No spiritual data ingested yet. Drop wheel-of-life self-assessments or life-event CSVs from Add data.',
+    });
+  }
+
   function renderEmptyShell(clerkId, patientName, sectionLabel) {
     var shell = document.createElement('main');
     shell.className = 'jc-empty-shell';
@@ -484,6 +623,14 @@
       '.exam-value { font-family: "IBM Plex Mono", monospace; color: #0D1B2A; }',
       '.exam-ref, .exam-date, .exam-lab { font-family: "IBM Plex Mono", monospace; color: #7A8FA6; font-size: 12px; }',
       '.exam-points { display: inline-block; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 4px; padding: 1px 6px; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+      // Section metric grid
+      '.ov-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }',
+      '.ov-metric { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }',
+      '.ov-metric-num { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 24px; color: #0D1B2A; line-height: 1.1; }',
+      '.ov-metric-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
+      '.ov-metric-link { text-decoration: none; transition: border-color 0.15s, transform 0.15s; }',
+      '.ov-metric-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
+      '.ov-empty-hint p { margin: 0; font-size: 13px; color: #7A8FA6; font-style: italic; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -532,10 +679,19 @@
       'loops':             'Loops',
       'assessment':        'Assessment',
     };
+    var dataRenderers = {
+      'physical':          renderPhysical,
+      'physical-vitals':   renderVitals,
+      'physical-genetics': renderGenetics,
+      'mental':            renderMental,
+      'spiritual':         renderSpiritual,
+    };
     fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (summary) {
-        renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || section);
+        var renderer = dataRenderers[section];
+        if (renderer) renderer(summary);
+        else renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || section);
       })
       .catch(function () { renderEmptyShell(patient, null, labels[section] || section); });
   });
