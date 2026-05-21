@@ -150,9 +150,19 @@
     renderList();
   }
 
+  var MAX_ATTEMPTS = 3;
+
   function statusLabel(item) {
     if (item.status === 'staged')    return { en: 'Queued',     pt: 'Em fila',     css: 'staged' };
-    if (item.status === 'uploading') return { en: 'Uploading…', pt: 'Enviando…',   css: 'progress' };
+    if (item.status === 'uploading') {
+      var n = item.attempt || 1;
+      if (n === 1) return { en: 'Uploading…', pt: 'Enviando…', css: 'progress' };
+      return {
+        en: 'Retrying ' + n + '/' + MAX_ATTEMPTS + '…',
+        pt: 'Tentando ' + n + '/' + MAX_ATTEMPTS + '…',
+        css: 'progress',
+      };
+    }
     if (item.status === 'done') {
       if (item.result) {
         var c = item.result.classified_as || 'unclassified';
@@ -222,8 +232,7 @@
     commitBtnEl.disabled = stagedFiles.every(function (i) { return i.status !== 'staged'; });
   }
 
-  async function uploadOne(item, patientClerk, viewerClerk) {
-    item.status = 'uploading'; renderList();
+  async function tryUploadOnce(item, patientClerk, viewerClerk) {
     var fd = new FormData();
     fd.append('patient_clerk', patientClerk);
     if (viewerClerk) fd.append('viewer_clerk', viewerClerk);
@@ -232,23 +241,39 @@
     try {
       resp = await fetch('/api/ingest', { method: 'POST', body: fd });
     } catch (e) {
-      item.status = 'failed'; item.error = e.message || 'Network error'; renderList();
-      return;
+      return { ok: false, error: e.message || 'Network error' };
     }
     var data;
-    try { data = await resp.json(); } catch (e) {
-      item.status = 'failed'; item.error = 'Bad server response'; renderList(); return;
-    }
+    try { data = await resp.json(); }
+    catch (e) { return { ok: false, error: 'Bad server response' }; }
     if (!resp.ok || data.error) {
-      item.status = 'failed'; item.error = data.error || ('HTTP ' + resp.status); renderList();
-      return;
+      return { ok: false, error: data.error || ('HTTP ' + resp.status) };
     }
     var first = (data.results && data.results[0]) || null;
-    if (first && first.ok) {
-      item.status = 'done'; item.result = first;
-    } else {
-      item.status = 'failed'; item.error = (first && first.error) || 'Unknown error';
+    if (first && first.ok) return { ok: true, result: first };
+    return { ok: false, error: (first && first.error) || 'Unknown error' };
+  }
+
+  async function uploadOne(item, patientClerk, viewerClerk) {
+    var lastError = null;
+    for (var attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      item.status = 'uploading';
+      item.attempt = attempt;
+      renderList();
+      var outcome = await tryUploadOnce(item, patientClerk, viewerClerk);
+      if (outcome.ok) {
+        item.status = 'done';
+        item.result = outcome.result;
+        renderList();
+        return;
+      }
+      lastError = outcome.error;
+      if (attempt < MAX_ATTEMPTS) {
+        await new Promise(function (r) { setTimeout(r, 500 * attempt); });
+      }
     }
+    item.status = 'failed';
+    item.error = 'After ' + MAX_ATTEMPTS + ' attempts: ' + (lastError || 'Unknown error');
     renderList();
   }
 
