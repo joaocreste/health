@@ -103,7 +103,8 @@
       if (el.tagName === 'NAV' || el.tagName === 'HEADER' || el.tagName === 'SCRIPT' ||
           el.classList.contains('jc-empty-shell') ||
           el.classList.contains('jc-overview') ||
-          el.classList.contains('jc-exams')) continue;
+          el.classList.contains('jc-exams') ||
+          el.classList.contains('jc-home')) continue;
       el.style.display = 'none';
     }
   }
@@ -198,34 +199,123 @@
     }).join('') + '</ul>';
   }
 
+  // Mirror Patient-Zero's landing page exactly: dark-blue hero + Reports cards.
+  // Counts/recent-docs/recent-labs from `summary` are intentionally ignored —
+  // the layout is identical for every patient regardless of how much data has
+  // been ingested. The user gets to data by clicking "Add or edit data" in the
+  // top nav (or by opening one of the three pillar cards).
   function renderHome(summary) {
-    var p = summary.patient || {};
-    var pillars = summary.pillars || {};
-    var docs = summary.recent_documents || [];
-    var labs = summary.recent_labs || [];
-    var pending = summary.pending_files || [];
+    var p = (summary && summary.patient) || {};
+    var name = p.full_name || 'this patient';
 
-    var pillarsHtml =
-      renderPillarCard('Physical',  pillars.physical  && pillars.physical.total  || 0, (pillars.physical  && pillars.physical.breakdown)  || {}, 'physical.html',  'physical') +
-      renderPillarCard('Mental',    pillars.mental    && pillars.mental.total    || 0, (pillars.mental    && pillars.mental.breakdown)    || {}, 'mental.html',    'mental') +
-      renderPillarCard('Spiritual', pillars.spiritual && pillars.spiritual.total || 0, (pillars.spiritual && pillars.spiritual.breakdown) || {}, 'spiritual.html', 'spiritual');
+    document.title = 'JC Advisory — Health Summary · ' + name;
+
+    // ── Hero meta values ──────────────────────────────────────────
+    var months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+    var monthsPt = ['janeiro','fevereiro','março','abril','maio','junho',
+                    'julho','agosto','setembro','outubro','novembro','dezembro'];
+    var today = new Date();
+    var todayEn = today.getDate() + ' ' + months[today.getMonth()].slice(0, 3) + ' ' + today.getFullYear();
+    var todayPt = today.getDate() + ' de ' + monthsPt[today.getMonth()] + ' de ' + today.getFullYear();
+
+    var dobEn = '—', dobPt = '—';
+    if (p.date_of_birth) {
+      var dob = new Date(p.date_of_birth);
+      if (!isNaN(dob)) {
+        var age = today.getFullYear() - dob.getFullYear();
+        var beforeBirthday = (today.getMonth() < dob.getMonth()) ||
+                             (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
+        if (beforeBirthday) age--;
+        dobEn = dob.getDate() + ' ' + months[dob.getMonth()] + ' ' + dob.getFullYear() + ' · age ' + age;
+        dobPt = dob.getDate() + ' de ' + monthsPt[dob.getMonth()] + ' de ' + dob.getFullYear() + ' · ' + age + ' anos';
+      }
+    }
+
+    var residence = p.country_of_residence ? escapeHtml(p.country_of_residence) : '—';
+
+    // ── Hero ──────────────────────────────────────────────────────
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' +
+            '<span class="lang-en">Health Summary · ' + todayEn + '</span>' +
+            '<span class="lang-pt">Resumo de saúde · ' + todayPt + '</span>' +
+          '</div>' +
+          '<h1 class="hero-title">' +
+            '<span class="lang-en">From scattered data to a clinical picture.</span>' +
+            '<span class="lang-pt">Dos dados dispersos a um quadro clínico.</span>' +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            '<span class="lang-en">A single, structured view of ' + escapeHtml(name) + '’s physical, mental and spiritual health.</span>' +
+            '<span class="lang-pt">Uma visão única e estruturada da saúde física, mental e espiritual de ' + escapeHtml(name) + '.</span>' +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item">' +
+              '<span class="lang-en">Patient</span><span class="lang-pt">Paciente</span>' +
+              '<span>' + escapeHtml(name) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span class="lang-en">Date of birth</span><span class="lang-pt">Data de nascimento</span>' +
+              '<span><span class="lang-en">' + dobEn + '</span><span class="lang-pt">' + dobPt + '</span></span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span class="lang-en">Residence</span><span class="lang-pt">Residência</span>' +
+              '<span>' + residence + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span class="lang-en">Prepared</span><span class="lang-pt">Preparado em</span>' +
+              '<span><span class="lang-en">' + todayEn + '</span><span class="lang-pt">' + todayPt + '</span></span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span class="lang-en">Classification</span><span class="lang-pt">Classificação</span>' +
+              '<span><span class="lang-en">Strictly confidential</span><span class="lang-pt">Estritamente confidencial</span></span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    // ── Reports — three pillar cards (identical to Patient Zero) ─
+    var reports =
+      '<section class="report-section">' +
+        '<div class="container">' +
+          '<div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>' +
+          '<h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>' +
+          '<div class="entry-grid entry-grid-visual">' +
+            '<a class="entry-card entry-card-visual" href="physical.html">' +
+              '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<path d="M32 54 L13 36 C7 30 7 22 13 18 C18 13 25 13 29 18 L32 21 L35 18 C39 13 46 13 51 18 C57 22 57 30 51 36 L32 54 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
+                '<polyline points="6,36 18,36 22,28 27,44 32,30 37,38 42,36 58,36" stroke="#3E7CA3" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '</svg>' +
+              '<div class="entry-title"><span class="lang-en">Physical Health Overview</span><span class="lang-pt">Visão geral da saúde física</span></div>' +
+              '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
+            '</a>' +
+            '<a class="entry-card entry-card-visual" href="mental.html">' +
+              '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<path d="M32 14 C22 14 14 20 14 30 C14 40 22 50 32 50 V14 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
+                '<path d="M32 14 C42 14 50 20 50 30 C50 40 42 50 32 50 V14 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
+                '<path d="M22 24 Q26 26 22 30 Q26 34 22 38" stroke="#3E7CA3" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+                '<path d="M42 24 Q38 26 42 30 Q38 34 42 38" stroke="#3E7CA3" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+              '</svg>' +
+              '<div class="entry-title"><span class="lang-en">Mental Health Overview</span><span class="lang-pt">Visão geral da saúde mental</span></div>' +
+              '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
+            '</a>' +
+            '<a class="entry-card entry-card-visual" href="spiritual.html">' +
+              '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<path d="M27 8 L37 8 L37 22 L50 22 L50 32 L37 32 L37 56 L27 56 L27 32 L14 32 L14 22 L27 22 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
+                '<line x1="32" y1="14" x2="32" y2="54" stroke="#3E7CA3" stroke-width="2" stroke-linecap="round"/>' +
+                '<line x1="18" y1="27" x2="46" y2="27" stroke="#3E7CA3" stroke-width="2" stroke-linecap="round"/>' +
+              '</svg>' +
+              '<div class="entry-title"><span class="lang-en">Spiritual Health Overview</span><span class="lang-pt">Visão geral da saúde espiritual</span></div>' +
+              '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
+            '</a>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
 
     var overview = document.createElement('main');
-    overview.className = 'jc-overview';
-    overview.innerHTML =
-      '<div class="ov-shell">' +
-        renderPatientHeader(p) +
-        renderPendingBanner(pending) +
-        '<div class="pillar-grid">' + pillarsHtml + '</div>' +
-        '<section class="ov-section">' +
-          '<h2>Recent documents <span class="ov-count-inline">' + (summary.counts && summary.counts.documents || 0) + '</span></h2>' +
-          renderDocList(docs) +
-        '</section>' +
-        '<section class="ov-section">' +
-          '<h2>Recent lab results <span class="ov-count-inline">' + ((pillars.physical && pillars.physical.breakdown && pillars.physical.breakdown.lab_results) || 0) + '</span></h2>' +
-          renderLabList(labs) +
-        '</section>' +
-      '</div>';
+    overview.className = 'jc-home';
+    overview.innerHTML = hero + reports;
     document.body.appendChild(overview);
   }
 
@@ -333,6 +423,9 @@
     var s = document.createElement('style');
     s.id = 'jc-overview-styles';
     s.textContent = [
+      // jc-home reuses Patient Zero's hero + report-section styles from styles.css
+      // so it must NOT inherit the padded/centered card layout used by jc-overview.
+      '.jc-home { display: block; padding: 0; margin: 0; background: #F9F7F4; }',
       '.jc-overview { padding: 32px 24px 96px; background: #F9F7F4; min-height: 100vh; }',
       '.ov-shell { max-width: 1080px; margin: 0 auto; }',
       '.ov-header { margin-bottom: 24px; }',
