@@ -392,11 +392,11 @@
           ? '<button class="btn btn-gold reclassify-btn" type="button" data-patient="' + escapeHtml(p.clerk_user_id) + '" data-pending="' + pending + '" style="padding:4px 10px;font-size:11px;">Reclassify ' + pending + ' pending</button>'
           : '';
         var deleteBtn =
-          '<button class="btn delete-patient-btn" type="button" ' +
+          '<button class="btn btn-ghost delete-patient-btn" type="button" ' +
             'data-patient="' + escapeHtml(p.clerk_user_id) + '" ' +
             'data-name="' + escapeHtml(p.full_name || p.clerk_user_id) + '" ' +
             'title="Archive this patient (soft-delete)" ' +
-            'style="padding:4px 10px;font-size:11px;background:transparent;color:#7A2E22;border:1px solid #C0392B;">Delete</button>';
+            'style="margin-left:auto;padding:4px 10px;font-size:11px;">Delete patient</button>';
         var rows = (byPatient[p.clerk_user_id] || []);
         var pills = rows.map(function (a) {
           var isSelf = a.user_clerk === a.patient_clerk;
