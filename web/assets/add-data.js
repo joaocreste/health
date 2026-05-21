@@ -254,6 +254,11 @@
     return { ok: false, error: (first && first.error) || 'Unknown error' };
   }
 
+  function isRateLimit(err) {
+    var s = String(err || '');
+    return /\b429\b/.test(s) || /rate_limit/i.test(s);
+  }
+
   async function uploadOne(item, patientClerk, viewerClerk) {
     var lastError = null;
     for (var attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -269,7 +274,10 @@
       }
       lastError = outcome.error;
       if (attempt < MAX_ATTEMPTS) {
-        await new Promise(function (r) { setTimeout(r, 500 * attempt); });
+        // Rate-limit windows reset on a ~60s cadence; quick retries would
+        // just hit the same wall. Wait ~25–35s instead of 500ms–1s.
+        var waitMs = isRateLimit(lastError) ? (25000 + 10000 * attempt) : (500 * attempt);
+        await new Promise(function (r) { setTimeout(r, waitMs); });
       }
     }
     item.status = 'failed';

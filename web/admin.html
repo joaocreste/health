@@ -238,6 +238,47 @@
     color: #0D1B2A;
   }
   .grant-form .btn { padding: 6px 12px; font-size: 12px; }
+
+  /* ---------- Edit-user modal ---------- */
+  .edit-modal-backdrop {
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(13, 27, 42, 0.55);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px;
+    overflow-y: auto;
+  }
+  .edit-modal-backdrop.open { display: flex; }
+  .edit-modal {
+    background: #FFFFFF;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 640px;
+    padding: 28px 28px 24px;
+    box-shadow: 0 16px 48px rgba(13, 27, 42, 0.28);
+  }
+  .edit-modal h3 {
+    margin: 0 0 4px;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 20px;
+    color: #0D1B2A;
+  }
+  .edit-modal .edit-sub {
+    margin: 0 0 18px;
+    font-size: 12px;
+    color: #7A8FA6;
+  }
+  .edit-modal .form-actions { margin-top: 16px; }
+  .edit-modal .form-actions .btn { margin-right: 8px; }
+  .edit-feedback {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #7A8FA6;
+  }
+  .edit-feedback.ok { color: #2D5F3F; }
+  .edit-feedback.err { color: #7A2E22; }
 </style>
 </head>
 <body class="admin-page">
@@ -327,6 +368,71 @@
   </section>
 </main>
 
+<!-- Edit patient modal -->
+<div class="edit-modal-backdrop" id="edit-modal-backdrop" aria-hidden="true">
+  <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <h3 id="edit-modal-title">Edit patient</h3>
+    <p class="edit-sub" id="edit-modal-sub">clerk_user_id: <code id="edit-modal-clerk"></code></p>
+    <form id="edit-form">
+      <input type="hidden" name="user_clerk" id="edit-user-clerk">
+      <div class="form-grid">
+        <label>Full name *
+          <input name="full_name" id="edit-full-name" type="text" required autocomplete="off">
+        </label>
+        <label>Username
+          <input name="demo_username" id="edit-demo-username" type="text" autocomplete="off" placeholder="lowercase, no spaces">
+        </label>
+        <label>Password
+          <input name="demo_password" id="edit-demo-password" type="text" autocomplete="off" placeholder="plaintext, demo only">
+        </label>
+        <label>Email
+          <input name="email" id="edit-email" type="email" autocomplete="off">
+        </label>
+        <label>Locale
+          <select name="locale" id="edit-locale">
+            <option value="">—</option>
+            <option value="en">English</option>
+            <option value="pt">Portuguese</option>
+          </select>
+        </label>
+        <!-- Patient-only -->
+        <label data-edit-role="patient">Date of birth
+          <input name="date_of_birth" id="edit-dob" type="date">
+        </label>
+        <label data-edit-role="patient">Sex
+          <select name="sex" id="edit-sex">
+            <option value="">—</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </label>
+        <label data-edit-role="patient">Native language
+          <input name="native_language" id="edit-native-language" type="text" placeholder="pt, en, fr…">
+        </label>
+        <label data-edit-role="patient">Country
+          <input name="country_of_residence" id="edit-country" type="text" placeholder="BR, GB, FR…">
+        </label>
+        <label data-edit-role="patient">Height (cm)
+          <input name="height_cm" id="edit-height" type="number" step="0.1" min="0">
+        </label>
+        <label data-edit-role="patient">Weight (kg)
+          <input name="weight_kg" id="edit-weight" type="number" step="0.1" min="0">
+        </label>
+        <label data-edit-role="patient">Blood type
+          <input name="blood_type" id="edit-blood-type" type="text" placeholder="A+, O-, …">
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-ghost" id="edit-cancel">Cancel</button>
+        <span class="edit-feedback" id="edit-feedback"></span>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="assets/app.js?v=28"></script>
 <script>
   (function () {
@@ -391,12 +497,17 @@
         var reclassifyBtn = pending > 0
           ? '<button class="btn btn-gold reclassify-btn" type="button" data-patient="' + escapeHtml(p.clerk_user_id) + '" data-pending="' + pending + '" style="padding:4px 10px;font-size:11px;">Reclassify ' + pending + ' pending</button>'
           : '';
+        var editBtn =
+          '<button class="btn btn-ghost edit-patient-btn" type="button" ' +
+            'data-patient="' + escapeHtml(p.clerk_user_id) + '" ' +
+            'title="Edit patient info" ' +
+            'style="margin-left:auto;padding:4px 10px;font-size:11px;">Edit</button>';
         var deleteBtn =
           '<button class="btn btn-ghost delete-patient-btn" type="button" ' +
             'data-patient="' + escapeHtml(p.clerk_user_id) + '" ' +
             'data-name="' + escapeHtml(p.full_name || p.clerk_user_id) + '" ' +
             'title="Archive this patient (soft-delete)" ' +
-            'style="margin-left:auto;padding:4px 10px;font-size:11px;">Delete patient</button>';
+            'style="padding:4px 10px;font-size:11px;">Delete patient</button>';
         var rows = (byPatient[p.clerk_user_id] || []);
         var pills = rows.map(function (a) {
           var isSelf = a.user_clerk === a.patient_clerk;
@@ -415,6 +526,7 @@
               '<span class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</span>' +
               '<span class="meta">' + escapeHtml(meta.join(' · ')) + '</span>' +
               reclassifyBtn +
+              editBtn +
               deleteBtn +
             '</div>' +
             '<ul class="access-list">' + (pills || '<li class="access-pill">No access rows</li>') + '</ul>' +
@@ -454,6 +566,16 @@
             btn.disabled = false;
             btn.textContent = origText;
           });
+        });
+      });
+
+      // Wire edit buttons → open modal pre-filled from state.patients
+      Array.prototype.forEach.call(listEl.querySelectorAll('button.edit-patient-btn'), function (btn) {
+        btn.addEventListener('click', function () {
+          var clerk = btn.getAttribute('data-patient');
+          var p = state.patients.find(function (x) { return x.clerk_user_id === clerk; });
+          if (!p) return;
+          openEditModal(p);
         });
       });
 
@@ -508,6 +630,74 @@
         });
       });
     }
+
+    /* ---------- Edit-patient modal ---------- */
+    var editBackdrop = document.getElementById('edit-modal-backdrop');
+    var editForm     = document.getElementById('edit-form');
+    var editFeedback = document.getElementById('edit-feedback');
+
+    function setVal(id, v) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.value = (v === null || v === undefined) ? '' : String(v);
+    }
+    function openEditModal(p) {
+      setVal('edit-user-clerk',     p.clerk_user_id);
+      setVal('edit-full-name',      p.full_name);
+      setVal('edit-demo-username',  p.demo_username);
+      setVal('edit-demo-password',  p.demo_password);
+      setVal('edit-email',          p.email);
+      setVal('edit-locale',         p.locale);
+      setVal('edit-dob',            p.date_of_birth);
+      setVal('edit-sex',            p.sex);
+      setVal('edit-native-language', p.native_language);
+      setVal('edit-country',        p.country_of_residence);
+      setVal('edit-height',         p.height_cm);
+      setVal('edit-weight',         p.weight_kg);
+      setVal('edit-blood-type',     p.blood_type);
+      document.getElementById('edit-modal-clerk').textContent = p.clerk_user_id;
+      editFeedback.textContent = ''; editFeedback.className = 'edit-feedback';
+      editBackdrop.classList.add('open');
+      editBackdrop.setAttribute('aria-hidden', 'false');
+      setTimeout(function () { document.getElementById('edit-full-name').focus(); }, 30);
+    }
+    function closeEditModal() {
+      editBackdrop.classList.remove('open');
+      editBackdrop.setAttribute('aria-hidden', 'true');
+    }
+    document.getElementById('edit-cancel').addEventListener('click', closeEditModal);
+    editBackdrop.addEventListener('click', function (e) {
+      if (e.target === editBackdrop) closeEditModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && editBackdrop.classList.contains('open')) closeEditModal();
+    });
+
+    editForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(editForm);
+      var body = {};
+      fd.forEach(function (v, k) { body[k] = String(v); });
+      // Send empty strings as nulls so they clear the columns server-side.
+      Object.keys(body).forEach(function (k) {
+        if (k !== 'user_clerk' && body[k] === '') body[k] = null;
+      });
+      editFeedback.className = 'edit-feedback';
+      editFeedback.textContent = 'Saving…';
+      api('/api/admin/users/update', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }).then(function () {
+        editFeedback.textContent = 'Saved.';
+        editFeedback.className = 'edit-feedback ok';
+        return reload();
+      }).then(function () {
+        setTimeout(closeEditModal, 400);
+      }).catch(function (err) {
+        editFeedback.textContent = 'Save failed: ' + err.message;
+        editFeedback.className = 'edit-feedback err';
+      });
+    });
 
     function reload() {
       return api('/api/admin/everything').then(function (data) {

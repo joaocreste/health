@@ -72,7 +72,7 @@ async function handleChat(request, env) {
     return jsonError(500, `Could not load patient record: ${e.message}`);
   }
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
@@ -506,14 +506,17 @@ async function handleAdmin(request, env) {
       const [patients, users, access, pending] = await Promise.all([
         sql`
           SELECT u.id, u.clerk_user_id, u.full_name, u.email, u.locale, u.created_at,
-                 pp.date_of_birth, pp.sex, pp.country_of_residence, pp.native_language
+                 u.demo_username, u.demo_password,
+                 pp.date_of_birth, pp.sex, pp.country_of_residence, pp.native_language,
+                 pp.height_cm, pp.weight_kg, pp.blood_type
           FROM users u
           LEFT JOIN patient_profiles pp ON pp.user_id = u.id
           WHERE u.role = 'patient' AND u.archived_at IS NULL
           ORDER BY u.full_name
         `,
         sql`
-          SELECT id, clerk_user_id, full_name, email, role
+          SELECT id, clerk_user_id, full_name, email, role, locale,
+                 demo_username, demo_password
           FROM users
           WHERE archived_at IS NULL
           ORDER BY role, full_name
@@ -675,6 +678,98 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/users/update — edit any user's info. For role='patient'
+  // upserts patient_profiles in the same call. Client sends the full set of
+  // editable fields; empty string / null clears the column.
+  if (path === "/api/admin/users/update" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const userClerk = String(body?.user_clerk || "").trim();
+    if (!userClerk) return jsonError(400, "user_clerk_required");
+
+    const blank = (v) => (v === undefined || v === null || String(v).trim() === "" ? null : String(v).trim());
+    const num   = (v) => {
+      if (v === undefined || v === null || v === "") return null;
+      const n = Number(v); return Number.isFinite(n) ? n : null;
+    };
+    const date  = (v) => {
+      const s = blank(v);
+      if (!s) return null;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;  // signal bad input
+      return s;
+    };
+    const sexEnum = ["male", "female", "other", "unknown"];
+
+    const fullName    = blank(body.full_name);
+    const email       = blank(body.email);
+    const locale      = blank(body.locale);
+    const demoUser    = blank(body.demo_username);
+    const demoPass    = blank(body.demo_password);
+    const dob         = date(body.date_of_birth);
+    if (dob === undefined) return jsonError(400, "date_of_birth_must_be_yyyy_mm_dd");
+    const sex         = blank(body.sex);
+    if (sex !== null && !sexEnum.includes(sex)) return jsonError(400, "sex_invalid");
+    const country     = blank(body.country_of_residence);
+    const lang        = blank(body.native_language);
+    const heightCm    = num(body.height_cm);
+    const weightKg    = num(body.weight_kg);
+    const bloodType   = blank(body.blood_type);
+
+    try {
+      const rows = await sql`
+        SELECT id, role FROM users
+        WHERE clerk_user_id = ${userClerk} AND archived_at IS NULL
+        LIMIT 1
+      `;
+      if (rows.length === 0) return jsonError(404, "user_not_found");
+      const userId = rows[0].id;
+      const role = rows[0].role;
+
+      if (demoUser !== null) {
+        const dup = await sql`
+          SELECT id FROM users
+          WHERE demo_username = ${demoUser} AND id <> ${userId} AND archived_at IS NULL
+          LIMIT 1
+        `;
+        if (dup.length > 0) return jsonError(409, "demo_username_in_use");
+      }
+
+      await sql`
+        UPDATE users SET
+          full_name      = ${fullName},
+          email          = ${email},
+          locale         = ${locale},
+          demo_username  = ${demoUser},
+          demo_password  = ${demoPass},
+          updated_at     = now()
+        WHERE id = ${userId}
+      `;
+
+      if (role === "patient") {
+        await sql`
+          INSERT INTO patient_profiles (user_id, date_of_birth, sex, country_of_residence,
+                                        native_language, height_cm, weight_kg, blood_type)
+          VALUES (${userId}, ${dob}, ${sex}, ${country}, ${lang}, ${heightCm}, ${weightKg}, ${bloodType})
+          ON CONFLICT (user_id) DO UPDATE SET
+            date_of_birth        = EXCLUDED.date_of_birth,
+            sex                  = EXCLUDED.sex,
+            country_of_residence = EXCLUDED.country_of_residence,
+            native_language      = EXCLUDED.native_language,
+            height_cm            = EXCLUDED.height_cm,
+            weight_kg            = EXCLUDED.weight_kg,
+            blood_type           = EXCLUDED.blood_type,
+            updated_at           = now()
+        `;
+      }
+
+      return new Response(JSON.stringify({ ok: true, user_clerk: userClerk }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      return jsonError(500, `Update failed: ${e.message}`);
+    }
+  }
+
   // POST /api/admin/patients/delete — { patient_clerk }
   // Soft-delete: sets users.archived_at and removes incoming patient_access rows
   // so revoked-by-default for any granted viewers. Patient data (lab_results,
@@ -772,7 +867,7 @@ async function handleAdmin(request, env) {
       if (patientRows.length === 0 || patientRows[0].role !== "patient") {
         return jsonError(404, "patient_not_found");
       }
-      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
       const result = await reclassifyForPatient(sql, anthropic, env, patientRows[0].id, limit);
       return new Response(JSON.stringify({ ok: true, ...result }), {
         headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
