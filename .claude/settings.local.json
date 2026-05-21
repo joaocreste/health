@@ -102,7 +102,20 @@
       "Read(//tmp/**)",
       "Bash(awk *)",
       "Bash(xargs -I {} stat -f \"%z %N\" {})",
-      "Bash(xargs -I {} stat -f \"%z\" {})"
+      "Bash(xargs -I {} stat -f \"%z\" {})",
+      "WebFetch(domain:jc-advisory-health.pages.dev)",
+      "Bash(CLOUDFLARE_API_TOKEN=$\\(tr -d '\\\\n\\\\r' < token.txt\\) CLOUDFLARE_ACCOUNT_ID=8dac8253e9c75f921598ce5273e5a834 npx --no-install wrangler pages deployment list --project-name=jc-advisory-health)",
+      "Bash(npm run *)",
+      "Bash(git *)",
+      "Bash(gh repo *)",
+      "Bash(sips --getProperty pixelWidth --getProperty pixelHeight \"/Users/joaocreste/Claude Agent/Health WebbApp/data/Pictures/Forehead/IMG_0358.heic\")",
+      "Bash(ls -la web/functions/)",
+      "Bash(cat package.json)",
+      "Bash(yes)",
+      "Bash(perl -i -pe 's|assets/styles.css\\\\?v=43|assets/styles.css?v=45|g; s|assets/styles.css\\\\?v=44|assets/styles.css?v=45|g' web/*.html)",
+      "Bash(grep -nA 10 \"jcSignOut\" web/assets/app.js)",
+      "Bash(CLOUDFLARE_API_TOKEN=$\\(tr -d '\\\\n\\\\r' < token.txt\\) CLOUDFLARE_ACCOUNT_ID=8dac8253e9c75f921598ce5273e5a834 npx --no-install wrangler pages deploy web --project-name=jc-advisory-health --branch=main --commit-dirty=true)",
+      "Bash(grep -nE \"renderHomeFor|home'|home\\\\\"|home\\\\$|currentSection|Physical Health|Mental Health|Spiritual Health|pillar|hero\" \"/Users/joaocreste/Claude Agent/Health WebbApp/web/assets/patient-context.js\")"
     ],
     "defaultMode": "acceptEdits"
   }
