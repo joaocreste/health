@@ -631,6 +631,32 @@
       '.ov-metric-link { text-decoration: none; transition: border-color 0.15s, transform 0.15s; }',
       '.ov-metric-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
       '.ov-empty-hint p { margin: 0; font-size: 13px; color: #7A8FA6; font-style: italic; }',
+      // AI dashboard summary card
+      '.ov-dashboard { border-top: 3px solid #B8954A; }',
+      '.ov-dashboard-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }',
+      '.ov-dashboard-head h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; }',
+      '.ai-pill { display: inline-block; background: #FFF6E5; color: #B8954A; border: 1px solid #E0C681; padding: 1px 8px; border-radius: 999px; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; }',
+      '.ov-dashboard-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      '.ov-dashboard-meta code { font-size: 10px; color: #7A8FA6; background: transparent; }',
+      '.ov-dashboard-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }',
+      '.ov-dashboard-head-actions .btn { padding: 6px 12px; font-size: 12px; }',
+      '.ov-dashboard-body p { margin: 0 0 10px; line-height: 1.55; font-size: 14px; color: #1E2D3D; font-family: "IBM Plex Sans", sans-serif; }',
+      '.ov-dashboard-body p:last-child { margin-bottom: 0; }',
+      '.ov-dashboard-body .ov-dashboard-empty { color: #7A8FA6; font-style: italic; }',
+      '.jc-home-dash-wrap { background: #F9F7F4; padding: 28px 0 8px; }',
+      '.jc-home-dash-wrap .ov-dashboard { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; border-top: 3px solid #B8954A; padding: 22px 26px; }',
+      // Donut overlay
+      '.jc-donut-backdrop { position: fixed; inset: 0; background: rgba(13, 27, 42, 0.55); display: none; align-items: center; justify-content: center; z-index: 200; }',
+      '.jc-donut-backdrop.open { display: flex; }',
+      '.jc-donut-card { background: #FFFFFF; border-radius: 14px; padding: 28px 32px; min-width: 320px; max-width: 420px; box-shadow: 0 24px 60px rgba(13, 27, 42, 0.4); display: flex; align-items: center; gap: 24px; }',
+      '.jc-donut { width: 92px; height: 92px; flex-shrink: 0; }',
+      '.jc-donut-fg { transition: stroke-dashoffset 0.5s ease; }',
+      '.jc-donut-text { flex: 1; min-width: 0; }',
+      '.jc-donut-pct { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 22px; color: #0D1B2A; line-height: 1.1; }',
+      '.jc-donut-label { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; margin: 4px 0 8px; }',
+      '.jc-donut-trail { list-style: none; padding: 0; margin: 0; max-height: 96px; overflow-y: auto; font-family: "IBM Plex Mono", monospace; font-size: 11px; line-height: 1.5; }',
+      '.jc-donut-trail-item.ok { color: #2D5F3F; }',
+      '.jc-donut-trail-item.err { color: #7A2E22; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -655,7 +681,7 @@
     if (section === 'home') {
       fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(renderHome)
+        .then(function (s) { renderHome(s); decorateWithDashboard('home', { isHome: true }); })
         .catch(function () { renderEmptyShell(patient, null, 'Patient record'); });
       return;
     }
@@ -663,7 +689,7 @@
     if (section === 'physical-exams') {
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(renderExams)
+        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
         .catch(function () { renderEmptyShell(patient, null, 'Physical → Exams'); });
       return;
     }
@@ -690,9 +716,239 @@
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (summary) {
         var renderer = dataRenderers[section];
-        if (renderer) renderer(summary);
+        if (renderer) { renderer(summary); decorateWithDashboard(section); }
         else renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || section);
       })
       .catch(function () { renderEmptyShell(patient, null, labels[section] || section); });
   });
+
+  /* ── LLM-authored dashboard layer ──────────────────────────────────
+     Each rendered view (jc-home, jc-overview, jc-exams) gets an extra
+     "AI Summary" card injected via decorateWithDashboard(section). The
+     card shows the cached patient_dashboards.summary_md when present,
+     otherwise a "Build summary" CTA. Home gets a second "Build all
+     sections" CTA. Building triggers the donut overlay and fires one
+     POST per section sequentially.                                    */
+
+  var DASHBOARD_SECTIONS = ['home', 'physical', 'mental', 'spiritual', 'assessment'];
+  var SECTION_LABEL = {
+    home: 'Home', physical: 'Physical', mental: 'Mental',
+    spiritual: 'Spiritual', assessment: 'Assessment',
+  };
+  // Which dashboard section to inject onto which page slug.
+  var PAGE_TO_DASHBOARD = {
+    home:               'home',
+    physical:           'physical',
+    'physical-exams':   'physical',
+    'physical-vitals':  'physical',
+    'physical-genetics':'physical',
+    mental:             'mental',
+    spiritual:          'spiritual',
+    assessment:         'assessment',
+  };
+
+  function viewerClerkHeader() {
+    var vc = sessionStorage.getItem('jc_viewer_clerk') || sessionStorage.getItem('jc_current_patient') || patient;
+    return vc;
+  }
+
+  function mdToHtml(md) {
+    // Plain markdown only (the system prompt forbids headings / bullets).
+    // Split on blank lines into paragraphs, apply minimal inline emphasis.
+    var paragraphs = String(md || '').replace(/\r\n/g, '\n').split(/\n{2,}/);
+    return paragraphs.map(function (para) {
+      var safe = escapeHtml(para.trim()).replace(/\n/g, '<br>');
+      safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      safe = safe.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+      return '<p>' + safe + '</p>';
+    }).join('');
+  }
+
+  function relativeWhen(iso) {
+    if (!iso) return '';
+    var t = new Date(iso).getTime();
+    var secs = Math.max(1, Math.floor((Date.now() - t) / 1000));
+    if (secs < 60)         return secs + 's ago';
+    if (secs < 3600)       return Math.floor(secs / 60) + 'm ago';
+    if (secs < 86400)      return Math.floor(secs / 3600) + 'h ago';
+    if (secs < 86400 * 30) return Math.floor(secs / 86400) + 'd ago';
+    return formatDate(iso);
+  }
+
+  function dashboardCardHtml(dashSection, record, opts) {
+    opts = opts || {};
+    var isHome = !!opts.isHome;
+    var titleEn = isHome ? 'AI Summary' : (SECTION_LABEL[dashSection] || 'AI Summary');
+    var hasSummary = record && record.summary_md;
+    var bodyHtml = hasSummary ? mdToHtml(record.summary_md) :
+      '<p class="ov-dashboard-empty">No AI summary yet. Click <strong>Build summary</strong> to author one from the data above.</p>';
+    var meta = hasSummary
+      ? '<div class="ov-dashboard-meta">Generated ' + relativeWhen(record.generated_at) +
+          (record.model ? ' · <code>' + escapeHtml(record.model) + '</code>' : '') + '</div>'
+      : '';
+    var refreshLabel = hasSummary ? 'Refresh' : 'Build summary';
+    var allBtn = isHome
+      ? '<button type="button" class="btn btn-gold dash-build-all-btn" data-sections="' +
+        DASHBOARD_SECTIONS.join(',') + '">Build all sections</button>'
+      : '';
+    return (
+      '<section class="ov-section ov-dashboard" data-dash-section="' + escapeHtml(dashSection) + '">' +
+        '<header class="ov-dashboard-head">' +
+          '<div class="ov-dashboard-head-left">' +
+            '<h2>' + escapeHtml(titleEn) + ' <span class="ai-pill">AI</span></h2>' + meta +
+          '</div>' +
+          '<div class="ov-dashboard-head-actions">' + allBtn +
+            '<button type="button" class="btn btn-ghost dash-build-btn" data-section="' + escapeHtml(dashSection) + '">' +
+              escapeHtml(refreshLabel) + '</button>' +
+          '</div>' +
+        '</header>' +
+        '<div class="ov-dashboard-body">' + bodyHtml + '</div>' +
+      '</section>'
+    );
+  }
+
+  function findInsertionTarget(opts) {
+    if (opts && opts.isHome) {
+      // jc-home: insert between hero and the report-section.
+      var home = document.querySelector('main.jc-home');
+      if (!home) return null;
+      var reports = home.querySelector('.report-section');
+      var wrapper = document.createElement('div');
+      wrapper.className = 'jc-home-dash-wrap';
+      wrapper.innerHTML = '<div class="container"></div>';
+      if (reports) home.insertBefore(wrapper, reports);
+      else home.appendChild(wrapper);
+      return wrapper.querySelector('.container');
+    }
+    // ov-shell: insert just after .ov-header
+    var shell = document.querySelector('.jc-overview .ov-shell');
+    if (!shell) return null;
+    return shell;
+  }
+
+  function decorateWithDashboard(pageSection, opts) {
+    var dashSection = PAGE_TO_DASHBOARD[pageSection];
+    if (!dashSection) return;
+    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
+      .catch(function () { return { sections: {} }; })
+      .then(function (data) {
+        var record = (data && data.sections && data.sections[dashSection]) || null;
+        injectDashboardCard(dashSection, record, opts);
+      });
+  }
+
+  function injectDashboardCard(dashSection, record, opts) {
+    var target = findInsertionTarget(opts);
+    if (!target) return;
+    // Remove any prior dashboard card for this section (defensive)
+    var prior = target.querySelector('[data-dash-section="' + dashSection + '"]');
+    if (prior) prior.remove();
+    var html = dashboardCardHtml(dashSection, record, opts);
+    if (opts && opts.isHome) {
+      target.insertAdjacentHTML('beforeend', html);
+    } else {
+      var header = target.querySelector('.ov-header');
+      if (header) header.insertAdjacentHTML('afterend', html);
+      else target.insertAdjacentHTML('afterbegin', html);
+    }
+    wireDashboardButtons();
+  }
+
+  function wireDashboardButtons() {
+    Array.prototype.forEach.call(document.querySelectorAll('.dash-build-btn'), function (btn) {
+      if (btn.dataset.wired === '1') return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', function () {
+        buildSections([btn.getAttribute('data-section')]);
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.dash-build-all-btn'), function (btn) {
+      if (btn.dataset.wired === '1') return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', function () {
+        buildSections(btn.getAttribute('data-sections').split(','));
+      });
+    });
+  }
+
+  /* ── Donut overlay ─────────────────────────────────────────────── */
+  var donutEl = null;
+  function ensureDonut() {
+    if (donutEl) return donutEl;
+    donutEl = document.createElement('div');
+    donutEl.className = 'jc-donut-backdrop';
+    donutEl.innerHTML =
+      '<div class="jc-donut-card">' +
+        '<svg class="jc-donut" viewBox="0 0 100 100" aria-hidden="true">' +
+          '<circle cx="50" cy="50" r="42" fill="none" stroke="#E5E2DC" stroke-width="8"/>' +
+          '<circle class="jc-donut-fg" cx="50" cy="50" r="42" fill="none" stroke="#B8954A" stroke-width="8"' +
+            ' stroke-dasharray="263.9" stroke-dashoffset="263.9"' +
+            ' stroke-linecap="round" transform="rotate(-90 50 50)"/>' +
+        '</svg>' +
+        '<div class="jc-donut-text">' +
+          '<div class="jc-donut-pct">0 / 0</div>' +
+          '<div class="jc-donut-label">Building…</div>' +
+          '<ul class="jc-donut-trail"></ul>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(donutEl);
+    return donutEl;
+  }
+  function setDonut(done, total, label) {
+    var el = ensureDonut();
+    el.classList.add('open');
+    el.querySelector('.jc-donut-pct').textContent = done + ' / ' + total;
+    el.querySelector('.jc-donut-label').textContent = label || 'Building…';
+    var pct = total > 0 ? done / total : 0;
+    var dashLen = 263.9;
+    el.querySelector('.jc-donut-fg').setAttribute('stroke-dashoffset', String(dashLen * (1 - pct)));
+  }
+  function pushDonutTrail(section, status, ms) {
+    var trail = (donutEl && donutEl.querySelector('.jc-donut-trail'));
+    if (!trail) return;
+    var li = document.createElement('li');
+    li.className = 'jc-donut-trail-item ' + status;
+    li.textContent = (status === 'ok' ? '✓ ' : '✗ ') + (SECTION_LABEL[section] || section) +
+                     (typeof ms === 'number' ? ' · ' + (ms/1000).toFixed(1) + 's' : '');
+    trail.appendChild(li);
+  }
+  function closeDonut() { if (donutEl) donutEl.classList.remove('open'); }
+
+  async function buildSections(sections) {
+    sections = (sections || []).filter(function (s) { return DASHBOARD_SECTIONS.indexOf(s) !== -1; });
+    if (sections.length === 0) return;
+    var total = sections.length;
+    setDonut(0, total, 'Starting…');
+    var viewerClerk = viewerClerkHeader();
+    for (var i = 0; i < sections.length; i++) {
+      var section = sections[i];
+      setDonut(i, total, 'Building ' + (SECTION_LABEL[section] || section) + '…');
+      var startedAt = Date.now();
+      try {
+        var resp = await fetch('/api/patient-dashboard-build', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Viewer-Clerk': viewerClerk },
+          body: JSON.stringify({ patient_clerk: patient, section: section }),
+        });
+        var bodyText = await resp.text();
+        var data; try { data = JSON.parse(bodyText); } catch (e) { data = null; }
+        if (!resp.ok || !data || data.error) {
+          pushDonutTrail(section, 'err', Date.now() - startedAt);
+          // If rate-limited, wait ~30s before continuing.
+          if (resp.status === 429 || /rate_limit/i.test(bodyText)) {
+            setDonut(i, total, 'Rate-limited, waiting 30s…');
+            await new Promise(function (r) { setTimeout(r, 30000); });
+            i--; continue; // retry this section
+          }
+        } else {
+          pushDonutTrail(section, 'ok', Date.now() - startedAt);
+        }
+      } catch (e) {
+        pushDonutTrail(section, 'err', Date.now() - startedAt);
+      }
+    }
+    setDonut(total, total, 'Done. Reloading…');
+    setTimeout(function () { location.reload(); }, 700);
+  }
 })();

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient } from "../lib/ingest.js";
+import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
 
@@ -364,6 +365,68 @@ async function handleLogin(request, env) {
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Login failed: ${e.message}`);
+  }
+}
+
+async function handlePatientDashboard(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const rows = await sql`
+      SELECT id FROM users WHERE clerk_user_id = ${clerk}
+        AND role = 'patient' AND archived_at IS NULL LIMIT 1
+    `;
+    if (rows.length === 0) return jsonError(404, "patient_not_found");
+    const sections = await fetchAllDashboards(sql, rows[0].id);
+    return new Response(JSON.stringify({ sections }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    return jsonError(500, `Dashboard fetch failed: ${e.message}`);
+  }
+}
+
+async function handlePatientDashboardBuild(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL)       return jsonError(500, "DATABASE_URL not configured.");
+  if (!env.ANTHROPIC_API_KEY)  return jsonError(500, "anthropic_api_key_not_configured");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient_clerk || "").trim();
+  const section = String(body?.section || "").trim();
+  if (!patientClerk) return jsonError(400, "patient_clerk_required");
+  if (!DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
+
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const [patientRows, viewerRows] = await Promise.all([
+      sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+            AND role = 'patient' AND archived_at IS NULL LIMIT 1`,
+      viewerClerk
+        ? sql`SELECT id FROM users WHERE clerk_user_id = ${viewerClerk}
+              AND archived_at IS NULL LIMIT 1`
+        : Promise.resolve([]),
+    ]);
+    if (patientRows.length === 0) return jsonError(404, "patient_not_found");
+    const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
+    const result = await buildOneSection({
+      sql, anthropic,
+      patientId: patientRows[0].id,
+      section,
+      viewerId: viewerRows[0]?.id || null,
+    });
+    return new Response(JSON.stringify({ ok: true, ...result }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    const msg = e?.message || String(e);
+    const rateLimited = /\b429\b|rate_limit/i.test(msg);
+    return jsonError(rateLimited ? 429 : 500, `Build failed: ${msg}`);
   }
 }
 
@@ -897,6 +960,12 @@ export default {
     }
     if (url.pathname === "/api/patient-exams") {
       return handlePatientExams(request, env);
+    }
+    if (url.pathname === "/api/patient-dashboard") {
+      return handlePatientDashboard(request, env);
+    }
+    if (url.pathname === "/api/patient-dashboard-build") {
+      return handlePatientDashboardBuild(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
