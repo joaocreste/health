@@ -631,20 +631,30 @@
       '.ov-metric-link { text-decoration: none; transition: border-color 0.15s, transform 0.15s; }',
       '.ov-metric-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
       '.ov-empty-hint p { margin: 0; font-size: 13px; color: #7A8FA6; font-style: italic; }',
-      // AI dashboard summary card
-      '.ov-dashboard { border-top: 3px solid #B8954A; }',
-      '.ov-dashboard-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 12px; }',
-      '.ov-dashboard-head h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; }',
-      '.ai-pill { display: inline-block; background: #FFF6E5; color: #B8954A; border: 1px solid #E0C681; padding: 1px 8px; border-radius: 999px; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; }',
+      // AI-authored card layout
+      '.ov-cards { margin: 0 0 22px; }',
+      '.ov-cards-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }',
+      '.ov-cards-head h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; }',
+      '.ai-pill { display: inline-block; background: #FFF6E5; color: #B8954A; border: 1px solid #E0C681; padding: 1px 8px; border-radius: 999px; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: none; }',
       '.ov-dashboard-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
       '.ov-dashboard-meta code { font-size: 10px; color: #7A8FA6; background: transparent; }',
-      '.ov-dashboard-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }',
-      '.ov-dashboard-head-actions .btn { padding: 6px 12px; font-size: 12px; }',
-      '.ov-dashboard-body p { margin: 0 0 10px; line-height: 1.55; font-size: 14px; color: #1E2D3D; font-family: "IBM Plex Sans", sans-serif; }',
-      '.ov-dashboard-body p:last-child { margin-bottom: 0; }',
-      '.ov-dashboard-body .ov-dashboard-empty { color: #7A8FA6; font-style: italic; }',
+      '.ov-cards-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }',
+      '.ov-cards-head-actions .btn { padding: 6px 12px; font-size: 12px; }',
+      '.ov-cards-stack { display: flex; flex-direction: column; gap: 12px; }',
+      '.ov-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 18px 20px; }',
+      '.ov-card-narrative { border-top: 3px solid #B8954A; }',
+      '.ov-card-panel     { border-top: 3px solid #244E6E; }',
+      '.ov-card-timeline  { border-top: 3px solid #3E7CA3; }',
+      '.ov-card-flags     { border-top: 3px solid #7A2E22; }',
+      '.ov-card-empty     { border-top: 3px solid #DDD8CC; }',
+      '.ov-card-head { margin-bottom: 10px; }',
+      '.ov-card-head h3 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 0 0 4px; letter-spacing: 0; text-transform: none; }',
+      '.ov-card-subtitle { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; letter-spacing: 0.04em; }',
+      '.ov-card-body p { margin: 0 0 10px; line-height: 1.55; font-size: 14px; color: #1E2D3D; font-family: "IBM Plex Sans", sans-serif; }',
+      '.ov-card-body p:last-child { margin-bottom: 0; }',
+      '.ov-card-empty p { margin: 0; font-size: 13px; color: #7A8FA6; }',
+      '.ov-card .exam-table { margin-top: 4px; }',
       '.jc-home-dash-wrap { background: #F9F7F4; padding: 28px 0 8px; }',
-      '.jc-home-dash-wrap .ov-dashboard { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; border-top: 3px solid #B8954A; padding: 22px 26px; }',
       // Donut overlay
       '.jc-donut-backdrop { position: fixed; inset: 0; background: rgba(13, 27, 42, 0.55); display: none; align-items: center; justify-content: center; z-index: 200; }',
       '.jc-donut-backdrop.open { display: flex; }',
@@ -775,35 +785,149 @@
     return formatDate(iso);
   }
 
+  function fmtNum(n) {
+    if (n === null || n === undefined || n === '') return '—';
+    if (typeof n === 'number' && !Number.isFinite(n)) return '—';
+    return String(n);
+  }
+
+  function refRangeStr(low, high) {
+    if (low == null && high == null) return '—';
+    return (low == null ? '–' : fmtNum(low)) + ' – ' + (high == null ? '–' : fmtNum(high));
+  }
+
+  function valueWithUnit(v, vText, unit) {
+    if (v == null && vText == null) return '—';
+    var s = v != null ? fmtNum(v) : String(vText);
+    return s + (unit ? ' ' + escapeHtml(unit) : '');
+  }
+
+  function renderCardNarrative(c) {
+    return (
+      '<section class="ov-card ov-card-narrative">' +
+        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
+          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
+        '</header>' +
+        '<div class="ov-card-body">' + mdToHtml(c.body_md || '') + '</div>' +
+      '</section>'
+    );
+  }
+
+  function renderCardPanelSnapshot(c) {
+    var rows = (c.markers || []).map(function (m) {
+      return '<tr>' +
+        '<td class="exam-marker">' + escapeHtml(m.marker || '—') + '</td>' +
+        '<td class="exam-value">' + escapeHtml(String(valueWithUnit(m.value, m.value_text, m.unit))) + fmtFlag(m.flag) + '</td>' +
+        '<td class="exam-ref">' + escapeHtml(refRangeStr(m.ref_low, m.ref_high)) + '</td>' +
+      '</tr>';
+    }).join('');
+    return (
+      '<section class="ov-card ov-card-panel">' +
+        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
+          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
+        '</header>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th>Marker</th><th>Value</th><th>Ref range</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</section>'
+    );
+  }
+
+  function renderCardMarkerTimeline(c) {
+    var points = (c.points || []).slice().sort(function (a, b) {
+      return String(a.date || '').localeCompare(String(b.date || ''));
+    });
+    var unit = c.unit ? ' ' + c.unit : '';
+    var rows = points.map(function (p) {
+      var flagged = p.flag ? fmtFlag(p.flag) : '';
+      return '<tr>' +
+        '<td class="exam-date">' + escapeHtml(formatDate(p.date)) + '</td>' +
+        '<td class="exam-value">' + escapeHtml(fmtNum(p.value)) + escapeHtml(unit) + flagged + '</td>' +
+        '<td class="exam-lab">' + escapeHtml(p.lab || '—') + '</td>' +
+      '</tr>';
+    }).join('');
+    var ref = refRangeStr(c.ref_low, c.ref_high);
+    var refLine = (ref !== '—' ? '<div class="ov-card-subtitle">Reference: ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
+    return (
+      '<section class="ov-card ov-card-timeline">' +
+        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
+          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
+          refLine +
+        '</header>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th>Date</th><th>Value</th><th>Lab</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</section>'
+    );
+  }
+
+  function renderCardFlagList(c) {
+    var rows = (c.items || []).map(function (it) {
+      return '<tr>' +
+        '<td class="exam-marker">' + escapeHtml(it.marker || '—') + fmtFlag(it.flag) + '</td>' +
+        '<td class="exam-value">' + escapeHtml(String(valueWithUnit(it.value, it.value_text, it.unit))) + '</td>' +
+        '<td class="exam-ref">' + escapeHtml(refRangeStr(it.ref_low, it.ref_high)) + '</td>' +
+        '<td class="exam-date">' + escapeHtml(formatDate(it.date)) + '</td>' +
+        '<td class="exam-lab">' + escapeHtml(it.panel || '—') + '</td>' +
+      '</tr>';
+    }).join('');
+    return (
+      '<section class="ov-card ov-card-flags">' +
+        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
+          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
+        '</header>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th>Marker</th><th>Value</th><th>Ref range</th><th>Date</th><th>Panel</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</section>'
+    );
+  }
+
+  var CARD_RENDERERS = {
+    'narrative':       renderCardNarrative,
+    'panel-snapshot':  renderCardPanelSnapshot,
+    'marker-timeline': renderCardMarkerTimeline,
+    'flag-list':       renderCardFlagList,
+  };
+
   function dashboardCardHtml(dashSection, record, opts) {
     opts = opts || {};
     var isHome = !!opts.isHome;
-    var titleEn = isHome ? 'AI Summary' : (SECTION_LABEL[dashSection] || 'AI Summary');
-    var hasSummary = record && record.summary_md;
-    var bodyHtml = hasSummary ? mdToHtml(record.summary_md) :
-      '<p class="ov-dashboard-empty">No AI summary yet. Click <strong>Build summary</strong> to author one from the data above.</p>';
-    var meta = hasSummary
+    var titleEn = isHome ? 'AI-authored summary' : (SECTION_LABEL[dashSection] + ' · AI-authored');
+    var cards = (record && Array.isArray(record.cards)) ? record.cards : [];
+    var hasCards = cards.length > 0;
+    var meta = (record && record.generated_at)
       ? '<div class="ov-dashboard-meta">Generated ' + relativeWhen(record.generated_at) +
-          (record.model ? ' · <code>' + escapeHtml(record.model) + '</code>' : '') + '</div>'
+          (record.model ? ' · <code>' + escapeHtml(record.model) + '</code>' : '') +
+          ' · ' + cards.length + ' card' + (cards.length === 1 ? '' : 's') + '</div>'
       : '';
-    var refreshLabel = hasSummary ? 'Refresh' : 'Build summary';
+    var refreshLabel = hasCards ? 'Refresh' : 'Build cards';
     var allBtn = isHome
       ? '<button type="button" class="btn btn-gold dash-build-all-btn" data-sections="' +
         DASHBOARD_SECTIONS.join(',') + '">Build all sections</button>'
       : '';
+    var cardsHtml = hasCards
+      ? cards.map(function (c) {
+          var fn = CARD_RENDERERS[c.kind];
+          return fn ? fn(c) : '';
+        }).join('')
+      : '<section class="ov-card ov-card-empty">' +
+          '<p>No AI-authored cards yet for this section. Click <strong>' + escapeHtml(refreshLabel) +
+          '</strong> to have Claude read the patient\'s data and propose a card layout tailored to it.</p>' +
+        '</section>';
     return (
-      '<section class="ov-section ov-dashboard" data-dash-section="' + escapeHtml(dashSection) + '">' +
-        '<header class="ov-dashboard-head">' +
-          '<div class="ov-dashboard-head-left">' +
+      '<div class="ov-cards" data-dash-section="' + escapeHtml(dashSection) + '">' +
+        '<header class="ov-cards-head">' +
+          '<div class="ov-cards-head-left">' +
             '<h2>' + escapeHtml(titleEn) + ' <span class="ai-pill">AI</span></h2>' + meta +
           '</div>' +
-          '<div class="ov-dashboard-head-actions">' + allBtn +
+          '<div class="ov-cards-head-actions">' + allBtn +
             '<button type="button" class="btn btn-ghost dash-build-btn" data-section="' + escapeHtml(dashSection) + '">' +
               escapeHtml(refreshLabel) + '</button>' +
           '</div>' +
         '</header>' +
-        '<div class="ov-dashboard-body">' + bodyHtml + '</div>' +
-      '</section>'
+        '<div class="ov-cards-stack">' + cardsHtml + '</div>' +
+      '</div>'
     );
   }
 
