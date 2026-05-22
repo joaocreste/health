@@ -654,6 +654,15 @@
       '.ov-card-body p:last-child { margin-bottom: 0; }',
       '.ov-card-empty p { margin: 0; font-size: 13px; color: #7A8FA6; }',
       '.ov-card .exam-table { margin-top: 4px; }',
+      '.ov-chart-wrap { margin-top: 6px; }',
+      '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
+      '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',
+      '.ov-pt-pill { display: inline-flex; align-items: baseline; gap: 6px; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 6px; padding: 3px 8px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #1E2D3D; }',
+      '.ov-pt-pill .ov-pt-date { color: #7A8FA6; }',
+      '.ov-pt-pill .ov-pt-val { font-weight: 500; }',
+      '.ov-rangebar { width: 160px; height: 14px; display: block; }',
+      '.exam-bar { width: 180px; padding-right: 0; }',
+      '@media (max-width: 720px) { .exam-bar { display: none; } }',
       '.jc-home-dash-wrap { background: #F9F7F4; padding: 28px 0 8px; }',
       // Donut overlay
       '.jc-donut-backdrop { position: fixed; inset: 0; background: rgba(13, 27, 42, 0.55); display: none; align-items: center; justify-content: center; z-index: 200; }',
@@ -785,6 +794,158 @@
     return formatDate(iso);
   }
 
+  /* ── SVG chart helpers ─────────────────────────────────────────── */
+
+  var CHART_PALETTE = ['#244E6E', '#B8954A', '#3E7CA3', '#7A2E22', '#3F7A4F', '#7A8FA6'];
+
+  function dateMs(s) {
+    if (!s) return NaN;
+    var m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return NaN;
+    return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  }
+  function fmtTickDate(ms) {
+    var d = new Date(ms);
+    var mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+    return mon + ' ' + String(d.getUTCFullYear()).slice(2);
+  }
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function pickTicks(min, max, count) {
+    if (!isFinite(min) || !isFinite(max) || min === max) return [min];
+    var step = (max - min) / Math.max(1, count - 1);
+    var ticks = [];
+    for (var i = 0; i < count; i++) ticks.push(min + i * step);
+    return ticks;
+  }
+
+  // Returns SVG markup for a line chart with an optional ref band.
+  // series = [{ color, points: [{date, value, flag}] }, ...]
+  function svgLineChart(opts) {
+    var series = opts.series || [];
+    var width  = opts.width  || 600;
+    var height = opts.height || 200;
+    var padL = 56, padR = 18, padT = 16, padB = 32;
+    var iw = width - padL - padR;
+    var ih = height - padT - padB;
+    if (series.length === 0) return '';
+
+    // Aggregate x / y bounds
+    var xs = [], ys = [];
+    series.forEach(function (s) {
+      (s.points || []).forEach(function (p) {
+        var x = dateMs(p.date);
+        if (!isNaN(x) && p.value != null && isFinite(p.value)) {
+          xs.push(x); ys.push(+p.value);
+        }
+      });
+    });
+    if (xs.length === 0) return '';
+
+    var xMin = Math.min.apply(null, xs);
+    var xMax = Math.max.apply(null, xs);
+    if (xMin === xMax) { xMin = xMin - 86400000; xMax = xMax + 86400000; }
+    var yLow  = opts.ref_low,  yHigh = opts.ref_high;
+    if (yLow  != null && isFinite(yLow))  ys.push(+yLow);
+    if (yHigh != null && isFinite(yHigh)) ys.push(+yHigh);
+    var yMin = Math.min.apply(null, ys);
+    var yMax = Math.max.apply(null, ys);
+    var ySpan = yMax - yMin;
+    if (ySpan === 0) { ySpan = Math.abs(yMin) || 1; yMin -= ySpan / 2; yMax += ySpan / 2; }
+    var pad5 = ySpan * 0.08;
+    yMin -= pad5; yMax += pad5;
+
+    function xPx(t) { return padL + ((t - xMin) / (xMax - xMin)) * iw; }
+    function yPx(v) { return padT + ih - ((v - yMin) / (yMax - yMin)) * ih; }
+
+    var refBand = '';
+    if (yLow != null && yHigh != null && isFinite(yLow) && isFinite(yHigh)) {
+      var y1 = yPx(yHigh), y2 = yPx(yLow);
+      refBand =
+        '<rect x="' + padL + '" y="' + y1 + '" width="' + iw + '" height="' + (y2 - y1) +
+        '" fill="#E7EEFB" opacity="0.6"/>' +
+        '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y1 + '" y2="' + y1 + '" stroke="#ABBFE5" stroke-dasharray="3,3" stroke-width="1"/>' +
+        '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y2 + '" y2="' + y2 + '" stroke="#ABBFE5" stroke-dasharray="3,3" stroke-width="1"/>';
+    }
+
+    // Y-axis ticks (3 lines)
+    var yTicks = pickTicks(yMin + pad5, yMax - pad5, 3);
+    var yAxis = yTicks.map(function (v) {
+      var y = yPx(v);
+      var label = (Math.abs(v) >= 100) ? v.toFixed(0) : v.toFixed(2).replace(/\.?0+$/, '');
+      return '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y + '" y2="' + y + '" stroke="#EFEBE3" stroke-width="1"/>' +
+             '<text x="' + (padL - 6) + '" y="' + (y + 3) + '" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="#7A8FA6">' + label + '</text>';
+    }).join('');
+
+    // X-axis ticks (use min, mid, max)
+    var xTicks = [xMin, (xMin + xMax) / 2, xMax];
+    var xAxis = xTicks.map(function (t) {
+      var x = xPx(t);
+      return '<text x="' + x + '" y="' + (padT + ih + 16) + '" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#7A8FA6">' + fmtTickDate(t) + '</text>';
+    }).join('');
+
+    var seriesSvg = series.map(function (s, i) {
+      var color = s.color || CHART_PALETTE[i % CHART_PALETTE.length];
+      var pts = (s.points || []).slice().sort(function (a, b) { return dateMs(a.date) - dateMs(b.date); });
+      var d = pts.map(function (p, j) {
+        var x = xPx(dateMs(p.date)), y = yPx(+p.value);
+        return (j === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+      }).join(' ');
+      var line = pts.length > 1
+        ? '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+        : '';
+      var dots = pts.map(function (p) {
+        var x = xPx(dateMs(p.date)), y = yPx(+p.value);
+        var isFlag = p.flag === 'H' || p.flag === 'HH' || p.flag === 'L' || p.flag === 'LL';
+        var fill = isFlag ? '#7A2E22' : color;
+        return '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5" fill="' + fill + '" stroke="#FFFFFF" stroke-width="1.2"><title>' + escapeHtml(formatDate(p.date)) + ' · ' + escapeHtml(String(p.value)) + (s.unit ? ' ' + escapeHtml(s.unit) : '') + '</title></circle>';
+      }).join('');
+      return line + dots;
+    }).join('');
+
+    var legend = series.length > 1
+      ? '<g transform="translate(' + padL + ',' + (padT - 6) + ')">' +
+          series.map(function (s, i) {
+            var color = s.color || CHART_PALETTE[i % CHART_PALETTE.length];
+            return '<g transform="translate(' + (i * 110) + ',0)">' +
+                     '<rect x="0" y="-7" width="10" height="3" fill="' + color + '" rx="1"/>' +
+                     '<text x="14" y="-3" font-family="IBM Plex Mono, monospace" font-size="10" fill="#1E2D3D">' + escapeHtml(s.marker || '') + '</text>' +
+                   '</g>';
+          }).join('') +
+        '</g>'
+      : '';
+
+    return (
+      '<svg class="ov-chart" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="xMidYMid meet">' +
+        refBand + yAxis + xAxis + seriesSvg + legend +
+      '</svg>'
+    );
+  }
+
+  // Horizontal range bar: where does `value` sit between ref_low and ref_high?
+  function svgRangeBar(value, refLow, refHigh, flag) {
+    if (value == null || !isFinite(+value)) return '';
+    if (refLow == null || refHigh == null || refLow === refHigh) return '';
+    var v = +value, lo = +refLow, hi = +refHigh;
+    var span = hi - lo;
+    var lowEnd = Math.min(lo, v) - span * 0.15;
+    var hiEnd  = Math.max(hi, v) + span * 0.15;
+    var total = hiEnd - lowEnd;
+    var w = 160, h = 12;
+    function xp(x) { return ((x - lowEnd) / total) * w; }
+    var bandX = xp(lo), bandW = xp(hi) - xp(lo);
+    var dotX = xp(v);
+    var isFlag = flag === 'H' || flag === 'HH' || flag === 'L' || flag === 'LL';
+    var dotFill = isFlag ? '#7A2E22' : '#244E6E';
+    return (
+      '<svg class="ov-rangebar" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+        '<rect x="0" y="' + (h/2 - 0.6) + '" width="' + w + '" height="1.2" fill="#E5E2DC"/>' +
+        '<rect x="' + bandX.toFixed(1) + '" y="' + (h/2 - 3) + '" width="' + bandW.toFixed(1) + '" height="6" rx="3" fill="#D8E8F2"/>' +
+        '<circle cx="' + dotX.toFixed(1) + '" cy="' + (h/2) + '" r="4" fill="' + dotFill + '" stroke="#FFFFFF" stroke-width="1.2"/>' +
+      '</svg>'
+    );
+  }
+
   function fmtNum(n) {
     if (n === null || n === undefined || n === '') return '—';
     if (typeof n === 'number' && !Number.isFinite(n)) return '—';
@@ -815,10 +976,12 @@
 
   function renderCardPanelSnapshot(c) {
     var rows = (c.markers || []).map(function (m) {
+      var bar = svgRangeBar(m.value, m.ref_low, m.ref_high, m.flag);
       return '<tr>' +
         '<td class="exam-marker">' + escapeHtml(m.marker || '—') + '</td>' +
         '<td class="exam-value">' + escapeHtml(String(valueWithUnit(m.value, m.value_text, m.unit))) + fmtFlag(m.flag) + '</td>' +
         '<td class="exam-ref">' + escapeHtml(refRangeStr(m.ref_low, m.ref_high)) + '</td>' +
+        '<td class="exam-bar">' + bar + '</td>' +
       '</tr>';
     }).join('');
     return (
@@ -827,7 +990,7 @@
           (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
         '</header>' +
         '<table class="exam-table"><thead><tr>' +
-          '<th>Marker</th><th>Value</th><th>Ref range</th>' +
+          '<th>Marker</th><th>Value</th><th>Ref range</th><th>Position</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table>' +
       '</section>'
     );
@@ -835,28 +998,59 @@
 
   function renderCardMarkerTimeline(c) {
     var points = (c.points || []).slice().sort(function (a, b) {
-      return String(a.date || '').localeCompare(String(b.date || ''));
+      return dateMs(a.date) - dateMs(b.date);
     });
-    var unit = c.unit ? ' ' + c.unit : '';
-    var rows = points.map(function (p) {
-      var flagged = p.flag ? fmtFlag(p.flag) : '';
-      return '<tr>' +
-        '<td class="exam-date">' + escapeHtml(formatDate(p.date)) + '</td>' +
-        '<td class="exam-value">' + escapeHtml(fmtNum(p.value)) + escapeHtml(unit) + flagged + '</td>' +
-        '<td class="exam-lab">' + escapeHtml(p.lab || '—') + '</td>' +
-      '</tr>';
-    }).join('');
     var ref = refRangeStr(c.ref_low, c.ref_high);
     var refLine = (ref !== '—' ? '<div class="ov-card-subtitle">Reference: ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
+    var chart = svgLineChart({
+      series: [{ marker: c.marker, unit: c.unit, color: CHART_PALETTE[0], points: points }],
+      ref_low: c.ref_low, ref_high: c.ref_high,
+      width: 640, height: 200,
+    });
+    // Compact value list below the chart so exact numbers stay accessible.
+    var unit = c.unit ? ' ' + c.unit : '';
+    var pills = points.map(function (p) {
+      var flagged = p.flag ? fmtFlag(p.flag) : '';
+      return '<span class="ov-pt-pill">' +
+        '<span class="ov-pt-date">' + escapeHtml(formatDate(p.date)) + '</span>' +
+        '<span class="ov-pt-val">' + escapeHtml(fmtNum(p.value)) + escapeHtml(unit) + flagged + '</span>' +
+      '</span>';
+    }).join('');
     return (
       '<section class="ov-card ov-card-timeline">' +
         '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
           (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
           refLine +
         '</header>' +
-        '<table class="exam-table"><thead><tr>' +
-          '<th>Date</th><th>Value</th><th>Lab</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<div class="ov-chart-wrap">' + chart + '</div>' +
+        (pills ? '<div class="ov-pt-pills">' + pills + '</div>' : '') +
+      '</section>'
+    );
+  }
+
+  function renderCardMultiMarkerTimeline(c) {
+    var series = (c.series || []).map(function (s, i) {
+      return {
+        marker: s.marker,
+        unit: s.unit,
+        color: s.color || CHART_PALETTE[i % CHART_PALETTE.length],
+        points: (s.points || []).slice().sort(function (a, b) { return dateMs(a.date) - dateMs(b.date); }),
+      };
+    });
+    // Multi-series ref band only makes sense if all series share a range.
+    var sharedLow  = series.length && series.every(function (s) { return s.ref_low  === series[0].ref_low;  }) ? series[0].ref_low  : null;
+    var sharedHigh = series.length && series.every(function (s) { return s.ref_high === series[0].ref_high; }) ? series[0].ref_high : null;
+    var chart = svgLineChart({
+      series: series,
+      ref_low: sharedLow, ref_high: sharedHigh,
+      width: 640, height: 220,
+    });
+    return (
+      '<section class="ov-card ov-card-timeline">' +
+        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
+          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
+        '</header>' +
+        '<div class="ov-chart-wrap">' + chart + '</div>' +
       '</section>'
     );
   }
@@ -884,10 +1078,11 @@
   }
 
   var CARD_RENDERERS = {
-    'narrative':       renderCardNarrative,
-    'panel-snapshot':  renderCardPanelSnapshot,
-    'marker-timeline': renderCardMarkerTimeline,
-    'flag-list':       renderCardFlagList,
+    'narrative':              renderCardNarrative,
+    'panel-snapshot':         renderCardPanelSnapshot,
+    'marker-timeline':        renderCardMarkerTimeline,
+    'multi-marker-timeline':  renderCardMultiMarkerTimeline,
+    'flag-list':              renderCardFlagList,
   };
 
   function dashboardCardHtml(dashSection, record, opts) {
