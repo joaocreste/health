@@ -579,22 +579,37 @@
         });
       });
 
-      // Wire delete buttons (soft-delete via archived_at)
+      // Wire delete buttons — HARD delete. Wipes the user row, every cascading
+      // record (labs, documents, writings, imports, profile, access, dashboards),
+      // and every R2 blob attached to the patient. Irreversible.
       Array.prototype.forEach.call(listEl.querySelectorAll('button.delete-patient-btn'), function (btn) {
         btn.addEventListener('click', function () {
           var patient = btn.getAttribute('data-patient');
           var name    = btn.getAttribute('data-name');
-          if (!confirm('Delete patient "' + name + '"?\n\n' +
-                       'The patient row is archived (soft-delete) and disappears from ' +
-                       'the admin + patient-picker views. All access grants for this ' +
-                       'patient are revoked. Lab results, documents and uploads stay ' +
-                       'in the database / R2 — nothing is permanently destroyed.')) return;
+          if (!confirm(
+                'Permanently delete patient "' + name + '"?\n\n' +
+                'This is irreversible. It will:\n' +
+                '  • drop the user row\n' +
+                '  • drop every lab result, document, writing, import, and profile field\n' +
+                '  • drop every access grant\n' +
+                '  • drop every AI-authored dashboard card\n' +
+                '  • delete every uploaded PDF / image / blob from R2 storage\n\n' +
+                'There is no archive and no undo. Type OK to confirm.'
+              )) return;
+          var second = prompt('Type the patient name exactly to confirm:\n  ' + name);
+          if (second !== name) { alert('Cancelled — name did not match.'); return; }
           var orig = btn.textContent;
           btn.disabled = true; btn.textContent = 'Deleting…';
           api('/api/admin/patients/delete', {
             method: 'POST',
             body: JSON.stringify({ patient_clerk: patient }),
-          }).then(reload).catch(function (e) {
+          }).then(function (data) {
+            var d = (data && data.deleted) || {};
+            alert('Deleted "' + (d.full_name || name) + '". Removed ' +
+                  (d.r2_objects || 0) + ' R2 object' + (d.r2_objects === 1 ? '' : 's') +
+                  (d.r2_delete_errors ? ' (' + d.r2_delete_errors + ' R2 errors)' : '') + '.');
+            return reload();
+          }).catch(function (e) {
             alert('Delete failed: ' + e.message);
             btn.disabled = false; btn.textContent = orig;
           });

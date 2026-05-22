@@ -834,10 +834,10 @@ async function handleAdmin(request, env) {
   }
 
   // POST /api/admin/patients/delete — { patient_clerk }
-  // Soft-delete: sets users.archived_at and removes incoming patient_access rows
-  // so revoked-by-default for any granted viewers. Patient data (lab_results,
-  // documents, imports) is preserved on disk and in R2; the row simply stops
-  // surfacing in admin / patient-picker queries (which all filter archived_at).
+  // HARD delete: removes the user row (cascades to lab_results, documents,
+  // writings, imports, import_files, patient_profiles, patient_access,
+  // patient_dashboards, mood entries, etc.) AND wipes every R2 object
+  // attached to that patient. Irreversible by design.
   if (path === "/api/admin/patients/delete" && request.method === "POST") {
     let body;
     try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
@@ -846,22 +846,92 @@ async function handleAdmin(request, env) {
 
     try {
       const rows = await sql`
-        SELECT id, role, full_name, archived_at
-        FROM users
-        WHERE clerk_user_id = ${patientClerk}
-        LIMIT 1
+        SELECT id, role, full_name FROM users
+        WHERE clerk_user_id = ${patientClerk} LIMIT 1
       `;
-      if (rows.length === 0)                  return jsonError(404, "patient_not_found");
-      if (rows[0].role !== "patient")         return jsonError(400, "target_must_be_patient");
-      if (rows[0].id === admin.id)            return jsonError(400, "cannot_delete_self");
-      if (rows[0].archived_at !== null)       return jsonError(409, "already_archived");
+      if (rows.length === 0)          return jsonError(404, "patient_not_found");
+      if (rows[0].role !== "patient") return jsonError(400, "target_must_be_patient");
+      if (rows[0].id === admin.id)    return jsonError(400, "cannot_delete_self");
+      const patientId = rows[0].id;
 
-      await sql`UPDATE users SET archived_at = now() WHERE id = ${rows[0].id}`;
-      await sql`DELETE FROM patient_access WHERE patient_id = ${rows[0].id}`;
+      // 1. Collect every R2 key and every R2 prefix attached to this patient.
+      // Single-key columns from every table that stores a blob_key.
+      const keyQuery = await sql`
+        SELECT blob_key AS k FROM documents      WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM lab_results        WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT blob_key       FROM writings            WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+        UNION
+        SELECT if_.blob_key   FROM import_files if_
+          JOIN imports i ON i.id = if_.import_id
+          WHERE i.patient_id = ${patientId} AND if_.blob_key IS NOT NULL
+        UNION
+        SELECT blob_key       FROM ecg_events         WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM clinical_history  WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM encounters        WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM injuries          WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM life_events       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM medications       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM panic_events      WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM pgx_findings      WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM prescriptions     WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM risk_assessments  WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM supplements       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT source_blob_key FROM surgeries         WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+        UNION
+        SELECT manifest_blob_key FROM imaging_studies WHERE patient_id = ${patientId} AND manifest_blob_key IS NOT NULL
+        UNION
+        SELECT report_blob_key   FROM imaging_studies WHERE patient_id = ${patientId} AND report_blob_key   IS NOT NULL
+      `;
+      const prefixQuery = await sql`
+        SELECT DISTINCT blob_prefix FROM imaging_studies
+        WHERE patient_id = ${patientId} AND blob_prefix IS NOT NULL
+      `;
+
+      const keys = new Set(keyQuery.map((r) => r.k).filter(Boolean));
+
+      // 2. Expand every prefix to its concrete object list and union into the key set.
+      let r2Errors = 0;
+      if (env.R2_BUCKET) {
+        for (const row of prefixQuery) {
+          let cursor;
+          do {
+            const listed = await env.R2_BUCKET.list({ prefix: row.blob_prefix, cursor });
+            (listed.objects || []).forEach((obj) => keys.add(obj.key));
+            cursor = listed.truncated ? listed.cursor : undefined;
+          } while (cursor);
+        }
+        // 3. Delete in batches of 1000 (R2 binding cap).
+        const keyArr = Array.from(keys);
+        for (let i = 0; i < keyArr.length; i += 1000) {
+          try { await env.R2_BUCKET.delete(keyArr.slice(i, i + 1000)); }
+          catch (e) { r2Errors++; }
+        }
+      }
+
+      // 4. Drop the user row. Cascades wipe every dependent row.
+      await sql`DELETE FROM users WHERE id = ${patientId}`;
 
       return new Response(JSON.stringify({
         ok: true,
-        archived: { clerk_user_id: patientClerk, full_name: rows[0].full_name },
+        deleted: {
+          clerk_user_id: patientClerk,
+          full_name: rows[0].full_name,
+          r2_objects: keys.size,
+          r2_delete_errors: r2Errors,
+        },
       }), { headers: { "Content-Type": "application/json" } });
     } catch (e) {
       return jsonError(500, `Delete patient failed: ${e.message}`);
