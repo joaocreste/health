@@ -1113,6 +1113,15 @@
       return;
     }
 
+    // Paulo's only physical data is the manually-curated MRI pair, so
+    // every Physical sub-page short-circuits to the bespoke MRI page.
+    // Avoids the "0 / 0 / 0" metric grid that hides the actual content.
+    if (patient === PAULO_SILOTTO &&
+        (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
+      renderPauloPhysicalExams();
+      return;
+    }
+
     // Other section pages — show a small "not built yet" shell rather than the
     // home overview, so the user knows where they are.
     var labels = {
