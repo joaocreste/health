@@ -427,7 +427,10 @@
     var patientClerk = getPatientClerk();
     var viewerClerk = getViewerClerk();
     if (!patientClerk) {
-      alert('No patient context — return to the picker and choose a patient first.');
+      var lang = (document.documentElement.lang || 'en').toLowerCase().slice(0, 2);
+      alert(lang === 'pt'
+        ? 'Nenhum paciente selecionado — volte ao seletor e escolha um paciente primeiro.'
+        : 'No patient context — return to the picker and choose a patient first.');
       return;
     }
     commitBtnEl.disabled = true;

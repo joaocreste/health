@@ -50,6 +50,21 @@
     });
   }
 
+  // Paired translation. CSS hides whichever .lang-* doesn't match html[lang].
+  // Inputs assumed pre-escaped (or trusted literal markup like en-dashes).
+  function t(en, pt) {
+    return '<span class="lang-en">' + en + '</span><span class="lang-pt">' + pt + '</span>';
+  }
+
+  // Plain-text translation for contexts that can't host HTML (SVG <text>,
+  // .textContent, document.title, alert/confirm messages). Picks the
+  // current html[lang] at call time — caller must re-call to refresh
+  // after a language toggle.
+  function tPlain(en, pt) {
+    var l = (document.documentElement.lang || 'en').toLowerCase().slice(0, 2);
+    return l === 'pt' ? pt : en;
+  }
+
   function formatDate(iso) {
     if (!iso) return '—';
     var s = String(iso);
@@ -112,15 +127,18 @@
   // ─── Renderers ──────────────────────────────────────────────────
   function renderPatientHeader(p) {
     var profileBits = [];
-    if (p.date_of_birth) profileBits.push('DOB ' + formatDate(p.date_of_birth));
+    if (p.date_of_birth) profileBits.push(t('DOB ', 'Nasc. ') + formatDate(p.date_of_birth));
     if (p.sex) profileBits.push(escapeHtml(p.sex));
     if (p.country_of_residence) profileBits.push(escapeHtml(p.country_of_residence));
-    if (p.native_language) profileBits.push('lang: ' + escapeHtml(p.native_language));
+    if (p.native_language) profileBits.push(t('lang: ', 'idioma: ') + escapeHtml(p.native_language));
+    var profile = profileBits.length
+      ? profileBits.join(' · ')
+      : '<em>' + t('No profile fields set.', 'Nenhum dado de perfil definido.') + '</em>';
     return (
       '<header class="ov-header">' +
-        '<div class="ov-eyebrow">Patient record</div>' +
-        '<h1 class="ov-title">' + escapeHtml(p.full_name || 'Unnamed') + '</h1>' +
-        '<div class="ov-profile">' + (profileBits.join(' · ') || '<em>No profile fields set.</em>') + '</div>' +
+        '<div class="ov-eyebrow">' + t('Patient record', 'Prontuário do paciente') + '</div>' +
+        '<h1 class="ov-title">' + (p.full_name ? escapeHtml(p.full_name) : t('Unnamed', 'Sem nome')) + '</h1>' +
+        '<div class="ov-profile">' + profile + '</div>' +
         '<div class="ov-id">' + escapeHtml(p.clerk_user_id || '') + '</div>' +
       '</header>'
     );
@@ -152,14 +170,22 @@
 
   function renderPendingBanner(pending) {
     if (!pending || pending.length === 0) return '';
+    var n = pending.length;
+    var headline = t(
+      n + (n === 1 ? ' file' : ' files') + ' did not process.',
+      n + (n === 1 ? ' arquivo' : ' arquivos') + ' não foi processado.'
+    );
+    var sub = t(
+      'Uploaded but classification or parsing failed (often an API billing or transient error). ',
+      'Enviado, mas a classificação ou o parsing falhou (frequentemente erro de billing da API ou transitório). '
+    );
     return (
       '<div class="ov-pending">' +
-        '<strong>' + pending.length + ' file' + (pending.length === 1 ? '' : 's') + ' did not process.</strong> ' +
-        'Uploaded but classification or parsing failed (often an API billing or transient error). ' +
+        '<strong>' + headline + '</strong> ' + sub +
         '<ul class="ov-list">' +
           pending.map(function (f) {
             return '<li>' +
-              '<span class="ov-list-title">' + escapeHtml(f.original_path || '(no name)') + '</span>' +
+              '<span class="ov-list-title">' + (f.original_path ? escapeHtml(f.original_path) : t('(no name)', '(sem nome)')) + '</span>' +
               '<span class="ov-list-meta">' + escapeHtml(f.status || '?') +
                 (f.error_message ? ' — ' + escapeHtml(String(f.error_message).slice(0, 160)) : '') +
               '</span></li>';
@@ -170,12 +196,15 @@
   }
 
   function renderDocList(docs) {
-    if (!docs || docs.length === 0) return '<div class="ov-empty">No documents yet.</div>';
+    if (!docs || docs.length === 0) {
+      return '<div class="ov-empty">' + t('No documents yet.', 'Nenhum documento ainda.') + '</div>';
+    }
     return '<ul class="ov-list">' + docs.map(function (d) {
-      var title = d.title || d.original_filename || '(untitled)';
+      var title = d.title || d.original_filename || null;
+      var titleHtml = title ? escapeHtml(title) : t('(untitled)', '(sem título)');
       var date = d.document_date || (d.created_at && String(d.created_at).slice(0, 10));
       return '<li>' +
-               '<span class="ov-list-title">' + escapeHtml(title) + '</span>' +
+               '<span class="ov-list-title">' + titleHtml + '</span>' +
                '<span class="ov-list-meta">' +
                  escapeHtml(d.kind || '—') + ' · ' + escapeHtml(formatDate(date)) +
                '</span>' +
@@ -184,7 +213,9 @@
   }
 
   function renderLabList(labs) {
-    if (!labs || labs.length === 0) return '<div class="ov-empty">No lab results yet.</div>';
+    if (!labs || labs.length === 0) {
+      return '<div class="ov-empty">' + t('No lab results yet.', 'Nenhum resultado de exame ainda.') + '</div>';
+    }
     return '<div class="lab-panel-body lab-panel-body-flat">' +
       labs.map(renderLabTest).join('') +
     '</div>';
@@ -329,12 +360,12 @@
 
   function pillLabel(status, flag) {
     if (status === 'flag') {
-      if (flag === 'H' || flag === 'HH') return 'High';
-      if (flag === 'L' || flag === 'LL') return 'Low';
-      return 'Out of range';
+      if (flag === 'H' || flag === 'HH') return t('High', 'Alto');
+      if (flag === 'L' || flag === 'LL') return t('Low',  'Baixo');
+      return t('Out of range', 'Fora do intervalo');
     }
-    if (status === 'watch') return 'Watch';
-    return 'Normal';
+    if (status === 'watch') return t('Watch', 'Atenção');
+    return t('Normal', 'Normal');
   }
 
   function renderLabBar(value, refLow, refHigh, status) {
@@ -356,11 +387,13 @@
     var markerCls = (status === 'flag') ? 'lab-bar-marker-flag'
                   : (status === 'watch') ? 'lab-bar-marker-watch'
                   : 'lab-bar-marker-normal';
+    var loStr = escapeHtml(fmtLabNum(refLow));
+    var hiStr = escapeHtml(fmtLabNum(refHigh));
     var leftLabel  = hasLow
-      ? '<span>min ' + escapeHtml(fmtLabNum(refLow))  + '</span>'
+      ? '<span>' + t('min ' + loStr, 'mín ' + loStr) + '</span>'
       : '<span></span>';
     var rightLabel = hasHigh
-      ? '<span>max ' + escapeHtml(fmtLabNum(refHigh)) + '</span>'
+      ? '<span>' + t('max ' + hiStr, 'máx ' + hiStr) + '</span>'
       : '<span></span>';
     return (
       '<div class="lab-bar-wrap">' +
@@ -418,7 +451,7 @@
         '</div>' +
         renderLabBar(value, m.ref_low, m.ref_high, status) +
         '<div class="lab-test-foot">' +
-          '<div class="lab-test-ref">Reference: ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
+          '<div class="lab-test-ref">' + t('Reference:', 'Referência:') + ' ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
           subline +
         '</div>' +
       '</div>'
@@ -432,15 +465,20 @@
     var imaging = exams.imaging || [];
 
     var panelsHtml = panels.length === 0
-      ? '<div class="ov-empty">No lab results yet. Upload exam PDFs from Add data; once parsed they appear here grouped by panel.</div>'
+      ? '<div class="ov-empty">' +
+          t('No lab results yet. Upload exam PDFs from Add data; once parsed they appear here grouped by panel.',
+            'Sem resultados de exames. Envie PDFs em "Adicionar dados"; após processados aparecerão aqui agrupados por painel.') +
+        '</div>'
       : '<div class="lab-panel-grid">' + panels.map(function (pn) {
           var body = pn.markers.map(renderLabTest).join('');
+          var n = pn.markers.length;
+          var countHtml = n + ' ' + t(n === 1 ? 'marker' : 'markers', n === 1 ? 'marcador' : 'marcadores');
           return (
             '<details class="lab-panel" open>' +
               '<summary class="lab-panel-head">' +
                 '<span class="lab-panel-title">' + escapeHtml(pn.panel) + '</span>' +
                 '<span class="lab-panel-sub"></span>' +
-                '<span class="lab-panel-count">' + pn.markers.length + ' marker' + (pn.markers.length === 1 ? '' : 's') + '</span>' +
+                '<span class="lab-panel-count">' + countHtml + '</span>' +
               '</summary>' +
               '<div class="lab-panel-body">' + body + '</div>' +
             '</details>'
@@ -449,13 +487,14 @@
 
     var imagingHtml = imaging.length === 0 ? '' :
       '<section class="ov-section">' +
-        '<h2>Imaging studies <span class="ov-count-inline">' + imaging.length + '</span></h2>' +
+        '<h2>' + t('Imaging studies', 'Estudos de imagem') + ' <span class="ov-count-inline">' + imaging.length + '</span></h2>' +
         '<ul class="ov-list">' + imaging.map(function (s) {
+          var filesLabel = s.file_count ? ' · ' + s.file_count + ' ' + t('files', 'arquivos') : '';
           return '<li>' +
             '<span class="ov-list-title">' + escapeHtml(s.modality || '?') +
               (s.body_part ? ' · ' + escapeHtml(s.body_part) : '') + '</span>' +
             '<span class="ov-list-meta">' + escapeHtml(formatDate(s.study_date)) +
-              (s.file_count ? ' · ' + s.file_count + ' files' : '') +
+              filesLabel +
               ' · ' + escapeHtml(s.source_format || '—') +
             '</span></li>';
         }).join('') + '</ul>' +
@@ -463,8 +502,11 @@
 
     var docsHtml = docs.length === 0 ? '' :
       '<section class="ov-section">' +
-        '<h2>Source PDFs <span class="ov-count-inline">' + docs.length + '</span></h2>' +
-        '<p class="ov-section-note">PDFs uploaded to this patient. Items marked "unclassified" landed here because the LLM classifier was unreachable when they were ingested.</p>' +
+        '<h2>' + t('Source PDFs', 'PDFs de origem') + ' <span class="ov-count-inline">' + docs.length + '</span></h2>' +
+        '<p class="ov-section-note">' +
+          t('PDFs uploaded to this patient. Items marked "unclassified" landed here because the LLM classifier was unreachable when they were ingested.',
+            'PDFs enviados deste paciente. Itens marcados como "não classificado" pararam aqui porque o classificador LLM estava indisponível durante a ingestão.') +
+        '</p>' +
         renderDocList(docs) +
       '</section>';
 
@@ -473,7 +515,7 @@
     view.innerHTML =
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
-        '<div class="ov-section-eyebrow">Physical → Exams</div>' +
+        '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
         panelsHtml +
         imagingHtml +
         docsHtml +
@@ -491,9 +533,10 @@
     return (
       '<section class="ov-section">' +
         '<div class="ov-metrics">' + rows.map(function (r) {
+          // r.label is pre-built HTML (typically via t()). Don't escape.
           var inner =
             '<div class="ov-metric-num">' + escapeHtml(String(r.value)) + '</div>' +
-            '<div class="ov-metric-label">' + escapeHtml(r.label) + '</div>';
+            '<div class="ov-metric-label">' + r.label + '</div>';
           return r.href
             ? '<a class="ov-metric ov-metric-link" href="' + r.href + '">' + inner + '</a>'
             : '<div class="ov-metric">' + inner + '</div>';
@@ -503,7 +546,8 @@
   }
 
   function renderSectionView(opts) {
-    /* opts: { summary, title, eyebrow, metrics, emptyHint } */
+    /* opts: { summary, title, eyebrow, metrics, emptyHint, extra }
+       eyebrow and emptyHint are pre-built HTML (already paired via t()). */
     var p = (opts.summary && opts.summary.patient) || {};
     var pending = (opts.summary && opts.summary.pending_files) || [];
     var anyValue = (opts.metrics || []).some(function (m) { return m.value > 0; });
@@ -516,15 +560,24 @@
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
         renderPendingBanner(pending) +
-        '<div class="ov-section-eyebrow">' + escapeHtml(opts.eyebrow) + '</div>' +
+        '<div class="ov-section-eyebrow">' + opts.eyebrow + '</div>' +
         renderMetricGrid(opts.metrics) +
         (anyValue ? '' :
           '<div class="ov-section ov-empty-hint">' +
-            '<p>' + escapeHtml(opts.emptyHint) + '</p>' +
+            '<p>' + opts.emptyHint + '</p>' +
           '</div>') +
         (opts.extra || '') +
       '</div>';
     document.body.appendChild(view);
+  }
+
+  function recentSection(titleHtml, count, body) {
+    return (
+      '<section class="ov-section">' +
+        '<h2>' + titleHtml + ' <span class="ov-count-inline">' + count + '</span></h2>' +
+        body +
+      '</section>'
+    );
   }
 
   function renderPhysical(summary) {
@@ -534,55 +587,55 @@
       return ['lab_pdf', 'imaging_image', 'dicom_series', 'ecg_pdf', 'doctor_report', 'medication_csv', 'genetics_report'].indexOf(d.kind) !== -1;
     });
     var metrics = [
-      { label: 'Lab markers',     value: b.lab_results     || 0, href: 'physical-exams.html' },
-      { label: 'Imaging studies', value: b.imaging_studies || 0, href: 'physical-exams.html' },
-      { label: 'Vitals days',     value: b.vitals_days     || 0, href: 'physical-vitals.html' },
-      { label: 'ECG events',      value: b.ecg_events      || 0, href: 'physical-vitals.html' },
-      { label: 'Genetics (PGx)',  value: b.pgx_findings    || 0, href: 'physical-genetics.html' },
-      { label: 'Medications',     value: b.medications     || 0 },
-      { label: 'Supplements',     value: b.supplements     || 0 },
-      { label: 'Encounters',      value: b.encounters      || 0 },
-      { label: 'Surgeries',       value: b.surgeries       || 0 },
-      { label: 'Injuries',        value: b.injuries        || 0 },
+      { label: t('Lab markers',     'Marcadores laboratoriais'), value: b.lab_results     || 0, href: 'physical-exams.html' },
+      { label: t('Imaging studies', 'Estudos de imagem'),        value: b.imaging_studies || 0, href: 'physical-exams.html' },
+      { label: t('Vitals days',     'Dias de vitais'),           value: b.vitals_days     || 0, href: 'physical-vitals.html' },
+      { label: t('ECG events',      'Eventos de ECG'),           value: b.ecg_events      || 0, href: 'physical-vitals.html' },
+      { label: t('Genetics (PGx)',  'Genética (PGx)'),           value: b.pgx_findings    || 0, href: 'physical-genetics.html' },
+      { label: t('Medications',     'Medicamentos'),             value: b.medications     || 0 },
+      { label: t('Supplements',     'Suplementos'),              value: b.supplements     || 0 },
+      { label: t('Encounters',      'Consultas'),                value: b.encounters      || 0 },
+      { label: t('Surgeries',       'Cirurgias'),                value: b.surgeries       || 0 },
+      { label: t('Injuries',        'Lesões'),                   value: b.injuries        || 0 },
     ];
     var extra =
       (labs.length === 0 ? '' :
-        '<section class="ov-section">' +
-          '<h2>Recent lab results <span class="ov-count-inline">' + labs.length + '</span></h2>' +
-          renderLabList(labs.slice(0, 8)) +
-        '</section>') +
+        recentSection(t('Recent lab results', 'Resultados recentes'), labs.length, renderLabList(labs.slice(0, 8)))) +
       (docs.length === 0 ? '' :
-        '<section class="ov-section">' +
-          '<h2>Recent documents <span class="ov-count-inline">' + docs.length + '</span></h2>' +
-          renderDocList(docs.slice(0, 8)) +
-        '</section>');
+        recentSection(t('Recent documents',   'Documentos recentes'), docs.length, renderDocList(docs.slice(0, 8))));
     renderSectionView({
-      summary: summary, title: 'Physical', eyebrow: 'Physical',
+      summary: summary, title: 'Physical',
+      eyebrow: t('Physical', 'Físico'),
       metrics: metrics, extra: extra,
-      emptyHint: 'Nothing physical ingested yet. Drop lab PDFs, ECGs, imaging or vitals exports from Add data.',
+      emptyHint: t('Nothing physical ingested yet. Drop lab PDFs, ECGs, imaging or vitals exports from Add data.',
+                   'Nada físico ingerido ainda. Envie PDFs de exames, ECGs, imagens ou exports de vitais em "Adicionar dados".'),
     });
   }
 
   function renderVitals(summary) {
     var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
     renderSectionView({
-      summary: summary, title: 'Vitals', eyebrow: 'Physical → Vitals',
+      summary: summary, title: 'Vitals',
+      eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
       metrics: [
-        { label: 'Vitals days', value: b.vitals_days || 0 },
-        { label: 'ECG events',  value: b.ecg_events  || 0 },
+        { label: t('Vitals days', 'Dias de vitais'),  value: b.vitals_days || 0 },
+        { label: t('ECG events',  'Eventos de ECG'),  value: b.ecg_events  || 0 },
       ],
-      emptyHint: 'No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
+      emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
+                   'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
     });
   }
 
   function renderGenetics(summary) {
     var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
     renderSectionView({
-      summary: summary, title: 'Genetics', eyebrow: 'Physical → Genetics',
+      summary: summary, title: 'Genetics',
+      eyebrow: t('Physical → Genetics', 'Físico → Genética'),
       metrics: [
-        { label: 'PGx findings', value: b.pgx_findings || 0 },
+        { label: t('PGx findings', 'Achados PGx'), value: b.pgx_findings || 0 },
       ],
-      emptyHint: 'No genetics data ingested yet. Upload a 23andMe / AncestryDNA raw file or a pharmacogenomic report PDF.',
+      emptyHint: t('No genetics data ingested yet. Upload a 23andMe / AncestryDNA raw file or a pharmacogenomic report PDF.',
+                   'Sem dados genéticos ainda. Envie um arquivo bruto 23andMe / AncestryDNA ou um PDF de relatório farmacogenômico.'),
     });
   }
 
@@ -590,52 +643,56 @@
     var b = (summary.pillars && summary.pillars.mental && summary.pillars.mental.breakdown) || {};
     var writings = (summary.recent_documents || []).filter(function (d) { return d.kind === 'writing'; });
     var extra = writings.length === 0 ? '' :
-      '<section class="ov-section">' +
-        '<h2>Recent writings <span class="ov-count-inline">' + writings.length + '</span></h2>' +
-        renderDocList(writings.slice(0, 8)) +
-      '</section>';
+      recentSection(t('Recent writings', 'Escritos recentes'), writings.length, renderDocList(writings.slice(0, 8)));
     renderSectionView({
-      summary: summary, title: 'Mental', eyebrow: 'Mental',
+      summary: summary, title: 'Mental',
+      eyebrow: t('Mental', 'Mental'),
       metrics: [
-        { label: 'Writings',         value: b.writings         || 0 },
-        { label: 'Mood entries',     value: b.mood_entries     || 0 },
-        { label: 'Psych items',      value: b.psych_items      || 0 },
-        { label: 'Panic events',     value: b.panic_events     || 0 },
-        { label: 'Risk assessments', value: b.risk_assessments || 0 },
+        { label: t('Writings',         'Escritos'),               value: b.writings         || 0 },
+        { label: t('Mood entries',     'Registros de humor'),     value: b.mood_entries     || 0 },
+        { label: t('Psych items',      'Itens psiquiátricos'),    value: b.psych_items      || 0 },
+        { label: t('Panic events',     'Eventos de pânico'),      value: b.panic_events     || 0 },
+        { label: t('Risk assessments', 'Avaliações de risco'),    value: b.risk_assessments || 0 },
       ],
       extra: extra,
-      emptyHint: 'No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
+      emptyHint: t('No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
+                   'Sem dados de saúde mental ainda. Envie diários, registros de humor ou avaliações psiquiátricas em "Adicionar dados".'),
     });
   }
 
   function renderSpiritual(summary) {
     var b = (summary.pillars && summary.pillars.spiritual && summary.pillars.spiritual.breakdown) || {};
     renderSectionView({
-      summary: summary, title: 'Spiritual', eyebrow: 'Spiritual',
+      summary: summary, title: 'Spiritual',
+      eyebrow: t('Spiritual', 'Espiritual'),
       metrics: [
-        { label: 'Wheel of life',  value: b.wheel_of_life || 0 },
-        { label: 'Life events',    value: b.life_events   || 0 },
+        { label: t('Wheel of life', 'Roda da vida'),    value: b.wheel_of_life || 0 },
+        { label: t('Life events',   'Eventos de vida'), value: b.life_events   || 0 },
       ],
-      emptyHint: 'No spiritual data ingested yet. Drop wheel-of-life self-assessments or life-event CSVs from Add data.',
+      emptyHint: t('No spiritual data ingested yet. Drop wheel-of-life self-assessments or life-event CSVs from Add data.',
+                   'Sem dados espirituais ainda. Envie autoavaliações de roda da vida ou CSVs de eventos de vida em "Adicionar dados".'),
     });
   }
 
-  function renderEmptyShell(clerkId, patientName, sectionLabel) {
+  function renderEmptyShell(clerkId, patientName, sectionLabelHtml) {
+    var nameHtml = patientName ? escapeHtml(patientName) : t('this patient', 'este paciente');
     var shell = document.createElement('main');
     shell.className = 'jc-empty-shell';
     shell.innerHTML =
       '<div class="jc-empty-card">' +
-        '<div class="jc-empty-eyebrow">' + escapeHtml(sectionLabel || 'Patient record') + '</div>' +
+        '<div class="jc-empty-eyebrow">' + (sectionLabelHtml || t('Patient record', 'Prontuário do paciente')) + '</div>' +
         '<h1 class="jc-empty-title">' +
-          'Not built yet for ' + escapeHtml(patientName || 'this patient') + '.' +
+          t('Not built yet for ' + nameHtml + '.', 'Ainda não construído para ' + nameHtml + '.') +
         '</h1>' +
         '<p class="jc-empty-body">' +
-          'This section still uses Patient Zero\'s hardcoded layout. Data for ' +
-          escapeHtml(patientName || 'this patient') + ' will appear here once a data-driven view is built.' +
+          t('This section still uses Patient Zero\'s hardcoded layout. Data for ' + nameHtml + ' will appear here once a data-driven view is built.',
+            'Esta seção ainda usa o layout fixo do Paciente Zero. Os dados de ' + nameHtml + ' aparecerão aqui quando uma visão orientada a dados for construída.') +
         '</p>' +
         '<div class="jc-empty-id">' + escapeHtml(clerkId) + '</div>' +
         '<div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">' +
-          '<a href="home.html" class="jc-empty-back" style="text-decoration:none;display:inline-block;">← Back to summary</a>' +
+          '<a href="home.html" class="jc-empty-back" style="text-decoration:none;display:inline-block;">' +
+            t('← Back to summary', '← Voltar ao resumo') +
+          '</a>' +
         '</div>' +
       '</div>';
     document.body.appendChild(shell);
@@ -788,7 +845,7 @@
       fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (s) { renderHome(s); decorateWithDashboard('home', { isHome: true }); })
-        .catch(function () { renderEmptyShell(patient, null, 'Patient record'); });
+        .catch(function () { renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente')); });
       return;
     }
 
@@ -796,20 +853,20 @@
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
-        .catch(function () { renderEmptyShell(patient, null, 'Physical → Exams'); });
+        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); });
       return;
     }
 
     // Other section pages — show a small "not built yet" shell rather than the
     // home overview, so the user knows where they are.
     var labels = {
-      'physical':          'Physical',
-      'physical-vitals':   'Physical → Vitals',
-      'physical-genetics': 'Physical → Genetics',
-      'mental':            'Mental',
-      'spiritual':         'Spiritual',
-      'loops':             'Loops',
-      'assessment':        'Assessment',
+      'physical':          t('Physical',           'Físico'),
+      'physical-vitals':   t('Physical → Vitals',  'Físico → Vitais'),
+      'physical-genetics': t('Physical → Genetics','Físico → Genética'),
+      'mental':            t('Mental',             'Mental'),
+      'spiritual':         t('Spiritual',          'Espiritual'),
+      'loops':             t('Loops',              'Loops'),
+      'assessment':        t('Assessment',         'Avaliação'),
     };
     var dataRenderers = {
       'physical':          renderPhysical,
@@ -823,9 +880,9 @@
       .then(function (summary) {
         var renderer = dataRenderers[section];
         if (renderer) { renderer(summary); decorateWithDashboard(section); }
-        else renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || section);
+        else renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || escapeHtml(section));
       })
-      .catch(function () { renderEmptyShell(patient, null, labels[section] || section); });
+      .catch(function () { renderEmptyShell(patient, null, labels[section] || escapeHtml(section)); });
   });
 
   /* ── LLM-authored dashboard layer ──────────────────────────────────
@@ -838,8 +895,19 @@
 
   var DASHBOARD_SECTIONS = ['home', 'physical', 'mental', 'spiritual', 'assessment'];
   var SECTION_LABEL = {
+    home:       t('Home',       'Início'),
+    physical:   t('Physical',   'Físico'),
+    mental:     t('Mental',     'Mental'),
+    spiritual:  t('Spiritual',  'Espiritual'),
+    assessment: t('Assessment', 'Avaliação'),
+  };
+  var SECTION_LABEL_PLAIN_EN = {
     home: 'Home', physical: 'Physical', mental: 'Mental',
     spiritual: 'Spiritual', assessment: 'Assessment',
+  };
+  var SECTION_LABEL_PLAIN_PT = {
+    home: 'Início', physical: 'Físico', mental: 'Mental',
+    spiritual: 'Espiritual', assessment: 'Avaliação',
   };
   // Which dashboard section to inject onto which page slug.
   var PAGE_TO_DASHBOARD = {
@@ -872,12 +940,12 @@
 
   function relativeWhen(iso) {
     if (!iso) return '';
-    var t = new Date(iso).getTime();
-    var secs = Math.max(1, Math.floor((Date.now() - t) / 1000));
-    if (secs < 60)         return secs + 's ago';
-    if (secs < 3600)       return Math.floor(secs / 60) + 'm ago';
-    if (secs < 86400)      return Math.floor(secs / 3600) + 'h ago';
-    if (secs < 86400 * 30) return Math.floor(secs / 86400) + 'd ago';
+    var ts = new Date(iso).getTime();
+    var secs = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+    if (secs < 60)         return t(secs + 's ago',                  'há ' + secs + 's');
+    if (secs < 3600)       return t(Math.floor(secs / 60) + 'm ago', 'há ' + Math.floor(secs / 60) + 'min');
+    if (secs < 86400)      return t(Math.floor(secs / 3600) + 'h ago','há ' + Math.floor(secs / 3600) + 'h');
+    if (secs < 86400 * 30) return t(Math.floor(secs / 86400) + 'd ago','há ' + Math.floor(secs / 86400) + 'd');
     return formatDate(iso);
   }
 
@@ -891,10 +959,16 @@
     if (!m) return NaN;
     return Date.UTC(+m[1], +m[2] - 1, +m[3]);
   }
+  // SVG <text> can't host paired HTML spans, so pick the language at render
+  // time. Charts won't re-translate mid-session when the user toggles
+  // language — they re-render the next time the page is opened.
   function fmtTickDate(ms) {
     var d = new Date(ms);
-    var mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
-    return mon + ' ' + String(d.getUTCFullYear()).slice(2);
+    var yr = String(d.getUTCFullYear()).slice(2);
+    var months = tPlain('en', 'pt') === 'pt'
+      ? ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+      : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getUTCMonth()] + ' ' + yr;
   }
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
@@ -1078,7 +1152,7 @@
       return dateMs(a.date) - dateMs(b.date);
     });
     var ref = refRangeStr(c.ref_low, c.ref_high);
-    var refLine = (ref !== '—' ? '<div class="ov-card-subtitle">Reference: ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
+    var refLine = (ref !== '—' ? '<div class="ov-card-subtitle">' + t('Reference:', 'Referência:') + ' ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
     var chart = svgLineChart({
       series: [{ marker: c.marker, unit: c.unit, color: CHART_PALETTE[0], points: points }],
       ref_low: c.ref_low, ref_high: c.ref_high,
@@ -1155,18 +1229,26 @@
   function dashboardCardHtml(dashSection, record, opts) {
     opts = opts || {};
     var isHome = !!opts.isHome;
-    var titleEn = isHome ? 'AI-authored summary' : (SECTION_LABEL[dashSection] + ' · AI-authored');
+    var titleHtml = isHome
+      ? t('AI-authored summary', 'Resumo escrito pela IA')
+      : (SECTION_LABEL[dashSection] || escapeHtml(dashSection)) + ' · ' + t('AI-authored', 'escrito pela IA');
     var cards = (record && Array.isArray(record.cards)) ? record.cards : [];
     var hasCards = cards.length > 0;
+    var nCards = cards.length;
+    var cardsCountHtml = nCards + ' ' + t(nCards === 1 ? 'card' : 'cards', nCards === 1 ? 'cartão' : 'cartões');
     var meta = (record && record.generated_at)
-      ? '<div class="ov-dashboard-meta">Generated ' + relativeWhen(record.generated_at) +
+      ? '<div class="ov-dashboard-meta">' +
+          t('Generated', 'Gerado') + ' ' + relativeWhen(record.generated_at) +
           (record.model ? ' · <code>' + escapeHtml(record.model) + '</code>' : '') +
-          ' · ' + cards.length + ' card' + (cards.length === 1 ? '' : 's') + '</div>'
+          ' · ' + cardsCountHtml +
+        '</div>'
       : '';
-    var refreshLabel = hasCards ? 'Refresh' : 'Build cards';
+    var refreshLabelHtml = hasCards
+      ? t('Refresh', 'Atualizar')
+      : t('Build cards', 'Gerar cartões');
     var allBtn = isHome
       ? '<button type="button" class="btn btn-gold dash-build-all-btn" data-sections="' +
-        DASHBOARD_SECTIONS.join(',') + '">Build all sections</button>'
+        DASHBOARD_SECTIONS.join(',') + '">' + t('Build all sections', 'Gerar todas as seções') + '</button>'
       : '';
     var cardsHtml = hasCards
       ? cards.map(function (c) {
@@ -1174,18 +1256,22 @@
           return fn ? fn(c) : '';
         }).join('')
       : '<section class="ov-card ov-card-empty">' +
-          '<p>No AI-authored cards yet for this section. Click <strong>' + escapeHtml(refreshLabel) +
-          '</strong> to have Claude read the patient\'s data and propose a card layout tailored to it.</p>' +
+          '<p>' +
+            t('No AI-authored cards yet for this section. Click <strong>' + (hasCards ? 'Refresh' : 'Build cards') +
+              '</strong> to have Claude read the patient\'s data and propose a card layout tailored to it.',
+              'Nenhum cartão escrito pela IA ainda para esta seção. Clique em <strong>' + (hasCards ? 'Atualizar' : 'Gerar cartões') +
+              '</strong> para que o Claude leia os dados do paciente e proponha um layout de cartões personalizado.') +
+          '</p>' +
         '</section>';
     return (
       '<div class="ov-cards" data-dash-section="' + escapeHtml(dashSection) + '">' +
         '<header class="ov-cards-head">' +
           '<div class="ov-cards-head-left">' +
-            '<h2>' + escapeHtml(titleEn) + ' <span class="ai-pill">AI</span></h2>' + meta +
+            '<h2>' + titleHtml + ' <span class="ai-pill">AI</span></h2>' + meta +
           '</div>' +
           '<div class="ov-cards-head-actions">' + allBtn +
             '<button type="button" class="btn btn-ghost dash-build-btn" data-section="' + escapeHtml(dashSection) + '">' +
-              escapeHtml(refreshLabel) + '</button>' +
+              refreshLabelHtml + '</button>' +
           '</div>' +
         '</header>' +
         '<div class="ov-cards-stack">' + cardsHtml + '</div>' +
@@ -1274,7 +1360,7 @@
         '</svg>' +
         '<div class="jc-donut-text">' +
           '<div class="jc-donut-pct">0 / 0</div>' +
-          '<div class="jc-donut-label">Building…</div>' +
+          '<div class="jc-donut-label">' + tPlain('Building…', 'Gerando…') + '</div>' +
           '<ul class="jc-donut-trail"></ul>' +
         '</div>' +
       '</div>';
@@ -1285,17 +1371,21 @@
     var el = ensureDonut();
     el.classList.add('open');
     el.querySelector('.jc-donut-pct').textContent = done + ' / ' + total;
-    el.querySelector('.jc-donut-label').textContent = label || 'Building…';
+    el.querySelector('.jc-donut-label').textContent = label || tPlain('Building…', 'Gerando…');
     var pct = total > 0 ? done / total : 0;
     var dashLen = 263.9;
     el.querySelector('.jc-donut-fg').setAttribute('stroke-dashoffset', String(dashLen * (1 - pct)));
+  }
+  function sectionLabelPlain(section) {
+    var map = tPlain('en', 'pt') === 'pt' ? SECTION_LABEL_PLAIN_PT : SECTION_LABEL_PLAIN_EN;
+    return map[section] || section;
   }
   function pushDonutTrail(section, status, ms) {
     var trail = (donutEl && donutEl.querySelector('.jc-donut-trail'));
     if (!trail) return;
     var li = document.createElement('li');
     li.className = 'jc-donut-trail-item ' + status;
-    li.textContent = (status === 'ok' ? '✓ ' : '✗ ') + (SECTION_LABEL[section] || section) +
+    li.textContent = (status === 'ok' ? '✓ ' : '✗ ') + sectionLabelPlain(section) +
                      (typeof ms === 'number' ? ' · ' + (ms/1000).toFixed(1) + 's' : '');
     trail.appendChild(li);
   }
@@ -1305,11 +1395,11 @@
     sections = (sections || []).filter(function (s) { return DASHBOARD_SECTIONS.indexOf(s) !== -1; });
     if (sections.length === 0) return;
     var total = sections.length;
-    setDonut(0, total, 'Starting…');
+    setDonut(0, total, tPlain('Starting…', 'Iniciando…'));
     var viewerClerk = viewerClerkHeader();
     for (var i = 0; i < sections.length; i++) {
       var section = sections[i];
-      setDonut(i, total, 'Building ' + (SECTION_LABEL[section] || section) + '…');
+      setDonut(i, total, tPlain('Building ', 'Gerando ') + sectionLabelPlain(section) + '…');
       var startedAt = Date.now();
       try {
         var resp = await fetch('/api/patient-dashboard-build', {
@@ -1323,7 +1413,7 @@
           pushDonutTrail(section, 'err', Date.now() - startedAt);
           // If rate-limited, wait ~30s before continuing.
           if (resp.status === 429 || /rate_limit/i.test(bodyText)) {
-            setDonut(i, total, 'Rate-limited, waiting 30s…');
+            setDonut(i, total, tPlain('Rate-limited, waiting 30s…', 'Limite de taxa, aguardando 30s…'));
             await new Promise(function (r) { setTimeout(r, 30000); });
             i--; continue; // retry this section
           }
@@ -1334,7 +1424,7 @@
         pushDonutTrail(section, 'err', Date.now() - startedAt);
       }
     }
-    setDonut(total, total, 'Done. Reloading…');
+    setDonut(total, total, tPlain('Done. Reloading…', 'Pronto. Recarregando…'));
     setTimeout(function () { location.reload(); }, 700);
   }
 })();
