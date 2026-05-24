@@ -276,7 +276,7 @@ async function handlePatientExams(request, env) {
     const [labs, labDocs, imaging] = await Promise.all([
       sql`
         SELECT panel, marker, value, value_text, unit, ref_low, ref_high, flag,
-               taken_at, laboratory, source_blob_key
+               taken_at, laboratory, requesting_doctor, source_blob_key
         FROM lab_results
         WHERE patient_id = ${pid}
         ORDER BY COALESCE(panel, 'zz') ASC, marker ASC, taken_at DESC
@@ -319,6 +319,7 @@ async function handlePatientExams(request, env) {
           flag: latest.flag,
           latest_taken_at: latest.taken_at,
           laboratory: latest.laboratory,
+          requesting_doctor: latest.requesting_doctor,
           source_blob_key: latest.source_blob_key,
           points,
         };

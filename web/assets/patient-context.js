@@ -510,6 +510,8 @@
         renderDocList(docs) +
       '</section>';
 
+    var comparisonHtml = renderHistoricalComparison(panels);
+
     var view = document.createElement('main');
     view.className = 'jc-overview jc-exams';
     view.innerHTML =
@@ -517,10 +519,114 @@
         renderPatientHeader(p) +
         '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
         panelsHtml +
+        comparisonHtml +
         imagingHtml +
         docsHtml +
       '</div>';
     document.body.appendChild(view);
+  }
+
+  function renderHistoricalComparison(panels) {
+    // Build the union of (date, lab, doctor) samples across every marker.
+    // Each unique sample = one column; each marker = one row; panel boundaries
+    // become tbody section headers — mirroring the Patient-Zero lab-cmp-table.
+    var sampleMap = {}; // key -> { date, laboratory, doctor, ts }
+    var anyMultiple = false;
+    panels.forEach(function (pn) {
+      pn.markers.forEach(function (m) {
+        if (m.points && m.points.length > 1) anyMultiple = true;
+        (m.points || []).forEach(function (p) {
+          var key = (p.taken_at || '') + '|' + (p.laboratory || '') + '|' + (p.requesting_doctor || '');
+          if (!sampleMap[key]) {
+            sampleMap[key] = {
+              key: key,
+              date: p.taken_at,
+              laboratory: p.laboratory,
+              doctor: p.requesting_doctor,
+              ts: dateMs(p.taken_at) || 0,
+            };
+          }
+        });
+      });
+    });
+    var samples = Object.keys(sampleMap).map(function (k) { return sampleMap[k]; });
+    if (samples.length < 2 || !anyMultiple) return ''; // nothing to compare
+    samples.sort(function (a, b) { return b.ts - a.ts; }); // newest first
+
+    var headerCols = samples.map(function (s, i) {
+      var dateLbl = s.date ? escapeHtml(formatDate(s.date)) : '—';
+      var labLbl  = s.laboratory ? escapeHtml(s.laboratory) : '—';
+      var docLbl  = s.doctor ? escapeHtml(s.doctor) : '—';
+      var cls = 'lab-cmp-col-head' + (i === 0 ? ' lab-cmp-col-latest' : '');
+      return (
+        '<th class="' + cls + '">' +
+          '<div class="lab-cmp-date">' + dateLbl + '</div>' +
+          '<div class="lab-cmp-lab">' + labLbl + '</div>' +
+          '<div class="lab-cmp-md">' + docLbl + '</div>' +
+        '</th>'
+      );
+    }).join('');
+
+    var bodyRows = panels.map(function (pn) {
+      var rows = pn.markers.map(function (m) {
+        // Index points by sample key for O(1) lookup.
+        var byKey = {};
+        (m.points || []).forEach(function (p) {
+          var k = (p.taken_at || '') + '|' + (p.laboratory || '') + '|' + (p.requesting_doctor || '');
+          byKey[k] = p;
+        });
+        var cells = samples.map(function (s, i) {
+          var p = byKey[s.key];
+          if (!p) return '<td class="lab-cmp-val lab-cmp-empty">—</td>';
+          var v = (p.value != null && isFinite(Number(p.value)))
+            ? fmtLabNum(Number(p.value))
+            : (p.value_text || '—');
+          var flagAttr = (p.flag === 'H' || p.flag === 'HH') ? ' data-flag="high"'
+                       : (p.flag === 'L' || p.flag === 'LL') ? ' data-flag="low"' : '';
+          var cls = 'lab-cmp-val' + (i === 0 ? ' lab-cmp-latest' : '');
+          return '<td class="' + cls + '"' + flagAttr + '>' + escapeHtml(String(v)) + '</td>';
+        }).join('');
+        var unit = m.unit ? ' <small class="lab-cmp-unit">(' + escapeHtml(m.unit) + ')</small>' : '';
+        return (
+          '<tr>' +
+            '<th class="lab-cmp-marker">' + escapeHtml(m.marker) + unit + '</th>' +
+            cells +
+          '</tr>'
+        );
+      }).join('');
+      return (
+        '<tr class="lab-cmp-section"><th colspan="' + (samples.length + 1) + '">' + escapeHtml(pn.panel) + '</th></tr>' +
+        rows
+      );
+    }).join('');
+
+    var nMarkers = panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
+    var countLine = nMarkers + ' ' + t(nMarkers === 1 ? 'marker' : 'markers', nMarkers === 1 ? 'marcador' : 'marcadores') +
+                    ' · ' + samples.length + ' ' + t(samples.length === 1 ? 'sample' : 'samples', samples.length === 1 ? 'amostra' : 'amostras');
+
+    return (
+      '<details class="lab-panel" open style="margin-top:18px;">' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' + t('Historical comparison', 'Comparação histórica') + '</span>' +
+          '<span class="lab-panel-sub">' +
+            t('All samples side-by-side · most recent at left · empty cells where a marker wasn\'t tested',
+              'Todas as amostras lado a lado · mais recente à esquerda · células vazias onde um marcador não foi dosado') +
+          '</span>' +
+          '<span class="lab-panel-count">' + countLine + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' +
+          '<div class="lab-cmp-wrap">' +
+            '<table class="lab-cmp-table">' +
+              '<thead><tr>' +
+                '<th class="lab-cmp-marker-head">' + t('Marker', 'Marcador') + '</th>' +
+                headerCols +
+              '</tr></thead>' +
+              '<tbody>' + bodyRows + '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div>' +
+      '</details>'
+    );
   }
 
   /* ── Generic section views ────────────────────────────────────────
@@ -798,6 +904,9 @@
       '.ov-card .exam-table { margin-top: 4px; }',
       '.ov-card .lab-panel-body { padding: 8px 0 0; border-top: 1px solid #E5E2DC; }',
       '.lab-panel-body-flat { padding: 0; border-top: none; }',
+      // Flagged cells in the historical-comparison table
+      '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
+      '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
       '.ov-chart-wrap { margin-top: 6px; }',
       '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
       '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',

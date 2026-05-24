@@ -215,6 +215,7 @@ export const labResults = pgTable("lab_results", {
   flag: text("flag"),                      // 'L' | 'H' | 'HH' | 'LL' | null
   takenAt: date("taken_at").notNull(),
   laboratory: text("laboratory"),
+  requestingDoctor: text("requesting_doctor"),  // "Dr. X" / "Dra. Y" who ordered the panel
   sourceBlobKey: text("source_blob_key"),  // R2 key of original PDF
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
