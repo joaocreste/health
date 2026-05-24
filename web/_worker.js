@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
-import { handleIngest, reclassifyForPatient } from "../lib/ingest.js";
+import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
 import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
@@ -1148,6 +1148,43 @@ async function handleAdmin(request, env) {
       });
     } catch (e) {
       return jsonError(500, `Reclassify failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/backfill-requesting-doctor — { patient_clerk?, limit? }
+  // Re-reads each PDF that has lab rows with requesting_doctor IS NULL,
+  // asks Claude (Haiku) for the doctor's name, UPDATEs the rows. Bounded
+  // by `limit` PDFs per call (default 25, max 50). Call repeatedly until
+  // remaining_pdfs = 0.
+  if (path === "/api/admin/backfill-requesting-doctor" && request.method === "POST") {
+    if (!env.ANTHROPIC_API_KEY) return jsonError(500, "anthropic_api_key_not_configured");
+    if (!env.R2_BUCKET)         return jsonError(500, "r2_bucket_not_bound");
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const patientClerk = String(body?.patient_clerk || "").trim(); // optional
+    const limit = Math.min(Math.max(parseInt(body?.limit, 10) || 25, 1), 50);
+
+    try {
+      let patientId = null;
+      if (patientClerk) {
+        const rows = await sql`
+          SELECT id, role FROM users
+          WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1
+        `;
+        if (rows.length === 0 || rows[0].role !== "patient") {
+          return jsonError(404, "patient_not_found");
+        }
+        patientId = rows[0].id;
+      }
+      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
+      const result = await backfillRequestingDoctor(sql, anthropic, env, { patientId, limit });
+      return new Response(JSON.stringify({ ok: true, ...result }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      const msg = e?.message || String(e);
+      const rateLimited = /\b429\b|rate_limit/i.test(msg);
+      return jsonError(rateLimited ? 429 : 500, `Backfill failed: ${msg}`);
     }
   }
 
