@@ -19,7 +19,8 @@
 
   if (window.JC_PUBLIC === true || window.JC_PICKER_PAGE === true) return;
 
-  var PATIENT_ZERO = 'pending:joao';
+  var PATIENT_ZERO  = 'pending:joao';
+  var PAULO_SILOTTO = 'pending:paulo-silotto-df3441';
 
   var params = new URLSearchParams(location.search);
   var fromUrl = params.get('patient');
@@ -1098,8 +1099,8 @@
     if (section === 'physical-exams') {
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
-        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); });
+        .then(function (e) { renderExams(e); maybeRenderPauloMRIs(); decorateWithDashboard('physical'); })
+        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); maybeRenderPauloMRIs(); });
       return;
     }
 
@@ -1657,5 +1658,339 @@
     }
     setDonut(total, total, tPlain('Done. Reloading…', 'Pronto. Recarregando…'));
     setTimeout(function () { location.reload(); }, 700);
+  }
+
+  /* ── Paulo Silotto · bespoke MRI viewer ─────────────────────────────
+     Two manually-curated DICOM exports (cervical + lumbar MRI, 15 May
+     2026, Dr. Marco Antonio de Carvalho, CETAM Diagnóstico). Each
+     viewer carries three orientations (AXI / COR / SAG) populated from
+     a per-orientation manifest, a slider scrubber over the slices,
+     and the radiologist's report — original Portuguese with English
+     translation, toggled by the top-level language switch. */
+
+  var PAULO_MRIS = [
+    {
+      slug: 'paulo-cervical-mri-2026-05-15',
+      titleEn: 'MRI · Cervical spine · 15 May 2026',
+      titlePt: 'RM · Coluna cervical · 15 de maio de 2026',
+      reportEn: [
+        ['h', 'MRI of the cervical spine'],
+        ['p', '<strong>Technique:</strong> Multiplanar study in T1, T2 and STIR weighted sequences, without paramagnetic intravenous contrast.'],
+        ['h2', 'Description'],
+        ['p', 'Cranio-vertebral junction structures without abnormalities.'],
+        ['p', 'Sinistroconvex deviation of the axis in the position of study.'],
+        ['p', 'Vertebral bodies aligned, with normal height and marginal osteophytes.'],
+        ['p', 'Posterior elements intact. Arthrosis of the uncovertebral and facet joints, more evident at the lower cervical levels, with diffuse thickening of the ligamentum flavum.'],
+        ['p', 'Signs of diffuse disc dehydration predominating at C6–C7, where reduced disc height is observed.'],
+        ['p', 'Mild disc bulging at C3–C4 and C4–C5 that flattens the ventral aspect of the dural sac and mildly reduces the bilateral foraminal dimensions.'],
+        ['p', 'Diffuse disco-osteophytic bulging at C5–C6 that compresses the ventral aspect of the spinal cord, without myelopathy, and reduces the bilateral foraminal dimensions, contacting the respective exiting nerve roots.'],
+        ['p', 'Spinal cord with normal morphology and signal intensity.'],
+        ['p', 'Mild hypotrophy of the paravertebral musculature, predominating in the lumbosacral region.'],
+        ['h2', 'Conclusion'],
+        ['ul', [
+          'Sinistroconvex deviation of the axis in the position of study.',
+          'Marginal osteophytes.',
+          'Mild disc bulging at C3–C4 and C4–C5 that flattens the ventral aspect of the dural sac and mildly reduces the bilateral foraminal dimensions.',
+          'Diffuse disco-osteophytic bulging at C5–C6 that compresses the ventral aspect of the spinal cord, without myelopathy, and reduces the bilateral foraminal dimensions, contacting the respective exiting nerve roots.',
+          'Mild hypotrophy of the paravertebral musculature, predominating in the lumbosacral region.',
+        ]],
+      ],
+      reportPt: [
+        ['h', 'Ressonância magnética da coluna cervical'],
+        ['p', '<strong>Técnica:</strong> Estudo realizado com multiplanar em sequências ponderadas em T1, T2 e STIR, sem a administração de contraste endovenoso paramagnético.'],
+        ['h2', 'Descrição'],
+        ['p', 'Estruturas da junção crânio-vertebral sem anormalidades.'],
+        ['p', 'Desvio sinistro-convexo do eixo na posição do estudo.'],
+        ['p', 'Corpos vertebrais alinhados e com altura normal e osteófitos marginais.'],
+        ['p', 'Elementos posteriores íntegros. Artrose das uncovertebrais e das interapofisárias, mais evidente nos níveis cervicais inferiores, com espessamento difuso do ligamento amarelo.'],
+        ['p', 'Sinais de hipohidratação discal difusa predominando em C6–C7 onde se observa redução da altura discal.'],
+        ['p', 'Abaulamento discal discreto de C3–C4 e C4–C5 que retifica a face ventral do saco dural e reduz discretamente as amplitudes foraminais bilaterais.'],
+        ['p', 'Abaulamento disco-osteofitário difuso de C5–C6 que comprime a face ventral da medula, sem mielopatia, e reduz as amplitudes foraminais bilaterais tocando as respectivas emergentes.'],
+        ['p', 'Medula de morfologia e intensidade de sinal normais.'],
+        ['p', 'Discreta hipotrofia da musculatura paravertebral predominando na região lombossacra.'],
+        ['h2', 'Conclusão'],
+        ['ul', [
+          'Desvio sinistro-convexo do eixo na posição do estudo.',
+          'Osteófitos marginais.',
+          'Abaulamento discal discreto de C3–C4 e C4–C5 que retifica a face ventral do saco dural e reduz discretamente as amplitudes foraminais bilaterais.',
+          'Abaulamento disco-osteofitário difuso de C5–C6 que comprime a face ventral da medula, sem mielopatia, e reduz as amplitudes foraminais bilaterais tocando as respectivas emergentes.',
+          'Discreta hipotrofia da musculatura paravertebral predominando na região lombossacra.',
+        ]],
+      ],
+    },
+    {
+      slug: 'paulo-lombar-mri-2026-05-15',
+      titleEn: 'MRI · Lumbar spine · 15 May 2026',
+      titlePt: 'RM · Coluna lombar · 15 de maio de 2026',
+      reportEn: [
+        ['h', 'MRI of the lumbar spine'],
+        ['p', '<strong>Technique:</strong> Multiplanar study in T1, T2 and STIR weighted sequences, without paramagnetic intravenous contrast.'],
+        ['h2', 'Description'],
+        ['p', 'Sinistroconvex deviation of the axis in the position of study. Flattening of the physiological lumbar curvature.'],
+        ['p', 'Mild anterolisthesis of L3 over L4. Minimal retrolisthesis of L1 over L2.'],
+        ['p', 'Vertebral bodies with normal height and marginal osteophytes.'],
+        ['p', 'Diffuse disc dehydration and reduction in disc heights.'],
+        ['p', 'Degenerative discopathy at L1–L2, L2–L3 and L4–L5 with irregularity of the opposing endplates and Modic I (edema) signal changes at the three levels, and Modic II (fatty) at L4–L5.'],
+        ['p', 'Mild disc bulging at L1–L2 that flattens the ventral aspect of the dural sac and reduces the bilateral foraminal dimensions, notably on the left.'],
+        ['p', 'Diffuse disc bulging at L2–L3 that compresses the ventral aspect of the dural sac, contacts the anterior descending roots, and reduces the bilateral foraminal dimensions, with stenosis and compression of the exiting root on the left.'],
+        ['p', 'Diffuse disc pseudo-bulging at L3–L4 that compresses the ventral aspect of the dural sac and, combined with facet joint hypertrophy and ligamentum flavum thickening, produces spinal canal stenosis with compression of the anterior descending roots and bilateral reduction of foraminal dimensions, notably on the left, contacting the respective exiting root.'],
+        ['p', 'Diffuse disco-osteophytic bulging at L4–L5 with a protruding central disc component that compresses the ventral aspect of the dural sac, contacting the bilateral anterior descending roots, and reduces the foraminal dimensions, contacting the right exiting root.'],
+        ['p', 'Left paramedian / foraminal disc extrusion at L5–S1 which, combined with ipsilateral facet hypertrophy, compresses the ipsilateral S1 descending root.'],
+        ['p', 'Conus medullaris and cauda equina in normal topographic position, with normal morphology and signal intensity.'],
+        ['p', 'Moderate hypotrophy of the paravertebral musculature.'],
+        ['p', 'Edema of the interspinous ligament at L2–L3, L3–L4 and L5–S1.'],
+        ['h2', 'Conclusion'],
+        ['ul', [
+          'Sinistroconvex deviation of the axis in the position of study. Flattening of the physiological lumbar curvature. Mild anterolisthesis of L3 over L4. Minimal retrolisthesis of L1 over L2.',
+          'Diffuse multisegmental degenerative spondylodiscopathy as detailed above.',
+          'Edema of the interspinous ligament at L2–L3, L3–L4 and L5–S1.',
+          'Moderate hypotrophy of the paravertebral musculature.',
+        ]],
+      ],
+      reportPt: [
+        ['h', 'Ressonância magnética da coluna lombar'],
+        ['p', '<strong>Técnica:</strong> Estudo realizado com multiplanar em sequências ponderadas em T1, T2 e STIR, sem a administração de contraste endovenoso paramagnético.'],
+        ['h2', 'Descrição'],
+        ['p', 'Desvio sinistro-convexo do eixo na posição do estudo. Retificação da curvatura lombar fisiológica.'],
+        ['p', 'Anterolistese discreta de L3 sob L4. Mínima retrolistese de L1 sobre L2.'],
+        ['p', 'Corpos vertebrais com altura normal e osteófitos marginais.'],
+        ['p', 'Hipohidratação e redução difusa das alturas discais.'],
+        ['p', 'Discopatia degenerativa de L1–L2, L2–L3 e L4–L5 com irregularidade dos platôs apostos e alteração de sinal do tipo Modic I (edema) nos três níveis e Modic II (gordura) em L4–L5.'],
+        ['p', 'Abaulamento discal discreto de L1–L2 que retifica a face ventral do saco dural e reduz as amplitudes foraminais bilaterais, notadamente à esquerda.'],
+        ['p', 'Abaulamento discal difuso de L2–L3 que comprime a face ventral do saco dural, toca as descendentes anteriores e reduz as amplitudes foraminais bilaterais com estenose e compressão da emergente à esquerda.'],
+        ['p', 'Pseudo-abaulamento discal difuso de L3–L4 que comprime a face ventral do saco dural e, associado à hipertrofia das interfacetárias e espessamento dos ligamentos amarelos, determina estenose do canal vertebral, com compressão das descendentes anteriores e redução das amplitudes foraminais bilaterais, notadamente à esquerda, tocando a respectiva emergente.'],
+        ['p', 'Abaulamento disco-osteofitário difuso de L4–L5 com componente discal protruso na região central, que comprime a face ventral do saco dural, tocando as descendentes anteriores bilaterais e reduz as amplitudes foraminais tocando a emergente direita.'],
+        ['p', 'Extrusão discal paramediana / foraminal esquerda de L5–S1 que, associada à hipertrofia da facetária ipsilateral, comprime a respectiva descendente ipsilateral de S1.'],
+        ['p', 'Cone medular e cauda equina tópicos, de morfologia e intensidade de sinal normais.'],
+        ['p', 'Moderada hipotrofia da musculatura paravertebral.'],
+        ['p', 'Edema do ligamento interespinhoso de L2–L3, L3–L4 e L5–S1.'],
+        ['h2', 'Conclusão'],
+        ['ul', [
+          'Desvio sinistro-convexo do eixo na posição do estudo. Retificação da curvatura lombar fisiológica. Anterolistese discreta de L3 sob L4. Mínima retrolistese de L1 sobre L2.',
+          'Espondilodiscopatia degenerativa difusa e multissegmentar conforme pormenorizado acima.',
+          'Edema do ligamento interespinhoso de L2–L3, L3–L4 e L5–S1.',
+          'Moderada hipotrofia da musculatura paravertebral.',
+        ]],
+      ],
+    },
+  ];
+
+  function renderReportBlocks(blocks) {
+    return blocks.map(function (b) {
+      var kind = b[0], body = b[1];
+      if (kind === 'h')  return '<h3 class="paulo-mri-report-h">'  + body + '</h3>';
+      if (kind === 'h2') return '<h4 class="paulo-mri-report-h2">' + body + '</h4>';
+      if (kind === 'p')  return '<p>'  + body + '</p>';
+      if (kind === 'ul') return '<ul>' + body.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ul>';
+      return '';
+    }).join('');
+  }
+
+  function injectPauloStyles() {
+    if (document.getElementById('paulo-mri-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'paulo-mri-styles';
+    s.textContent = [
+      '.paulo-mri-stack { display: flex; flex-direction: column; gap: 18px; margin-bottom: 24px; }',
+      '.paulo-mri-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #244E6E; border-radius: 10px; padding: 18px 20px 20px; }',
+      '.paulo-mri-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin-bottom: 4px; }',
+      '.paulo-mri-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; margin: 0 0 4px; }',
+      '.paulo-mri-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      '.paulo-mri-viewer { background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 8px; padding: 12px 12px 16px; }',
+      '.paulo-mri-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }',
+      '.paulo-mri-tabs { display: inline-flex; gap: 4px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 6px; padding: 3px; }',
+      '.paulo-mri-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
+      '.paulo-mri-tab:hover { background: #F4F1EA; }',
+      '.paulo-mri-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
+      '.paulo-mri-counter { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #7A8FA6; letter-spacing: 0.04em; }',
+      '.paulo-mri-counter .paulo-mri-idx { color: #0D1B2A; font-weight: 500; }',
+      '.paulo-mri-stage { background: #000000; border-radius: 6px; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden; user-select: none; }',
+      '.paulo-mri-stage img { width: 100%; height: 100%; object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; cursor: ns-resize; display: block; }',
+      '.paulo-mri-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; margin-top: 14px; background: #DDD8CC; border-radius: 2px; outline: none; cursor: pointer; }',
+      '.paulo-mri-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #244E6E; border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(13,27,42,0.15); cursor: grab; transition: transform 0.1s; }',
+      '.paulo-mri-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.1); }',
+      '.paulo-mri-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #244E6E; border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(13,27,42,0.15); cursor: grab; }',
+      '.paulo-mri-report { margin-top: 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; padding: 12px 16px; }',
+      '.paulo-mri-report-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }',
+      '.paulo-mri-report-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
+      '.paulo-mri-report-download { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
+      '.paulo-mri-report-download:hover { background: #FFF6E5; }',
+      '.paulo-mri-report-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.55; color: #1E2D3D; }',
+      '.paulo-mri-report-body p { margin: 0 0 8px; }',
+      '.paulo-mri-report-body p:last-child { margin-bottom: 0; }',
+      '.paulo-mri-report-body ul { margin: 0 0 8px; padding-left: 22px; }',
+      '.paulo-mri-report-body li { margin-bottom: 6px; }',
+      '.paulo-mri-report-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0 0 10px; letter-spacing: 0; text-transform: none; }',
+      '.paulo-mri-report-h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #244E6E; margin: 12px 0 6px; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function buildPauloViewerCard(study, idx) {
+    var slug = study.slug;
+    var pdfHref = 'scans/' + slug + '-report.pdf';
+    var html =
+      '<section class="paulo-mri-card" data-paulo-mri="' + slug + '" data-idx="' + idx + '">' +
+        '<div class="paulo-mri-eyebrow">' + t('Imaging study', 'Estudo de imagem') + '</div>' +
+        '<h2 class="paulo-mri-title">' + t(study.titleEn, study.titlePt) + '</h2>' +
+        '<div class="paulo-mri-meta">' +
+          t('Dr. Marco Antonio de Carvalho · CRM-99607 · CETAM Diagnóstico',
+            'Dr. Marco Antonio de Carvalho · CRM-99607 · CETAM Diagnóstico') +
+        '</div>' +
+        '<div class="paulo-mri-viewer">' +
+          '<div class="paulo-mri-controls">' +
+            '<div class="paulo-mri-tabs" role="tablist">' +
+              '<button type="button" class="paulo-mri-tab" data-view="axi" aria-pressed="true">' +
+                t('Axial', 'Axial') +
+              '</button>' +
+              '<button type="button" class="paulo-mri-tab" data-view="cor" aria-pressed="false">' +
+                t('Coronal', 'Coronal') +
+              '</button>' +
+              '<button type="button" class="paulo-mri-tab" data-view="sag" aria-pressed="false">' +
+                t('Sagittal', 'Sagital') +
+              '</button>' +
+            '</div>' +
+            '<div class="paulo-mri-counter">' +
+              t('Slice ', 'Corte ') +
+              '<span class="paulo-mri-idx">1</span> / <span class="paulo-mri-total">1</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="paulo-mri-stage"><img alt="' + escapeHtml(study.titleEn) + '" loading="eager"></div>' +
+          '<input type="range" class="paulo-mri-slider" min="0" max="0" value="0" aria-label="' + escapeHtml(study.titleEn) + ' slice">' +
+        '</div>' +
+        '<div class="paulo-mri-report">' +
+          '<header class="paulo-mri-report-head">' +
+            '<h3 class="paulo-mri-report-title">' + t('Radiologist report', 'Laudo do radiologista') + '</h3>' +
+            '<a class="paulo-mri-report-download" href="' + pdfHref + '" download>' +
+              t('Export PDF', 'Exportar PDF') +
+            '</a>' +
+          '</header>' +
+          '<div class="paulo-mri-report-body">' +
+            '<div class="lang-en">' + renderReportBlocks(study.reportEn) + '</div>' +
+            '<div class="lang-pt">' + renderReportBlocks(study.reportPt) + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+    return html;
+  }
+
+  function wirePauloViewer(card, study) {
+    var manifestUrl = 'scans/' + study.slug + '-manifest.json';
+    var img    = card.querySelector('.paulo-mri-stage img');
+    var slider = card.querySelector('.paulo-mri-slider');
+    var idxEl  = card.querySelector('.paulo-mri-idx');
+    var totEl  = card.querySelector('.paulo-mri-total');
+    var stage  = card.querySelector('.paulo-mri-stage');
+    var tabs   = card.querySelectorAll('.paulo-mri-tab');
+
+    var state = { view: 'axi', files: [], cache: new Map() };
+    var manifest = null;
+    var PRELOAD = 6;
+
+    function urlFor(i) {
+      return 'scans/' + study.slug + '/' + state.view + '/' + state.files[i];
+    }
+
+    function setSlice(i) {
+      var max = state.files.length - 1;
+      if (max < 0) return;
+      i = Math.max(0, Math.min(max, i));
+      slider.value = i;
+      idxEl.textContent = String(i + 1);
+      img.src = urlFor(i);
+      for (var d = 1; d <= PRELOAD; d++) {
+        [i + d, i - d].forEach(function (n) {
+          if (n < 0 || n > max) return;
+          var key = state.view + ':' + n;
+          if (state.cache.has(key)) return;
+          var im = new Image();
+          im.src = urlFor(n);
+          state.cache.set(key, im);
+        });
+      }
+    }
+
+    function switchView(view) {
+      if (!manifest || !manifest[view] || manifest[view].length === 0) return;
+      state.view = view;
+      state.files = manifest[view];
+      var max = state.files.length - 1;
+      slider.max = String(max);
+      totEl.textContent = String(state.files.length);
+      Array.prototype.forEach.call(tabs, function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-view') === view ? 'true' : 'false');
+      });
+      setSlice(Math.floor(max / 2));
+    }
+
+    Array.prototype.forEach.call(tabs, function (b) {
+      b.addEventListener('click', function () {
+        switchView(b.getAttribute('data-view'));
+      });
+    });
+    slider.addEventListener('input', function (e) {
+      setSlice(parseInt(e.target.value, 10));
+    });
+    stage.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var step = Math.sign(e.deltaY) * (e.shiftKey ? 10 : 1);
+      setSlice(parseInt(slider.value, 10) + step);
+    }, { passive: false });
+
+    var dragging = false, startY = 0, startIdx = 0;
+    stage.addEventListener('pointerdown', function (e) {
+      dragging = true; startY = e.clientY; startIdx = parseInt(slider.value, 10);
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var delta = Math.round((startY - e.clientY) * 0.5);
+      setSlice(startIdx + delta);
+    });
+    stage.addEventListener('pointerup',     function () { dragging = false; });
+    stage.addEventListener('pointercancel', function () { dragging = false; });
+    slider.addEventListener('keydown', function (e) {
+      var cur = parseInt(slider.value, 10);
+      var max = state.files.length - 1;
+      if (e.key === 'PageUp')   { e.preventDefault(); setSlice(cur + 10); }
+      if (e.key === 'PageDown') { e.preventDefault(); setSlice(cur - 10); }
+      if (e.key === 'Home')     { e.preventDefault(); setSlice(0); }
+      if (e.key === 'End')      { e.preventDefault(); setSlice(max); }
+    });
+
+    fetch(manifestUrl)
+      .then(function (r) { return r.json(); })
+      .then(function (m) {
+        manifest = m;
+        switchView('axi');
+      })
+      .catch(function (err) {
+        console.error('Paulo MRI manifest failed', manifestUrl, err);
+      });
+  }
+
+  function maybeRenderPauloMRIs() {
+    if (patient !== PAULO_SILOTTO) return;
+    if (document.querySelector('.paulo-mri-stack')) return;
+
+    injectPauloStyles();
+    var shell = document.querySelector('.jc-overview .ov-shell') || document.querySelector('.jc-empty-shell');
+    if (!shell) return;
+
+    var stack = document.createElement('section');
+    stack.className = 'paulo-mri-stack';
+    stack.innerHTML = PAULO_MRIS.map(buildPauloViewerCard).join('');
+
+    // Slot beneath the patient header (jc-overview) or at the top of the
+    // empty shell (fallback).
+    var header = shell.querySelector('.ov-header');
+    if (header && header.nextSibling) shell.insertBefore(stack, header.nextSibling);
+    else if (header) shell.appendChild(stack);
+    else shell.insertBefore(stack, shell.firstChild);
+
+    PAULO_MRIS.forEach(function (study, i) {
+      var card = stack.children[i];
+      if (card) wirePauloViewer(card, study);
+    });
   }
 })();
