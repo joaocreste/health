@@ -339,14 +339,29 @@
 
   function renderLabBar(value, refLow, refHigh, status) {
     var hasNumericValue = (value != null && isFinite(value));
-    var hasRange = (refLow != null && refHigh != null && isFinite(refLow) && isFinite(refHigh) && refHigh > refLow);
-    if (!hasNumericValue || !hasRange) return '';
-    var pct = 10 + ((value - refLow) / (refHigh - refLow)) * 80;
+    var hasLow  = (refLow  != null && isFinite(refLow));
+    var hasHigh = (refHigh != null && isFinite(refHigh));
+    if (!hasNumericValue || (!hasLow && !hasHigh)) return '';
+
+    // Synthesize the missing bound so one-sided refs still get a bar.
+    // Upper-only ("< high"): assume lower bound = 0 (typical for lab markers).
+    // Lower-only ("> low"):  assume upper bound = max(low * 2, value * 1.2).
+    var lo = hasLow  ? refLow  : 0;
+    var hi = hasHigh ? refHigh : Math.max(refLow * 2, value * 1.2, refLow + 1);
+    if (hi <= lo) return '';
+
+    var pct = 10 + ((value - lo) / (hi - lo)) * 80;
     if (pct < 0)   pct = 0;
     if (pct > 100) pct = 100;
     var markerCls = (status === 'flag') ? 'lab-bar-marker-flag'
                   : (status === 'watch') ? 'lab-bar-marker-watch'
                   : 'lab-bar-marker-normal';
+    var leftLabel  = hasLow
+      ? '<span>min ' + escapeHtml(fmtLabNum(refLow))  + '</span>'
+      : '<span></span>';
+    var rightLabel = hasHigh
+      ? '<span>max ' + escapeHtml(fmtLabNum(refHigh)) + '</span>'
+      : '<span></span>';
     return (
       '<div class="lab-bar-wrap">' +
         '<div class="lab-bar">' +
@@ -358,10 +373,7 @@
             '<div class="lab-bar-dot"></div>' +
           '</div>' +
         '</div>' +
-        '<div class="lab-bar-labels">' +
-          '<span>min ' + escapeHtml(fmtLabNum(refLow))  + '</span>' +
-          '<span>max ' + escapeHtml(fmtLabNum(refHigh)) + '</span>' +
-        '</div>' +
+        '<div class="lab-bar-labels">' + leftLabel + rightLabel + '</div>' +
       '</div>'
     );
   }
