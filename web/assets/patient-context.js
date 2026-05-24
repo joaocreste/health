@@ -1480,6 +1480,11 @@
       : (SECTION_LABEL[dashSection] || escapeHtml(dashSection)) + ' · ' + t('AI-authored', 'escrito pela IA');
     var cards = (record && Array.isArray(record.cards)) ? record.cards : [];
     var hasCards = cards.length > 0;
+    // Build affordances ("Refresh" / "Build cards" / "Build all sections")
+    // and the empty-state "click Build cards to…" prompt are removed for
+    // now while the ingestion is being reworked. The cards themselves
+    // still render when they exist in patient_dashboards.
+    if (!hasCards) return ''; // nothing to show
     var nCards = cards.length;
     var cardsCountHtml = nCards + ' ' + t(nCards === 1 ? 'card' : 'cards', nCards === 1 ? 'cartão' : 'cartões');
     var meta = (record && record.generated_at)
@@ -1489,35 +1494,15 @@
           ' · ' + cardsCountHtml +
         '</div>'
       : '';
-    var refreshLabelHtml = hasCards
-      ? t('Refresh', 'Atualizar')
-      : t('Build cards', 'Gerar cartões');
-    var allBtn = isHome
-      ? '<button type="button" class="btn btn-gold dash-build-all-btn" data-sections="' +
-        DASHBOARD_SECTIONS.join(',') + '">' + t('Build all sections', 'Gerar todas as seções') + '</button>'
-      : '';
-    var cardsHtml = hasCards
-      ? cards.map(function (c) {
-          var fn = CARD_RENDERERS[c.kind];
-          return fn ? fn(c) : '';
-        }).join('')
-      : '<section class="ov-card ov-card-empty">' +
-          '<p>' +
-            t('No AI-authored cards yet for this section. Click <strong>' + (hasCards ? 'Refresh' : 'Build cards') +
-              '</strong> to have Claude read the patient\'s data and propose a card layout tailored to it.',
-              'Nenhum cartão escrito pela IA ainda para esta seção. Clique em <strong>' + (hasCards ? 'Atualizar' : 'Gerar cartões') +
-              '</strong> para que o Claude leia os dados do paciente e proponha um layout de cartões personalizado.') +
-          '</p>' +
-        '</section>';
+    var cardsHtml = cards.map(function (c) {
+      var fn = CARD_RENDERERS[c.kind];
+      return fn ? fn(c) : '';
+    }).join('');
     return (
       '<div class="ov-cards" data-dash-section="' + escapeHtml(dashSection) + '">' +
         '<header class="ov-cards-head">' +
           '<div class="ov-cards-head-left">' +
             '<h2>' + titleHtml + ' <span class="ai-pill">AI</span></h2>' + meta +
-          '</div>' +
-          '<div class="ov-cards-head-actions">' + allBtn +
-            '<button type="button" class="btn btn-ghost dash-build-btn" data-section="' + escapeHtml(dashSection) + '">' +
-              refreshLabelHtml + '</button>' +
           '</div>' +
         '</header>' +
         '<div class="ov-cards-stack">' + cardsHtml + '</div>' +
@@ -1557,12 +1542,13 @@
   }
 
   function injectDashboardCard(dashSection, record, opts) {
+    var html = dashboardCardHtml(dashSection, record, opts);
+    if (!html) return; // empty when there are no AI cards yet — skip the wrapper
     var target = findInsertionTarget(opts);
     if (!target) return;
     // Remove any prior dashboard card for this section (defensive)
     var prior = target.querySelector('[data-dash-section="' + dashSection + '"]');
     if (prior) prior.remove();
-    var html = dashboardCardHtml(dashSection, record, opts);
     if (opts && opts.isHome) {
       target.insertAdjacentHTML('beforeend', html);
     } else {
@@ -1570,7 +1556,6 @@
       if (header) header.insertAdjacentHTML('afterend', html);
       else target.insertAdjacentHTML('afterbegin', html);
     }
-    wireDashboardButtons();
   }
 
   function wireDashboardButtons() {
