@@ -116,7 +116,11 @@
     var kids = document.body.children;
     for (var i = 0; i < kids.length; i++) {
       var el = kids[i];
-      if (el.tagName === 'NAV' || el.tagName === 'HEADER' || el.tagName === 'SCRIPT' ||
+      // Keep <nav> (the top bar) and <script>; explicitly hide
+      // <header class="page-header"> because it hardcodes Joao's hero
+      // copy on the static pages and would leak through for every
+      // other patient.
+      if (el.tagName === 'NAV' || el.tagName === 'SCRIPT' ||
           el.classList.contains('jc-empty-shell') ||
           el.classList.contains('jc-overview') ||
           el.classList.contains('jc-exams') ||
