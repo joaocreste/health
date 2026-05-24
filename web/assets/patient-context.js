@@ -119,7 +119,9 @@
           el.classList.contains('jc-empty-shell') ||
           el.classList.contains('jc-overview') ||
           el.classList.contains('jc-exams') ||
-          el.classList.contains('jc-home')) continue;
+          el.classList.contains('jc-home') ||
+          el.classList.contains('jc-danger-zone') ||
+          el.classList.contains('jc-danger-backdrop')) continue;
       el.style.display = 'none';
     }
   }
@@ -907,6 +909,26 @@
       // Flagged cells in the historical-comparison table
       '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
       '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
+      // Danger zone (Delete my health data)
+      '.jc-danger-zone { max-width: 1080px; margin: 32px auto; padding: 0 24px; }',
+      '.jc-danger-card { background: #FFFFFF; border: 1px solid #E5B5AB; border-radius: 10px; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }',
+      '.jc-danger-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A2E22; }',
+      '.jc-danger-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 0; }',
+      '.jc-danger-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; line-height: 1.5; margin: 0; }',
+      '.jc-danger-btn { align-self: flex-start; padding: 8px 16px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; color: #7A2E22; background: #FFFFFF; border: 1px solid #E5B5AB; border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s; }',
+      '.jc-danger-btn:hover { background: #7A2E22; color: #FFFFFF; }',
+      '.jc-danger-backdrop { position: fixed; inset: 0; background: rgba(13, 27, 42, 0.55); display: none; align-items: center; justify-content: center; z-index: 200; }',
+      '.jc-danger-backdrop.open { display: flex; }',
+      '.jc-danger-modal { background: #FFFFFF; border-radius: 12px; padding: 28px 32px; min-width: 360px; max-width: 480px; box-shadow: 0 24px 60px rgba(13, 27, 42, 0.4); display: flex; flex-direction: column; gap: 14px; }',
+      '.jc-danger-modal h3 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 16px; color: #0D1B2A; margin: 0; }',
+      '.jc-danger-modal p { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; line-height: 1.55; margin: 0; }',
+      '.jc-danger-modal input { font-family: "IBM Plex Mono", monospace; font-size: 14px; padding: 8px 12px; border: 1px solid #DDD8CC; border-radius: 6px; color: #0D1B2A; }',
+      '.jc-danger-modal input:focus { outline: 2px solid #B8954A; outline-offset: 1px; border-color: #B8954A; }',
+      '.jc-danger-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }',
+      '.jc-danger-modal-actions button { padding: 8px 16px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; border: 1px solid #DDD8CC; background: #FFFFFF; color: #0D1B2A; }',
+      '.jc-danger-modal-actions button.jc-danger-go { color: #FFFFFF; background: #7A2E22; border-color: #7A2E22; }',
+      '.jc-danger-modal-actions button.jc-danger-go:disabled { opacity: 0.4; cursor: not-allowed; }',
+      '.jc-danger-error { color: #7A2E22; font-size: 12px; font-family: "IBM Plex Mono", monospace; }',
       '.ov-chart-wrap { margin-top: 6px; }',
       '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
       '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',
@@ -933,6 +955,95 @@
     document.head.appendChild(s);
   }
 
+  function injectDangerZone() {
+    if (document.querySelector('.jc-danger-zone')) return;
+    var zone = document.createElement('section');
+    zone.className = 'jc-danger-zone';
+    zone.innerHTML =
+      '<div class="jc-danger-card">' +
+        '<div class="jc-danger-eyebrow">' + t('Danger zone', 'Zona de risco') + '</div>' +
+        '<h3 class="jc-danger-title">' + t('Delete my health data', 'Excluir meus dados de saúde') + '</h3>' +
+        '<p class="jc-danger-body">' +
+          t('Wipes every exam, lab result, vital reading, mental-health entry, document and AI summary attached to this account. Your login stays — you can start over from a blank state. This cannot be undone.',
+            'Apaga todo exame, resultado de laboratório, vital, registro de saúde mental, documento e resumo da IA vinculado a esta conta. Seu acesso permanece — você pode recomeçar do zero. Esta ação não pode ser desfeita.') +
+        '</p>' +
+        '<button type="button" class="jc-danger-btn">' +
+          t('Delete my health data', 'Excluir meus dados de saúde') +
+        '</button>' +
+      '</div>';
+    var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
+    if (footer && footer.parentNode) footer.parentNode.insertBefore(zone, footer);
+    else document.body.appendChild(zone);
+    zone.querySelector('.jc-danger-btn').addEventListener('click', openDangerModal);
+  }
+
+  function openDangerModal() {
+    var existing = document.querySelector('.jc-danger-backdrop');
+    if (existing) { existing.classList.add('open'); return; }
+    var bd = document.createElement('div');
+    bd.className = 'jc-danger-backdrop';
+    bd.innerHTML =
+      '<div class="jc-danger-modal" role="dialog" aria-modal="true">' +
+        '<h3>' + t('Delete my health data?', 'Excluir meus dados de saúde?') + '</h3>' +
+        '<p>' +
+          t('This will permanently delete every exam, lab result, document, vital, mental-health entry and AI summary on this account. Your username and password stay intact. This action cannot be undone.',
+            'Isto apagará permanentemente todo exame, resultado, documento, vital, registro de saúde mental e resumo da IA desta conta. Seu usuário e senha permanecem intactos. Esta ação não pode ser desfeita.') +
+        '</p>' +
+        '<p>' + t('Type <strong>DELETE</strong> to confirm:', 'Digite <strong>DELETE</strong> para confirmar:') + '</p>' +
+        '<input type="text" class="jc-danger-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+        '<div class="jc-danger-error" style="display:none;"></div>' +
+        '<div class="jc-danger-modal-actions">' +
+          '<button type="button" class="jc-danger-cancel">' + t('Cancel', 'Cancelar') + '</button>' +
+          '<button type="button" class="jc-danger-go" disabled>' +
+            t('Delete everything', 'Apagar tudo') +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(bd);
+    var input  = bd.querySelector('.jc-danger-input');
+    var goBtn  = bd.querySelector('.jc-danger-go');
+    var cancel = bd.querySelector('.jc-danger-cancel');
+    var errEl  = bd.querySelector('.jc-danger-error');
+    input.addEventListener('input', function () {
+      goBtn.disabled = (input.value.trim().toUpperCase() !== 'DELETE');
+    });
+    cancel.addEventListener('click', function () { bd.remove(); });
+    bd.addEventListener('click', function (e) { if (e.target === bd) bd.remove(); });
+    goBtn.addEventListener('click', async function () {
+      goBtn.disabled = true; cancel.disabled = true;
+      goBtn.textContent = tPlain('Deleting…', 'Apagando…');
+      errEl.style.display = 'none';
+      try {
+        var resp = await fetch('/api/patient-wipe-data', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Viewer-Clerk': viewerClerkHeader(),
+          },
+          body: JSON.stringify({ patient_clerk: patient }),
+        });
+        var body = await resp.json().catch(function () { return null; });
+        if (!resp.ok || !body || !body.ok) {
+          var msg = (body && body.error) ? body.error : ('HTTP ' + resp.status);
+          throw new Error(msg);
+        }
+        // Force a hard reload so every cached view rebuilds from a blank
+        // state. Append a cache-buster to the URL so the browser drops
+        // any stale JSON.
+        var url = new URL(location.href);
+        url.searchParams.set('wiped', String(Date.now()));
+        location.replace(url.toString());
+      } catch (e) {
+        errEl.textContent = (tPlain('Failed: ', 'Falhou: ') + (e.message || e));
+        errEl.style.display = 'block';
+        goBtn.textContent = tPlain('Delete everything', 'Apagar tudo');
+        goBtn.disabled = false;
+        cancel.disabled = false;
+      }
+    });
+    setTimeout(function () { bd.classList.add('open'); input.focus(); }, 0);
+  }
+
   function ready(fn) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', fn);
@@ -943,6 +1054,11 @@
 
   ready(function () {
     injectChangeButton();
+    // Danger zone goes on every home page, including Patient Zero's.
+    if (currentSection() === 'home') {
+      injectStyles();
+      injectDangerZone();
+    }
     if (patient === PATIENT_ZERO) return;
 
     injectStyles();

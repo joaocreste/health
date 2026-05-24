@@ -431,6 +431,146 @@ async function handlePatientDashboardBuild(request, env) {
   }
 }
 
+/* POST /api/patient-wipe-data — body: { patient_clerk }
+   Header: X-Viewer-Clerk (must match patient OR be an admin).
+
+   Deletes every health-data row for the patient AND every R2 object
+   attached to them. Leaves users / patient_profiles / patient_access
+   intact — the account, the password, and the doctor-access list
+   survive so the patient can start fresh without re-registering.
+
+   Patterned on /api/admin/patients/delete; the only intentional
+   difference is skipping the final DELETE FROM users. */
+async function handlePatientWipeData(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient_clerk || "").trim();
+  if (!patientClerk) return jsonError(400, "patient_clerk_required");
+
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  if (!viewerClerk) return jsonError(401, "viewer_required");
+
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const [patientRows, viewerRows] = await Promise.all([
+      sql`SELECT id, full_name FROM users
+            WHERE clerk_user_id = ${patientClerk} AND role = 'patient' AND archived_at IS NULL
+            LIMIT 1`,
+      sql`SELECT id, role FROM users
+            WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL
+            LIMIT 1`,
+    ]);
+    if (patientRows.length === 0) return jsonError(404, "patient_not_found");
+    if (viewerRows.length === 0) return jsonError(401, "viewer_not_found");
+    const isSelf  = viewerRows[0].id === patientRows[0].id;
+    const isAdmin = viewerRows[0].role === "admin";
+    if (!isSelf && !isAdmin) return jsonError(403, "forbidden");
+    const patientId = patientRows[0].id;
+
+    // 1. Collect every R2 key attached to this patient.
+    const keyQuery = await sql`
+      SELECT blob_key AS k FROM documents      WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM lab_results        WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT blob_key       FROM writings            WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+      UNION
+      SELECT if_.blob_key   FROM import_files if_
+        JOIN imports i ON i.id = if_.import_id
+        WHERE i.patient_id = ${patientId} AND if_.blob_key IS NOT NULL
+      UNION
+      SELECT blob_key       FROM ecg_events         WHERE patient_id = ${patientId} AND blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM clinical_history  WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM encounters        WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM injuries          WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM life_events       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM medications       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM panic_events      WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM pgx_findings      WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM prescriptions     WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM risk_assessments  WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM supplements       WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT source_blob_key FROM surgeries         WHERE patient_id = ${patientId} AND source_blob_key IS NOT NULL
+      UNION
+      SELECT manifest_blob_key FROM imaging_studies WHERE patient_id = ${patientId} AND manifest_blob_key IS NOT NULL
+      UNION
+      SELECT report_blob_key   FROM imaging_studies WHERE patient_id = ${patientId} AND report_blob_key   IS NOT NULL
+    `;
+    const prefixQuery = await sql`
+      SELECT DISTINCT blob_prefix FROM imaging_studies
+      WHERE patient_id = ${patientId} AND blob_prefix IS NOT NULL
+    `;
+    const keys = new Set(keyQuery.map((r) => r.k).filter(Boolean));
+
+    let r2Errors = 0;
+    if (env.R2_BUCKET) {
+      for (const row of prefixQuery) {
+        let cursor;
+        do {
+          const listed = await env.R2_BUCKET.list({ prefix: row.blob_prefix, cursor });
+          (listed.objects || []).forEach((obj) => keys.add(obj.key));
+          cursor = listed.truncated ? listed.cursor : undefined;
+        } while (cursor);
+      }
+      const keyArr = Array.from(keys);
+      for (let i = 0; i < keyArr.length; i += 1000) {
+        try { await env.R2_BUCKET.delete(keyArr.slice(i, i + 1000)); }
+        catch { r2Errors++; }
+      }
+    }
+
+    // 2. DELETE every patient-owned row from every health-data table.
+    // Cascade FKs handle child tables (patient_dashboards → cards,
+    // imports → import_files, psych_items → psych_evidence,
+    // medications → taper_history).
+    await sql`DELETE FROM lab_results              WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM vitals_daily             WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM glucose_points           WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM imaging_studies          WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM writings                 WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM documents                WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM wheel_of_life_assessments WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM medications              WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM supplements              WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM surgeries                WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM injuries                 WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM clinical_history         WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM risk_assessments         WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM psych_items              WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM mood_entries             WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM panic_events             WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM encounters               WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM prescriptions            WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM ecg_events               WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM pgx_findings             WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM life_events              WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM patient_dashboards       WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM imports                  WHERE patient_id = ${patientId}`;
+
+    return new Response(JSON.stringify({
+      ok: true,
+      patient: { clerk_user_id: patientClerk, full_name: patientRows[0].full_name },
+      r2_objects: keys.size,
+      r2_delete_errors: r2Errors,
+    }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+  } catch (e) {
+    return jsonError(500, `Wipe failed: ${e.message}`);
+  }
+}
+
 async function handlePatients(request, env) {
   if (!env.DATABASE_URL) {
     return jsonError(500, "DATABASE_URL not configured.");
@@ -1037,6 +1177,9 @@ export default {
     }
     if (url.pathname === "/api/patient-dashboard-build") {
       return handlePatientDashboardBuild(request, env);
+    }
+    if (url.pathname === "/api/patient-wipe-data") {
+      return handlePatientWipeData(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
