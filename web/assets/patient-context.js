@@ -121,6 +121,7 @@
           el.classList.contains('jc-overview') ||
           el.classList.contains('jc-exams') ||
           el.classList.contains('jc-home') ||
+          el.classList.contains('jc-paulo-exams') ||
           el.classList.contains('jc-danger-zone') ||
           el.classList.contains('jc-danger-backdrop')) continue;
       el.style.display = 'none';
@@ -1097,10 +1098,14 @@
     }
 
     if (section === 'physical-exams') {
+      if (patient === PAULO_SILOTTO) {
+        renderPauloPhysicalExams();
+        return;
+      }
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (e) { renderExams(e); maybeRenderPauloMRIs(); decorateWithDashboard('physical'); })
-        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); maybeRenderPauloMRIs(); });
+        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
+        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); });
       return;
     }
 
@@ -1660,228 +1665,273 @@
     setTimeout(function () { location.reload(); }, 700);
   }
 
-  /* ── Paulo Silotto · bespoke MRI viewer ─────────────────────────────
+  /* ── Paulo Silotto · bespoke physical-exams page ────────────────────
      Two manually-curated DICOM exports (cervical + lumbar MRI, 15 May
-     2026, Dr. Marco Antonio de Carvalho, CETAM Diagnóstico). Each
-     viewer carries three orientations (AXI / COR / SAG) populated from
-     a per-orientation manifest, a slider scrubber over the slices,
-     and the radiologist's report — original Portuguese with English
-     translation, toggled by the top-level language switch. */
+     2026, Dr. Marco Antonio de Carvalho, CETAM Diagnóstico). The page
+     is rendered structurally to mirror Patient Zero's static
+     physical-exams.html: a hero header, then per-exam `.imagery-exam`
+     blocks with a `.ct-viewer`, AXI/COR/SAG view toggle, slider, and a
+     full radiologist's report — Portuguese original with English
+     translation, swapped by the top-bar language buttons. */
 
-  var PAULO_MRIS = [
+  /* ── Full Paulo physical-exams page ─────────────────────────────────
+     Bypasses /api/patient-exams and renders a structured page that
+     reuses Patient Zero's CSS classes (.report-section, .imagery-exam,
+     .section-label, .section-title, .section-desc, .ct-grid,
+     .ct-viewer, .ct-stage, .ct-img, .ct-slider, .list-card, .alert,
+     .export-btn-primary, .report-export-row). Marked .jc-paulo-exams
+     so hidePageBody keeps it visible while the static-page content
+     gets dimmed. */
+
+  var PAULO_STUDIES = [
     {
       slug: 'paulo-cervical-mri-2026-05-15',
-      titleEn: 'MRI · Cervical spine · 15 May 2026',
-      titlePt: 'RM · Coluna cervical · 15 de maio de 2026',
-      reportEn: [
-        ['h', 'MRI of the cervical spine'],
-        ['p', '<strong>Technique:</strong> Multiplanar study in T1, T2 and STIR weighted sequences, without paramagnetic intravenous contrast.'],
-        ['h2', 'Description'],
-        ['p', 'Cranio-vertebral junction structures without abnormalities.'],
-        ['p', 'Sinistroconvex deviation of the axis in the position of study.'],
-        ['p', 'Vertebral bodies aligned, with normal height and marginal osteophytes.'],
-        ['p', 'Posterior elements intact. Arthrosis of the uncovertebral and facet joints, more evident at the lower cervical levels, with diffuse thickening of the ligamentum flavum.'],
-        ['p', 'Signs of diffuse disc dehydration predominating at C6–C7, where reduced disc height is observed.'],
-        ['p', 'Mild disc bulging at C3–C4 and C4–C5 that flattens the ventral aspect of the dural sac and mildly reduces the bilateral foraminal dimensions.'],
-        ['p', 'Diffuse disco-osteophytic bulging at C5–C6 that compresses the ventral aspect of the spinal cord, without myelopathy, and reduces the bilateral foraminal dimensions, contacting the respective exiting nerve roots.'],
-        ['p', 'Spinal cord with normal morphology and signal intensity.'],
-        ['p', 'Mild hypotrophy of the paravertebral musculature, predominating in the lumbosacral region.'],
-        ['h2', 'Conclusion'],
-        ['ul', [
-          'Sinistroconvex deviation of the axis in the position of study.',
-          'Marginal osteophytes.',
-          'Mild disc bulging at C3–C4 and C4–C5 that flattens the ventral aspect of the dural sac and mildly reduces the bilateral foraminal dimensions.',
-          'Diffuse disco-osteophytic bulging at C5–C6 that compresses the ventral aspect of the spinal cord, without myelopathy, and reduces the bilateral foraminal dimensions, contacting the respective exiting nerve roots.',
-          'Mild hypotrophy of the paravertebral musculature, predominating in the lumbosacral region.',
-        ]],
+      labelEn: '09A · MRI · Cervical spine',
+      labelPt: '09A · RM · Coluna cervical',
+      titleEn: 'MRI cervical spine · 15 May 2026',
+      titlePt: 'RM da coluna cervical · 15 de maio de 2026',
+      blurbEn: 'MRI of the cervical spine without intravenous contrast, multi-planar T1, T2 and STIR sequences. Three orientations were acquired — axial (60 slices), coronal (24) and sagittal (93). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
+      blurbPt: 'Ressonância da coluna cervical sem contraste endovenoso, sequências multiplanares em T1, T2 e STIR. Três orientações adquiridas — axial (60 cortes), coronal (24) e sagital (93). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
+      pdfHref: 'scans/paulo-cervical-mri-2026-05-15-report.pdf',
+      pdfLabelEn: 'Export cervical MRI report (PDF)',
+      pdfLabelPt: 'Exportar laudo da RM cervical (PDF)',
+      identsEn: [
+        '<strong>Patient.</strong> Paulo Augusto Silotto Dias de Souza',
+        '<strong>DOB.</strong> 14 July 1961',
+        '<strong>Exam date.</strong> 15 May 2026',
+        '<strong>Exam.</strong> MRI cervical spine',
+        '<strong>Accession.</strong> 5463652',
+        '<strong>Reporting physician.</strong> Dr. Marco Antonio de Carvalho · CRM-99607',
+        '<strong>Provider.</strong> CETAM Diagnóstico',
+        '<strong>Insurance.</strong> Bradesco Saúde',
       ],
-      reportPt: [
-        ['h', 'Ressonância magnética da coluna cervical'],
-        ['p', '<strong>Técnica:</strong> Estudo realizado com multiplanar em sequências ponderadas em T1, T2 e STIR, sem a administração de contraste endovenoso paramagnético.'],
-        ['h2', 'Descrição'],
-        ['p', 'Estruturas da junção crânio-vertebral sem anormalidades.'],
-        ['p', 'Desvio sinistro-convexo do eixo na posição do estudo.'],
-        ['p', 'Corpos vertebrais alinhados e com altura normal e osteófitos marginais.'],
-        ['p', 'Elementos posteriores íntegros. Artrose das uncovertebrais e das interapofisárias, mais evidente nos níveis cervicais inferiores, com espessamento difuso do ligamento amarelo.'],
-        ['p', 'Sinais de hipohidratação discal difusa predominando em C6–C7 onde se observa redução da altura discal.'],
-        ['p', 'Abaulamento discal discreto de C3–C4 e C4–C5 que retifica a face ventral do saco dural e reduz discretamente as amplitudes foraminais bilaterais.'],
-        ['p', 'Abaulamento disco-osteofitário difuso de C5–C6 que comprime a face ventral da medula, sem mielopatia, e reduz as amplitudes foraminais bilaterais tocando as respectivas emergentes.'],
-        ['p', 'Medula de morfologia e intensidade de sinal normais.'],
-        ['p', 'Discreta hipotrofia da musculatura paravertebral predominando na região lombossacra.'],
-        ['h2', 'Conclusão'],
-        ['ul', [
-          'Desvio sinistro-convexo do eixo na posição do estudo.',
-          'Osteófitos marginais.',
-          'Abaulamento discal discreto de C3–C4 e C4–C5 que retifica a face ventral do saco dural e reduz discretamente as amplitudes foraminais bilaterais.',
-          'Abaulamento disco-osteofitário difuso de C5–C6 que comprime a face ventral da medula, sem mielopatia, e reduz as amplitudes foraminais bilaterais tocando as respectivas emergentes.',
-          'Discreta hipotrofia da musculatura paravertebral predominando na região lombossacra.',
-        ]],
+      identsPt: [
+        '<strong>Paciente.</strong> Paulo Augusto Silotto Dias de Souza',
+        '<strong>Data de nascimento.</strong> 14 de julho de 1961',
+        '<strong>Data do exame.</strong> 15 de maio de 2026',
+        '<strong>Exame.</strong> RM da coluna cervical',
+        '<strong>Identificador.</strong> 5463652',
+        '<strong>Médico responsável.</strong> Dr. Marco Antonio de Carvalho · CRM-99607',
+        '<strong>Prestador.</strong> CETAM Diagnóstico',
+        '<strong>Convênio.</strong> Bradesco Saúde',
       ],
+      techniqueEn: [
+        'Multi-planar acquisition in T1, T2 and STIR weighted sequences.',
+        'No paramagnetic intravenous contrast administered.',
+      ],
+      techniquePt: [
+        'Aquisição multiplanar em sequências ponderadas em T1, T2 e STIR.',
+        'Sem administração de contraste endovenoso paramagnético.',
+      ],
+      findingsEn: [
+        'Cranio-vertebral junction structures without abnormalities.',
+        'Sinistroconvex deviation of the axis in the position of study.',
+        'Vertebral bodies aligned, with normal height and marginal osteophytes.',
+        'Posterior elements intact. Arthrosis of the uncovertebral and facet joints, more evident at the lower cervical levels, with diffuse thickening of the ligamentum flavum.',
+        'Signs of diffuse disc dehydration predominating at <strong>C6–C7</strong>, where reduced disc height is observed.',
+        'Mild disc bulging at <strong>C3–C4 and C4–C5</strong> that flattens the ventral aspect of the dural sac and mildly reduces the bilateral foraminal dimensions.',
+        'Diffuse disco-osteophytic bulging at <strong>C5–C6</strong> that compresses the ventral aspect of the spinal cord, without myelopathy, and reduces the bilateral foraminal dimensions, contacting the respective exiting nerve roots.',
+        'Spinal cord with normal morphology and signal intensity.',
+        'Mild hypotrophy of the paravertebral musculature, predominating in the lumbosacral region.',
+      ],
+      findingsPt: [
+        'Estruturas da junção crânio-vertebral sem anormalidades.',
+        'Desvio sinistro-convexo do eixo na posição do estudo.',
+        'Corpos vertebrais alinhados, com altura normal e osteófitos marginais.',
+        'Elementos posteriores íntegros. Artrose das uncovertebrais e interapofisárias, mais evidente nos níveis cervicais inferiores, com espessamento difuso do ligamento amarelo.',
+        'Sinais de hipohidratação discal difusa predominando em <strong>C6–C7</strong>, onde se observa redução da altura discal.',
+        'Abaulamento discal discreto de <strong>C3–C4 e C4–C5</strong> que retifica a face ventral do saco dural e reduz discretamente as amplitudes foraminais bilaterais.',
+        'Abaulamento disco-osteofitário difuso de <strong>C5–C6</strong> que comprime a face ventral da medula, sem mielopatia, e reduz as amplitudes foraminais bilaterais tocando as respectivas emergentes.',
+        'Medula de morfologia e intensidade de sinal normais.',
+        'Discreta hipotrofia da musculatura paravertebral predominando na região lombossacra.',
+      ],
+      conclusionEn: '<strong>Impression:</strong> Multilevel cervical degenerative change. Mild C3–C4 and C4–C5 disc bulging with shallow bilateral foraminal narrowing. <strong>Diffuse C5–C6 disco-osteophytic bulging with ventral cord compression — no myelopathy</strong> — and bilateral foraminal narrowing contacting both exiting roots. Sinistroconvex deviation of the cervical axis and mild paravertebral muscle hypotrophy.',
+      conclusionPt: '<strong>Conclusão:</strong> Alterações degenerativas cervicais multinivelares. Abaulamento discal discreto em C3–C4 e C4–C5 com redução foraminal bilateral. <strong>Abaulamento disco-osteofitário difuso em C5–C6 com compressão ventral da medula — sem mielopatia</strong> — e redução foraminal bilateral tocando ambas as emergentes. Desvio sinistro-convexo do eixo cervical e hipotrofia discreta da musculatura paravertebral.',
     },
     {
       slug: 'paulo-lombar-mri-2026-05-15',
-      titleEn: 'MRI · Lumbar spine · 15 May 2026',
-      titlePt: 'RM · Coluna lombar · 15 de maio de 2026',
-      reportEn: [
-        ['h', 'MRI of the lumbar spine'],
-        ['p', '<strong>Technique:</strong> Multiplanar study in T1, T2 and STIR weighted sequences, without paramagnetic intravenous contrast.'],
-        ['h2', 'Description'],
-        ['p', 'Sinistroconvex deviation of the axis in the position of study. Flattening of the physiological lumbar curvature.'],
-        ['p', 'Mild anterolisthesis of L3 over L4. Minimal retrolisthesis of L1 over L2.'],
-        ['p', 'Vertebral bodies with normal height and marginal osteophytes.'],
-        ['p', 'Diffuse disc dehydration and reduction in disc heights.'],
-        ['p', 'Degenerative discopathy at L1–L2, L2–L3 and L4–L5 with irregularity of the opposing endplates and Modic I (edema) signal changes at the three levels, and Modic II (fatty) at L4–L5.'],
-        ['p', 'Mild disc bulging at L1–L2 that flattens the ventral aspect of the dural sac and reduces the bilateral foraminal dimensions, notably on the left.'],
-        ['p', 'Diffuse disc bulging at L2–L3 that compresses the ventral aspect of the dural sac, contacts the anterior descending roots, and reduces the bilateral foraminal dimensions, with stenosis and compression of the exiting root on the left.'],
-        ['p', 'Diffuse disc pseudo-bulging at L3–L4 that compresses the ventral aspect of the dural sac and, combined with facet joint hypertrophy and ligamentum flavum thickening, produces spinal canal stenosis with compression of the anterior descending roots and bilateral reduction of foraminal dimensions, notably on the left, contacting the respective exiting root.'],
-        ['p', 'Diffuse disco-osteophytic bulging at L4–L5 with a protruding central disc component that compresses the ventral aspect of the dural sac, contacting the bilateral anterior descending roots, and reduces the foraminal dimensions, contacting the right exiting root.'],
-        ['p', 'Left paramedian / foraminal disc extrusion at L5–S1 which, combined with ipsilateral facet hypertrophy, compresses the ipsilateral S1 descending root.'],
-        ['p', 'Conus medullaris and cauda equina in normal topographic position, with normal morphology and signal intensity.'],
-        ['p', 'Moderate hypotrophy of the paravertebral musculature.'],
-        ['p', 'Edema of the interspinous ligament at L2–L3, L3–L4 and L5–S1.'],
-        ['h2', 'Conclusion'],
-        ['ul', [
-          'Sinistroconvex deviation of the axis in the position of study. Flattening of the physiological lumbar curvature. Mild anterolisthesis of L3 over L4. Minimal retrolisthesis of L1 over L2.',
-          'Diffuse multisegmental degenerative spondylodiscopathy as detailed above.',
-          'Edema of the interspinous ligament at L2–L3, L3–L4 and L5–S1.',
-          'Moderate hypotrophy of the paravertebral musculature.',
-        ]],
+      labelEn: '09A · MRI · Lumbar spine',
+      labelPt: '09A · RM · Coluna lombar',
+      titleEn: 'MRI lumbar spine · 15 May 2026',
+      titlePt: 'RM da coluna lombar · 15 de maio de 2026',
+      blurbEn: 'MRI of the lumbar spine without intravenous contrast, multi-planar T1, T2 and STIR sequences. Three orientations were acquired — axial (60 slices), coronal (24) and sagittal (93). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
+      blurbPt: 'Ressonância da coluna lombar sem contraste endovenoso, sequências multiplanares em T1, T2 e STIR. Três orientações adquiridas — axial (60 cortes), coronal (24) e sagital (93). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
+      pdfHref: 'scans/paulo-lombar-mri-2026-05-15-report.pdf',
+      pdfLabelEn: 'Export lumbar MRI report (PDF)',
+      pdfLabelPt: 'Exportar laudo da RM lombar (PDF)',
+      identsEn: [
+        '<strong>Patient.</strong> Paulo Augusto Silotto Dias de Souza',
+        '<strong>DOB.</strong> 14 July 1961',
+        '<strong>Exam date.</strong> 15 May 2026',
+        '<strong>Exam.</strong> MRI lumbar spine',
+        '<strong>Accession.</strong> 5463652',
+        '<strong>Reporting physician.</strong> Dr. Marco Antonio de Carvalho · CRM-99607',
+        '<strong>Provider.</strong> CETAM Diagnóstico',
+        '<strong>Insurance.</strong> Bradesco Saúde',
       ],
-      reportPt: [
-        ['h', 'Ressonância magnética da coluna lombar'],
-        ['p', '<strong>Técnica:</strong> Estudo realizado com multiplanar em sequências ponderadas em T1, T2 e STIR, sem a administração de contraste endovenoso paramagnético.'],
-        ['h2', 'Descrição'],
-        ['p', 'Desvio sinistro-convexo do eixo na posição do estudo. Retificação da curvatura lombar fisiológica.'],
-        ['p', 'Anterolistese discreta de L3 sob L4. Mínima retrolistese de L1 sobre L2.'],
-        ['p', 'Corpos vertebrais com altura normal e osteófitos marginais.'],
-        ['p', 'Hipohidratação e redução difusa das alturas discais.'],
-        ['p', 'Discopatia degenerativa de L1–L2, L2–L3 e L4–L5 com irregularidade dos platôs apostos e alteração de sinal do tipo Modic I (edema) nos três níveis e Modic II (gordura) em L4–L5.'],
-        ['p', 'Abaulamento discal discreto de L1–L2 que retifica a face ventral do saco dural e reduz as amplitudes foraminais bilaterais, notadamente à esquerda.'],
-        ['p', 'Abaulamento discal difuso de L2–L3 que comprime a face ventral do saco dural, toca as descendentes anteriores e reduz as amplitudes foraminais bilaterais com estenose e compressão da emergente à esquerda.'],
-        ['p', 'Pseudo-abaulamento discal difuso de L3–L4 que comprime a face ventral do saco dural e, associado à hipertrofia das interfacetárias e espessamento dos ligamentos amarelos, determina estenose do canal vertebral, com compressão das descendentes anteriores e redução das amplitudes foraminais bilaterais, notadamente à esquerda, tocando a respectiva emergente.'],
-        ['p', 'Abaulamento disco-osteofitário difuso de L4–L5 com componente discal protruso na região central, que comprime a face ventral do saco dural, tocando as descendentes anteriores bilaterais e reduz as amplitudes foraminais tocando a emergente direita.'],
-        ['p', 'Extrusão discal paramediana / foraminal esquerda de L5–S1 que, associada à hipertrofia da facetária ipsilateral, comprime a respectiva descendente ipsilateral de S1.'],
-        ['p', 'Cone medular e cauda equina tópicos, de morfologia e intensidade de sinal normais.'],
-        ['p', 'Moderada hipotrofia da musculatura paravertebral.'],
-        ['p', 'Edema do ligamento interespinhoso de L2–L3, L3–L4 e L5–S1.'],
-        ['h2', 'Conclusão'],
-        ['ul', [
-          'Desvio sinistro-convexo do eixo na posição do estudo. Retificação da curvatura lombar fisiológica. Anterolistese discreta de L3 sob L4. Mínima retrolistese de L1 sobre L2.',
-          'Espondilodiscopatia degenerativa difusa e multissegmentar conforme pormenorizado acima.',
-          'Edema do ligamento interespinhoso de L2–L3, L3–L4 e L5–S1.',
-          'Moderada hipotrofia da musculatura paravertebral.',
-        ]],
+      identsPt: [
+        '<strong>Paciente.</strong> Paulo Augusto Silotto Dias de Souza',
+        '<strong>Data de nascimento.</strong> 14 de julho de 1961',
+        '<strong>Data do exame.</strong> 15 de maio de 2026',
+        '<strong>Exame.</strong> RM da coluna lombar',
+        '<strong>Identificador.</strong> 5463652',
+        '<strong>Médico responsável.</strong> Dr. Marco Antonio de Carvalho · CRM-99607',
+        '<strong>Prestador.</strong> CETAM Diagnóstico',
+        '<strong>Convênio.</strong> Bradesco Saúde',
       ],
+      techniqueEn: [
+        'Multi-planar acquisition in T1, T2 and STIR weighted sequences.',
+        'No paramagnetic intravenous contrast administered.',
+      ],
+      techniquePt: [
+        'Aquisição multiplanar em sequências ponderadas em T1, T2 e STIR.',
+        'Sem administração de contraste endovenoso paramagnético.',
+      ],
+      findingsEn: [
+        'Sinistroconvex deviation of the axis in the position of study. Flattening of the physiological lumbar curvature.',
+        'Mild anterolisthesis of <strong>L3 over L4</strong>. Minimal retrolisthesis of <strong>L1 over L2</strong>.',
+        'Vertebral bodies with normal height and marginal osteophytes.',
+        'Diffuse disc dehydration and reduction in disc heights.',
+        'Degenerative discopathy at <strong>L1–L2, L2–L3 and L4–L5</strong> with irregularity of the opposing endplates and <strong>Modic I (oedema)</strong> signal changes at the three levels, and <strong>Modic II (fatty)</strong> at L4–L5.',
+        'Mild disc bulging at <strong>L1–L2</strong> that flattens the ventral aspect of the dural sac and reduces the bilateral foraminal dimensions, notably on the left.',
+        'Diffuse disc bulging at <strong>L2–L3</strong> that compresses the ventral aspect of the dural sac, contacts the anterior descending roots, and reduces the bilateral foraminal dimensions with <strong>stenosis and compression of the exiting root on the left</strong>.',
+        'Diffuse disc pseudo-bulging at <strong>L3–L4</strong> that compresses the ventral aspect of the dural sac and, combined with facet joint hypertrophy and ligamentum flavum thickening, produces <strong>spinal canal stenosis</strong> with compression of the anterior descending roots and bilateral reduction of foraminal dimensions, notably on the left, contacting the respective exiting root.',
+        'Diffuse disco-osteophytic bulging at <strong>L4–L5</strong> with a protruding central disc component that compresses the ventral aspect of the dural sac, contacting the bilateral anterior descending roots, and reduces the foraminal dimensions, contacting the right exiting root.',
+        '<strong>Left paramedian / foraminal disc extrusion at L5–S1</strong> which, combined with ipsilateral facet hypertrophy, compresses the ipsilateral S1 descending root.',
+        'Conus medullaris and cauda equina in normal topographic position, with normal morphology and signal intensity.',
+        'Moderate hypotrophy of the paravertebral musculature.',
+        'Oedema of the interspinous ligament at <strong>L2–L3, L3–L4 and L5–S1</strong>.',
+      ],
+      findingsPt: [
+        'Desvio sinistro-convexo do eixo na posição do estudo. Retificação da curvatura lombar fisiológica.',
+        'Anterolistese discreta de <strong>L3 sob L4</strong>. Mínima retrolistese de <strong>L1 sobre L2</strong>.',
+        'Corpos vertebrais com altura normal e osteófitos marginais.',
+        'Hipohidratação e redução difusa das alturas discais.',
+        'Discopatia degenerativa de <strong>L1–L2, L2–L3 e L4–L5</strong> com irregularidade dos platôs apostos e alteração de sinal do tipo <strong>Modic I (edema)</strong> nos três níveis e <strong>Modic II (gordura)</strong> em L4–L5.',
+        'Abaulamento discal discreto de <strong>L1–L2</strong> que retifica a face ventral do saco dural e reduz as amplitudes foraminais bilaterais, notadamente à esquerda.',
+        'Abaulamento discal difuso de <strong>L2–L3</strong> que comprime a face ventral do saco dural, toca as descendentes anteriores e reduz as amplitudes foraminais bilaterais com <strong>estenose e compressão da emergente à esquerda</strong>.',
+        'Pseudo-abaulamento discal difuso de <strong>L3–L4</strong> que comprime a face ventral do saco dural e, associado à hipertrofia das interfacetárias e espessamento dos ligamentos amarelos, determina <strong>estenose do canal vertebral</strong>, com compressão das descendentes anteriores e redução das amplitudes foraminais bilaterais, notadamente à esquerda, tocando a respectiva emergente.',
+        'Abaulamento disco-osteofitário difuso de <strong>L4–L5</strong> com componente discal protruso central, que comprime a face ventral do saco dural, toca as descendentes anteriores bilaterais e reduz as amplitudes foraminais tocando a emergente direita.',
+        '<strong>Extrusão discal paramediana / foraminal esquerda em L5–S1</strong> que, associada à hipertrofia da facetária ipsilateral, comprime a respectiva descendente ipsilateral de S1.',
+        'Cone medular e cauda equina tópicos, de morfologia e intensidade de sinal normais.',
+        'Moderada hipotrofia da musculatura paravertebral.',
+        'Edema do ligamento interespinhoso de <strong>L2–L3, L3–L4 e L5–S1</strong>.',
+      ],
+      conclusionEn: '<strong>Impression:</strong> Diffuse multisegmental degenerative spondylodiscopathy. Spinal canal stenosis at L3–L4 with anterior descending root compression; <strong>foraminal disc extrusion at L5–S1 compressing the left S1 root</strong>; bilateral foraminal narrowing throughout the lumbar segments, more severe on the left. Sinistroconvex deviation of the axis, mild L3 anterolisthesis over L4, moderate paravertebral muscle hypotrophy, and interspinous ligament oedema at L2–L3, L3–L4 and L5–S1.',
+      conclusionPt: '<strong>Conclusão:</strong> Espondilodiscopatia degenerativa difusa e multissegmentar. Estenose do canal vertebral em L3–L4 com compressão das descendentes anteriores; <strong>extrusão discal foraminal em L5–S1 comprimindo a raiz S1 esquerda</strong>; estreitamento foraminal bilateral em todo o segmento lombar, mais acentuado à esquerda. Desvio sinistro-convexo do eixo, anterolistese discreta de L3 sobre L4, hipotrofia moderada da musculatura paravertebral e edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1.',
     },
   ];
 
-  function renderReportBlocks(blocks) {
-    return blocks.map(function (b) {
-      var kind = b[0], body = b[1];
-      if (kind === 'h')  return '<h3 class="paulo-mri-report-h">'  + body + '</h3>';
-      if (kind === 'h2') return '<h4 class="paulo-mri-report-h2">' + body + '</h4>';
-      if (kind === 'p')  return '<p>'  + body + '</p>';
-      if (kind === 'ul') return '<ul>' + body.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</ul>';
-      return '';
-    }).join('');
-  }
-
-  function injectPauloStyles() {
-    if (document.getElementById('paulo-mri-styles')) return;
+  function injectPauloExamsStyles() {
+    if (document.getElementById('paulo-exams-styles')) return;
     var s = document.createElement('style');
-    s.id = 'paulo-mri-styles';
+    s.id = 'paulo-exams-styles';
     s.textContent = [
-      '.paulo-mri-stack { display: flex; flex-direction: column; gap: 18px; margin-bottom: 24px; }',
-      '.paulo-mri-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #244E6E; border-radius: 10px; padding: 18px 20px 20px; }',
-      '.paulo-mri-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin-bottom: 4px; }',
-      '.paulo-mri-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; margin: 0 0 4px; }',
-      '.paulo-mri-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
-      '.paulo-mri-viewer { background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 8px; padding: 12px 12px 16px; }',
-      '.paulo-mri-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }',
-      '.paulo-mri-tabs { display: inline-flex; gap: 4px; background: #FFFFFF; border: 1px solid #DDD8CC; border-radius: 6px; padding: 3px; }',
-      '.paulo-mri-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
-      '.paulo-mri-tab:hover { background: #F4F1EA; }',
-      '.paulo-mri-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
-      '.paulo-mri-counter { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #7A8FA6; letter-spacing: 0.04em; }',
-      '.paulo-mri-counter .paulo-mri-idx { color: #0D1B2A; font-weight: 500; }',
-      '.paulo-mri-stage { background: #000000; border-radius: 6px; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden; user-select: none; }',
-      '.paulo-mri-stage img { width: 100%; height: 100%; object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; cursor: ns-resize; display: block; }',
-      '.paulo-mri-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; margin-top: 14px; background: #DDD8CC; border-radius: 2px; outline: none; cursor: pointer; }',
-      '.paulo-mri-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #244E6E; border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(13,27,42,0.15); cursor: grab; transition: transform 0.1s; }',
-      '.paulo-mri-slider::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.1); }',
-      '.paulo-mri-slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #244E6E; border: 2px solid #FFFFFF; box-shadow: 0 2px 4px rgba(13,27,42,0.15); cursor: grab; }',
-      '.paulo-mri-report { margin-top: 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; padding: 12px 16px; }',
-      '.paulo-mri-report-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }',
-      '.paulo-mri-report-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
-      '.paulo-mri-report-download { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
-      '.paulo-mri-report-download:hover { background: #FFF6E5; }',
-      '.paulo-mri-report-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.55; color: #1E2D3D; }',
-      '.paulo-mri-report-body p { margin: 0 0 8px; }',
-      '.paulo-mri-report-body p:last-child { margin-bottom: 0; }',
-      '.paulo-mri-report-body ul { margin: 0 0 8px; padding-left: 22px; }',
-      '.paulo-mri-report-body li { margin-bottom: 6px; }',
-      '.paulo-mri-report-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0 0 10px; letter-spacing: 0; text-transform: none; }',
-      '.paulo-mri-report-h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #244E6E; margin: 12px 0 6px; }',
+      'main.jc-paulo-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
+      'main.jc-paulo-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
+      'main.jc-paulo-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
+      'main.jc-paulo-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
+      'main.jc-paulo-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 70ch; }',
+      'main.jc-paulo-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
+      'main.jc-paulo-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
+      'main.jc-paulo-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
+      'main.jc-paulo-exams #imagery { padding: 48px 0 24px; }',
+      'main.jc-paulo-exams #imagery > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-exams #imagery .imagery-exam > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      // View-tab strip inside the .ct-viewer head
+      'main.jc-paulo-exams .ct-viewer-head { flex-wrap: wrap; gap: 10px; }',
+      'main.jc-paulo-exams .pl-view-tabs { display: inline-flex; gap: 4px; background: rgba(13, 27, 42, 0.06); border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 3px; }',
+      'main.jc-paulo-exams .pl-view-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
+      'main.jc-paulo-exams .pl-view-tab:hover { background: rgba(13, 27, 42, 0.06); }',
+      'main.jc-paulo-exams .pl-view-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab { color: rgba(255,255,255,0.85); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab:hover { background: rgba(255,255,255,0.08); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
     ].join('\n');
     document.head.appendChild(s);
   }
 
-  function buildPauloViewerCard(study, idx) {
-    var slug = study.slug;
-    var pdfHref = 'scans/' + slug + '-report.pdf';
-    var html =
-      '<section class="paulo-mri-card" data-paulo-mri="' + slug + '" data-idx="' + idx + '">' +
-        '<div class="paulo-mri-eyebrow">' + t('Imaging study', 'Estudo de imagem') + '</div>' +
-        '<h2 class="paulo-mri-title">' + t(study.titleEn, study.titlePt) + '</h2>' +
-        '<div class="paulo-mri-meta">' +
-          t('Dr. Marco Antonio de Carvalho · CRM-99607 · CETAM Diagnóstico',
-            'Dr. Marco Antonio de Carvalho · CRM-99607 · CETAM Diagnóstico') +
-        '</div>' +
-        '<div class="paulo-mri-viewer">' +
-          '<div class="paulo-mri-controls">' +
-            '<div class="paulo-mri-tabs" role="tablist">' +
-              '<button type="button" class="paulo-mri-tab" data-view="axi" aria-pressed="true">' +
-                t('Axial', 'Axial') +
-              '</button>' +
-              '<button type="button" class="paulo-mri-tab" data-view="cor" aria-pressed="false">' +
-                t('Coronal', 'Coronal') +
-              '</button>' +
-              '<button type="button" class="paulo-mri-tab" data-view="sag" aria-pressed="false">' +
-                t('Sagittal', 'Sagital') +
-              '</button>' +
+  function pauloLi(s) { return '<li>' + s + '</li>'; }
+
+  function buildPauloExamSection(study, idx) {
+    var pdfBtn =
+      '<a class="export-btn-primary" href="' + study.pdfHref + '" download>' +
+        '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+          '<polyline points="7 10 12 15 17 10"/>' +
+          '<line x1="12" y1="15" x2="12" y2="3"/>' +
+        '</svg>' +
+        t(study.pdfLabelEn, study.pdfLabelPt) +
+      '</a>';
+
+    return (
+      '<div class="imagery-exam" id="paulo-' + study.slug + '"><div class="container">' +
+        '<div class="section-label">' + t(study.labelEn, study.labelPt) + '</div>' +
+        '<h2 class="section-title">' + t(study.titleEn, study.titlePt) + '</h2>' +
+        '<p class="section-desc">' + t(study.blurbEn, study.blurbPt) + '</p>' +
+        '<div class="report-export-row">' + pdfBtn + '</div>' +
+        '<div class="ct-grid ct-grid-single">' +
+          '<div class="pl-ct-viewer ct-viewer" data-paulo-study="' + study.slug + '">' +
+            '<div class="ct-viewer-head">' +
+              '<div class="ct-viewer-title">' + t(study.titleEn, study.titlePt) + '</div>' +
+              '<div class="pl-view-tabs" role="tablist">' +
+                '<button type="button" class="pl-view-tab" data-view="axi" aria-pressed="true">AXI</button>' +
+                '<button type="button" class="pl-view-tab" data-view="cor" aria-pressed="false">COR</button>' +
+                '<button type="button" class="pl-view-tab" data-view="sag" aria-pressed="false">SAG</button>' +
+              '</div>' +
+              '<div class="ct-viewer-meta">' +
+                t('Slice ', 'Corte ') +
+                '<span class="ct-idx">1</span> / <span class="ct-total">1</span>' +
+              '</div>' +
             '</div>' +
-            '<div class="paulo-mri-counter">' +
-              t('Slice ', 'Corte ') +
-              '<span class="paulo-mri-idx">1</span> / <span class="paulo-mri-total">1</span>' +
+            '<div class="ct-stage">' +
+              '<img class="ct-img" alt="' + escapeHtml(study.titleEn) + '" loading="eager">' +
             '</div>' +
-          '</div>' +
-          '<div class="paulo-mri-stage"><img alt="' + escapeHtml(study.titleEn) + '" loading="eager"></div>' +
-          '<input type="range" class="paulo-mri-slider" min="0" max="0" value="0" aria-label="' + escapeHtml(study.titleEn) + ' slice">' +
-        '</div>' +
-        '<div class="paulo-mri-report">' +
-          '<header class="paulo-mri-report-head">' +
-            '<h3 class="paulo-mri-report-title">' + t('Radiologist report', 'Laudo do radiologista') + '</h3>' +
-            '<a class="paulo-mri-report-download" href="' + pdfHref + '" download>' +
-              t('Export PDF', 'Exportar PDF') +
-            '</a>' +
-          '</header>' +
-          '<div class="paulo-mri-report-body">' +
-            '<div class="lang-en">' + renderReportBlocks(study.reportEn) + '</div>' +
-            '<div class="lang-pt">' + renderReportBlocks(study.reportPt) + '</div>' +
+            '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="' + escapeHtml(study.titleEn) + ' slice">' +
           '</div>' +
         '</div>' +
-      '</section>';
-    return html;
+
+        '<h3 style="font-family:\'Raleway\',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">' +
+          t('Radiologist&apos;s report', 'Laudo do radiologista') +
+        '</h3>' +
+
+        '<div class="two-col mb-3">' +
+          '<div class="list-card">' +
+            '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+            '<ul class="lang-en">' + study.identsEn.map(pauloLi).join('') + '</ul>' +
+            '<ul class="lang-pt">' + study.identsPt.map(pauloLi).join('') + '</ul>' +
+          '</div>' +
+          '<div class="list-card">' +
+            '<h4>' + t('Technique', 'Técnica') + '</h4>' +
+            '<ul class="lang-en">' + study.techniqueEn.map(pauloLi).join('') + '</ul>' +
+            '<ul class="lang-pt">' + study.techniquePt.map(pauloLi).join('') + '</ul>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="list-card mb-3">' +
+          '<h4>' + t('Findings', 'Achados') + '</h4>' +
+          '<ul class="lang-en">' + study.findingsEn.map(pauloLi).join('') + '</ul>' +
+          '<ul class="lang-pt">' + study.findingsPt.map(pauloLi).join('') + '</ul>' +
+        '</div>' +
+
+        '<div class="alert alert-warn">' +
+          '<span class="lang-en">' + study.conclusionEn + '</span>' +
+          '<span class="lang-pt">' + study.conclusionPt + '</span>' +
+        '</div>' +
+      '</div></div>'
+    );
   }
 
-  function wirePauloViewer(card, study) {
+  function wirePauloViewer(viewerEl, study) {
     var manifestUrl = 'scans/' + study.slug + '-manifest.json';
-    var img    = card.querySelector('.paulo-mri-stage img');
-    var slider = card.querySelector('.paulo-mri-slider');
-    var idxEl  = card.querySelector('.paulo-mri-idx');
-    var totEl  = card.querySelector('.paulo-mri-total');
-    var stage  = card.querySelector('.paulo-mri-stage');
-    var tabs   = card.querySelectorAll('.paulo-mri-tab');
+    var img    = viewerEl.querySelector('.ct-img');
+    var slider = viewerEl.querySelector('.ct-slider');
+    var idxEl  = viewerEl.querySelector('.ct-idx');
+    var totEl  = viewerEl.querySelector('.ct-total');
+    var stage  = viewerEl.querySelector('.ct-stage');
+    var tabs   = viewerEl.querySelectorAll('.pl-view-tab');
 
     var state = { view: 'axi', files: [], cache: new Map() };
     var manifest = null;
@@ -1969,28 +2019,79 @@
       });
   }
 
-  function maybeRenderPauloMRIs() {
-    if (patient !== PAULO_SILOTTO) return;
-    if (document.querySelector('.paulo-mri-stack')) return;
+  function renderPauloPhysicalExams() {
+    injectPauloExamsStyles();
 
-    injectPauloStyles();
-    var shell = document.querySelector('.jc-overview .ov-shell') || document.querySelector('.jc-empty-shell');
-    if (!shell) return;
+    document.title = 'JC Advisory — Physical · Imaging exams · Paulo Silotto Souza';
 
-    var stack = document.createElement('section');
-    stack.className = 'paulo-mri-stack';
-    stack.innerHTML = PAULO_MRIS.map(buildPauloViewerCard).join('');
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('Imaging exams · Paulo Silotto Souza',
+              'Exames de imagem · Paulo Silotto Souza') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('Two MRI studies acquired on 15 May 2026 at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Each viewer carries axial, coronal and sagittal acquisitions — switch plane with the AXI / COR / SAG buttons inside the viewer, then drag the slider (or use mouse wheel, click-and-drag, or arrow keys) to walk through the slices. The radiologist&apos;s full report is rendered below each viewer, with the original Portuguese and an English translation that follow the top-bar language toggle.',
+              'Dois estudos de RM realizados em 15 de maio de 2026 no CETAM Diagnóstico, laudados pelo Dr. Marco Antonio de Carvalho (CRM-99607). Cada visualizador contém as aquisições axial, coronal e sagital — alterne o plano com os botões AXI / COR / SAG dentro do visualizador e depois arraste o controle (ou use a rolagem do mouse, clicar-e-arrastar ou as setas) para percorrer os cortes. O laudo completo do radiologista está renderizado abaixo de cada visualizador, com o original em português e uma tradução em inglês que acompanham o seletor de idioma da barra superior.') +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Patient', 'Paciente') + '</span><span>Paulo Silotto Souza</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('DOB · age', 'Nasc. · idade') + '</span>' +
+              '<span>' + t('14 Jul 1961 · 64', '14 jul 1961 · 64') + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Exam date', 'Data do exame') + '</span>' +
+              '<span>' + t('15 May 2026', '15 mai 2026') + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Reporting physician', 'Médico responsável') + '</span>' +
+              '<span>Dr. Marco A. de Carvalho · CRM-99607</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Provider', 'Prestador') + '</span>' +
+              '<span>CETAM Diagnóstico</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
 
-    // Slot beneath the patient header (jc-overview) or at the top of the
-    // empty shell (fallback).
-    var header = shell.querySelector('.ov-header');
-    if (header && header.nextSibling) shell.insertBefore(stack, header.nextSibling);
-    else if (header) shell.appendChild(stack);
-    else shell.insertBefore(stack, shell.firstChild);
+    var examsHtml = PAULO_STUDIES.map(buildPauloExamSection).join('');
 
-    PAULO_MRIS.forEach(function (study, i) {
-      var card = stack.children[i];
-      if (card) wirePauloViewer(card, study);
+    var imagery =
+      '<section class="report-section" id="imagery">' +
+        '<div class="container">' +
+          '<div class="section-label">' +
+            t('09A · Imagery', '09A · Imagem') +
+          '</div>' +
+          '<h2 class="section-title">' +
+            t('Imaging exams', 'Exames de imagem') +
+          '</h2>' +
+          '<p class="section-desc">' +
+            t('Two imaging studies acquired the same day — cervical and lumbar MRI. Each viewer supports plane switching (AXI / COR / SAG), slider, mouse-wheel scroll, click-and-drag, and arrow-key navigation. The radiologist&apos;s report follows beneath each viewer in both Portuguese and English.',
+              'Dois estudos de imagem realizados no mesmo dia — RM cervical e lombar. Cada visualizador aceita troca de plano (AXI / COR / SAG), controle deslizante, rolagem do mouse, clicar-e-arrastar e setas do teclado. O laudo do radiologista segue abaixo de cada visualizador, em português e em inglês.') +
+          '</p>' +
+        '</div>' +
+        examsHtml +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-paulo-exams';
+    main.innerHTML = hero + imagery;
+    document.body.appendChild(main);
+
+    // Wire viewers
+    PAULO_STUDIES.forEach(function (study) {
+      var viewerEl = main.querySelector('.pl-ct-viewer[data-paulo-study="' + study.slug + '"]');
+      if (viewerEl) wirePauloViewer(viewerEl, study);
     });
+
+    // Place the danger zone beneath the new main, mirroring how the
+    // jc-overview view does it for other patients.
+    injectDangerZone(main);
   }
 })();
