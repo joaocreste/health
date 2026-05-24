@@ -1876,6 +1876,18 @@
       'main.jc-paulo-exams .paulo-ai-summary-body p { margin: 0 0 10px; }',
       'main.jc-paulo-exams .paulo-ai-summary-body p:last-child { margin-bottom: 0; }',
       'main.jc-paulo-exams .paulo-ai-summary-body strong { color: #0D1B2A; }',
+      // Three holistic insights — Physical / Mental / Spiritual
+      'main.jc-paulo-exams .paulo-ai-insights-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      'main.jc-paulo-exams .paulo-ai-insights-head { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 12px; }',
+      'main.jc-paulo-exams .paulo-ai-insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      'main.jc-paulo-exams .paulo-ai-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; }',
+      'main.jc-paulo-exams .paulo-ai-insight-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin-bottom: 8px; }',
+      'main.jc-paulo-exams .paulo-ai-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      'main.jc-paulo-exams .paulo-ai-insight-body strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .paulo-ai-insight.is-tbd { background: #FFFFFF; border-style: dashed; }',
+      'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-label { color: #7A8FA6; }',
+      'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-body { color: #7A8FA6; font-style: italic; }',
+      '@media (max-width: 820px) { main.jc-paulo-exams .paulo-ai-insights { grid-template-columns: 1fr; } }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -2110,6 +2122,28 @@
               '<p>As RM cervical e lombar do mesmo dia demonstram <strong>doença discal degenerativa difusa e multinivelar</strong>, com três achados que merecem atenção clínica. <strong>L5–S1:</strong> extrusão discal paramediana / foraminal esquerda comprimindo a raiz descendente S1 ipsilateral — o achado mais agudo do par. <strong>L3–L4:</strong> estenose do canal vertebral por pseudo-abaulamento associado a hipertrofia facetária e espessamento dos ligamentos amarelos, com compressão das descendentes anteriores. <strong>C5–C6:</strong> abaulamento disco-osteofitário difuso com compressão ventral da medula — sem alteração de sinal medular (sem mielopatia) neste momento, porém com contato medular.</p>' +
               '<p>Achados comuns às duas regiões: desvio sinistro-convexo do eixo, osteófitos marginais, hipohidratação discal difusa e hipotrofia da musculatura paravertebral (discreta na cervical, moderada na lombar). O segmento lombar mostra ainda <strong>anterolistese discreta de L3 sobre L4</strong>, sinal <strong>Modic I (edema)</strong> em L1–L2, L2–L3 e L4–L5, <strong>Modic II (gordura)</strong> em L4–L5 e edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1 — marcadores de alteração degenerativa inflamatória ativa, não apenas degeneração crônica encerrada.</p>' +
               '<p><strong>Próximo passo recomendado:</strong> correlação clínica com os sintomas radiculares atuais — território S1 à esquerda a partir da extrusão L5–S1; território C6 / C7 a partir do abaulamento C5–C6 — e avaliação por especialista em coluna para ponderar manejo conservador vs. opções intervencionistas frente à estenose em L3–L4, ao estreitamento foraminal multinível e ao contato medular ventral em C5–C6.</p>' +
+            '</div>' +
+            '<div class="paulo-ai-insights-block">' +
+              '<div class="paulo-ai-insights-head">' +
+                t('Three holistic insights', 'Três insights holísticos') +
+              '</div>' +
+              '<div class="paulo-ai-insights">' +
+                '<div class="paulo-ai-insight">' +
+                  '<div class="paulo-ai-insight-label">' + t('Physical', 'Físico') + '</div>' +
+                  '<p class="paulo-ai-insight-body lang-en"><strong>Clinical Pilates + aquatic therapy</strong> as the weekly base — both rebuild the paravertebral musculature flagged as hypotrophic on the MRI without axial loading. Run a <strong>spine-focused physiotherapy programme</strong> in parallel (McKenzie method for the L5–S1 extrusion; cervical traction work for C5–C6). <strong>Avoid</strong> running on hard surfaces, CrossFit-style heavy lifting and contact sports until the left-sided S1 radicular pattern is controlled.</p>' +
+                  '<p class="paulo-ai-insight-body lang-pt"><strong>Pilates clínico + hidroterapia</strong> como base semanal — ambos recuperam a musculatura paravertebral hipotrofiada vista na RM sem carga axial. Em paralelo, <strong>programa estruturado de fisioterapia para coluna</strong> (método McKenzie para a extrusão L5–S1; tração cervical para C5–C6). <strong>Evitar</strong> corrida em piso duro, levantamento pesado tipo CrossFit e esportes de contato até o quadro radicular S1 à esquerda estar controlado.</p>' +
+                '</div>' +
+                '<div class="paulo-ai-insight">' +
+                  '<div class="paulo-ai-insight-label">' + t('Mental', 'Mental') + '</div>' +
+                  '<p class="paulo-ai-insight-body lang-en">Chronic spine pain has a documented bidirectional link with anxiety and depressive symptoms — pain catastrophizing is one of the strongest predictors of poor outcomes regardless of imaging severity. Recommend <strong>CBT focused on chronic-pain coping</strong> (8–12 sessions to start) and <strong>quarterly follow-up</strong> with a clinical psychologist or psychiatrist while the radicular pattern is being managed. Mindfulness-based stress reduction (MBSR) is a strong adjunct.</p>' +
+                  '<p class="paulo-ai-insight-body lang-pt">Dor crônica de coluna tem ligação bidirecional comprovada com ansiedade e sintomas depressivos — catastrofização da dor é um dos maiores preditores de pior evolução, independentemente da gravidade da imagem. Recomenda-se <strong>TCC focada em manejo de dor crônica</strong> (8–12 sessões iniciais) e <strong>acompanhamento trimestral</strong> com psicólogo(a) clínico ou psiquiatra enquanto o quadro radicular estiver em manejo. Mindfulness (MBSR) é um excelente adjuvante.</p>' +
+                '</div>' +
+                '<div class="paulo-ai-insight is-tbd">' +
+                  '<div class="paulo-ai-insight-label">' + t('Spiritual', 'Espiritual') + '</div>' +
+                  '<p class="paulo-ai-insight-body lang-en">TBD — no spiritual or values-of-life data captured yet. Once a baseline is recorded (faith practice, meaning-making framework, support community), the AI summary will fold it into the synthesis.</p>' +
+                  '<p class="paulo-ai-insight-body lang-pt">A definir — ainda não há dados sobre a dimensão espiritual / valores de vida. Assim que houver um registro inicial (prática de fé, estrutura de significado, comunidade de apoio), o resumo da IA incorporará esses dados à síntese.</p>' +
+                '</div>' +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>' +
