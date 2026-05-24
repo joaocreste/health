@@ -955,7 +955,11 @@
     document.head.appendChild(s);
   }
 
-  function injectDangerZone() {
+  // insertAfterEl: optional. When the patient's home is rendered by JS
+  // (non-Patient-Zero), pass the just-appended <main> so the zone lands
+  // beneath it. When omitted (Patient Zero's static page), fall back to
+  // "before footer" → "append to body".
+  function injectDangerZone(insertAfterEl) {
     if (document.querySelector('.jc-danger-zone')) return;
     var zone = document.createElement('section');
     zone.className = 'jc-danger-zone';
@@ -971,9 +975,13 @@
           t('Delete my health data', 'Excluir meus dados de saúde') +
         '</button>' +
       '</div>';
-    var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
-    if (footer && footer.parentNode) footer.parentNode.insertBefore(zone, footer);
-    else document.body.appendChild(zone);
+    if (insertAfterEl && insertAfterEl.parentNode) {
+      insertAfterEl.parentNode.insertBefore(zone, insertAfterEl.nextSibling);
+    } else {
+      var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
+      if (footer && footer.parentNode) footer.parentNode.insertBefore(zone, footer);
+      else document.body.appendChild(zone);
+    }
     zone.querySelector('.jc-danger-btn').addEventListener('click', openDangerModal);
   }
 
@@ -1054,12 +1062,15 @@
 
   ready(function () {
     injectChangeButton();
-    // Danger zone goes on every home page, including Patient Zero's.
-    if (currentSection() === 'home') {
-      injectStyles();
-      injectDangerZone();
+    // Patient Zero's home is a static page that ends in <footer> — we can
+    // inject the danger zone right away, before the footer.
+    if (patient === PATIENT_ZERO) {
+      if (currentSection() === 'home') {
+        injectStyles();
+        injectDangerZone();
+      }
+      return;
     }
-    if (patient === PATIENT_ZERO) return;
 
     injectStyles();
     hidePageBody();
@@ -1069,8 +1080,18 @@
     if (section === 'home') {
       fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (s) { renderHome(s); decorateWithDashboard('home', { isHome: true }); })
-        .catch(function () { renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente')); });
+        .then(function (s) {
+          renderHome(s);
+          // Place the danger zone AFTER the just-rendered home — otherwise
+          // it would land above it (renderHome appends to body, which would
+          // sit below any sibling already inserted higher up).
+          injectDangerZone(document.querySelector('main.jc-home'));
+          decorateWithDashboard('home', { isHome: true });
+        })
+        .catch(function () {
+          renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente'));
+          injectDangerZone(document.querySelector('main.jc-empty-shell'));
+        });
       return;
     }
 
