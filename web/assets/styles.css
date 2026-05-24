@@ -1444,7 +1444,33 @@ body.add-data-open { overflow: hidden; }
   font-size: 14px;
   color: #5C4715;
 }
-.add-data-drop-label strong { color: #B8954A; }
+.add-data-drop-label em { font-style: italic; color: #B8954A; }
+.add-data-drop-actions {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.add-data-drop-link {
+  background: transparent; border: 1px solid #B8954A;
+  color: #B8954A; border-radius: 999px;
+  padding: 4px 12px; cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  transition: background 0.12s;
+}
+.add-data-drop-link:hover { background: #FFF6E5; }
+.add-data-drop-sep { color: #B8954A; font-size: 13px; }
+.add-data-drop-hint {
+  margin-top: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: 0.04em;
+  color: #7A8FA6;
+}
+.add-data-row-folder {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 400; color: #7A8FA6;
+  font-size: 11px; margin-right: 2px;
+}
+.add-data-row-leaf { font-weight: 500; color: #0D1B2A; }
 
 .add-data-list {
   list-style: none;

@@ -54,8 +54,9 @@
           '<button type="button" class="add-data-close" aria-label="Close">×</button>' +
         '</div>' +
 
-        '<label class="add-data-drop" id="add-data-drop">' +
+        '<div class="add-data-drop" id="add-data-drop" tabindex="0" role="button">' +
           '<input type="file" multiple style="display:none" id="add-data-input">' +
+          '<input type="file" webkitdirectory directory multiple style="display:none" id="add-data-dir-input">' +
           '<div class="add-data-drop-inner">' +
             '<svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
               '<path d="M32 44V18"/>' +
@@ -63,11 +64,24 @@
               '<path d="M14 44v6a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2v-6"/>' +
             '</svg>' +
             '<div class="add-data-drop-label">' +
-              '<span class="lang-en">Drop files here, or <strong>click to browse</strong></span>' +
-              '<span class="lang-pt">Arraste arquivos aqui, ou <strong>clique para escolher</strong></span>' +
+              '<span class="lang-en">Drop files <em>or folders</em> here</span>' +
+              '<span class="lang-pt">Arraste arquivos <em>ou pastas</em> aqui</span>' +
+            '</div>' +
+            '<div class="add-data-drop-actions">' +
+              '<button type="button" class="add-data-drop-link" id="add-data-pick-files">' +
+                '<span class="lang-en">Choose files</span><span class="lang-pt">Escolher arquivos</span>' +
+              '</button>' +
+              '<span class="add-data-drop-sep">·</span>' +
+              '<button type="button" class="add-data-drop-link" id="add-data-pick-dir">' +
+                '<span class="lang-en">Choose folder</span><span class="lang-pt">Escolher pasta</span>' +
+              '</button>' +
+            '</div>' +
+            '<div class="add-data-drop-hint">' +
+              '<span class="lang-en">Folder paths are preserved so the classifier can use them as context.</span>' +
+              '<span class="lang-pt">A estrutura de pastas é preservada para o classificador.</span>' +
             '</div>' +
           '</div>' +
-        '</label>' +
+        '</div>' +
 
         '<ul class="add-data-list" id="add-data-list"></ul>' +
 
@@ -86,6 +100,7 @@
 
     modalEl = wrap;
     fileInputEl = wrap.querySelector('#add-data-input');
+    var dirInputEl = wrap.querySelector('#add-data-dir-input');
     listEl = wrap.querySelector('#add-data-list');
     commitBtnEl = wrap.querySelector('#add-data-commit');
 
@@ -109,12 +124,34 @@
       });
     });
     dropZone.addEventListener('drop', function (e) {
-      var files = e.dataTransfer && e.dataTransfer.files;
-      if (files) addFiles(files);
+      handleDrop(e.dataTransfer);
+    });
+    // Activate the file picker when the empty dropzone area is clicked (but
+    // not when the user clicks the explicit "Choose folder" / "Choose files"
+    // buttons or any inner control).
+    dropZone.addEventListener('click', function (e) {
+      var t = e.target;
+      while (t && t !== dropZone) {
+        if (t.tagName === 'BUTTON' || t.tagName === 'INPUT' || t.tagName === 'A') return;
+        t = t.parentNode;
+      }
+      fileInputEl.click();
+    });
+    wrap.querySelector('#add-data-pick-files').addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      fileInputEl.click();
+    });
+    wrap.querySelector('#add-data-pick-dir').addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      dirInputEl.click();
     });
     fileInputEl.addEventListener('change', function () {
-      addFiles(fileInputEl.files);
+      addFiles(fileInputEl.files, /*fromDir=*/false);
       fileInputEl.value = '';
+    });
+    dirInputEl.addEventListener('change', function () {
+      addFiles(dirInputEl.files, /*fromDir=*/true);
+      dirInputEl.value = '';
     });
 
     wrap.querySelector('#add-data-clear').addEventListener('click', function () {
@@ -137,16 +174,96 @@
     document.body.classList.remove('add-data-open');
   }
 
-  function addFiles(fileList) {
-    Array.prototype.forEach.call(fileList, function (file) {
-      stagedFiles.push({
-        id: ++fileIdCounter,
-        file: file,
-        status: 'staged',
-        result: null,
-        error: null,
-      });
+  function sanitizePath(p) {
+    // Normalize separators, strip leading "./" and any leading slash so paths
+    // are always relative. Trim each segment of trailing whitespace.
+    return String(p || '')
+      .replace(/\\/g, '/')
+      .replace(/^\.\//, '')
+      .replace(/^\/+/, '')
+      .split('/')
+      .map(function (s) { return s.trim(); })
+      .filter(Boolean)
+      .join('/');
+  }
+
+  function stageEntry(file, relPath) {
+    var path = sanitizePath(relPath || file.name);
+    stagedFiles.push({
+      id: ++fileIdCounter,
+      file: file,
+      path: path,
+      status: 'staged',
+      result: null,
+      error: null,
     });
+  }
+
+  // Used by both the <input> change events and the drop fallback (when the
+  // browser doesn't expose entries — covers all <input> picks).
+  function addFiles(fileList, fromDir) {
+    Array.prototype.forEach.call(fileList, function (file) {
+      // webkitRelativePath is populated for files picked via
+      // <input webkitdirectory> AND for files dragged from a directory
+      // in some browsers. For loose-file picks it's empty — fall back to name.
+      var rel = (fromDir && file.webkitRelativePath) ? file.webkitRelativePath
+              : (file.webkitRelativePath || file.name);
+      stageEntry(file, rel);
+    });
+    renderList();
+  }
+
+  // Recursive walker for drag-and-drop. dataTransfer.items lets us see folders;
+  // each item exposes webkitGetAsEntry which gives us a FileSystemEntry we can
+  // walk with .file() / .createReader().readEntries(). Falls back to
+  // dataTransfer.files when entries aren't available (older browsers, drops
+  // from unusual sources).
+  function handleDrop(dt) {
+    if (!dt) return;
+    var items = dt.items;
+    var anyEntry = false;
+    if (items && items.length) {
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file' && items[i].webkitGetAsEntry) {
+          anyEntry = true; break;
+        }
+      }
+    }
+    if (!anyEntry) {
+      if (dt.files) addFiles(dt.files, false);
+      return;
+    }
+    var pending = 0, finished = false;
+    function done() { if (finished && pending === 0) renderList(); }
+    function walkEntry(entry, prefix) {
+      if (!entry) return;
+      if (entry.isFile) {
+        pending++;
+        entry.file(function (f) {
+          stageEntry(f, prefix + entry.name);
+          pending--; done();
+        }, function () { pending--; done(); });
+      } else if (entry.isDirectory) {
+        var reader = entry.createReader();
+        function readBatch() {
+          pending++;
+          reader.readEntries(function (entries) {
+            entries.forEach(function (e) { walkEntry(e, prefix + entry.name + '/'); });
+            pending--;
+            if (entries.length > 0) readBatch();   // some browsers cap at 100/batch
+            else done();
+          }, function () { pending--; done(); });
+        }
+        readBatch();
+      }
+    }
+    for (var j = 0; j < items.length; j++) {
+      var entry = items[j].webkitGetAsEntry && items[j].webkitGetAsEntry();
+      if (entry) walkEntry(entry, '');
+    }
+    finished = true;
+    done();
+    // Show immediate visual feedback even before async walk completes
     renderList();
   }
 
@@ -215,10 +332,20 @@
         var parts = Object.keys(byTable).map(function (k) { return byTable[k] + '× ' + k; });
         targets = '<div class="add-data-row-targets">→ ' + parts.join(', ') + '</div>';
       }
+      // Split the display path into "folder/segments/" + "leaf.ext" so the
+      // folder context is visible but the filename stays emphasized.
+      var path = item.path || item.file.name;
+      var lastSlash = path.lastIndexOf('/');
+      var folderHtml = lastSlash > 0
+        ? '<span class="add-data-row-folder">' + escapeHtml(path.slice(0, lastSlash + 1)) + '</span>'
+        : '';
+      var leaf = lastSlash > 0 ? path.slice(lastSlash + 1) : path;
       html +=
         '<li class="add-data-row" data-id="' + item.id + '">' +
           '<div class="add-data-row-main">' +
-            '<div class="add-data-row-name">' + escapeHtml(item.file.name) + '</div>' +
+            '<div class="add-data-row-name">' + folderHtml +
+              '<span class="add-data-row-leaf">' + escapeHtml(leaf) + '</span>' +
+            '</div>' +
             '<div class="add-data-row-meta">' + humanSize(item.file.size) + (item.file.type ? ' · ' + escapeHtml(item.file.type) : '') + '</div>' +
             summary + note + targets +
           '</div>' +
@@ -236,7 +363,10 @@
     var fd = new FormData();
     fd.append('patient_clerk', patientClerk);
     if (viewerClerk) fd.append('viewer_clerk', viewerClerk);
-    fd.append('files', item.file, item.file.name);
+    // Pass the relative path as the multipart filename so the server reads
+    // it via formData file.name. Backend stores it on import_files.original_path
+    // and surfaces it to the classifier, which uses the folder context.
+    fd.append('files', item.file, item.path || item.file.name);
     var resp;
     try {
       resp = await fetch('/api/ingest', { method: 'POST', body: fd });
