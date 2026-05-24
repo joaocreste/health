@@ -319,9 +319,12 @@
     document.body.appendChild(overview);
   }
 
-  function fmtNum(n) {
+  function fmtLabNum(n) {
     if (n == null || !isFinite(n)) return '';
-    var s = (Math.abs(n) >= 100) ? Number(n).toFixed(0) : Number(n).toFixed(2);
+    var abs = Math.abs(Number(n));
+    var s = (abs >= 1000) ? Number(n).toFixed(0)
+          : (abs >= 100)  ? Number(n).toFixed(1)
+          :                  Number(n).toFixed(2);
     return s.replace(/\.?0+$/, '');
   }
 
@@ -365,16 +368,16 @@
           '</div>' +
         '</div>' +
         '<div class="lab-bar-labels">' +
-          '<span>min ' + escapeHtml(fmtNum(refLow))  + '</span>' +
-          '<span>max ' + escapeHtml(fmtNum(refHigh)) + '</span>' +
+          '<span>min ' + escapeHtml(fmtLabNum(refLow))  + '</span>' +
+          '<span>max ' + escapeHtml(fmtLabNum(refHigh)) + '</span>' +
         '</div>' +
       '</div>'
     );
   }
 
   function formatRefText(refLow, refHigh, unit) {
-    var lo = (refLow  != null && isFinite(refLow))  ? fmtNum(refLow)  : null;
-    var hi = (refHigh != null && isFinite(refHigh)) ? fmtNum(refHigh) : null;
+    var lo = (refLow  != null && isFinite(refLow))  ? fmtLabNum(refLow)  : null;
+    var hi = (refHigh != null && isFinite(refHigh)) ? fmtLabNum(refHigh) : null;
     var u = unit ? ' ' + escapeHtml(unit) : '';
     if (lo != null && hi != null) return escapeHtml(lo) + ' – ' + escapeHtml(hi) + u;
     if (lo != null) return '&gt; ' + escapeHtml(lo) + u;
@@ -383,15 +386,21 @@
   }
 
   function renderLabTest(m) {
-    var value = (m.latest_value != null && isFinite(m.latest_value)) ? Number(m.latest_value) : null;
+    var rawValue = m.latest_value != null ? m.latest_value : m.value;
+    var value = (rawValue != null && isFinite(Number(rawValue))) ? Number(rawValue) : null;
     var status = classifyLab(value, m.ref_low, m.ref_high, m.flag);
     var pillCls = (status === 'flag') ? 'pill-flag' : (status === 'watch') ? 'pill-watch' : 'pill-ok';
+    var valueText = m.latest_value_text != null ? m.latest_value_text : m.value_text;
     var valHtml = (value != null)
-      ? '<span class="lab-val-num">' + escapeHtml(fmtNum(value)) + '</span>' +
+      ? '<span class="lab-val-num">' + escapeHtml(fmtLabNum(value)) + '</span>' +
         (m.unit ? ' <span class="lab-val-unit">' + escapeHtml(m.unit) + '</span>' : '')
-      : '<span class="lab-val-num">' + escapeHtml(m.latest_value_text || '—') + '</span>';
-    var dateBit = m.latest_taken_at
-      ? '<span class="lab-test-ref" style="margin-left:auto;">' + escapeHtml(formatDate(m.latest_taken_at)) + '</span>'
+      : '<span class="lab-val-num">' + escapeHtml(valueText || '—') + '</span>';
+    var dateIso = m.latest_taken_at != null ? m.latest_taken_at : m.date;
+    var subBits = [];
+    if (m.panel) subBits.push(escapeHtml(m.panel));
+    if (dateIso) subBits.push(escapeHtml(formatDate(dateIso)));
+    var subline = subBits.length
+      ? '<span class="lab-test-ref" style="margin-left:auto;">' + subBits.join(' · ') + '</span>'
       : '';
     return (
       '<div class="lab-test lab-test-' + status + '">' +
@@ -405,7 +414,7 @@
         renderLabBar(value, m.ref_low, m.ref_high, status) +
         '<div class="lab-test-foot">' +
           '<div class="lab-test-ref">Reference: ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
-          dateBit +
+          subline +
         '</div>' +
       '</div>'
     );
@@ -725,6 +734,7 @@
       '.ov-card-body p:last-child { margin-bottom: 0; }',
       '.ov-card-empty p { margin: 0; font-size: 13px; color: #7A8FA6; }',
       '.ov-card .exam-table { margin-top: 4px; }',
+      '.ov-card .lab-panel-body { padding: 8px 0 0; border-top: 1px solid #E5E2DC; }',
       '.ov-chart-wrap { margin-top: 6px; }',
       '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
       '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',
@@ -1046,23 +1056,13 @@
   }
 
   function renderCardPanelSnapshot(c) {
-    var rows = (c.markers || []).map(function (m) {
-      var bar = svgRangeBar(m.value, m.ref_low, m.ref_high, m.flag);
-      return '<tr>' +
-        '<td class="exam-marker">' + escapeHtml(m.marker || '—') + '</td>' +
-        '<td class="exam-value">' + escapeHtml(String(valueWithUnit(m.value, m.value_text, m.unit))) + fmtFlag(m.flag) + '</td>' +
-        '<td class="exam-ref">' + escapeHtml(refRangeStr(m.ref_low, m.ref_high)) + '</td>' +
-        '<td class="exam-bar">' + bar + '</td>' +
-      '</tr>';
-    }).join('');
+    var tests = (c.markers || []).map(renderLabTest).join('');
     return (
       '<section class="ov-card ov-card-panel">' +
         '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
           (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
         '</header>' +
-        '<table class="exam-table"><thead><tr>' +
-          '<th>Marker</th><th>Value</th><th>Ref range</th><th>Position</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<div class="lab-panel-body">' + tests + '</div>' +
       '</section>'
     );
   }
@@ -1127,23 +1127,13 @@
   }
 
   function renderCardFlagList(c) {
-    var rows = (c.items || []).map(function (it) {
-      return '<tr>' +
-        '<td class="exam-marker">' + escapeHtml(it.marker || '—') + fmtFlag(it.flag) + '</td>' +
-        '<td class="exam-value">' + escapeHtml(String(valueWithUnit(it.value, it.value_text, it.unit))) + '</td>' +
-        '<td class="exam-ref">' + escapeHtml(refRangeStr(it.ref_low, it.ref_high)) + '</td>' +
-        '<td class="exam-date">' + escapeHtml(formatDate(it.date)) + '</td>' +
-        '<td class="exam-lab">' + escapeHtml(it.panel || '—') + '</td>' +
-      '</tr>';
-    }).join('');
+    var tests = (c.items || []).map(renderLabTest).join('');
     return (
       '<section class="ov-card ov-card-flags">' +
         '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
           (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
         '</header>' +
-        '<table class="exam-table"><thead><tr>' +
-          '<th>Marker</th><th>Value</th><th>Ref range</th><th>Date</th><th>Panel</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<div class="lab-panel-body">' + tests + '</div>' +
       '</section>'
     );
   }
