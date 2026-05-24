@@ -1862,6 +1862,20 @@
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab { color: rgba(255,255,255,0.85); }',
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab:hover { background: rgba(255,255,255,0.08); }',
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
+      // Override the global .ct-grid-single cap (620px) so the viewer fills the page.
+      'main.jc-paulo-exams .ct-grid.ct-grid-single { max-width: none; margin-left: 0; margin-right: 0; }',
+      'main.jc-paulo-exams .ct-stage { aspect-ratio: 16 / 9; max-height: 720px; }',
+      // AI summary card slot above the exam blocks
+      'main.jc-paulo-exams .paulo-ai-summary-wrap { padding: 0 0 8px; }',
+      'main.jc-paulo-exams .paulo-ai-summary-wrap .container { max-width: 1080px; margin: 0 auto; padding: 24px 24px 0; }',
+      'main.jc-paulo-exams .paulo-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; }',
+      'main.jc-paulo-exams .paulo-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
+      'main.jc-paulo-exams .paulo-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
+      'main.jc-paulo-exams .paulo-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      'main.jc-paulo-exams .paulo-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
+      'main.jc-paulo-exams .paulo-ai-summary-body p { margin: 0 0 10px; }',
+      'main.jc-paulo-exams .paulo-ai-summary-body p:last-child { margin-bottom: 0; }',
+      'main.jc-paulo-exams .paulo-ai-summary-body strong { color: #0D1B2A; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -2075,6 +2089,32 @@
 
     var examsHtml = PAULO_STUDIES.map(buildPauloExamSection).join('');
 
+    var aiSummary =
+      '<section class="paulo-ai-summary-wrap">' +
+        '<div class="container">' +
+          '<div class="paulo-ai-summary">' +
+            '<header class="paulo-ai-summary-head">' +
+              '<h2>' + t('AI summary · Cervical &amp; lumbar MRI', 'Resumo da IA · RM cervical e lombar') + '</h2>' +
+              '<span class="ai-pill">AI</span>' +
+            '</header>' +
+            '<div class="paulo-ai-summary-meta">' +
+              t('Synthesised from both radiology reports · 15 May 2026 · CETAM Diagnóstico',
+                'Sintetizado a partir dos dois laudos radiológicos · 15 de maio de 2026 · CETAM Diagnóstico') +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-en">' +
+              '<p>Same-day MRI of the cervical and lumbar spine demonstrates <strong>widespread multi-level degenerative disc disease</strong>, with three findings that warrant clinical attention. <strong>L5–S1:</strong> a left paramedian / foraminal disc extrusion compressing the ipsilateral descending S1 nerve root — the most acute finding of the pair. <strong>L3–L4:</strong> spinal canal stenosis from a pseudo-bulge combined with facet joint hypertrophy and ligamentum flavum thickening, compressing the anterior descending roots. <strong>C5–C6:</strong> a diffuse disco-osteophytic bulge with ventral cord compression — no cord signal change (no myelopathy) at this point, but the cord is being contacted.</p>' +
+              '<p>Shared across both regions: sinistroconvex axis deviation, marginal osteophytes, diffuse disc dehydration, and paravertebral muscle hypotrophy (mild cervical, moderate lumbar). The lumbar segment additionally shows mild <strong>L3-over-L4 anterolisthesis</strong>, <strong>Modic I (oedema)</strong> signal at L1–L2, L2–L3 and L4–L5, <strong>Modic II (fatty)</strong> at L4–L5, and interspinous ligament oedema at L2–L3, L3–L4 and L5–S1 — markers of active inflammatory degenerative change rather than purely chronic burnt-out disease.</p>' +
+              '<p><strong>Recommended next step:</strong> clinical correlation against current radicular symptoms — left-sided S1 territory from the L5–S1 extrusion, C6 / C7 territory from the C5–C6 bulge — and a spine-specialist evaluation to weigh conservative management vs. interventional options given the L3–L4 canal stenosis, multi-level foraminal narrowing, and ventral cord contact at C5–C6.</p>' +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-pt">' +
+              '<p>As RM cervical e lombar do mesmo dia demonstram <strong>doença discal degenerativa difusa e multinivelar</strong>, com três achados que merecem atenção clínica. <strong>L5–S1:</strong> extrusão discal paramediana / foraminal esquerda comprimindo a raiz descendente S1 ipsilateral — o achado mais agudo do par. <strong>L3–L4:</strong> estenose do canal vertebral por pseudo-abaulamento associado a hipertrofia facetária e espessamento dos ligamentos amarelos, com compressão das descendentes anteriores. <strong>C5–C6:</strong> abaulamento disco-osteofitário difuso com compressão ventral da medula — sem alteração de sinal medular (sem mielopatia) neste momento, porém com contato medular.</p>' +
+              '<p>Achados comuns às duas regiões: desvio sinistro-convexo do eixo, osteófitos marginais, hipohidratação discal difusa e hipotrofia da musculatura paravertebral (discreta na cervical, moderada na lombar). O segmento lombar mostra ainda <strong>anterolistese discreta de L3 sobre L4</strong>, sinal <strong>Modic I (edema)</strong> em L1–L2, L2–L3 e L4–L5, <strong>Modic II (gordura)</strong> em L4–L5 e edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1 — marcadores de alteração degenerativa inflamatória ativa, não apenas degeneração crônica encerrada.</p>' +
+              '<p><strong>Próximo passo recomendado:</strong> correlação clínica com os sintomas radiculares atuais — território S1 à esquerda a partir da extrusão L5–S1; território C6 / C7 a partir do abaulamento C5–C6 — e avaliação por especialista em coluna para ponderar manejo conservador vs. opções intervencionistas frente à estenose em L3–L4, ao estreitamento foraminal multinível e ao contato medular ventral em C5–C6.</p>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
     var imagery =
       '<section class="report-section" id="imagery">' +
         '<div class="container">' +
@@ -2094,7 +2134,7 @@
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + imagery;
+    main.innerHTML = hero + aiSummary + imagery;
     document.body.appendChild(main);
 
     // Wire viewers
