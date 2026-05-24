@@ -2515,6 +2515,24 @@
       'main.jc-silvana-exams .silv-ai-summary-body p:last-child { margin-bottom: 0; }',
       'main.jc-silvana-exams .silv-ai-summary-body strong { color: #0D1B2A; }',
 
+      // Three big insights (Physical / Mental / Spiritual)
+      'main.jc-silvana-exams .silv-insights { margin-top: 22px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      'main.jc-silvana-exams .silv-insights-heading { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0 0 14px; }',
+      'main.jc-silvana-exams .silv-insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      '@media (max-width: 880px) { main.jc-silvana-exams .silv-insights-grid { grid-template-columns: 1fr; } }',
+      'main.jc-silvana-exams .silv-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }',
+      'main.jc-silvana-exams .silv-insight-physical  { border-top: 3px solid #244E6E; }',
+      'main.jc-silvana-exams .silv-insight-mental    { border-top: 3px solid #B8954A; }',
+      'main.jc-silvana-exams .silv-insight-spiritual { border-top: 3px solid #7A8FA6; }',
+      'main.jc-silvana-exams .silv-insight-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
+      'main.jc-silvana-exams .silv-insight-headline { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3; color: #0D1B2A; }',
+      'main.jc-silvana-exams .silv-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      'main.jc-silvana-exams .silv-insight-body p { margin: 0 0 8px; }',
+      'main.jc-silvana-exams .silv-insight-body p:last-child { margin-bottom: 0; }',
+      'main.jc-silvana-exams .silv-insight-body strong { color: #0D1B2A; }',
+      'main.jc-silvana-exams .silv-insight-tbd .silv-insight-headline { color: #7A8FA6; font-weight: 300; font-size: 22px; letter-spacing: 0.04em; }',
+      'main.jc-silvana-exams .silv-insight-tbd .silv-insight-body { color: #7A8FA6; font-style: italic; }',
+
       // Per-marker history table
       'main.jc-silvana-exams .silv-hist { margin-top: 10px; }',
       'main.jc-silvana-exams .silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
@@ -2615,13 +2633,69 @@
           '<p>Across 7 years of bloodwork (Jun 2019 → Apr 2026), the dominant clinical pattern is a <strong>persistent borderline atherogenic lipid profile</strong> — total cholesterol has stayed in the 196–233 mg/dL range with triglycerides chronically above 150 mg/dL (peaking at 233 mg/dL in 2023) and non-HDL hovering near or above 160 mg/dL. LDL is creeping up since 2024 and HDL has improved modestly. <strong>Glucose handling is well preserved</strong>: HbA1c has trended down (5.5 → 5.2 → 5.1%) despite the lipid drift, with HOMA-IR 1.05 in 2022 — no insulin resistance.</p>' +
           '<p>The <strong>thyroid axis is mostly stable but variable</strong>: TSH bounced between 2.4 and 4.0 µIU/mL across years, briefly crossing the upper bound at <strong>4.755 µIU/mL on 18 Feb 2026</strong> before returning to 2.7–3.0 µIU/mL six weeks later. T4-free has remained euthyroid throughout. Worth a repeat TSH in 6–12 weeks rather than treating on the single elevated reading. The <strong>full Oct 2025 autoimmune panel was clean</strong> — ANA non-reactive, anti-CCP / anti-SSA / anti-SSB / ANCA all negative, rheumatoid factor 2.5 — but complement C3 ran high at <strong>162.6 mg/dL</strong>, consistent with an acute-phase response rather than active disease. The Dec 2025 allergy panel was uniformly negative (all 9 specific IgEs &lt; 0.10 kU/L; total IgE 21 UI/mL).</p>' +
           '<p>Two functional findings stand out: a <strong>flat lactose tolerance curve in Apr 2022</strong> (Δ glucose 18.5 mg/dL vs. normal &gt; 30 mg/dL) consistent with lactase deficiency, and <strong>moderate diamine oxidase activity (6.99 U/mL, 55 HDU)</strong> in Mar 2026 — within range but at the lower-middle of "moderate", supporting the histamine-intolerance workup Dr. Janaina ordered. Vitamin D climbed steadily from 35.1 (2019) → 61.49 ng/mL (2026), now just above the upper risk-group bound — worth reviewing supplementation. Kidney function had one transient eGFR dip to <strong>58.2 mL/min/1.73m²</strong> on 18 Feb 2026 (creatinine 1.10) but rebounded by 25 Apr (creatinine 1.00).</p>' +
-          '<p><strong>Suggested follow-up:</strong> (1) repeat TSH in 6–12 weeks to confirm whether the Feb 2026 spike is sustained; (2) lipid-focused intervention discussion — Total Chol / TG / non-HDL all chronically over target; (3) trend creatinine again in 3 months to rule out a sustained eGFR drop; (4) reassess Vitamin D dose; (5) the histamine-intolerance workup (DAO + clinical) can move to the dietary trial Dr. Janaina recommended.</p>' +
         '</div>' +
         '<div class="silv-ai-summary-body lang-pt">' +
           '<p>Ao longo de 7 anos (jun 2019 → abr 2026), o padrão dominante é um <strong>perfil lipídico persistentemente borderline aterogênico</strong> — colesterol total entre 196 e 233 mg/dL, triglicérides cronicamente acima de 150 mg/dL (pico de 233 mg/dL em 2023) e não-HDL próximo ou acima de 160 mg/dL. LDL em alta desde 2024 e HDL com leve melhora. <strong>O metabolismo glicêmico está bem preservado</strong>: HbA1c em queda (5,5 → 5,2 → 5,1%) apesar do drift lipídico, com HOMA-IR 1,05 em 2022 — sem resistência à insulina.</p>' +
           '<p>O <strong>eixo tireoidiano é majoritariamente estável, mas variável</strong>: TSH oscilou entre 2,4 e 4,0 µIU/mL ao longo dos anos, cruzando brevemente o limite superior em <strong>4,755 µIU/mL em 18 fev 2026</strong> antes de retornar para 2,7–3,0 µIU/mL seis semanas depois. T4 livre permaneceu eutireoidiano. Vale repetir o TSH em 6–12 semanas em vez de tratar com base em uma única medida elevada. O <strong>painel autoimune completo de out 2025 está limpo</strong> — FAN não reagente, anti-CCP / anti-SSA / anti-SSB / ANCA negativos, FR 2,5 — porém o complemento C3 veio alto em <strong>162,6 mg/dL</strong>, compatível com resposta de fase aguda, não doença ativa. O painel de alergia de dez 2025 veio uniformemente negativo (todos os 9 IgE específicos &lt; 0,10 kU/L; IgE total 21 UI/mL).</p>' +
           '<p>Dois achados funcionais se destacam: a <strong>curva de lactose plana em abr 2022</strong> (Δ glicose 18,5 mg/dL vs. normal &gt; 30 mg/dL), compatível com deficiência de lactase, e <strong>atividade da DAO moderada (6,99 U/mL, 55 HDU)</strong> em mar 2026 — dentro do intervalo, mas no terço inferior da faixa "moderada", apoiando a investigação de intolerância à histamina solicitada pela Dra. Janaina. Vitamina D subiu de 35,1 (2019) → 61,49 ng/mL (2026), agora logo acima do limite superior do grupo de risco — vale revisar a suplementação. A função renal teve uma queda transitória da TFG para <strong>58,2 mL/min/1,73m²</strong> em 18 fev 2026 (creatinina 1,10), com recuperação em 25 abr (creatinina 1,00).</p>' +
-          '<p><strong>Próximos passos sugeridos:</strong> (1) repetir TSH em 6–12 semanas para confirmar se a alta de fev 2026 é sustentada; (2) discutir manejo lipídico — Colesterol total / TG / não-HDL cronicamente acima da meta; (3) repetir creatinina em 3 meses para descartar queda sustentada da TFG; (4) reavaliar dose de vitamina D; (5) a investigação de intolerância à histamina (DAO + clínica) pode prosseguir para o trial dietético recomendado pela Dra. Janaina.</p>' +
+        '</div>' +
+
+        // ── Three big insights, one per pillar ─────────────────────
+        '<div class="silv-insights">' +
+          '<div class="silv-insights-heading">' +
+            t('Three big insights', 'Três grandes insights') +
+          '</div>' +
+          '<div class="silv-insights-grid">' +
+
+            // ── Physical ──
+            '<div class="silv-insight silv-insight-physical">' +
+              '<div class="silv-insight-eyebrow">' + t('Physical', 'Físico') + '</div>' +
+              '<div class="silv-insight-headline">' +
+                t('Pilates 2× per week + brisk walking 30 min daily',
+                  'Pilates 2× por semana + caminhada vigorosa 30 min/dia') +
+              '</div>' +
+              '<div class="silv-insight-body lang-en">' +
+                '<p>The single combination that directly targets the dominant 7-year pattern — chronically borderline-high cholesterol and triglycerides — while protecting post-menopausal bone density and lumbar / core stability. Aerobic load (walking) is the highest-yield intervention for triglycerides and HDL; Pilates loads the spine isometrically and builds the deep stabilisers that matter most after 55.</p>' +
+                '<p><strong>Lab-side follow-ups inside this pillar:</strong> repeat TSH in 6–12 weeks to confirm the Feb 2026 spike isn\'t sustained; recheck creatinine in 3 months to rule out a sustained eGFR drop; lipid recheck 6 weeks after starting the routine; reassess Vitamin D dose given the climb to 61.49 ng/mL; advance the histamine-intolerance workup (DAO + clinical) to the dietary trial Dr. Janaina recommended.</p>' +
+              '</div>' +
+              '<div class="silv-insight-body lang-pt">' +
+                '<p>A combinação que ataca o padrão dominante dos últimos 7 anos — colesterol e triglicérides cronicamente acima do alvo — ao mesmo tempo que protege a densidade óssea pós-menopausa e a estabilidade lombar / do core. Carga aeróbica (caminhada) é a intervenção de maior retorno para triglicérides e HDL; o Pilates carrega a coluna de forma isométrica e fortalece os estabilizadores profundos que mais importam após os 55 anos.</p>' +
+                '<p><strong>Acompanhamentos laboratoriais deste pilar:</strong> repetir TSH em 6–12 semanas para confirmar se a alta de fev 2026 é sustentada; refazer creatinina em 3 meses para descartar queda sustentada da TFG; novo lipidograma 6 semanas após iniciar a rotina; reavaliar dose de vitamina D após a subida para 61,49 ng/mL; avançar a investigação de intolerância à histamina (DAO + clínica) para o trial dietético recomendado pela Dra. Janaina.</p>' +
+              '</div>' +
+            '</div>' +
+
+            // ── Mental ──
+            '<div class="silv-insight silv-insight-mental">' +
+              '<div class="silv-insight-eyebrow">' + t('Mental', 'Mental') + '</div>' +
+              '<div class="silv-insight-headline">' +
+                t('Quarterly clinical-psychology check-in + annual cognitive baseline',
+                  'Check-in trimestral com psicólogo clínico + avaliação cognitiva anual') +
+              '</div>' +
+              '<div class="silv-insight-body lang-en">' +
+                '<p>No mental-health data has been ingested yet, which is itself the strongest argument for a structured baseline. The post-menopausal life-phase transition (mood, sleep architecture, executive function) deserves a dedicated channel rather than being absorbed into routine medical visits. A quarterly cadence is enough to catch drift without medicalising normal variation, and an annual cognitive screen establishes a reference point now (while measurement is easy) for any future comparison.</p>' +
+                '<p>The Feb 2024 morning cortisol of <strong>5.93 µg/dL</strong> (below the 7–21 µg/dL window) is the one biological signal in this dataset that touches the stress / HPA axis — it would be worth a single repeat alongside the next routine bloodwork, especially if sleep or energy is a current complaint.</p>' +
+              '</div>' +
+              '<div class="silv-insight-body lang-pt">' +
+                '<p>Nenhum dado de saúde mental foi ingerido ainda — o que é, em si, o argumento mais forte para uma avaliação de base estruturada. A transição da pós-menopausa (humor, arquitetura do sono, função executiva) merece um canal próprio, em vez de ser absorvida nas consultas médicas de rotina. Uma cadência trimestral basta para captar drift sem medicalizar variação normal, e uma triagem cognitiva anual estabelece desde já uma referência (enquanto a medida é fácil) para qualquer comparação futura.</p>' +
+                '<p>O cortisol matinal de fev 2024 em <strong>5,93 µg/dL</strong> (abaixo da janela 7–21 µg/dL) é o único sinal biológico deste conjunto que toca o eixo HPA / estresse — vale uma única repetição junto da próxima coleta de rotina, sobretudo se houver queixa atual de sono ou energia.</p>' +
+              '</div>' +
+            '</div>' +
+
+            // ── Spiritual ──
+            '<div class="silv-insight silv-insight-spiritual silv-insight-tbd">' +
+              '<div class="silv-insight-eyebrow">' + t('Spiritual', 'Espiritual') + '</div>' +
+              '<div class="silv-insight-headline">TBD</div>' +
+              '<div class="silv-insight-body lang-en">' +
+                '<p>No spiritual / values data ingested yet — no life-event log, no wheel-of-life self-assessment, no journal or writing samples. Until any of those exist for this patient, this pillar stays empty by design rather than being filled with generic copy.</p>' +
+                '<p>The moment a wheel-of-life CSV, a life-event timeline or a few journal entries are added via <em>Add data</em>, the AI will surface alignment patterns and meaning-related insights here in the same shape as the other two pillars.</p>' +
+              '</div>' +
+              '<div class="silv-insight-body lang-pt">' +
+                '<p>Nenhum dado espiritual / de valores foi ingerido ainda — sem registro de eventos de vida, sem autoavaliação da roda da vida, sem amostras de diário ou escrita. Enquanto nada disso existir para a paciente, este pilar fica intencionalmente vazio em vez de ser preenchido com texto genérico.</p>' +
+                '<p>No momento em que um CSV da roda da vida, uma linha do tempo de eventos ou algumas entradas de diário forem adicionados em <em>Adicionar dados</em>, a IA vai trazer aqui padrões de alinhamento e insights de sentido no mesmo formato dos outros dois pilares.</p>' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
         '</div>' +
       '</section>';
 
