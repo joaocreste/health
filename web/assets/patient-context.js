@@ -185,18 +185,9 @@
 
   function renderLabList(labs) {
     if (!labs || labs.length === 0) return '<div class="ov-empty">No lab results yet.</div>';
-    return '<ul class="ov-list">' + labs.map(function (l) {
-      var v = (l.value != null) ? (l.value + (l.unit ? ' ' + l.unit : '')) : (l.value_text || '—');
-      var ref = (l.ref_low != null || l.ref_high != null)
-        ? ' (ref ' + (l.ref_low != null ? l.ref_low : '–') + '–' + (l.ref_high != null ? l.ref_high : '–') + ')' : '';
-      return '<li>' +
-               '<span class="ov-list-title">' + escapeHtml(l.marker || '—') + fmtFlag(l.flag) + '</span>' +
-               '<span class="ov-list-meta">' +
-                 escapeHtml(v) + escapeHtml(ref) + ' · ' + escapeHtml(formatDate(l.taken_at)) +
-                 (l.panel ? ' · ' + escapeHtml(l.panel) : '') +
-               '</span>' +
-             '</li>';
-    }).join('') + '</ul>';
+    return '<div class="lab-panel-body lab-panel-body-flat">' +
+      labs.map(renderLabTest).join('') +
+    '</div>';
   }
 
   // Mirror Patient-Zero's landing page exactly: dark-blue hero + Reports cards.
@@ -395,7 +386,9 @@
       ? '<span class="lab-val-num">' + escapeHtml(fmtLabNum(value)) + '</span>' +
         (m.unit ? ' <span class="lab-val-unit">' + escapeHtml(m.unit) + '</span>' : '')
       : '<span class="lab-val-num">' + escapeHtml(valueText || '—') + '</span>';
-    var dateIso = m.latest_taken_at != null ? m.latest_taken_at : m.date;
+    var dateIso = m.latest_taken_at != null ? m.latest_taken_at
+                : m.date != null ? m.date
+                : m.taken_at;
     var subBits = [];
     if (m.panel) subBits.push(escapeHtml(m.panel));
     if (dateIso) subBits.push(escapeHtml(formatDate(dateIso)));
@@ -735,6 +728,7 @@
       '.ov-card-empty p { margin: 0; font-size: 13px; color: #7A8FA6; }',
       '.ov-card .exam-table { margin-top: 4px; }',
       '.ov-card .lab-panel-body { padding: 8px 0 0; border-top: 1px solid #E5E2DC; }',
+      '.lab-panel-body-flat { padding: 0; border-top: none; }',
       '.ov-chart-wrap { margin-top: 6px; }',
       '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
       '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',
