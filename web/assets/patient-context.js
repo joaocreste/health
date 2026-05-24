@@ -19,8 +19,9 @@
 
   if (window.JC_PUBLIC === true || window.JC_PICKER_PAGE === true) return;
 
-  var PATIENT_ZERO  = 'pending:joao';
-  var PAULO_SILOTTO = 'pending:paulo-silotto-df3441';
+  var PATIENT_ZERO    = 'pending:joao';
+  var PAULO_SILOTTO   = 'pending:paulo-silotto-df3441';
+  var SILVANA_CRESTE  = 'pending:silvana-creste-18ba19';
 
   var params = new URLSearchParams(location.search);
   var fromUrl = params.get('patient');
@@ -126,6 +127,7 @@
           el.classList.contains('jc-exams') ||
           el.classList.contains('jc-home') ||
           el.classList.contains('jc-paulo-exams') ||
+          el.classList.contains('jc-silvana-exams') ||
           el.classList.contains('jc-danger-zone') ||
           el.classList.contains('jc-danger-backdrop')) continue;
       el.style.display = 'none';
@@ -1106,6 +1108,10 @@
         renderPauloPhysicalExams();
         return;
       }
+      if (patient === SILVANA_CRESTE) {
+        renderSilvanaPhysicalExams();
+        return;
+      }
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
         .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
@@ -1119,6 +1125,15 @@
     if (patient === PAULO_SILOTTO &&
         (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
       renderPauloPhysicalExams();
+      return;
+    }
+
+    // Silvana's data is the manually-curated multi-year lab history;
+    // route every Physical sub-page to the bespoke lab page for the
+    // same reason as Paulo's.
+    if (patient === SILVANA_CRESTE &&
+        (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
+      renderSilvanaPhysicalExams();
       return;
     }
 
@@ -2179,6 +2194,466 @@
 
     // Place the danger zone beneath the new main, mirroring how the
     // jc-overview view does it for other patients.
+    injectDangerZone(main);
+  }
+
+  /* ── Silvana Creste · bespoke lab-history page ──────────────────────
+     Reads window.SILVANA_LABS (loaded via assets/silvana-labs.js) and
+     renders an exam page in Joao's style:
+       1. Dark hero with patient meta
+       2. AI summary card (gold-bordered, with AI pill)
+       3. Per-panel <details class="lab-panel"> blocks. Each panel hosts
+          one .lab-test card per marker — latest value, status pill,
+          horizontal range bar, plus an inline history table for the
+          marker.
+       4. Single end-of-page historical-comparison table (the same wide
+          side-by-side grid Joao's static page uses) populated from
+          every marker × every sample.
+       5. Source-PDF list with download links. */
+
+  function silvanaLatestPoint(marker) {
+    var pts = (marker.points || []).slice();
+    pts.sort(function (a, b) { return dateMs(b.date) - dateMs(a.date); });
+    return pts[0] || null;
+  }
+
+  function silvanaClassify(value, refLow, refHigh, flag) {
+    if (flag === 'H' || flag === 'HH' || flag === 'L' || flag === 'LL') return 'flag';
+    if (value == null || !isFinite(value)) return 'normal';
+    if (refLow  != null && isFinite(refLow)  && value < refLow)  return 'flag';
+    if (refHigh != null && isFinite(refHigh) && value > refHigh) return 'flag';
+    return 'normal';
+  }
+
+  function silvanaBar(value, refLow, refHigh, status) {
+    if (value == null || !isFinite(value)) return '';
+    var hasLow  = (refLow  != null && isFinite(refLow));
+    var hasHigh = (refHigh != null && isFinite(refHigh));
+    if (!hasLow && !hasHigh) return '';
+    var lo = hasLow  ? refLow  : 0;
+    var hi = hasHigh ? refHigh : Math.max(refLow * 2, value * 1.2, refLow + 1);
+    if (hi <= lo) return '';
+    var pct = 10 + ((value - lo) / (hi - lo)) * 80;
+    if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+    var markerCls = (status === 'flag') ? 'lab-bar-marker-flag' : 'lab-bar-marker-normal';
+    var leftLabel  = hasLow  ? '<span>' + t('min ' + fmtLabNum(refLow),  'mín ' + fmtLabNum(refLow))  + '</span>' : '<span></span>';
+    var rightLabel = hasHigh ? '<span>' + t('max ' + fmtLabNum(refHigh), 'máx ' + fmtLabNum(refHigh)) + '</span>' : '<span></span>';
+    return (
+      '<div class="lab-bar-wrap">' +
+        '<div class="lab-bar">' +
+          '<div class="lab-bar-bg"></div>' +
+          '<div class="lab-bar-range"></div>' +
+          '<div class="lab-bar-tick lab-bar-tick-min"></div>' +
+          '<div class="lab-bar-tick lab-bar-tick-max"></div>' +
+          '<div class="lab-bar-marker ' + markerCls + '" style="left: ' + pct.toFixed(2) + '%;">' +
+            '<div class="lab-bar-dot"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lab-bar-labels">' + leftLabel + rightLabel + '</div>' +
+      '</div>'
+    );
+  }
+
+  function silvanaMarkerCard(m) {
+    var latest = silvanaLatestPoint(m);
+    var v   = latest ? latest.value     : null;
+    var vt  = latest ? latest.value_text : null;
+    var flg = latest ? latest.flag       : null;
+    var status = silvanaClassify(v, m.ref_low, m.ref_high, flg);
+    var pillCls = status === 'flag' ? 'pill-flag' : 'pill-ok';
+    var valHtml = (v != null && isFinite(v))
+      ? '<span class="lab-val-num">' + fmtLabNum(v) + '</span>' +
+        (m.unit ? ' <span class="lab-val-unit">' + escapeHtml(m.unit) + '</span>' : '')
+      : '<span class="lab-val-num">' + escapeHtml(vt || '—') + '</span>';
+
+    // Per-marker history table (the user's "history table beneath each card")
+    var hist = (m.points || []).slice().sort(function (a, b) {
+      return dateMs(b.date) - dateMs(a.date);
+    });
+    var historyHtml = '';
+    if (hist.length > 1) {
+      var rows = hist.map(function (p, i) {
+        var disp = (p.value != null && isFinite(p.value))
+          ? fmtLabNum(p.value) + (m.unit ? ' ' + escapeHtml(m.unit) : '')
+          : escapeHtml(p.value_text || '—');
+        var st = silvanaClassify(p.value, m.ref_low, m.ref_high, p.flag);
+        var flgTag = p.flag ? '<span class="lab-flag ' + (p.flag.charAt(0)==='L'?'low':'high') + '">' + escapeHtml(p.flag) + '</span>' : '';
+        var cls = 'silv-hist-row' + (i === 0 ? ' silv-hist-row-latest' : '') + (st === 'flag' ? ' silv-hist-row-flag' : '');
+        return (
+          '<tr class="' + cls + '">' +
+            '<td class="silv-hist-date">' + escapeHtml(formatDate(p.date)) + '</td>' +
+            '<td class="silv-hist-val">' + disp + ' ' + flgTag + '</td>' +
+            (p.note_en || p.note_pt ?
+              '<td class="silv-hist-note">' + t(escapeHtml(p.note_en || ''), escapeHtml(p.note_pt || '')) + '</td>'
+              : '<td class="silv-hist-note">—</td>') +
+          '</tr>'
+        );
+      }).join('');
+      historyHtml =
+        '<details class="silv-hist">' +
+          '<summary>' + t(hist.length + ' historical samples · click to expand',
+                          hist.length + ' amostras anteriores · clique para expandir') + '</summary>' +
+          '<table class="silv-hist-table">' +
+            '<thead><tr>' +
+              '<th>' + t('Date', 'Data') + '</th>' +
+              '<th>' + t('Value', 'Valor') + '</th>' +
+              '<th>' + t('Note', 'Nota') + '</th>' +
+            '</tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>' +
+        '</details>';
+    }
+
+    var noteHtml = '';
+    if (latest && (latest.note_en || latest.note_pt)) {
+      noteHtml =
+        '<div class="lab-note">' +
+          '<span class="lang-en">' + escapeHtml(latest.note_en || '') + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(latest.note_pt || '') + '</span>' +
+        '</div>';
+    }
+
+    var latestDate = latest ? formatDate(latest.date) : '—';
+
+    return (
+      '<div class="lab-test lab-test-' + status + '">' +
+        '<div class="lab-test-head">' +
+          '<div class="lab-test-name">' +
+            '<span class="lang-en">' + escapeHtml(m.marker_en) + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(m.marker_pt) + '</span>' +
+          '</div>' +
+          '<div class="lab-test-meta">' +
+            '<span class="lab-test-val">' + valHtml + '</span>' +
+            '<span class="pill ' + pillCls + '">' +
+              (status === 'flag' ? t('Out of range', 'Fora do intervalo') : t('Normal', 'Normal')) +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+        silvanaBar(v, m.ref_low, m.ref_high, status) +
+        '<div class="lab-test-foot">' +
+          '<div class="lab-test-ref">' +
+            t('Reference:', 'Referência:') + ' ' +
+            '<span class="lang-en">' + escapeHtml(m.ref_text_en || '—') + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(m.ref_text_pt || '—') + '</span>' +
+          '</div>' +
+          '<div class="silv-latest-date">' +
+            t('Latest sample: ', 'Última amostra: ') + escapeHtml(latestDate) +
+          '</div>' +
+        '</div>' +
+        noteHtml +
+        historyHtml +
+      '</div>'
+    );
+  }
+
+  function silvanaPanelDetails(pn) {
+    var body = pn.markers.map(silvanaMarkerCard).join('');
+    var n = pn.markers.length;
+    var countHtml = n + ' ' + t(n === 1 ? 'marker' : 'markers', n === 1 ? 'marcador' : 'marcadores');
+    return (
+      '<details class="lab-panel" id="silv-panel-' + pn.slug + '" open>' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' +
+            '<span class="lang-en">' + escapeHtml(pn.title_en) + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(pn.title_pt) + '</span>' +
+          '</span>' +
+          '<span class="lab-panel-sub">' +
+            '<span class="lang-en">' + escapeHtml(pn.subtitle_en || '') + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(pn.subtitle_pt || '') + '</span>' +
+          '</span>' +
+          '<span class="lab-panel-count">' + countHtml + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' + body + '</div>' +
+      '</details>'
+    );
+  }
+
+  function silvanaHistoricalComparison(panels) {
+    // Build union of (date, lab, doctor) samples
+    var sampleMap = {};
+    panels.forEach(function (pn) {
+      pn.markers.forEach(function (m) {
+        (m.points || []).forEach(function (p) {
+          var key = p.date + '|';
+          if (!sampleMap[key]) {
+            sampleMap[key] = { key: key, date: p.date, ts: dateMs(p.date) || 0 };
+          }
+        });
+      });
+    });
+    var samples = Object.keys(sampleMap).map(function (k) { return sampleMap[k]; });
+    samples.sort(function (a, b) { return b.ts - a.ts; });
+    if (samples.length < 2) return '';
+
+    // Decorate each sample with doc / lab from the document list when present
+    var docByDate = {};
+    (window.SILVANA_LABS.documents || []).forEach(function (d) { docByDate[d.date] = d; });
+    samples.forEach(function (s) {
+      var d = docByDate[s.date];
+      if (d) { s.lab = d.laboratory; s.doctor = d.doctor; }
+    });
+
+    var headerCols = samples.map(function (s, i) {
+      var cls = 'lab-cmp-col-head' + (i === 0 ? ' lab-cmp-col-latest' : '');
+      return (
+        '<th class="' + cls + '">' +
+          '<div class="lab-cmp-date">' + escapeHtml(formatDate(s.date)) + '</div>' +
+          '<div class="lab-cmp-lab">' + escapeHtml(s.lab || '—') + '</div>' +
+          '<div class="lab-cmp-md">' + escapeHtml(s.doctor || '—') + '</div>' +
+        '</th>'
+      );
+    }).join('');
+
+    var bodyRows = panels.map(function (pn) {
+      var rows = pn.markers.map(function (m) {
+        var byDate = {};
+        (m.points || []).forEach(function (p) { byDate[p.date] = p; });
+        var cells = samples.map(function (s, i) {
+          var p = byDate[s.date];
+          if (!p) return '<td class="lab-cmp-val lab-cmp-empty">—</td>';
+          var v = (p.value != null && isFinite(Number(p.value)))
+            ? fmtLabNum(Number(p.value))
+            : (p.value_text || '—');
+          var flagAttr = (p.flag === 'H' || p.flag === 'HH') ? ' data-flag="high"'
+                       : (p.flag === 'L' || p.flag === 'LL') ? ' data-flag="low"' : '';
+          var cls = 'lab-cmp-val' + (i === 0 ? ' lab-cmp-latest' : '');
+          return '<td class="' + cls + '"' + flagAttr + '>' + escapeHtml(String(v)) + '</td>';
+        }).join('');
+        var unit = m.unit ? ' <small class="lab-cmp-unit">(' + escapeHtml(m.unit) + ')</small>' : '';
+        var markerLabel =
+          '<span class="lang-en">' + escapeHtml(m.marker_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(m.marker_pt) + '</span>';
+        return (
+          '<tr>' +
+            '<th class="lab-cmp-marker">' + markerLabel + unit + '</th>' +
+            cells +
+          '</tr>'
+        );
+      }).join('');
+      var pnLabel =
+        '<span class="lang-en">' + escapeHtml(pn.title_en) + '</span>' +
+        '<span class="lang-pt">' + escapeHtml(pn.title_pt) + '</span>';
+      return (
+        '<tr class="lab-cmp-section"><th colspan="' + (samples.length + 1) + '">' + pnLabel + '</th></tr>' +
+        rows
+      );
+    }).join('');
+
+    var nMarkers = panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
+    var countLine = nMarkers + ' ' + t(nMarkers === 1 ? 'marker' : 'markers', nMarkers === 1 ? 'marcador' : 'marcadores') +
+                    ' · ' + samples.length + ' ' + t(samples.length === 1 ? 'sample' : 'samples', samples.length === 1 ? 'amostra' : 'amostras');
+
+    return (
+      '<details class="lab-panel" id="silv-comparison" open style="margin-top:18px;">' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' + t('Historical comparison', 'Comparação histórica') + '</span>' +
+          '<span class="lab-panel-sub">' +
+            t('All samples side-by-side · most recent at left · empty cells where a marker wasn\'t tested',
+              'Todas as amostras lado a lado · mais recente à esquerda · células vazias onde um marcador não foi dosado') +
+          '</span>' +
+          '<span class="lab-panel-count">' + countLine + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' +
+          '<div class="lab-cmp-wrap">' +
+            '<table class="lab-cmp-table">' +
+              '<thead><tr>' +
+                '<th class="lab-cmp-marker-head">' + t('Marker', 'Marcador') + '</th>' +
+                headerCols +
+              '</tr></thead>' +
+              '<tbody>' + bodyRows + '</tbody>' +
+            '</table>' +
+          '</div>' +
+        '</div>' +
+      '</details>'
+    );
+  }
+
+  function silvanaDocsList(docs) {
+    var items = docs.map(function (d) {
+      return (
+        '<li class="silv-doc">' +
+          '<a href="scans/' + escapeHtml(d.pdf) + '" download class="silv-doc-link">' +
+            '<span class="silv-doc-title">' +
+              '<span class="lang-en">' + escapeHtml(d.title_en) + '</span>' +
+              '<span class="lang-pt">' + escapeHtml(d.title_pt) + '</span>' +
+            '</span>' +
+            '<span class="silv-doc-meta">' +
+              escapeHtml(d.laboratory || '—') +
+              (d.doctor ? ' · ' + escapeHtml(d.doctor) : '') +
+            '</span>' +
+          '</a>' +
+        '</li>'
+      );
+    }).join('');
+    return '<ul class="silv-docs">' + items + '</ul>';
+  }
+
+  function injectSilvanaStyles() {
+    if (document.getElementById('silvana-exams-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'silvana-exams-styles';
+    s.textContent = [
+      'main.jc-silvana-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
+      'main.jc-silvana-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
+      'main.jc-silvana-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-silvana-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
+      'main.jc-silvana-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
+      'main.jc-silvana-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 72ch; }',
+      'main.jc-silvana-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
+      'main.jc-silvana-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
+      'main.jc-silvana-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
+      'main.jc-silvana-exams #silv-content { padding: 36px 0 16px; }',
+      'main.jc-silvana-exams #silv-content > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+
+      // AI summary card
+      'main.jc-silvana-exams .silv-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; }',
+      'main.jc-silvana-exams .silv-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
+      'main.jc-silvana-exams .silv-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
+      'main.jc-silvana-exams .silv-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      'main.jc-silvana-exams .silv-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
+      'main.jc-silvana-exams .silv-ai-summary-body p { margin: 0 0 10px; }',
+      'main.jc-silvana-exams .silv-ai-summary-body p:last-child { margin-bottom: 0; }',
+      'main.jc-silvana-exams .silv-ai-summary-body strong { color: #0D1B2A; }',
+
+      // Per-marker history table
+      'main.jc-silvana-exams .silv-hist { margin-top: 10px; }',
+      'main.jc-silvana-exams .silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
+      'main.jc-silvana-exams .silv-hist summary::-webkit-details-marker { display: none; }',
+      'main.jc-silvana-exams .silv-hist summary::before { content: "▸"; display: inline-block; width: 12px; margin-right: 4px; transition: transform 0.15s; }',
+      'main.jc-silvana-exams .silv-hist[open] summary::before { transform: rotate(90deg); }',
+      'main.jc-silvana-exams .silv-hist-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      'main.jc-silvana-exams .silv-hist-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
+      'main.jc-silvana-exams .silv-hist-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: top; color: #1E2D3D; }',
+      'main.jc-silvana-exams .silv-hist-row-latest td { background: rgba(184, 149, 74, 0.06); font-weight: 500; }',
+      'main.jc-silvana-exams .silv-hist-row-flag .silv-hist-val { color: #7A2E22; }',
+      'main.jc-silvana-exams .silv-hist-date { font-family: "IBM Plex Mono", monospace; color: #7A8FA6; white-space: nowrap; }',
+      'main.jc-silvana-exams .silv-hist-val { font-family: "IBM Plex Mono", monospace; }',
+      'main.jc-silvana-exams .silv-hist-note { font-size: 11px; color: #7A8FA6; }',
+      'main.jc-silvana-exams .silv-latest-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+
+      // Historical comparison table cell coloring
+      'main.jc-silvana-exams .lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
+      'main.jc-silvana-exams .lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
+
+      // Source PDF list
+      'main.jc-silvana-exams .silv-docs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }',
+      'main.jc-silvana-exams .silv-doc-link { display: block; padding: 12px 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; color: #0D1B2A; text-decoration: none; transition: border-color 0.12s, transform 0.06s; }',
+      'main.jc-silvana-exams .silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
+      'main.jc-silvana-exams .silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
+      'main.jc-silvana-exams .silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function renderSilvanaPhysicalExams() {
+    if (!window.SILVANA_LABS) {
+      console.error('SILVANA_LABS data not loaded — expected via assets/silvana-labs.js');
+      renderEmptyShell(patient, 'Silvana Creste', t('Physical → Exams', 'Físico → Exames'));
+      return;
+    }
+    injectSilvanaStyles();
+    document.title = 'JC Advisory — Physical · Exams · Silvana Creste';
+
+    var data = window.SILVANA_LABS;
+    var dates = [];
+    data.panels.forEach(function (pn) {
+      pn.markers.forEach(function (m) {
+        (m.points || []).forEach(function (p) { if (p.date) dates.push(p.date); });
+      });
+    });
+    dates.sort();
+    var firstDate = dates[0];
+    var lastDate  = dates[dates.length - 1];
+
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('Lab history · Silvana Creste',
+              'Histórico laboratorial · Silvana Creste') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('Lab markers consolidated from ' + data.documents.length + ' source PDFs spanning ' + formatDate(firstDate) + ' to ' + formatDate(lastDate) + '. Each panel below shows the latest result with reference range and status pill; expand the per-marker history toggle to see every prior sample. A single side-by-side comparison table at the bottom puts every date on one grid.',
+              'Marcadores laboratoriais consolidados a partir de ' + data.documents.length + ' PDFs originais, de ' + formatDate(firstDate) + ' a ' + formatDate(lastDate) + '. Cada painel abaixo mostra o resultado mais recente com intervalo de referência e o status; expanda o histórico de cada marcador para ver as amostras anteriores. Uma tabela única no fim coloca todas as datas lado a lado.') +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Patient', 'Paciente') + '</span><span>' + escapeHtml(data.patient.full_name) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('DOB · age', 'Nasc. · idade') + '</span>' +
+              '<span>29 ' + t('Sep', 'set') + ' 1967 · 58</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Date range', 'Intervalo') + '</span>' +
+              '<span>' + escapeHtml(formatDate(firstDate)) + ' → ' + escapeHtml(formatDate(lastDate)) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Source PDFs', 'PDFs originais') + '</span>' +
+              '<span>' + data.documents.length + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Markers tracked', 'Marcadores') + '</span>' +
+              '<span>' + data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    var ai =
+      '<section class="silv-ai-summary">' +
+        '<header class="silv-ai-summary-head">' +
+          '<h2>' + t('AI summary · 7-year lab review', 'Resumo da IA · 7 anos de exames') + '</h2>' +
+          '<span class="ai-pill">AI</span>' +
+        '</header>' +
+        '<div class="silv-ai-summary-meta">' +
+          t('Synthesised from ' + data.documents.length + ' source PDFs · ' + formatDate(firstDate) + ' → ' + formatDate(lastDate),
+            'Sintetizado a partir de ' + data.documents.length + ' PDFs · ' + formatDate(firstDate) + ' a ' + formatDate(lastDate)) +
+        '</div>' +
+        '<div class="silv-ai-summary-body lang-en">' +
+          '<p>Across 7 years of bloodwork (Jun 2019 → Apr 2026), the dominant clinical pattern is a <strong>persistent borderline atherogenic lipid profile</strong> — total cholesterol has stayed in the 196–233 mg/dL range with triglycerides chronically above 150 mg/dL (peaking at 233 mg/dL in 2023) and non-HDL hovering near or above 160 mg/dL. LDL is creeping up since 2024 and HDL has improved modestly. <strong>Glucose handling is well preserved</strong>: HbA1c has trended down (5.5 → 5.2 → 5.1%) despite the lipid drift, with HOMA-IR 1.05 in 2022 — no insulin resistance.</p>' +
+          '<p>The <strong>thyroid axis is mostly stable but variable</strong>: TSH bounced between 2.4 and 4.0 µIU/mL across years, briefly crossing the upper bound at <strong>4.755 µIU/mL on 18 Feb 2026</strong> before returning to 2.7–3.0 µIU/mL six weeks later. T4-free has remained euthyroid throughout. Worth a repeat TSH in 6–12 weeks rather than treating on the single elevated reading. The <strong>full Oct 2025 autoimmune panel was clean</strong> — ANA non-reactive, anti-CCP / anti-SSA / anti-SSB / ANCA all negative, rheumatoid factor 2.5 — but complement C3 ran high at <strong>162.6 mg/dL</strong>, consistent with an acute-phase response rather than active disease. The Dec 2025 allergy panel was uniformly negative (all 9 specific IgEs &lt; 0.10 kU/L; total IgE 21 UI/mL).</p>' +
+          '<p>Two functional findings stand out: a <strong>flat lactose tolerance curve in Apr 2022</strong> (Δ glucose 18.5 mg/dL vs. normal &gt; 30 mg/dL) consistent with lactase deficiency, and <strong>moderate diamine oxidase activity (6.99 U/mL, 55 HDU)</strong> in Mar 2026 — within range but at the lower-middle of "moderate", supporting the histamine-intolerance workup Dr. Janaina ordered. Vitamin D climbed steadily from 35.1 (2019) → 61.49 ng/mL (2026), now just above the upper risk-group bound — worth reviewing supplementation. Kidney function had one transient eGFR dip to <strong>58.2 mL/min/1.73m²</strong> on 18 Feb 2026 (creatinine 1.10) but rebounded by 25 Apr (creatinine 1.00).</p>' +
+          '<p><strong>Suggested follow-up:</strong> (1) repeat TSH in 6–12 weeks to confirm whether the Feb 2026 spike is sustained; (2) lipid-focused intervention discussion — Total Chol / TG / non-HDL all chronically over target; (3) trend creatinine again in 3 months to rule out a sustained eGFR drop; (4) reassess Vitamin D dose; (5) the histamine-intolerance workup (DAO + clinical) can move to the dietary trial Dr. Janaina recommended.</p>' +
+        '</div>' +
+        '<div class="silv-ai-summary-body lang-pt">' +
+          '<p>Ao longo de 7 anos (jun 2019 → abr 2026), o padrão dominante é um <strong>perfil lipídico persistentemente borderline aterogênico</strong> — colesterol total entre 196 e 233 mg/dL, triglicérides cronicamente acima de 150 mg/dL (pico de 233 mg/dL em 2023) e não-HDL próximo ou acima de 160 mg/dL. LDL em alta desde 2024 e HDL com leve melhora. <strong>O metabolismo glicêmico está bem preservado</strong>: HbA1c em queda (5,5 → 5,2 → 5,1%) apesar do drift lipídico, com HOMA-IR 1,05 em 2022 — sem resistência à insulina.</p>' +
+          '<p>O <strong>eixo tireoidiano é majoritariamente estável, mas variável</strong>: TSH oscilou entre 2,4 e 4,0 µIU/mL ao longo dos anos, cruzando brevemente o limite superior em <strong>4,755 µIU/mL em 18 fev 2026</strong> antes de retornar para 2,7–3,0 µIU/mL seis semanas depois. T4 livre permaneceu eutireoidiano. Vale repetir o TSH em 6–12 semanas em vez de tratar com base em uma única medida elevada. O <strong>painel autoimune completo de out 2025 está limpo</strong> — FAN não reagente, anti-CCP / anti-SSA / anti-SSB / ANCA negativos, FR 2,5 — porém o complemento C3 veio alto em <strong>162,6 mg/dL</strong>, compatível com resposta de fase aguda, não doença ativa. O painel de alergia de dez 2025 veio uniformemente negativo (todos os 9 IgE específicos &lt; 0,10 kU/L; IgE total 21 UI/mL).</p>' +
+          '<p>Dois achados funcionais se destacam: a <strong>curva de lactose plana em abr 2022</strong> (Δ glicose 18,5 mg/dL vs. normal &gt; 30 mg/dL), compatível com deficiência de lactase, e <strong>atividade da DAO moderada (6,99 U/mL, 55 HDU)</strong> em mar 2026 — dentro do intervalo, mas no terço inferior da faixa "moderada", apoiando a investigação de intolerância à histamina solicitada pela Dra. Janaina. Vitamina D subiu de 35,1 (2019) → 61,49 ng/mL (2026), agora logo acima do limite superior do grupo de risco — vale revisar a suplementação. A função renal teve uma queda transitória da TFG para <strong>58,2 mL/min/1,73m²</strong> em 18 fev 2026 (creatinina 1,10), com recuperação em 25 abr (creatinina 1,00).</p>' +
+          '<p><strong>Próximos passos sugeridos:</strong> (1) repetir TSH em 6–12 semanas para confirmar se a alta de fev 2026 é sustentada; (2) discutir manejo lipídico — Colesterol total / TG / não-HDL cronicamente acima da meta; (3) repetir creatinina em 3 meses para descartar queda sustentada da TFG; (4) reavaliar dose de vitamina D; (5) a investigação de intolerância à histamina (DAO + clínica) pode prosseguir para o trial dietético recomendado pela Dra. Janaina.</p>' +
+        '</div>' +
+      '</section>';
+
+    var imagery =
+      '<section id="silv-content">' +
+        '<div class="container">' +
+          ai +
+          '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
+          '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
+          '<p class="section-desc">' +
+            t('Each panel shows the latest result with its reference bar and status pill. Click "historical samples" beneath each marker to see every prior value. The historical comparison table near the bottom puts every date side-by-side.',
+              'Cada painel mostra o resultado mais recente com a barra de referência e o status. Clique em "amostras anteriores" abaixo de cada marcador para ver todos os valores. A tabela de comparação histórica ao final coloca todas as datas lado a lado.') +
+          '</p>' +
+          '<div class="lab-panel-grid">' +
+            data.panels.map(silvanaPanelDetails).join('') +
+          '</div>' +
+          silvanaHistoricalComparison(data.panels) +
+          '<div class="section-label" style="margin-top:32px;">' + t('Source PDFs', 'PDFs originais') + '</div>' +
+          '<h2 class="section-title">' + t('Original lab reports', 'Laudos originais') + '</h2>' +
+          '<p class="section-desc">' +
+            t('All ' + data.documents.length + ' source PDFs are available below. Click any to download the original lab report.',
+              'Todos os ' + data.documents.length + ' PDFs originais estão disponíveis abaixo. Clique para baixar o laudo original.') +
+          '</p>' +
+          silvanaDocsList(data.documents) +
+        '</div>' +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-silvana-exams';
+    main.innerHTML = hero + imagery;
+    document.body.appendChild(main);
+
     injectDangerZone(main);
   }
 })();
