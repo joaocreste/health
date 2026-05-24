@@ -319,6 +319,98 @@
     document.body.appendChild(overview);
   }
 
+  function fmtNum(n) {
+    if (n == null || !isFinite(n)) return '';
+    var s = (Math.abs(n) >= 100) ? Number(n).toFixed(0) : Number(n).toFixed(2);
+    return s.replace(/\.?0+$/, '');
+  }
+
+  function classifyLab(value, refLow, refHigh, flag) {
+    if (flag === 'H' || flag === 'HH' || flag === 'L' || flag === 'LL') return 'flag';
+    if (value == null || !isFinite(value)) return 'normal';
+    if (refLow  != null && isFinite(refLow)  && value < refLow)  return 'flag';
+    if (refHigh != null && isFinite(refHigh) && value > refHigh) return 'flag';
+    return 'normal';
+  }
+
+  function pillLabel(status, flag) {
+    if (status === 'flag') {
+      if (flag === 'H' || flag === 'HH') return 'High';
+      if (flag === 'L' || flag === 'LL') return 'Low';
+      return 'Out of range';
+    }
+    if (status === 'watch') return 'Watch';
+    return 'Normal';
+  }
+
+  function renderLabBar(value, refLow, refHigh, status) {
+    var hasNumericValue = (value != null && isFinite(value));
+    var hasRange = (refLow != null && refHigh != null && isFinite(refLow) && isFinite(refHigh) && refHigh > refLow);
+    if (!hasNumericValue || !hasRange) return '';
+    var pct = 10 + ((value - refLow) / (refHigh - refLow)) * 80;
+    if (pct < 0)   pct = 0;
+    if (pct > 100) pct = 100;
+    var markerCls = (status === 'flag') ? 'lab-bar-marker-flag'
+                  : (status === 'watch') ? 'lab-bar-marker-watch'
+                  : 'lab-bar-marker-normal';
+    return (
+      '<div class="lab-bar-wrap">' +
+        '<div class="lab-bar">' +
+          '<div class="lab-bar-bg"></div>' +
+          '<div class="lab-bar-range"></div>' +
+          '<div class="lab-bar-tick lab-bar-tick-min"></div>' +
+          '<div class="lab-bar-tick lab-bar-tick-max"></div>' +
+          '<div class="lab-bar-marker ' + markerCls + '" style="left: ' + pct.toFixed(2) + '%;">' +
+            '<div class="lab-bar-dot"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lab-bar-labels">' +
+          '<span>min ' + escapeHtml(fmtNum(refLow))  + '</span>' +
+          '<span>max ' + escapeHtml(fmtNum(refHigh)) + '</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function formatRefText(refLow, refHigh, unit) {
+    var lo = (refLow  != null && isFinite(refLow))  ? fmtNum(refLow)  : null;
+    var hi = (refHigh != null && isFinite(refHigh)) ? fmtNum(refHigh) : null;
+    var u = unit ? ' ' + escapeHtml(unit) : '';
+    if (lo != null && hi != null) return escapeHtml(lo) + ' – ' + escapeHtml(hi) + u;
+    if (lo != null) return '&gt; ' + escapeHtml(lo) + u;
+    if (hi != null) return '&lt; ' + escapeHtml(hi) + u;
+    return '—';
+  }
+
+  function renderLabTest(m) {
+    var value = (m.latest_value != null && isFinite(m.latest_value)) ? Number(m.latest_value) : null;
+    var status = classifyLab(value, m.ref_low, m.ref_high, m.flag);
+    var pillCls = (status === 'flag') ? 'pill-flag' : (status === 'watch') ? 'pill-watch' : 'pill-ok';
+    var valHtml = (value != null)
+      ? '<span class="lab-val-num">' + escapeHtml(fmtNum(value)) + '</span>' +
+        (m.unit ? ' <span class="lab-val-unit">' + escapeHtml(m.unit) + '</span>' : '')
+      : '<span class="lab-val-num">' + escapeHtml(m.latest_value_text || '—') + '</span>';
+    var dateBit = m.latest_taken_at
+      ? '<span class="lab-test-ref" style="margin-left:auto;">' + escapeHtml(formatDate(m.latest_taken_at)) + '</span>'
+      : '';
+    return (
+      '<div class="lab-test lab-test-' + status + '">' +
+        '<div class="lab-test-head">' +
+          '<div class="lab-test-name">' + escapeHtml(m.marker) + '</div>' +
+          '<div class="lab-test-meta">' +
+            '<span class="lab-test-val">' + valHtml + '</span>' +
+            '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>' +
+          '</div>' +
+        '</div>' +
+        renderLabBar(value, m.ref_low, m.ref_high, status) +
+        '<div class="lab-test-foot">' +
+          '<div class="lab-test-ref">Reference: ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
+          dateBit +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   function renderExams(exams) {
     var p = exams.patient || {};
     var panels = exams.panels || [];
@@ -327,40 +419,19 @@
 
     var panelsHtml = panels.length === 0
       ? '<div class="ov-empty">No lab results yet. Upload exam PDFs from Add data; once parsed they appear here grouped by panel.</div>'
-      : panels.map(function (pn) {
-          var rows = pn.markers.map(function (m) {
-            var v = (m.latest_value != null) ? (m.latest_value + (m.unit ? ' ' + m.unit : '')) : (m.latest_value_text || '—');
-            var ref = (m.ref_low != null || m.ref_high != null)
-              ? (m.ref_low != null ? m.ref_low : '–') + ' – ' + (m.ref_high != null ? m.ref_high : '–')
-              : '—';
-            var pointsCount = m.points && m.points.length;
-            var pointsCell = pointsCount > 1
-              ? '<span title="' + pointsCount + ' data points" class="exam-points">' + pointsCount + '×</span>'
-              : '';
-            return '<tr>' +
-              '<td class="exam-marker">' + escapeHtml(m.marker) + '</td>' +
-              '<td class="exam-value">' + escapeHtml(String(v)) + fmtFlag(m.flag) + '</td>' +
-              '<td class="exam-ref">' + escapeHtml(ref) + '</td>' +
-              '<td class="exam-date">' + escapeHtml(formatDate(m.latest_taken_at)) + '</td>' +
-              '<td class="exam-lab">' + escapeHtml(m.laboratory || '—') + '</td>' +
-              '<td class="exam-trend">' + pointsCell + '</td>' +
-            '</tr>';
-          }).join('');
+      : '<div class="lab-panel-grid">' + panels.map(function (pn) {
+          var body = pn.markers.map(renderLabTest).join('');
           return (
-            '<section class="exam-panel">' +
-              '<header class="exam-panel-head">' +
-                '<h2>' + escapeHtml(pn.panel) + '</h2>' +
-                '<span class="exam-panel-count">' + pn.markers.length + ' marker' + (pn.markers.length === 1 ? '' : 's') + '</span>' +
-              '</header>' +
-              '<table class="exam-table">' +
-                '<thead><tr>' +
-                  '<th>Marker</th><th>Latest value</th><th>Ref range</th><th>Date</th><th>Lab</th><th>Points</th>' +
-                '</tr></thead>' +
-                '<tbody>' + rows + '</tbody>' +
-              '</table>' +
-            '</section>'
+            '<details class="lab-panel" open>' +
+              '<summary class="lab-panel-head">' +
+                '<span class="lab-panel-title">' + escapeHtml(pn.panel) + '</span>' +
+                '<span class="lab-panel-sub"></span>' +
+                '<span class="lab-panel-count">' + pn.markers.length + ' marker' + (pn.markers.length === 1 ? '' : 's') + '</span>' +
+              '</summary>' +
+              '<div class="lab-panel-body">' + body + '</div>' +
+            '</details>'
           );
-        }).join('');
+        }).join('') + '</div>';
 
     var imagingHtml = imaging.length === 0 ? '' :
       '<section class="ov-section">' +
