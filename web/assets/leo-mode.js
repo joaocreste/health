@@ -121,7 +121,11 @@
     '.lab-causes',                     // physical-exams.html: wrapper around causes lists (incl. titles)
     '.lab-note',                       // physical-exams.html: per-marker AI notes (Joao-specific)
     '.letter-content',                 // assessment.html: the long personalised letter (if class exists)
-    '.ct-grid',                        // physical-exams.html: every image viewer grid in #imagery
+    // .ct-grid intentionally NOT hidden: per the inherit-Patient-Zero-
+    // clinical-data design, Leo keeps every DICOM viewer in #imagery
+    // (MRI cervical, CT sinuses + US-guided biopsy, lumbar MRI + CT,
+    // coronary CT angio, EEG, brain MRI). The patient-supplied
+    // forehead photo block is hidden separately by hidePatientPhotos().
   ];
 
   function hideSelectors() {
