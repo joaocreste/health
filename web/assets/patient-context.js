@@ -3471,6 +3471,11 @@
     var s = document.createElement('style');
     s.id = 'silvana-vitals-styles';
     s.textContent = [
+      // Composition + Muscle-Fat panels share a 2-column row
+      'main.jc-silvana-vitals .silv-vitals-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }',
+      'main.jc-silvana-vitals .silv-vitals-pair > .lab-panel { margin-bottom: 0 !important; }',
+      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-vitals-pair { grid-template-columns: 1fr; } }',
+
       // Segmental analysis grid — two figures side by side
       'main.jc-silvana-vitals .silv-segmental-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }',
       '@media (max-width: 880px) { main.jc-silvana-vitals .silv-segmental-grid { grid-template-columns: 1fr; } }',
@@ -3518,14 +3523,16 @@
     var content =
       '<section id="silv-content">' +
         '<div class="container">' +
-          silvanaVitalsPanel(
-            t('Body composition analysis', 'Análise da Composição Corporal'),
-            t('Water, protein, mineral, fat and total weight against the InBody reference range', 'Água, proteína, mineral, gordura e peso total comparados à faixa de referência do InBody'),
-            data.composition) +
-          silvanaVitalsPanel(
-            t('Muscle-Fat analysis', 'Análise Músculo-Gordura'),
-            t('Weight, skeletal muscle mass and body-fat mass on the InBody scale', 'Peso, massa muscular esquelética e massa de gordura na escala InBody'),
-            data.muscle_fat) +
+          '<div class="silv-vitals-pair">' +
+            silvanaVitalsPanel(
+              t('Body composition analysis', 'Análise da Composição Corporal'),
+              t('Water, protein, mineral, fat and total weight against the InBody reference range', 'Água, proteína, mineral, gordura e peso total comparados à faixa de referência do InBody'),
+              data.composition) +
+            silvanaVitalsPanel(
+              t('Muscle-Fat analysis', 'Análise Músculo-Gordura'),
+              t('Weight, skeletal muscle mass and body-fat mass on the InBody scale', 'Peso, massa muscular esquelética e massa de gordura na escala InBody'),
+              data.muscle_fat) +
+          '</div>' +
           silvanaVitalsPanel(
             t('Obesity analysis', 'Análise de Obesidade'),
             t('BMI and body-fat percentage', 'IMC e percentual de gordura corporal'),
