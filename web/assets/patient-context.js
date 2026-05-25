@@ -3518,6 +3518,103 @@
     document.head.appendChild(s);
   }
 
+  function silvanaVitalsAiSummary() {
+    // Synthesis card — ties the 11 Feb 2026 InBody panel to the
+    // 7-year lab history rendered on the Exams page. Three pillars at
+    // the bottom: a specific Physical recommendation, Mental as TBD
+    // pending therapy contact, Spiritual as TBD (no data yet).
+    return (
+      '<section class="silv-ai-summary">' +
+        '<header class="silv-ai-summary-head">' +
+          '<h2>' + t('AI summary · body composition + 7-year lab context',
+                     'Resumo da IA · composição corporal + contexto laboratorial') + '</h2>' +
+          '<span class="ai-pill">AI</span>' +
+        '</header>' +
+        '<div class="silv-ai-summary-meta">' +
+          t('Synthesised from the 11 Feb 2026 InBody120 panel and 7 years of lab markers (Jun 2019 → Apr 2026)',
+            'Sintetizado a partir do painel InBody120 de 11 fev 2026 e 7 anos de exames (jun 2019 → abr 2026)') +
+        '</div>' +
+
+        // EN body
+        '<div class="silv-ai-summary-body lang-en">' +
+          '<p>The body composition panel (weight 70.1 kg, body fat 41.9%, visceral fat level 13, obesity degree 127%) tells the same story the chronic lipid profile has been signalling for years: <strong>central adiposity with a borderline cardiometabolic profile</strong>. Total cholesterol has stayed between 196–233 mg/dL since 2019, triglycerides chronically above 150 mg/dL, non-HDL near 160 mg/dL — all consistent with the fat-mass excess, especially the elevated visceral component. The reassuring counterpoint is preserved glycemic control: HbA1c 5.1% in Apr 2026 (trending down from 5.5%) and HOMA-IR 1.05 in 2022. The lipid drift is still reversible before it spills into insulin resistance, but the window is narrowing.</p>' +
+          '<p>The segmental analysis reveals a structurally important finding: <strong>both legs are below the InBody norm (81.3% and 80.3% of expected)</strong> while arms and trunk stay within range. At 58, this is the typical pattern of <strong>incipient sarcopenic obesity</strong> — lower-body lean deficit combined with excess body fat. It is an independent risk factor for declining metabolic function, future frailty and cardiovascular events. Total skeletal muscle mass is still 22.0 kg (upper bound of normal), but the distribution is the issue. Compared with Nov 2025 (21.1 → 22.0 kg in 3 months), there is modest total muscle gain — right direction, insufficient pace to correct the segmental deficit on its own.</p>' +
+          '<p>Other markers fit the picture: moderate DAO activity (6.99 U/mL) and the flat 2022 lactose curve suggest that <strong>diet has a functional-tolerance component beyond raw calories</strong> — a protein-consistent, low-histamine/low-lactose pattern would outperform generic caloric restriction. Vitamin D at 61.49 ng/mL (just above the upper risk-group bound) warrants reviewing supplementation. The transiently elevated TSH in Feb 2026 (4.755 µIU/mL) needs a 6–12 week recheck — subclinical hypothyroidism would directly affect body composition and metabolism.</p>' +
+        '</div>' +
+
+        // PT body
+        '<div class="silv-ai-summary-body lang-pt">' +
+          '<p>A composição corporal (peso 70,1 kg, PGC 41,9%, gordura visceral nível 13, grau de obesidade 127%) conta a mesma história que o perfil lipídico crônico vinha sinalizando há anos: <strong>adiposidade central com perfil cardiometabólico borderline</strong>. Colesterol total persistiu entre 196 e 233 mg/dL desde 2019, triglicérides cronicamente acima de 150 mg/dL, não-HDL próximo de 160 mg/dL — todos coerentes com excesso de massa de gordura, especialmente a visceral elevada. O contraponto tranquilizador é o controle glicêmico preservado: HbA1c 5,1% em abr 2026 (em queda de 5,5%) e HOMA-IR 1,05 em 2022. Ainda há margem para reverter o drift lipídico antes que evolua para resistência à insulina, mas a janela está se estreitando.</p>' +
+          '<p>A análise segmentar revela um achado estrutural relevante: <strong>ambas as pernas estão abaixo da norma InBody (81,3% e 80,3% do esperado)</strong> enquanto braços e tronco permanecem na faixa normal. Aos 58 anos, este é o padrão típico de <strong>obesidade sarcopênica incipiente</strong> — déficit de massa magra nas pernas combinado com excesso de gordura corporal. É um fator de risco independente para queda de função metabólica, fragilidade futura e eventos cardiovasculares. A massa muscular esquelética total ainda está em 22,0 kg (limite superior da faixa), mas a distribuição é o problema. Comparado a nov 2025 (21,1 → 22,0 kg em 3 meses), há ganho modesto de músculo total — direção correta, ritmo insuficiente para corrigir o déficit segmentar isoladamente.</p>' +
+          '<p>Outros marcadores se encaixam no quadro: a atividade da DAO moderada (6,99 U/mL) e a curva de lactose plana de 2022 sugerem que <strong>alimentação tem um componente de tolerância funcional além da quantidade calórica</strong> — um padrão com proteína consistente e baixo em histamina/lactose seria mais eficiente do que restrição calórica genérica. Vitamina D em 61,49 ng/mL (logo acima do limite superior do grupo de risco) sugere revisar a suplementação. O TSH transitoriamente alto em fev 2026 (4,755 µIU/mL) também merece reverificação em 6–12 semanas — hipotireoidismo subclínico afetaria diretamente composição corporal e metabolismo.</p>' +
+        '</div>' +
+
+        // Three pillars
+        '<div class="silv-insights">' +
+          '<div class="silv-insights-heading">' +
+            t('Three big insights · one per pillar',
+              'Três insights · um por pilar') +
+          '</div>' +
+          '<div class="silv-insights-grid">' +
+
+            // Physical — specific recommendation
+            '<div class="silv-insight silv-insight-physical">' +
+              '<div class="silv-insight-eyebrow">' + t('Physical', 'Físico') + '</div>' +
+              '<div class="silv-insight-headline">' +
+                t('Lower-body strength + clinical pilates',
+                  'Força nas pernas + pilates clínico') +
+              '</div>' +
+              '<div class="silv-insight-body">' +
+                '<div class="lang-en">' +
+                  '<p>Resistance training focused on the legs — squat, leg press, lunges, step-ups — 2–3× weekly, progressive, supervised. <strong>Clinical pilates</strong> is a good entry point: joint-friendly, posterior-chain activation, no impact. Add a daily 30+ min walk for cardiovascular base.</p>' +
+                  '<p>Target: <strong>−5 to −7 kg in 6 months with preservation of total muscle mass</strong>. Track body-fat % and segmental lean distribution, not just weight — the lower-body deficit is the structural target, not the scale.</p>' +
+                '</div>' +
+                '<div class="lang-pt">' +
+                  '<p>Treino de força focado nas pernas — agachamento, leg press, avanços, step-up — 2 a 3×/semana, progressivo, supervisionado. <strong>Pilates clínico</strong> é uma boa porta de entrada: respeita as articulações, ativa cadeia posterior, sem impacto. Adicionar caminhada de 30+ min/dia para base cardiovascular.</p>' +
+                  '<p>Meta: <strong>−5 a −7 kg em 6 meses com preservação da massa muscular total</strong>. Acompanhar PGC e distribuição segmentar da massa magra, não apenas o peso — o déficit nas pernas é o alvo estrutural, não a balança.</p>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            // Mental — TBD pending therapy
+            '<div class="silv-insight silv-insight-mental">' +
+              '<div class="silv-insight-eyebrow">' + t('Mental', 'Mental') + '</div>' +
+              '<div class="silv-insight-headline">' +
+                t('Therapy contact, then reassess in 3 months',
+                  'Contato com terapeuta e reavaliar em 3 meses') +
+              '</div>' +
+              '<div class="silv-insight-body">' +
+                '<div class="lang-en">' +
+                  '<p>Body-composition change at 58 needs psychological scaffolding — relationship with food, motivation for the exercise regimen, possible emotional component to the central adiposity. Recommend an evaluation by a therapist experienced with mid-life women\'s health.</p>' +
+                  '<p>No mental-health data uploaded yet; this insight will sharpen once journal entries, mood logs or a clinical evaluation are added.</p>' +
+                '</div>' +
+                '<div class="lang-pt">' +
+                  '<p>Mudança de composição corporal aos 58 anos exige acompanhamento psicológico — relação com alimentação, motivação para o regime de exercícios, possível componente emocional na adiposidade central. Sugerir avaliação por terapeuta com experiência em saúde da mulher na meia-idade.</p>' +
+                  '<p>Ainda não há dados de saúde mental no histórico; este insight ganhará precisão quando diários, registros de humor ou uma avaliação clínica forem adicionados.</p>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            // Spiritual — TBD
+            '<div class="silv-insight silv-insight-spiritual silv-insight-tbd">' +
+              '<div class="silv-insight-eyebrow">' + t('Spiritual', 'Espiritual') + '</div>' +
+              '<div class="silv-insight-headline">TBD</div>' +
+              '<div class="silv-insight-body">' +
+                '<div class="lang-en">' +
+                  '<p>No spiritual data uploaded yet — wheel-of-life self-assessment, life-event log or similar would unlock this pillar.</p>' +
+                '</div>' +
+                '<div class="lang-pt">' +
+                  '<p>Sem dados espirituais ainda — uma autoavaliação de roda da vida, registro de eventos de vida ou similar liberaria este pilar.</p>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
   function renderSilvanaVitals() {
     injectSilvanaStyles();
     injectSilvanaVitalsStyles();
@@ -3528,6 +3625,7 @@
     var content =
       '<section id="silv-content">' +
         '<div class="container">' +
+          silvanaVitalsAiSummary() +
           '<div class="silv-vitals-pair">' +
             silvanaVitalsPanel(
               t('Body composition analysis', 'Análise da Composição Corporal'),
