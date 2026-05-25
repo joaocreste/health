@@ -302,6 +302,36 @@
     });
   }
 
+  // After hiding, the static section-label numbers (1-10 on the exams
+  // page) will skip any hidden block — e.g. Leo's hidden #mri-head
+  // leaves a gap at 7. Walk every still-visible .section-label in
+  // document order and rewrite its leading "N · " so the sequence
+  // remains tight: 1, 2, 3, ...
+  function renumberVisibleSectionLabels() {
+    var labels = document.querySelectorAll('.section-label');
+    if (!labels.length) return;
+    var idx = 0;
+    labels.forEach(function (lbl) {
+      // Skip if any ancestor was hidden by display:none in this script
+      var node = lbl;
+      while (node && node !== document.body) {
+        if (node.style && node.style.display === 'none') return;
+        node = node.parentElement;
+      }
+      idx++;
+      var prefix = idx + ' · ';
+      var spans = lbl.querySelectorAll('span.lang-en, span.lang-pt');
+      var re = /^\d+[A-Z]?\s*·\s*/;
+      if (spans.length) {
+        spans.forEach(function (s) {
+          s.textContent = s.textContent.replace(re, prefix);
+        });
+      } else {
+        lbl.textContent = lbl.textContent.replace(re, prefix);
+      }
+    });
+  }
+
   // ─── 3. Strip nav links that don't apply to Leo's reduced view ──
   // (Leo has no medications nav target on physical, no osteopath
   // sub-target on vitals — keep the section-nav clean.)
@@ -483,6 +513,7 @@
     walkText(document.body);
     rewriteTitle();
     hideSelectors();
+    renumberVisibleSectionLabels();
     stripNavLinks();
     rewriteHomeHeader();
     injectLeoSummary();
