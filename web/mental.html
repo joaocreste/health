@@ -456,6 +456,7 @@
       </tbody>
     </table>
 
+    <div data-leo-hide="medications">
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;"><span class="lang-en">Active psychiatric regimen</span><span class="lang-pt">Regime psiquiátrico ativo</span></h3>
     <p class="text-soft mb-3" style="font-size: 14px;">
       <span class="lang-en">Current regimen as of <strong>25 May 2026</strong> (source: <code>data/medications.csv</code>). Psychiatric care with Dr. Eduardo Tisher (São Paulo, remote). Continuous benzodiazepine prescription since ≈2014 — alprazolam (São Paulo) before relocating to France; diazepam now. <strong>Depakote ER increased to 1,000 mg/day; Cymbalta discontinued; Lyrica increased to 300 mg/day (split in two doses); Quetiapine 50 mg/day; diazepam taper stepped down to 32.5 mg/day.</strong></span>
@@ -508,7 +509,9 @@
       Centre, with acute withdrawal symptoms (cold sweating, shivering, spasms) before NHS 111 emergency prescription —
       illustrates the medical risk of current dependence and the urgency of a supervised taper.
     </div>
+    </div>
 
+    <div data-leo-hide="med-history">
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">
       <span class="lang-en">Medication history</span><span class="lang-pt">Histórico de medicação</span>
     </h3>
@@ -648,6 +651,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 </section>
 
@@ -2126,7 +2130,8 @@
 
 <script src="assets/app.js?v=28"></script>
 <script src="assets/silvana-labs.js?v=1"></script>
-<script src="assets/patient-context.js?v=20"></script>
+<script src="assets/leo-mode.js?v=1"></script>
+<script src="assets/patient-context.js?v=21"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="assets/export.js?v=7"></script>

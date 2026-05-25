@@ -22,6 +22,11 @@
   var PATIENT_ZERO    = 'pending:joao';
   var PAULO_SILOTTO   = 'pending:paulo-silotto-df3441';
   var SILVANA_CRESTE  = 'pending:silvana-creste-18ba19';
+  // Leo Keller is rendered by transforming Patient Zero's static HTML
+  // in place — see assets/leo-mode.js. From this script's perspective,
+  // he behaves the same way Patient Zero does: skip the data-driven
+  // renderer and let the static page show.
+  var LEO_KELLER      = 'pending:leo-keller-a3f1c2';
 
   var params = new URLSearchParams(location.search);
   var fromUrl = params.get('patient');
@@ -1072,7 +1077,7 @@
     injectChangeButton();
     // Patient Zero's home is a static page that ends in <footer> — we can
     // inject the danger zone right away, before the footer.
-    if (patient === PATIENT_ZERO) {
+    if (patient === PATIENT_ZERO || patient === LEO_KELLER) {
       if (currentSection() === 'home') {
         injectStyles();
         injectDangerZone();
