@@ -121,6 +121,7 @@
     '.lab-causes',                     // physical-exams.html: wrapper around causes lists (incl. titles)
     '.lab-note',                       // physical-exams.html: per-marker AI notes (Joao-specific)
     '.letter-content',                 // assessment.html: the long personalised letter (if class exists)
+    '#mri-head',                       // physical-exams.html: 23 Apr 2022 brain MRI + intracranial angio-MR — not relevant to Leo
     // .ct-grid intentionally NOT hidden: per the inherit-Patient-Zero-
     // clinical-data design, Leo keeps every DICOM viewer in #imagery
     // (MRI cervical, CT sinuses + US-guided biopsy, lumbar MRI + CT,
