@@ -287,26 +287,26 @@
         '<div class="two-col mb-3">' +
           '<div class="list-card">' +
             '<h4>What the data shows</h4>' +
-            '<ul class="leo-risk-list" style="list-style:none;padding-left:0;">' +
-              '<li style="padding-left:0;margin-bottom:10px;">' +
-                '<span class="pill pill-flag" style="margin-right:8px;vertical-align:1px;">High</span>' +
+            '<ul class="leo-risk-list" style="list-style:disc;padding-left:20px;">' +
+              '<li style="margin-bottom:10px;">' +
                 '<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading dataset sits in Stage 1–2 territory (mean ~135 / 90 mmHg) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — confirm BP response in 4–6 weeks; if mean stays above 130/80, escalate.' +
+                '&nbsp;<span class="pill pill-flag" style="margin-left:4px;vertical-align:1px;">High</span>' +
               '</li>' +
-              '<li style="padding-left:0;margin-bottom:10px;">' +
-                '<span class="pill pill-watch" style="margin-right:8px;vertical-align:1px;">Medium</span>' +
+              '<li style="margin-bottom:10px;">' +
                 '<strong>Elevated homocysteine (14.40 µmol/L)</strong> against normal serum B12 and folate — consistent with sub-optimal one-carbon metabolism (suspected MTHFR polymorphism). Independent cardiovascular risk factor that stacks with the BP picture; consider MTHFR testing + methylated B-complex trial.' +
+                '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
               '</li>' +
-              '<li style="padding-left:0;margin-bottom:10px;">' +
-                '<span class="pill pill-watch" style="margin-right:8px;vertical-align:1px;">Medium</span>' +
+              '<li style="margin-bottom:10px;">' +
                 '<strong>Cervical spine MRI</strong> — multi-level degenerative change C3/4–C6/7 with mild bilateral foraminal narrowing. No cord signal abnormality. Conservative management on imaging grounds; physiotherapy if symptoms present.' +
+                '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
               '</li>' +
-              '<li style="padding-left:0;margin-bottom:10px;">' +
-                '<span class="pill pill-ok" style="margin-right:8px;vertical-align:1px;">Follow-up</span>' +
+              '<li style="margin-bottom:10px;">' +
                 '<strong>Borderline-elevated creatinine (1.30 mg/dL)</strong> with preserved eGFR (&gt; 60 mL/min). Without nephrotoxic co-medication this most likely reflects hydration noise + muscle mass — repeat in 8–12 weeks under standardised hydration, add Cystatin C if it persists.' +
+                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">Follow-up</span>' +
               '</li>' +
-              '<li style="padding-left:0;margin-bottom:10px;">' +
-                '<span class="pill pill-ok" style="margin-right:8px;vertical-align:1px;">Follow-up</span>' +
+              '<li style="margin-bottom:10px;">' +
                 '<strong>Vitamin D, HbA1c, HDL, testosterone, liver enzymes</strong> all in optimal range. Re-check on the standard annual panel cadence.' +
+                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">Follow-up</span>' +
               '</li>' +
             '</ul>' +
           '</div>' +
