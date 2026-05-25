@@ -3310,20 +3310,25 @@
   function silvanaVitalsSilhouetteSvg() {
     // Stylized androgynous figure. viewBox 220 × 380, drawn so it fits
     // inside a position:relative wrapper that overlays HTML badges.
+    // Thin (1.4px) strokes + smooth Bézier curves for a softer feel.
     return (
       '<svg class="silv-fig" viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-        '<circle cx="110" cy="32" r="22" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        '<path d="M100,52 L120,52 L122,66 L98,66 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        // torso
-        '<path d="M70,68 L150,68 L156,200 L64,200 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        // left arm (viewer left = patient left, InBody convention)
-        '<path d="M70,68 L40,80 L34,210 L52,214 L68,200 L70,68 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        // right arm
-        '<path d="M150,68 L180,80 L186,210 L168,214 L152,200 L150,68 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        // left leg
-        '<path d="M64,200 L108,200 L102,360 L74,360 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
-        // right leg
-        '<path d="M112,200 L156,200 L146,360 L118,360 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        '<g fill="#E8F0F7" stroke="#7A95B5" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">' +
+          // Head
+          '<circle cx="110" cy="34" r="20"/>' +
+          // Neck (soft trapezoid)
+          '<path d="M101 54 Q110 60 119 54 Q121 64 118 68 Q110 70 102 68 Q99 64 101 54 Z"/>' +
+          // Torso (rounded shoulders, slight waist, hips at bottom)
+          '<path d="M70 70 Q 64 96 68 130 Q 72 162 74 180 Q 70 200 68 220 L 152 220 Q 150 200 146 180 Q 148 162 152 130 Q 156 96 150 70 Q 110 76 70 70 Z"/>' +
+          // Left arm (curving outward then inward, narrowing at wrist)
+          '<path d="M70 70 Q 48 78 42 102 Q 36 142 38 190 Q 42 212 52 214 Q 60 208 64 192 Q 68 158 70 130 Q 70 100 70 70 Z"/>' +
+          // Right arm (mirror)
+          '<path d="M150 70 Q 172 78 178 102 Q 184 142 182 190 Q 178 212 168 214 Q 160 208 156 192 Q 152 158 150 130 Q 150 100 150 70 Z"/>' +
+          // Left leg (tapering toward ankle)
+          '<path d="M68 220 Q 66 270 70 320 Q 74 350 78 360 Q 90 364 100 358 Q 102 320 104 270 Q 106 240 108 220 Q 88 222 68 220 Z"/>' +
+          // Right leg (mirror)
+          '<path d="M112 220 Q 114 240 116 270 Q 118 320 120 358 Q 130 364 142 360 Q 146 350 150 320 Q 154 270 152 220 Q 132 222 112 220 Z"/>' +
+        '</g>' +
       '</svg>'
     );
   }
