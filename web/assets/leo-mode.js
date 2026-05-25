@@ -302,15 +302,21 @@
     });
   }
 
-  // After hiding, the static section-label numbers (1-10 on the exams
-  // page) will skip any hidden block — e.g. Leo's hidden #mri-head
-  // leaves a gap at 7. Walk every still-visible .section-label in
-  // document order and rewrite its leading "N · " so the sequence
-  // remains tight: 1, 2, 3, ...
+  // After hiding, the static section-label numbers (1, 1.a-1.f, 2, 3, 4
+  // on the exams page) will skip any hidden block. Walk every still-
+  // visible .section-label in document order and rewrite its leading
+  // prefix so the sequence stays tight. Top-level labels ("N · X")
+  // bump the top counter and reset the sub counter; sub-labels
+  // ("N.x · X") consume the next letter under the current top.
   function renumberVisibleSectionLabels() {
     var labels = document.querySelectorAll('.section-label');
     if (!labels.length) return;
-    var idx = 0;
+    var topIdx = 0;
+    var subIdx = 0;
+    var letters = 'abcdefghijklmnopqrstuvwxyz';
+    var topRe = /^\d+\s*·\s*/;
+    var subRe = /^\d+\.[a-z]\s*·\s*/;
+
     labels.forEach(function (lbl) {
       // Skip if any ancestor was hidden by display:none in this script
       var node = lbl;
@@ -318,10 +324,23 @@
         if (node.style && node.style.display === 'none') return;
         node = node.parentElement;
       }
-      idx++;
-      var prefix = idx + ' · ';
+
       var spans = lbl.querySelectorAll('span.lang-en, span.lang-pt');
-      var re = /^\d+[A-Z]?\s*·\s*/;
+      var sample = spans.length ? spans[0].textContent : lbl.textContent;
+      var prefix, re;
+      if (subRe.test(sample)) {
+        prefix = topIdx + '.' + letters[subIdx] + ' · ';
+        subIdx++;
+        re = subRe;
+      } else if (topRe.test(sample)) {
+        topIdx++;
+        subIdx = 0;
+        prefix = topIdx + ' · ';
+        re = topRe;
+      } else {
+        return;
+      }
+
       if (spans.length) {
         spans.forEach(function (s) {
           s.textContent = s.textContent.replace(re, prefix);
