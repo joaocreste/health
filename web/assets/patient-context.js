@@ -458,7 +458,7 @@
     return (
       '<div class="lab-test lab-test-' + status + '">' +
         '<div class="lab-test-head">' +
-          '<div class="lab-test-name">' + escapeHtml(m.marker) + '</div>' +
+          '<div class="lab-test-name">' + (m.marker_html || escapeHtml(m.marker)) + '</div>' +
           '<div class="lab-test-meta">' +
             '<span class="lab-test-val">' + valHtml + '</span>' +
             '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>' +
@@ -1133,11 +1133,15 @@
       return;
     }
 
-    // Silvana's data is the manually-curated multi-year lab history;
-    // route every Physical sub-page to the bespoke lab page for the
-    // same reason as Paulo's.
+    // Silvana's data is hand-curated. Physical → Vitals gets the
+    // bespoke InBody body-composition view; Physical and Genetics fall
+    // through to her multi-year lab history page.
+    if (patient === SILVANA_CRESTE && section === 'physical-vitals') {
+      renderSilvanaVitals();
+      return;
+    }
     if (patient === SILVANA_CRESTE &&
-        (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
+        (section === 'physical' || section === 'physical-genetics')) {
       renderSilvanaPhysicalExams();
       return;
     }
@@ -3033,6 +3037,393 @@
     main.innerHTML = hero + imagery;
     document.body.appendChild(main);
 
+    injectDangerZone(main);
+  }
+
+  /* ── Silvana Creste · bespoke Physical → Vitals view ─────────────
+     Body composition from a single InBody120 panel (11 Feb 2026) plus
+     one prior baseline (18 Nov 2025) for the history chart. Hand-curated
+     because the InBody printout is an image, not structured data — the
+     extractor would mangle it. Latest values rendered as .lab-test
+     cards with the same range bars used everywhere else; segmental
+     analysis rendered as two SVG silhouettes with overlaid badges.   */
+
+  var SILVANA_INBODY = {
+    device: 'InBody120',
+    test_id: '191125-1',
+    date: '2026-02-11',
+    height_cm: 162,
+    age: 58,
+    sex: 'female',
+    nutritionist: 'Nutr. Ricardo Moretto',
+    crn: 'CRN-3 63704',
+    score: 61, // /100
+
+    // Análise da Composição Corporal — five primary markers w/ ranges
+    composition: [
+      { marker_en: 'Total Body Water',  marker_pt: 'Água Corporal Total',  value: 29.8, unit: 'L',  ref_low: 28.1, ref_high: 34.3 },
+      { marker_en: 'Protein',           marker_pt: 'Proteína',             value: 7.9,  unit: 'kg', ref_low: 7.4,  ref_high: 9.1  },
+      { marker_en: 'Minerals',          marker_pt: 'Minerais',             value: 2.99, unit: 'kg', ref_low: 2.60, ref_high: 3.17 },
+      { marker_en: 'Body Fat Mass',     marker_pt: 'Massa de Gordura',     value: 29.4, unit: 'kg', ref_low: 11.8, ref_high: 17.6 },
+      { marker_en: 'Weight',            marker_pt: 'Peso',                 value: 70.1, unit: 'kg', ref_low: 46.9, ref_high: 63.4 },
+    ],
+
+    // Análise Músculo-Gordura — three indicators
+    muscle_fat: [
+      { marker_en: 'Weight',                       marker_pt: 'Peso',                       value: 70.1, unit: 'kg', ref_low: 46.9, ref_high: 63.4 },
+      { marker_en: 'Skeletal Muscle Mass',         marker_pt: 'Massa Muscular Esquelética', value: 22.0, unit: 'kg', ref_low: 17.3, ref_high: 21.1 },
+      { marker_en: 'Body Fat Mass',                marker_pt: 'Massa de Gordura',           value: 29.4, unit: 'kg', ref_low: 11.8, ref_high: 17.6 },
+    ],
+
+    // Análise de Obesidade — BMI + body-fat %
+    obesity: [
+      { marker_en: 'BMI',                  marker_pt: 'IMC', value: 26.7, unit: 'kg/m²', ref_low: 18.5, ref_high: 25.0 },
+      { marker_en: 'Body Fat Percentage',  marker_pt: 'PGC', value: 41.9, unit: '%',     ref_low: 18.0, ref_high: 28.0 },
+    ],
+
+    // Análise da Massa Magra Segmentar (5 limbs)
+    lean_segmental: [
+      { limb: 'left_arm',  label_pt: 'Braço Esquerdo',  label_en: 'Left arm',  kg: 2.13, pct: 110.7, status: 'normal' },
+      { limb: 'right_arm', label_pt: 'Braço Direito',   label_en: 'Right arm', kg: 2.11, pct: 109.8, status: 'normal' },
+      { limb: 'trunk',     label_pt: 'Tronco',          label_en: 'Trunk',     kg: 19.2, pct: 91.6,  status: 'normal' },
+      { limb: 'left_leg',  label_pt: 'Perna Esquerda',  label_en: 'Left leg',  kg: 5.84, pct: 81.3,  status: 'below' },
+      { limb: 'right_leg', label_pt: 'Perna Direita',   label_en: 'Right leg', kg: 5.78, pct: 80.3,  status: 'below' },
+    ],
+
+    // Análise da Gordura Segmentar (5 limbs)
+    fat_segmental: [
+      { limb: 'left_arm',  label_pt: 'Braço Esquerdo',  label_en: 'Left arm',  kg: 2.4,  pct: 254.0, status: 'above' },
+      { limb: 'right_arm', label_pt: 'Braço Direito',   label_en: 'Right arm', kg: 2.3,  pct: 253.6, status: 'above' },
+      { limb: 'trunk',     label_pt: 'Tronco',          label_en: 'Trunk',     kg: 15.6, pct: 301.5, status: 'above' },
+      { limb: 'left_leg',  label_pt: 'Perna Esquerda',  label_en: 'Left leg',  kg: 3.9,  pct: 166.3, status: 'above' },
+      { limb: 'right_leg', label_pt: 'Perna Direita',   label_en: 'Right leg', kg: 3.9,  pct: 166.3, status: 'above' },
+    ],
+
+    // Histórico da Composição Corporal — most recent two timepoints
+    history: [
+      { date: '2025-11-18', weight: 69.3, smm: 21.1, pbf: 43.5 },
+      { date: '2026-02-11', weight: 70.1, smm: 22.0, pbf: 41.9 },
+    ],
+
+    // Misc additional metrics from the printout
+    additional: {
+      basal_metabolic_rate: { value: 1249, unit: 'kcal', ref_low: 1419, ref_high: 1652 },
+      visceral_fat_level:   { value: 13,   unit: null,   ref_low: 1,    ref_high: 9    },
+      obesity_degree:       { value: 127,  unit: '%',    ref_low: 90,   ref_high: 110  },
+    },
+  };
+
+  function silvanaVitalsHero(data) {
+    var dateLabel = formatDate(data.date);
+    return (
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Physical → Vitals', 'Físico → Sinais Vitais') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('Body composition · Silvana Creste',
+              'Composição corporal · Silvana Creste') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('Bio-impedance panel on the ' + data.device + ' (' + dateLabel + ') ordered by ' + data.nutritionist + '. Three primary findings: weight above the recommended range (70.1 kg vs. 46.9–63.4), body-fat percentage well above the female reference (41.9% vs. 18–28%), and a clear lower-body lean-mass deficit — both legs are below the InBody norm (~81% of expected) while arms and trunk are within range.',
+              'Painel de bioimpedância no ' + data.device + ' (' + dateLabel + ') solicitado pelo ' + data.nutritionist + '. Três achados principais: peso acima da faixa recomendada (70,1 kg vs. 46,9–63,4), percentual de gordura corporal bem acima da referência feminina (41,9% vs. 18–28%), e um déficit claro de massa magra nas pernas — ambas estão abaixo da norma InBody (~81% do esperado) enquanto braços e tronco estão dentro da faixa.') +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Patient', 'Paciente') + '</span><span>Silvana Creste</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('DOB · age', 'Nasc. · idade') + '</span>' +
+              '<span>29 ' + t('Sep', 'set') + ' 1967 · ' + data.age + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Date', 'Data') + '</span>' +
+              '<span>' + escapeHtml(dateLabel) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Device', 'Aparelho') + '</span>' +
+              '<span>' + escapeHtml(data.device) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Nutritionist', 'Nutricionista') + '</span>' +
+              '<span>' + escapeHtml(data.nutritionist) + ' · ' + escapeHtml(data.crn) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('InBody score', 'Pontuação InBody') + '</span>' +
+              '<span>' + data.score + '<small style="color:rgba(255,255,255,0.55);font-weight:300;"> / 100</small></span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
+  // Wrap an InBody marker into the shape renderLabTest() expects.
+  // The InBody printout is Portuguese; we keep the PT name as the
+  // canonical `marker` (used by classifyLab fallbacks etc.) and emit
+  // a paired EN/PT span via marker_html so the lang toggle works.
+  function silvanaVitalsAsLabMarker(row) {
+    var en = row.marker_en || row.marker_pt;
+    var pt = row.marker_pt || row.marker_en;
+    return {
+      marker: pt,
+      marker_html: t(escapeHtml(en), escapeHtml(pt)),
+      latest_value: row.value,
+      unit: row.unit,
+      ref_low: row.ref_low,
+      ref_high: row.ref_high,
+      flag: null, // classifyLab() infers from value vs. bounds
+    };
+  }
+
+  function silvanaVitalsPanel(titleHtml, subtitleHtml, rows) {
+    var body = rows.map(function (r) { return renderLabTest(silvanaVitalsAsLabMarker(r)); }).join('');
+    var n = rows.length;
+    var countHtml = n + ' ' + t(n === 1 ? 'marker' : 'markers', n === 1 ? 'marcador' : 'marcadores');
+    return (
+      '<details class="lab-panel" open style="margin-bottom:18px;">' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' + titleHtml + '</span>' +
+          '<span class="lab-panel-sub">' + (subtitleHtml || '') + '</span>' +
+          '<span class="lab-panel-count">' + countHtml + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' + body + '</div>' +
+      '</details>'
+    );
+  }
+
+  function silvanaVitalsSilhouetteSvg() {
+    // Stylized androgynous figure. viewBox 220 × 380, drawn so it fits
+    // inside a position:relative wrapper that overlays HTML badges.
+    return (
+      '<svg class="silv-fig" viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<circle cx="110" cy="32" r="22" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        '<path d="M100,52 L120,52 L122,66 L98,66 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        // torso
+        '<path d="M70,68 L150,68 L156,200 L64,200 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        // left arm (viewer left = patient left, InBody convention)
+        '<path d="M70,68 L40,80 L34,210 L52,214 L68,200 L70,68 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        // right arm
+        '<path d="M150,68 L180,80 L186,210 L168,214 L152,200 L150,68 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        // left leg
+        '<path d="M64,200 L108,200 L102,360 L74,360 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+        // right leg
+        '<path d="M112,200 L156,200 L146,360 L118,360 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+      '</svg>'
+    );
+  }
+
+  function silvanaVitalsLimbBadge(r) {
+    var statusCls = (r.status === 'normal') ? 'silv-fig-status-normal' : 'silv-fig-status-flag';
+    var statusLbl = (r.status === 'normal') ? t('Normal',  'Normal')
+                   : (r.status === 'below') ? t('Below',   'Abaixo')
+                   :                          t('Above',   'Acima');
+    return (
+      '<div class="silv-fig-label silv-fig-label-' + r.limb.replace('_','-') + '">' +
+        '<div class="silv-fig-val">' + fmtLabNum(r.kg) + ' kg</div>' +
+        '<div class="silv-fig-pct">' + fmtLabNum(r.pct) + '%</div>' +
+        '<span class="silv-fig-status ' + statusCls + '">' + statusLbl + '</span>' +
+      '</div>'
+    );
+  }
+
+  function silvanaVitalsSegmentalFigure(titleHtml, rows) {
+    var badges = rows.map(silvanaVitalsLimbBadge).join('');
+    return (
+      '<div class="silv-segmental">' +
+        '<h3 class="silv-segmental-title">' + titleHtml + '</h3>' +
+        '<div class="silv-figure-wrap">' + silvanaVitalsSilhouetteSvg() + badges + '</div>' +
+      '</div>'
+    );
+  }
+
+  function silvanaVitalsSegmentalSection(data) {
+    return (
+      '<details class="lab-panel" open style="margin-bottom:18px;">' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' +
+            t('Segmental analysis', 'Análise segmentar') +
+          '</span>' +
+          '<span class="lab-panel-sub">' +
+            t('Lean mass and fat distribution per limb · five anatomical regions',
+              'Massa magra e gordura por membro · cinco regiões anatômicas') +
+          '</span>' +
+          '<span class="lab-panel-count">10 ' + t('regions', 'regiões') + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' +
+          '<div class="silv-segmental-grid">' +
+            silvanaVitalsSegmentalFigure(
+              t('Lean mass by limb', 'Análise da Massa Magra Segmentar'),
+              data.lean_segmental) +
+            silvanaVitalsSegmentalFigure(
+              t('Fat mass by limb', 'Análise da Gordura Segmentar'),
+              data.fat_segmental) +
+          '</div>' +
+        '</div>' +
+      '</details>'
+    );
+  }
+
+  function silvanaVitalsMiniLineChart(opts) {
+    // Single-series sparkline. svgLineChart shares its Y bounds across
+    // all series, so mixing kg with % distorts the layout — easier to
+    // emit three small charts side-by-side.
+    var points = (opts.points || []).slice().sort(function (a, b) { return dateMs(a.date) - dateMs(b.date); });
+    return svgLineChart({
+      series: [{ marker: opts.marker, unit: opts.unit, color: opts.color, points: points }],
+      width: 320, height: 160,
+    });
+  }
+
+  function silvanaVitalsHistoryPanel(data) {
+    var weightPts = data.history.map(function (h) { return { date: h.date, value: h.weight }; });
+    var smmPts    = data.history.map(function (h) { return { date: h.date, value: h.smm    }; });
+    var pbfPts    = data.history.map(function (h) { return { date: h.date, value: h.pbf    }; });
+
+    var chartsHtml =
+      '<div class="silv-history-charts">' +
+        '<div class="silv-history-chart">' +
+          '<div class="silv-history-chart-title">' + t('Weight', 'Peso') + ' <small>(kg)</small></div>' +
+          silvanaVitalsMiniLineChart({ marker: 'Peso', unit: 'kg', color: '#244E6E', points: weightPts }) +
+        '</div>' +
+        '<div class="silv-history-chart">' +
+          '<div class="silv-history-chart-title">' + t('Skeletal Muscle Mass', 'Massa Muscular Esquelética') + ' <small>(kg)</small></div>' +
+          silvanaVitalsMiniLineChart({ marker: 'SMM', unit: 'kg', color: '#3F7A4F', points: smmPts }) +
+        '</div>' +
+        '<div class="silv-history-chart">' +
+          '<div class="silv-history-chart-title">' + t('Body fat %', 'PGC') + ' <small>(%)</small></div>' +
+          silvanaVitalsMiniLineChart({ marker: 'PGC', unit: '%', color: '#7A2E22', points: pbfPts }) +
+        '</div>' +
+      '</div>';
+
+    // Compact delta table beneath the charts
+    var dates = data.history.map(function (h) { return h.date; });
+    var head =
+      '<tr>' +
+        '<th class="silv-hist-cmp-marker">' + t('Metric', 'Métrica') + '</th>' +
+        dates.map(function (d) { return '<th>' + escapeHtml(formatDate(d)) + '</th>'; }).join('') +
+        '<th>Δ</th>' +
+      '</tr>';
+    function row(labelHtml, key, unit) {
+      var vals = data.history.map(function (h) { return h[key]; });
+      var first = vals[0], last = vals[vals.length - 1];
+      var delta = last - first;
+      var sign = delta > 0 ? '+' : (delta < 0 ? '−' : '');
+      var deltaStr = sign + Math.abs(delta).toFixed(1) + (unit ? ' ' + unit : '');
+      var cells = vals.map(function (v) { return '<td>' + fmtLabNum(v) + (unit ? ' ' + unit : '') + '</td>'; }).join('');
+      return '<tr><th class="silv-hist-cmp-marker">' + labelHtml + '</th>' + cells + '<td class="silv-hist-cmp-delta">' + deltaStr + '</td></tr>';
+    }
+    var table =
+      '<table class="silv-history-table">' +
+        '<thead>' + head + '</thead>' +
+        '<tbody>' +
+          row(t('Weight', 'Peso'), 'weight', 'kg') +
+          row(t('Skeletal Muscle Mass', 'MM Esquelética'), 'smm', 'kg') +
+          row(t('Body fat %', 'PGC'), 'pbf', '%') +
+        '</tbody>' +
+      '</table>';
+
+    return (
+      '<details class="lab-panel" open style="margin-bottom:18px;">' +
+        '<summary class="lab-panel-head">' +
+          '<span class="lab-panel-title">' + t('Body composition history', 'Histórico da Composição Corporal') + '</span>' +
+          '<span class="lab-panel-sub">' + t('Weight, skeletal muscle mass and body-fat % across all InBody panels on file', 'Peso, massa muscular esquelética e PGC ao longo de todos os painéis InBody no histórico') + '</span>' +
+          '<span class="lab-panel-count">' + data.history.length + ' ' + t('timepoints', 'pontos') + '</span>' +
+        '</summary>' +
+        '<div class="lab-panel-body">' +
+          chartsHtml +
+          table +
+        '</div>' +
+      '</details>'
+    );
+  }
+
+  function silvanaVitalsAdditionalPanel(data) {
+    var rows = [
+      { marker_en: 'Basal Metabolic Rate', marker_pt: 'Taxa Metabólica Basal',  value: data.additional.basal_metabolic_rate.value, unit: data.additional.basal_metabolic_rate.unit, ref_low: data.additional.basal_metabolic_rate.ref_low, ref_high: data.additional.basal_metabolic_rate.ref_high },
+      { marker_en: 'Visceral Fat Level',   marker_pt: 'Nível de Gordura Visceral', value: data.additional.visceral_fat_level.value, unit: data.additional.visceral_fat_level.unit, ref_low: data.additional.visceral_fat_level.ref_low, ref_high: data.additional.visceral_fat_level.ref_high },
+      { marker_en: 'Obesity Degree',       marker_pt: 'Grau de Obesidade',      value: data.additional.obesity_degree.value, unit: data.additional.obesity_degree.unit, ref_low: data.additional.obesity_degree.ref_low, ref_high: data.additional.obesity_degree.ref_high },
+    ];
+    return silvanaVitalsPanel(
+      t('Additional metrics', 'Dados adicionais'),
+      t('Derived from the same bio-impedance read', 'Derivados da mesma medição de bioimpedância'),
+      rows
+    );
+  }
+
+  function injectSilvanaVitalsStyles() {
+    if (document.getElementById('silvana-vitals-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'silvana-vitals-styles';
+    s.textContent = [
+      // Segmental analysis grid — two figures side by side
+      'main.jc-silvana-vitals .silv-segmental-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }',
+      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-segmental-grid { grid-template-columns: 1fr; } }',
+      'main.jc-silvana-vitals .silv-segmental { display: flex; flex-direction: column; align-items: center; }',
+      'main.jc-silvana-vitals .silv-segmental-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: #244E6E; margin: 0 0 8px; text-align: center; }',
+      'main.jc-silvana-vitals .silv-figure-wrap { position: relative; width: 100%; max-width: 360px; aspect-ratio: 220 / 380; }',
+      'main.jc-silvana-vitals .silv-fig { position: absolute; inset: 0; width: 100%; height: 100%; }',
+      'main.jc-silvana-vitals .silv-fig-label { position: absolute; min-width: 72px; padding: 4px 8px; background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 6px; font-family: "IBM Plex Mono", monospace; line-height: 1.35; text-align: center; box-shadow: 0 1px 3px rgba(13,27,42,0.06); }',
+      'main.jc-silvana-vitals .silv-fig-val { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; font-weight: 600; color: #0D1B2A; }',
+      'main.jc-silvana-vitals .silv-fig-pct { font-size: 10px; color: #7A8FA6; margin: 1px 0 3px; }',
+      'main.jc-silvana-vitals .silv-fig-status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: "IBM Plex Sans", sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }',
+      'main.jc-silvana-vitals .silv-fig-status-normal { background: #E6F4EA; color: #2D5F3F; border: 1px solid #85B595; }',
+      'main.jc-silvana-vitals .silv-fig-status-flag   { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }',
+      // Label positions relative to wrapper
+      'main.jc-silvana-vitals .silv-fig-label-left-arm  { top: 22%; left: -4px; }',
+      'main.jc-silvana-vitals .silv-fig-label-right-arm { top: 22%; right: -4px; }',
+      'main.jc-silvana-vitals .silv-fig-label-trunk     { top: 44%; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.92); }',
+      'main.jc-silvana-vitals .silv-fig-label-left-leg  { top: 72%; left: -4px; }',
+      'main.jc-silvana-vitals .silv-fig-label-right-leg { top: 72%; right: -4px; }',
+
+      // History panel — three sparkline charts in a row
+      'main.jc-silvana-vitals .silv-history-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 14px; }',
+      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-history-charts { grid-template-columns: 1fr; } }',
+      'main.jc-silvana-vitals .silv-history-chart { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 8px; padding: 12px 14px; }',
+      'main.jc-silvana-vitals .silv-history-chart-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; color: #244E6E; margin-bottom: 4px; }',
+      'main.jc-silvana-vitals .silv-history-chart-title small { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; font-weight: 400; }',
+
+      // Delta table
+      'main.jc-silvana-vitals .silv-history-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      'main.jc-silvana-vitals .silv-history-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
+      'main.jc-silvana-vitals .silv-history-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: middle; color: #1E2D3D; font-family: "IBM Plex Mono", monospace; }',
+      'main.jc-silvana-vitals .silv-history-table .silv-hist-cmp-marker { font-family: "IBM Plex Sans", sans-serif; color: #0D1B2A; font-weight: 500; }',
+      'main.jc-silvana-vitals .silv-history-table .silv-hist-cmp-delta { font-weight: 600; color: #244E6E; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function renderSilvanaVitals() {
+    injectSilvanaStyles();
+    injectSilvanaVitalsStyles();
+    document.title = 'JC Advisory — Vitals · Silvana Creste';
+
+    var data = SILVANA_INBODY;
+
+    var content =
+      '<section id="silv-content">' +
+        '<div class="container">' +
+          silvanaVitalsPanel(
+            t('Body composition analysis', 'Análise da Composição Corporal'),
+            t('Water, protein, mineral, fat and total weight against the InBody reference range', 'Água, proteína, mineral, gordura e peso total comparados à faixa de referência do InBody'),
+            data.composition) +
+          silvanaVitalsPanel(
+            t('Muscle-Fat analysis', 'Análise Músculo-Gordura'),
+            t('Weight, skeletal muscle mass and body-fat mass on the InBody scale', 'Peso, massa muscular esquelética e massa de gordura na escala InBody'),
+            data.muscle_fat) +
+          silvanaVitalsPanel(
+            t('Obesity analysis', 'Análise de Obesidade'),
+            t('BMI and body-fat percentage', 'IMC e percentual de gordura corporal'),
+            data.obesity) +
+          silvanaVitalsSegmentalSection(data) +
+          silvanaVitalsHistoryPanel(data) +
+          silvanaVitalsAdditionalPanel(data) +
+        '</div>' +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-silvana-exams jc-silvana-vitals';
+    main.innerHTML = silvanaVitalsHero(data) + content;
+    document.body.appendChild(main);
     injectDangerZone(main);
   }
 })();
