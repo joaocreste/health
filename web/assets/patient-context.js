@@ -455,13 +455,28 @@
     var subline = subBits.length
       ? '<span class="lab-test-ref" style="margin-left:auto;">' + subBits.join(' · ') + '</span>'
       : '';
+    var hasHistory = !!(m.points && m.points.length > 1);
+    var historyBadge = hasHistory
+      ? '<span class="lab-test-history-badge" aria-hidden="true">' +
+          '<span class="lab-test-history-count">' + m.points.length + '</span>' +
+          '<svg class="lab-test-history-caret" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true">' +
+            '<path d="M2 3.5 L5 7 L8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>' +
+        '</span>'
+      : '';
+    var cardCls = 'lab-test lab-test-' + status + (hasHistory ? ' lab-test-has-history' : '');
+    var attrs = hasHistory
+      ? ' role="button" tabindex="0" aria-expanded="false"' +
+        ' aria-label="' + tPlain('Click to view exam history', 'Clique para ver o histórico do exame') + '"'
+      : '';
     return (
-      '<div class="lab-test lab-test-' + status + '">' +
+      '<div class="' + cardCls + '"' + attrs + '>' +
         '<div class="lab-test-head">' +
           '<div class="lab-test-name">' + (m.marker_html || escapeHtml(m.marker)) + '</div>' +
           '<div class="lab-test-meta">' +
             '<span class="lab-test-val">' + valHtml + '</span>' +
             '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>' +
+            historyBadge +
           '</div>' +
         '</div>' +
         renderLabBar(value, m.ref_low, m.ref_high, status) +
@@ -469,8 +484,82 @@
           '<div class="lab-test-ref">' + t('Reference:', 'Referência:') + ' ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
           subline +
         '</div>' +
+        renderLabHistory(m) +
       '</div>'
     );
+  }
+
+  // Per-card click-to-expand history. Renders one row per sample in
+  // m.points (Date · Requested by · Result · Status pill) — newest first,
+  // latest row highlighted. Empty string when there's only one sample
+  // (no history to show). Caller wraps the result inside .lab-test;
+  // installLabHistoryHandler() toggles visibility on card click.
+  function renderLabHistory(m) {
+    if (!m.points || m.points.length < 2) return '';
+    var pts = m.points.slice().sort(function (a, b) {
+      return (dateMs(b.taken_at) || 0) - (dateMs(a.taken_at) || 0);
+    });
+    var rows = pts.map(function (p, i) {
+      var v = (p.value != null && isFinite(Number(p.value))) ? Number(p.value) : null;
+      var status = classifyLab(v, m.ref_low, m.ref_high, p.flag);
+      var pillCls = (status === 'flag') ? 'pill-flag' : (status === 'watch') ? 'pill-watch' : 'pill-ok';
+      var valStr = v != null ? fmtLabNum(v) : (p.value_text || '—');
+      var dateStr = p.taken_at ? formatDate(p.taken_at) : '—';
+      var requested = p.requesting_doctor
+        ? escapeHtml(p.requesting_doctor)
+        : p.laboratory
+          ? '<span class="lab-hist-lab">' + escapeHtml(p.laboratory) + '</span>'
+          : '<span class="lab-hist-empty">—</span>';
+      var unit = m.unit ? ' <span class="lab-hist-unit">' + escapeHtml(m.unit) + '</span>' : '';
+      var rowCls = 'lab-hist-row' + (i === 0 ? ' is-latest' : '');
+      return (
+        '<tr class="' + rowCls + '">' +
+          '<td class="lab-hist-date">' + escapeHtml(dateStr) + '</td>' +
+          '<td class="lab-hist-doctor">' + requested + '</td>' +
+          '<td class="lab-hist-val">' + escapeHtml(valStr) + unit + '</td>' +
+          '<td class="lab-hist-status"><span class="pill ' + pillCls + '">' + pillLabel(status, p.flag) + '</span></td>' +
+        '</tr>'
+      );
+    }).join('');
+    return (
+      '<div class="lab-test-history" aria-hidden="true">' +
+        '<table class="lab-test-history-table">' +
+          '<thead><tr>' +
+            '<th>' + t('Date', 'Data') + '</th>' +
+            '<th>' + t('Requested by', 'Solicitado por') + '</th>' +
+            '<th>' + t('Result', 'Resultado') + '</th>' +
+            '<th>' + t('Status', 'Status') + '</th>' +
+          '</tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+        '</table>' +
+      '</div>'
+    );
+  }
+
+  // Delegated click + keyboard toggler for .lab-test-has-history cards.
+  // Idempotent: installs the listener once per page load.
+  function installLabHistoryHandler() {
+    if (document.body && document.body.dataset.jcLabHistoryHandler === '1') return;
+    if (document.body) document.body.dataset.jcLabHistoryHandler = '1';
+    function toggle(card) {
+      var open = card.classList.toggle('is-open');
+      card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var hist = card.querySelector('.lab-test-history');
+      if (hist) hist.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+    document.addEventListener('click', function (e) {
+      var card = e.target && e.target.closest && e.target.closest('.lab-test-has-history');
+      if (!card) return;
+      if (e.target.closest('a, button, input, select, textarea')) return;
+      toggle(card);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      var card = e.target && e.target.closest && e.target.closest('.lab-test-has-history');
+      if (!card || card !== e.target) return;
+      e.preventDefault();
+      toggle(card);
+    });
   }
 
   function renderExams(exams) {
@@ -922,6 +1011,30 @@
       // Flagged cells in the historical-comparison table
       '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
       '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
+      // Per-card click-to-expand history (.lab-test-has-history)
+      '.lab-test-has-history { cursor: pointer; transition: box-shadow 0.15s ease, border-color 0.15s ease; }',
+      '.lab-test-has-history:hover { border-color: #B8954A; box-shadow: 0 2px 6px rgba(13,27,42,0.06); }',
+      '.lab-test-has-history:focus { outline: 2px solid #B8954A; outline-offset: 2px; }',
+      '.lab-test-history-badge { display: inline-flex; align-items: center; gap: 4px; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 999px; padding: 2px 8px 2px 9px; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; letter-spacing: 0.04em; margin-left: 6px; }',
+      '.lab-test-history-caret { transition: transform 0.18s ease; }',
+      '.lab-test.is-open .lab-test-history-caret { transform: rotate(180deg); }',
+      '.lab-test-history { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E2DC; }',
+      '.lab-test.is-open .lab-test-history { display: block; }',
+      '.lab-test-history-table { width: 100%; border-collapse: collapse; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      '.lab-test-history-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 4px 8px 8px; border-bottom: 1px solid #E5E2DC; }',
+      '.lab-test-history-table th:last-child { text-align: right; }',
+      '.lab-test-history-table td { padding: 8px; border-bottom: 1px solid #EFEBE3; vertical-align: middle; color: #1E2D3D; }',
+      '.lab-test-history-table tr:last-child td { border-bottom: none; }',
+      '.lab-test-history-table .lab-hist-row.is-latest td { background: #FFF6E5; }',
+      '.lab-test-history-table .lab-hist-row.is-latest .lab-hist-date::after { content: " · " attr(data-latest); color: #B8954A; }',
+      '.lab-test-history-table .lab-hist-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #1E2D3D; white-space: nowrap; }',
+      '.lab-test-history-table .lab-hist-doctor { color: #1E2D3D; }',
+      '.lab-test-history-table .lab-hist-val { font-family: "IBM Plex Mono", monospace; color: #0D1B2A; white-space: nowrap; font-weight: 500; }',
+      '.lab-test-history-table .lab-hist-unit { color: #7A8FA6; font-weight: 400; font-size: 10px; margin-left: 2px; }',
+      '.lab-test-history-table .lab-hist-status { text-align: right; white-space: nowrap; }',
+      '.lab-test-history-table .lab-hist-lab { color: #7A8FA6; }',
+      '.lab-test-history-table .lab-hist-empty { color: #B8954A; font-style: italic; }',
+      '@media (max-width: 540px) { .lab-test-history-table .lab-hist-doctor { font-size: 11px; } .lab-test-history-table td, .lab-test-history-table th { padding: 6px 4px; } }',
       // Danger zone (Delete my health data)
       '.jc-danger-zone { max-width: 1080px; margin: 32px auto; padding: 0 24px; }',
       '.jc-danger-card { background: #FFFFFF; border: 1px solid #E5B5AB; border-radius: 10px; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }',
@@ -966,6 +1079,7 @@
       '.jc-donut-trail-item.err { color: #7A2E22; }',
     ].join('\n');
     document.head.appendChild(s);
+    installLabHistoryHandler();
   }
 
   // insertAfterEl: optional. When the patient's home is rendered by JS
