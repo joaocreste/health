@@ -121,6 +121,7 @@
     '.lab-causes',                     // physical-exams.html: wrapper around causes lists (incl. titles)
     '.lab-note',                       // physical-exams.html: per-marker AI notes (Joao-specific)
     '.letter-content',                 // assessment.html: the long personalised letter (if class exists)
+    '.ct-grid',                        // physical-exams.html: every image viewer grid in #imagery
   ];
 
   function hideSelectors() {
@@ -128,6 +129,27 @@
       try {
         document.querySelectorAll(sel).forEach(function (el) { el.style.display = 'none'; });
       } catch (_) {}
+    });
+  }
+
+  // Patient-supplied forehead photo gallery (physical-exams.html).
+  // Targeted by the "Patient notes" heading + "(patient-supplied
+  // photographs)" subtitle — no stable CSS hook so we walk siblings
+  // from the heading until the next major heading / section.
+  function hidePatientPhotos() {
+    document.querySelectorAll('h3').forEach(function (h3) {
+      var t = h3.textContent || '';
+      if (t.indexOf('Patient notes') === -1 && t.indexOf('Anotações do paciente') === -1) return;
+      if (t.indexOf('patient-supplied') === -1 && t.indexOf('fotografias') === -1 && t.indexOf('Fotografias') === -1) return;
+      h3.style.display = 'none';
+      var sib = h3.nextElementSibling;
+      while (sib) {
+        var next = sib.nextElementSibling;
+        var tag = sib.tagName;
+        if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4' || tag === 'SECTION') break;
+        sib.style.display = 'none';
+        sib = next;
+      }
     });
   }
 
@@ -323,6 +345,7 @@
     // original Joao names which are clearer trigger words than the
     // post-replacement "Leo" version.
     hideJoaoSpecificAlerts();
+    hidePatientPhotos();
     walkText(document.body);
     rewriteTitle();
     hideSelectors();
