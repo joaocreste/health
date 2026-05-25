@@ -1877,6 +1877,32 @@
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab { color: rgba(255,255,255,0.85); }',
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab:hover { background: rgba(255,255,255,0.08); }',
       'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
+      // Unified-viewer toggle bar (region + plane)
+      'main.jc-paulo-exams .pl-toggle-bar { display: flex; flex-wrap: wrap; gap: 18px; padding: 10px 14px; background: var(--blue-50, #EBF2F8); border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
+      'main.jc-paulo-exams .pl-tab-group { display: flex; align-items: center; gap: 8px; }',
+      'main.jc-paulo-exams .pl-tab-group-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-700, #244E6E); font-weight: 500; }',
+      'main.jc-paulo-exams .pl-tabs { display: inline-flex; gap: 2px; background: #FFFFFF; border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 2px; }',
+      'main.jc-paulo-exams .pl-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
+      'main.jc-paulo-exams .pl-tab:hover { background: rgba(13, 27, 42, 0.06); }',
+      'main.jc-paulo-exams .pl-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
+      'main.jc-paulo-exams .pl-sequence-tag { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; padding: 2px 8px; background: rgba(13, 27, 42, 0.08); border-radius: 999px; color: #244E6E; margin-right: 10px; vertical-align: 1px; }',
+      'main.jc-paulo-exams .pl-sequence-tag:empty { display: none; }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-toggle-bar { background: rgba(0,0,0,0.55); border-bottom-color: rgba(255,255,255,0.12); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab-group-label { color: rgba(255,255,255,0.78); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab { color: rgba(255,255,255,0.85); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab:hover { background: rgba(255,255,255,0.08); }',
+      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
+
+      // Side-by-side reports
+      'main.jc-paulo-exams .paulo-reports-heading { font-family: "Raleway", sans-serif; font-size: 20px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 2.5rem 0 0.75rem; }',
+      'main.jc-paulo-exams .paulo-reports-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }',
+      '@media (max-width: 960px) { main.jc-paulo-exams .paulo-reports-grid { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-exams .paulo-report-col { display: flex; flex-direction: column; gap: 12px; }',
+      'main.jc-paulo-exams .paulo-report-col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 0 0 6px; border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
+      'main.jc-paulo-exams .paulo-report-col-title { font-family: "Raleway", sans-serif; font-size: 15px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 0; }',
+      'main.jc-paulo-exams .paulo-report-col-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 8px; border-radius: 6px; }',
+      'main.jc-paulo-exams .paulo-report-col-pdf:hover { background: #FFF6E5; }',
       // Override the global .ct-grid-single cap (620px) so the viewer fills the page.
       'main.jc-paulo-exams .ct-grid.ct-grid-single { max-width: none; margin-left: 0; margin-right: 0; }',
       'main.jc-paulo-exams .ct-stage { aspect-ratio: 16 / 9; max-height: 720px; }',
@@ -1908,6 +1934,271 @@
   }
 
   function pauloLi(s) { return '<li>' + s + '</li>'; }
+
+  /* ── Unified spine MRI section ───────────────────────────────────
+     The CETAM portal exported both regions in the same six DICOM
+     bundles (cervical + lumbar slices intermixed), so showing two
+     separate viewer cards was misleading. This builder renders ONE
+     viewer with two toggles (region + plane) and places both
+     radiology reports side-by-side underneath. */
+
+  function buildPauloReportColumn(study) {
+    return (
+      '<div class="paulo-report-col">' +
+        '<div class="paulo-report-col-head">' +
+          '<h4 class="paulo-report-col-title">' + t(study.titleEn, study.titlePt) + '</h4>' +
+          '<a class="paulo-report-col-pdf" href="' + study.pdfHref + '" download>' +
+            '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+              '<polyline points="7 10 12 15 17 10"/>' +
+              '<line x1="12" y1="15" x2="12" y2="3"/>' +
+            '</svg>' +
+            t('PDF', 'PDF') +
+          '</a>' +
+        '</div>' +
+        '<div class="list-card">' +
+          '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+          '<ul class="lang-en">' + study.identsEn.map(pauloLi).join('') + '</ul>' +
+          '<ul class="lang-pt">' + study.identsPt.map(pauloLi).join('') + '</ul>' +
+        '</div>' +
+        '<div class="list-card">' +
+          '<h4>' + t('Technique', 'Técnica') + '</h4>' +
+          '<ul class="lang-en">' + study.techniqueEn.map(pauloLi).join('') + '</ul>' +
+          '<ul class="lang-pt">' + study.techniquePt.map(pauloLi).join('') + '</ul>' +
+        '</div>' +
+        '<div class="list-card">' +
+          '<h4>' + t('Findings', 'Achados') + '</h4>' +
+          '<ul class="lang-en">' + study.findingsEn.map(pauloLi).join('') + '</ul>' +
+          '<ul class="lang-pt">' + study.findingsPt.map(pauloLi).join('') + '</ul>' +
+        '</div>' +
+        '<div class="alert alert-warn">' +
+          '<span class="lang-en">' + study.conclusionEn + '</span>' +
+          '<span class="lang-pt">' + study.conclusionPt + '</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function buildPauloUnifiedSection(studies) {
+    // Two PDF buttons at the top
+    function pdfBtn(study) {
+      return (
+        '<a class="export-btn-primary" href="' + study.pdfHref + '" download>' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+            '<polyline points="7 10 12 15 17 10"/>' +
+            '<line x1="12" y1="15" x2="12" y2="3"/>' +
+          '</svg>' +
+          t(study.pdfLabelEn, study.pdfLabelPt) +
+        '</a>'
+      );
+    }
+
+    return (
+      '<div class="imagery-exam" id="paulo-spine-mri"><div class="container">' +
+        '<div class="section-label">' + t('09A · MRI · Spine', '09A · RM · Coluna') + '</div>' +
+        '<h2 class="section-title">' + t('Spine MRI · 15 May 2026', 'RM da coluna · 15 de maio de 2026') + '</h2>' +
+        '<p class="section-desc">' +
+          t('Same-day cervical and lumbar MRI at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Pick the region (Cervical / Lumbar) and the plane (AXI / COR / SAG), then drag the slider, scroll the wheel, click-and-drag the image, or use the arrow keys to walk through the slices. The two reports follow side-by-side beneath the viewer.',
+            'RM cervical e lombar do mesmo dia no CETAM Diagnóstico, laudadas pelo Dr. Marco Antonio de Carvalho (CRM-99607). Escolha a região (Cervical / Lombar) e o plano (AXI / COR / SAG), depois arraste o controle, role o mouse, clique-e-arraste a imagem ou use as setas para percorrer os cortes. Os dois laudos seguem lado a lado abaixo do visualizador.') +
+        '</p>' +
+        '<div class="report-export-row">' + studies.map(pdfBtn).join('') + '</div>' +
+
+        '<div class="ct-grid ct-grid-single">' +
+          '<div class="pl-ct-viewer ct-viewer" data-paulo-study="spine-combined">' +
+            '<div class="ct-viewer-head">' +
+              '<div class="ct-viewer-title">' + t('Spine MRI', 'RM da coluna') + '</div>' +
+              '<div class="ct-viewer-meta">' +
+                '<span class="pl-sequence-tag"></span>' +
+                t('Slice ', 'Corte ') +
+                '<span class="ct-idx">1</span> / <span class="ct-total">1</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="pl-toggle-bar">' +
+              '<div class="pl-tab-group">' +
+                '<span class="pl-tab-group-label">' + t('Region', 'Região') + '</span>' +
+                '<div class="pl-tabs" role="tablist">' +
+                  '<button type="button" class="pl-tab pl-region-tab" data-region="cervical" aria-pressed="true">' +
+                    t('Cervical', 'Cervical') +
+                  '</button>' +
+                  '<button type="button" class="pl-tab pl-region-tab" data-region="lombar" aria-pressed="false">' +
+                    t('Lumbar', 'Lombar') +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="pl-tab-group">' +
+                '<span class="pl-tab-group-label">' + t('Plane', 'Plano') + '</span>' +
+                '<div class="pl-tabs" role="tablist">' +
+                  '<button type="button" class="pl-tab pl-orient-tab" data-orient="axi" aria-pressed="true">AXI</button>' +
+                  '<button type="button" class="pl-tab pl-orient-tab" data-orient="cor" aria-pressed="false">COR</button>' +
+                  '<button type="button" class="pl-tab pl-orient-tab" data-orient="sag" aria-pressed="false">SAG</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ct-stage">' +
+              '<img class="ct-img" alt="Spine MRI" loading="eager">' +
+            '</div>' +
+            '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="Spine MRI slice">' +
+          '</div>' +
+        '</div>' +
+
+        '<h3 class="paulo-reports-heading">' +
+          t('Radiologist&apos;s reports', 'Laudos do radiologista') +
+        '</h3>' +
+        '<div class="paulo-reports-grid">' +
+          studies.map(buildPauloReportColumn).join('') +
+        '</div>' +
+      '</div></div>'
+    );
+  }
+
+  function wirePauloUnifiedViewer(viewerEl, studies) {
+    var img    = viewerEl.querySelector('.ct-img');
+    var slider = viewerEl.querySelector('.ct-slider');
+    var idxEl  = viewerEl.querySelector('.ct-idx');
+    var totEl  = viewerEl.querySelector('.ct-total');
+    var seqEl  = viewerEl.querySelector('.pl-sequence-tag');
+    var stage  = viewerEl.querySelector('.ct-stage');
+    var regionTabs = viewerEl.querySelectorAll('.pl-region-tab');
+    var orientTabs = viewerEl.querySelectorAll('.pl-orient-tab');
+
+    // manifests[region] = { axi: [filenames], axi_meta: [{file, series}], ... }
+    var manifests = { cervical: null, lombar: null };
+    var slugByRegion = {};
+    studies.forEach(function (s) {
+      // slug is e.g. "paulo-cervical-mri-2026-05-15" → region key = 'cervical' or 'lombar'
+      if (/cervical/.test(s.slug)) slugByRegion['cervical'] = s.slug;
+      else if (/lombar|lumbar/.test(s.slug)) slugByRegion['lombar'] = s.slug;
+    });
+
+    var state = { region: 'cervical', orient: 'axi', cache: new Map() };
+    var PRELOAD = 6;
+
+    function currentFiles() {
+      var m = manifests[state.region];
+      return (m && m[state.orient]) ? m[state.orient] : [];
+    }
+    function currentMeta() {
+      var m = manifests[state.region];
+      return (m && m[state.orient + '_meta']) ? m[state.orient + '_meta'] : [];
+    }
+    function urlFor(i) {
+      var files = currentFiles();
+      return 'scans/' + slugByRegion[state.region] + '/' + state.orient + '/' + files[i];
+    }
+
+    function updateSequenceTag(i) {
+      var meta = currentMeta();
+      var series = (meta[i] && meta[i].series) ? meta[i].series : '';
+      if (seqEl) seqEl.textContent = series;
+    }
+
+    function setSlice(i) {
+      var files = currentFiles();
+      var max = files.length - 1;
+      if (max < 0) { idxEl.textContent = '0'; totEl.textContent = '0'; return; }
+      i = Math.max(0, Math.min(max, i));
+      slider.value = i;
+      idxEl.textContent = String(i + 1);
+      img.src = urlFor(i);
+      updateSequenceTag(i);
+      for (var d = 1; d <= PRELOAD; d++) {
+        [i + d, i - d].forEach(function (n) {
+          if (n < 0 || n > max) return;
+          var key = state.region + ':' + state.orient + ':' + n;
+          if (state.cache.has(key)) return;
+          var im = new Image();
+          im.src = 'scans/' + slugByRegion[state.region] + '/' + state.orient + '/' + files[n];
+          state.cache.set(key, im);
+        });
+      }
+    }
+
+    function refreshSliderRange() {
+      var files = currentFiles();
+      var max = Math.max(0, files.length - 1);
+      slider.max = String(max);
+      totEl.textContent = String(files.length);
+      // jump to the middle slice of the new set
+      var mid = Math.floor(max / 2);
+      setSlice(mid);
+    }
+
+    function syncTabPressed() {
+      Array.prototype.forEach.call(regionTabs, function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-region') === state.region ? 'true' : 'false');
+      });
+      Array.prototype.forEach.call(orientTabs, function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-orient') === state.orient ? 'true' : 'false');
+      });
+    }
+
+    function switchTo(region, orient) {
+      var nextRegion = region || state.region;
+      var nextOrient = orient || state.orient;
+      var m = manifests[nextRegion];
+      if (!m) return;
+      // If the requested orientation has no slices for this region, hold the
+      // current orient if possible, else pick the first non-empty.
+      if (!m[nextOrient] || !m[nextOrient].length) {
+        var fallback = ['axi','cor','sag'].find(function (o) { return m[o] && m[o].length; });
+        if (!fallback) return;
+        nextOrient = fallback;
+      }
+      state.region = nextRegion;
+      state.orient = nextOrient;
+      syncTabPressed();
+      refreshSliderRange();
+    }
+
+    // Wire toggles
+    Array.prototype.forEach.call(regionTabs, function (b) {
+      b.addEventListener('click', function () { switchTo(b.getAttribute('data-region'), null); });
+    });
+    Array.prototype.forEach.call(orientTabs, function (b) {
+      b.addEventListener('click', function () { switchTo(null, b.getAttribute('data-orient')); });
+    });
+
+    // Slider + interaction handlers
+    slider.addEventListener('input', function (e) { setSlice(parseInt(e.target.value, 10)); });
+    stage.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var step = Math.sign(e.deltaY) * (e.shiftKey ? 10 : 1);
+      setSlice(parseInt(slider.value, 10) + step);
+    }, { passive: false });
+    var dragging = false, startY = 0, startIdx = 0;
+    stage.addEventListener('pointerdown', function (e) {
+      dragging = true; startY = e.clientY; startIdx = parseInt(slider.value, 10);
+      try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var delta = Math.round((startY - e.clientY) * 0.5);
+      setSlice(startIdx + delta);
+    });
+    stage.addEventListener('pointerup',     function () { dragging = false; });
+    stage.addEventListener('pointercancel', function () { dragging = false; });
+    slider.addEventListener('keydown', function (e) {
+      var cur = parseInt(slider.value, 10);
+      var max = currentFiles().length - 1;
+      if (e.key === 'PageUp')   { e.preventDefault(); setSlice(cur + 10); }
+      if (e.key === 'PageDown') { e.preventDefault(); setSlice(cur - 10); }
+      if (e.key === 'Home')     { e.preventDefault(); setSlice(0); }
+      if (e.key === 'End')      { e.preventDefault(); setSlice(max); }
+    });
+
+    // Fetch both manifests in parallel
+    Promise.all([
+      fetch('scans/' + slugByRegion['cervical'] + '-manifest.json').then(function (r) { return r.json(); }),
+      fetch('scans/' + slugByRegion['lombar']   + '-manifest.json').then(function (r) { return r.json(); }),
+    ]).then(function (results) {
+      manifests['cervical'] = results[0];
+      manifests['lombar']   = results[1];
+      switchTo('cervical', 'axi');
+    }).catch(function (err) {
+      console.error('Paulo unified MRI manifest load failed', err);
+    });
+  }
 
   function buildPauloExamSection(study, idx) {
     var pdfBtn =
@@ -2125,7 +2416,7 @@
         '</div>' +
       '</section>';
 
-    var examsHtml = PAULO_STUDIES.map(buildPauloExamSection).join('');
+    var examsHtml = buildPauloUnifiedSection(PAULO_STUDIES);
 
     var aiSummary =
       '<section class="paulo-ai-summary-wrap">' +
@@ -2182,11 +2473,11 @@
             t('09A · Imagery', '09A · Imagem') +
           '</div>' +
           '<h2 class="section-title">' +
-            t('Imaging exams', 'Exames de imagem') +
+            t('Imaging exam', 'Exame de imagem') +
           '</h2>' +
           '<p class="section-desc">' +
-            t('Two imaging studies acquired the same day — cervical and lumbar MRI. Each viewer supports plane switching (AXI / COR / SAG), slider, mouse-wheel scroll, click-and-drag, and arrow-key navigation. The radiologist&apos;s report follows beneath each viewer in both Portuguese and English.',
-              'Dois estudos de imagem realizados no mesmo dia — RM cervical e lombar. Cada visualizador aceita troca de plano (AXI / COR / SAG), controle deslizante, rolagem do mouse, clicar-e-arrastar e setas do teclado. O laudo do radiologista segue abaixo de cada visualizador, em português e em inglês.') +
+            t('One same-day MRI session of the spine covering both the cervical and lumbar regions. The single viewer below carries both — pick the anatomical region (Cervical / Lumbar) and the plane (AXI / COR / SAG), then scrub the slider. The two radiologists’ reports follow side-by-side in Portuguese and English.',
+              'Uma única sessão de RM da coluna, mesma data, cobrindo a região cervical e a lombar. O visualizador único abaixo carrega as duas — escolha a região anatômica (Cervical / Lombar) e o plano (AXI / COR / SAG) e depois deslize o controle. Os dois laudos seguem lado a lado em português e em inglês.') +
           '</p>' +
         '</div>' +
         examsHtml +
@@ -2197,11 +2488,9 @@
     main.innerHTML = hero + aiSummary + imagery;
     document.body.appendChild(main);
 
-    // Wire viewers
-    PAULO_STUDIES.forEach(function (study) {
-      var viewerEl = main.querySelector('.pl-ct-viewer[data-paulo-study="' + study.slug + '"]');
-      if (viewerEl) wirePauloViewer(viewerEl, study);
-    });
+    // Wire the unified viewer (handles both anatomies + orientations)
+    var unifiedViewer = main.querySelector('.pl-ct-viewer[data-paulo-study="spine-combined"]');
+    if (unifiedViewer) wirePauloUnifiedViewer(unifiedViewer, PAULO_STUDIES);
 
     // Place the danger zone beneath the new main, mirroring how the
     // jc-overview view does it for other patients.
