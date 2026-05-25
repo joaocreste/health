@@ -245,15 +245,17 @@
         '</table>' +
       '</div>';
 
-    // Drop it where the meds section used to live on physical.html
-    // (right before #clinical, or at the top of <main> on other pages).
+    // Drop the card only where the medications section used to live —
+    // physical.html has an anchor `#clinical` right after the (now
+    // hidden) #meds section. On every other page (home / mental /
+    // exams / etc.) the card simply isn't shown: medications already
+    // appear in the home AI summary risk list ("Blood pressure ...
+    // Perindopril 4 mg/day is the single agent on board") and we
+    // don't need to repeat them.
     var clinical = document.getElementById('clinical');
     if (clinical && clinical.parentNode) {
       clinical.parentNode.insertBefore(card, clinical);
-      return;
     }
-    // Fallback: append to body
-    document.body.appendChild(card);
   }
 
   // ─── 5. Inject Leo-specific AI summary on home ──────────────────
