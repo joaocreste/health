@@ -271,7 +271,7 @@
     card.innerHTML =
       '<div class="container">' +
         '<div class="section-label">' +
-          '01 · Browse <span class="ai-pill">AI</span>' +
+          '02 · Synthesis <span class="ai-pill">AI</span>' +
         '</div>' +
         '<h2 class="section-title">AI summary · Leo Keller</h2>' +
         '<p class="section-desc">Synthesised across the lab, vitals and imaging history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.</p>' +
@@ -303,13 +303,23 @@
         '</div>' +
       '</div>';
 
-    // Insert as the first content section after the page header
-    var firstSection = document.querySelector('main section, body > section');
-    if (firstSection && firstSection.parentNode) {
-      firstSection.parentNode.insertBefore(card, firstSection);
-    } else {
-      document.body.appendChild(card);
+    // Insert immediately AFTER the Reports section so the home page
+    // always opens with Hero → 01 · Browse / Reports → 02 · AI Synthesis
+    // → the rest of the page. Find the Reports section by looking for
+    // the entry-card-visual grid (a stable, distinctive landmark).
+    var reportsSection = null;
+    document.querySelectorAll('section.report-section, section.hero, section').forEach(function (s) {
+      if (reportsSection) return;
+      if (s.querySelector('.entry-card-visual, .entry-grid-visual')) {
+        reportsSection = s;
+      }
+    });
+    if (reportsSection && reportsSection.parentNode) {
+      reportsSection.parentNode.insertBefore(card, reportsSection.nextSibling);
+      return;
     }
+    // Fallback: drop at the end of body so we never land above the hero
+    document.body.appendChild(card);
   }
 
   // ─── 6. Adjust the static "page-header" description so the
