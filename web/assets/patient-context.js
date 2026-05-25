@@ -1133,16 +1133,25 @@
       return;
     }
 
-    // Silvana's data is hand-curated. Physical → Vitals gets the
-    // bespoke InBody body-composition view; Physical and Genetics fall
-    // through to her multi-year lab history page.
+    // Silvana's data is hand-curated. Routes:
+    //   Physical (overview)  → 2-card landing (Sinais Vitais + Exames)
+    //   Physical → Vitals    → bespoke InBody body-composition view
+    //   Physical → Exams     → multi-year lab history page
+    //   Physical → Genetics  → not built yet
+    if (patient === SILVANA_CRESTE && section === 'physical') {
+      renderSilvanaPhysicalLanding();
+      return;
+    }
     if (patient === SILVANA_CRESTE && section === 'physical-vitals') {
       renderSilvanaVitals();
       return;
     }
-    if (patient === SILVANA_CRESTE &&
-        (section === 'physical' || section === 'physical-genetics')) {
+    if (patient === SILVANA_CRESTE && section === 'physical-exams') {
       renderSilvanaPhysicalExams();
+      return;
+    }
+    if (patient === SILVANA_CRESTE && section === 'physical-genetics') {
+      renderEmptyShell(patient, 'Silvana Creste', t('Physical → Genetics', 'Físico → Genética'));
       return;
     }
 
@@ -2868,6 +2877,113 @@
       'main.jc-silvana-exams .silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
       'main.jc-silvana-exams .silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
       'main.jc-silvana-exams .silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  /* Physical → overview landing for Silvana. Two entry cards, modeled
+     on Joao's physical.html: Sinais Vitais and Exames. Genetics is
+     intentionally out for now — no data uploaded yet. */
+  function renderSilvanaPhysicalLanding() {
+    injectSilvanaStyles();
+    injectSilvanaLandingStyles();
+    document.title = 'JC Advisory — Physical · Silvana Creste';
+
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Physical', 'Físico') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('Physical health overview · Silvana Creste',
+              'Visão geral da saúde física · Silvana Creste') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('Two views of the same patient — daily and periodic vitals (body composition, future wearables), and point-in-time labs spanning 2019 to 2026.',
+              'Duas visões do mesmo paciente — sinais vitais diários e periódicos (composição corporal e, no futuro, wearables) e exames laboratoriais pontuais de 2019 a 2026.') +
+          '</p>' +
+        '</div>' +
+      '</section>';
+
+    var cards =
+      '<section class="silv-landing">' +
+        '<div class="container">' +
+          '<div class="silv-landing-grid">' +
+            // Sinais Vitais
+            '<a class="silv-landing-card" href="physical-vitals.html">' +
+              '<svg class="silv-landing-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<circle cx="32" cy="32" r="22" fill="#D8E8F2" stroke="#244E6E" stroke-width="2"/>' +
+                '<polyline points="14,32 22,32 26,22 30,42 34,28 38,36 42,32 50,32" ' +
+                  'stroke="#3E7CA3" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '</svg>' +
+              '<div class="silv-landing-title">' + t('Vitals', 'Sinais vitais') + '</div>' +
+              '<div class="silv-landing-status">' +
+                '<span class="pill pill-flag">' + t('Body fat above range', 'Gordura acima da faixa') + '</span>' +
+                '<span class="pill pill-watch">' + t('Lower-body lean deficit', 'Déficit muscular nas pernas') + '</span>' +
+              '</div>' +
+              '<ul class="silv-landing-bullets">' +
+                '<li>' + t('InBody120 body composition (11 Feb 2026)',
+                           'Composição corporal InBody120 (11 fev 2026)') + '</li>' +
+                '<li>' + t('Segmental lean + fat mass · 5 anatomical regions',
+                           'Massa magra e gordura segmentar · 5 regiões anatômicas') + '</li>' +
+                '<li>' + t('Two-timepoint history with delta',
+                           'Histórico com 2 medidas e delta') + '</li>' +
+              '</ul>' +
+              '<span class="silv-landing-cta">' + t('Open', 'Abrir') + ' →</span>' +
+            '</a>' +
+            // Exames
+            '<a class="silv-landing-card" href="physical-exams.html">' +
+              '<svg class="silv-landing-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+                '<line x1="20" y1="8" x2="44" y2="8" stroke="#244E6E" stroke-width="2.5" stroke-linecap="round"/>' +
+                '<path d="M22 8 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 8 Z" ' +
+                  'fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
+                '<path d="M22 34 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 34 Z" fill="#3E7CA3"/>' +
+                '<circle cx="28" cy="44" r="2" fill="#FFFFFF" opacity="0.8"/>' +
+                '<circle cx="35" cy="50" r="1.5" fill="#FFFFFF" opacity="0.8"/>' +
+              '</svg>' +
+              '<div class="silv-landing-title">' + t('Exams', 'Exames') + '</div>' +
+              '<div class="silv-landing-status">' +
+                '<span class="pill pill-watch">' + t('Borderline lipid drift', 'Drift lipídico borderline') + '</span>' +
+                '<span class="pill pill-info">' + t('7-year lab history', 'Histórico de 7 anos') + '</span>' +
+              '</div>' +
+              '<ul class="silv-landing-bullets">' +
+                '<li>' + t('Multi-year lab markers · Jun 2019 → Apr 2026',
+                           'Marcadores laboratoriais · jun 2019 → abr 2026') + '</li>' +
+                '<li>' + t('Side-by-side comparison across every panel',
+                           'Comparação lado a lado em todos os painéis') + '</li>' +
+                '<li>' + t('AI summary with three pillar insights',
+                           'Resumo da IA com três insights por pilar') + '</li>' +
+              '</ul>' +
+              '<span class="silv-landing-cta">' + t('Open', 'Abrir') + ' →</span>' +
+            '</a>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-silvana-exams jc-silvana-landing';
+    main.innerHTML = hero + cards;
+    document.body.appendChild(main);
+    injectDangerZone(main);
+  }
+
+  function injectSilvanaLandingStyles() {
+    if (document.getElementById('silvana-landing-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'silvana-landing-styles';
+    s.textContent = [
+      'main.jc-silvana-landing .silv-landing { padding: 36px 0 24px; }',
+      'main.jc-silvana-landing .silv-landing > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-silvana-landing .silv-landing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }',
+      '@media (max-width: 880px) { main.jc-silvana-landing .silv-landing-grid { grid-template-columns: 1fr; } }',
+      'main.jc-silvana-landing .silv-landing-card { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px; background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #244E6E; border-radius: 10px; text-decoration: none; color: inherit; transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s; }',
+      'main.jc-silvana-landing .silv-landing-card:hover { transform: translateY(-2px); border-color: #B8954A; box-shadow: 0 6px 18px rgba(13,27,42,0.08); }',
+      'main.jc-silvana-landing .silv-landing-icon { width: 56px; height: 56px; }',
+      'main.jc-silvana-landing .silv-landing-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; }',
+      'main.jc-silvana-landing .silv-landing-status { display: flex; flex-wrap: wrap; gap: 6px; }',
+      'main.jc-silvana-landing .silv-landing-bullets { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; line-height: 1.45; }',
+      'main.jc-silvana-landing .silv-landing-bullets li { position: relative; padding-left: 14px; }',
+      'main.jc-silvana-landing .silv-landing-bullets li::before { content: "·"; position: absolute; left: 4px; color: #B8954A; font-weight: 700; }',
+      'main.jc-silvana-landing .silv-landing-cta { margin-top: auto; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #244E6E; letter-spacing: 0.04em; }',
     ].join('\n');
     document.head.appendChild(s);
   }
