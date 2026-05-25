@@ -1718,8 +1718,8 @@
       labelPt: '09A · RM · Coluna cervical',
       titleEn: 'MRI cervical spine · 15 May 2026',
       titlePt: 'RM da coluna cervical · 15 de maio de 2026',
-      blurbEn: 'MRI of the cervical spine without intravenous contrast, multi-planar T1, T2 and STIR sequences. Three orientations were acquired — axial (60 slices), coronal (24) and sagittal (93). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
-      blurbPt: 'Ressonância da coluna cervical sem contraste endovenoso, sequências multiplanares em T1, T2 e STIR. Três orientações adquiridas — axial (60 cortes), coronal (24) e sagital (93). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
+      blurbEn: 'MRI of the cervical spine without intravenous contrast. Three orientations were acquired — axial T2 (35 slices), coronal T2 (12) and sagittal (45, across T1 / T2 / STIR weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
+      blurbPt: 'Ressonância da coluna cervical sem contraste endovenoso. Três orientações adquiridas — axial T2 (35 cortes), coronal T2 (12) e sagital (45, com sequências T1 / T2 / STIR, agrupadas nessa ordem ao longo do slider). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
       pdfHref: 'scans/paulo-cervical-mri-2026-05-15-report.pdf',
       pdfLabelEn: 'Export cervical MRI report (PDF)',
       pdfLabelPt: 'Exportar laudo da RM cervical (PDF)',
@@ -1782,8 +1782,8 @@
       labelPt: '09A · RM · Coluna lombar',
       titleEn: 'MRI lumbar spine · 15 May 2026',
       titlePt: 'RM da coluna lombar · 15 de maio de 2026',
-      blurbEn: 'MRI of the lumbar spine without intravenous contrast, multi-planar T1, T2 and STIR sequences. Three orientations were acquired — axial (60 slices), coronal (24) and sagittal (93). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
-      blurbPt: 'Ressonância da coluna lombar sem contraste endovenoso, sequências multiplanares em T1, T2 e STIR. Três orientações adquiridas — axial (60 cortes), coronal (24) e sagital (93). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
+      blurbEn: 'MRI of the lumbar spine without intravenous contrast. Three orientations were acquired — axial T2 (25 slices), coronal T2 (12) and sagittal (48, across STIR / T2 CLEAR / T1 weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
+      blurbPt: 'Ressonância da coluna lombar sem contraste endovenoso. Três orientações adquiridas — axial T2 (25 cortes), coronal T2 (12) e sagital (48, com sequências STIR / T2 CLEAR / T1, agrupadas nessa ordem ao longo do slider). Use os botões AXI / COR / SAG no visualizador para alternar o plano e depois deslize o controle para percorrer os cortes.',
       pdfHref: 'scans/paulo-lombar-mri-2026-05-15-report.pdf',
       pdfLabelEn: 'Export lumbar MRI report (PDF)',
       pdfLabelPt: 'Exportar laudo da RM lombar (PDF)',
@@ -2066,7 +2066,18 @@
       .then(function (r) { return r.json(); })
       .then(function (m) {
         manifest = m;
-        switchView('axi');
+        // Hide any orientation button whose manifest entry is empty,
+        // so future exports with only some sequences degrade gracefully.
+        var firstAvailable = null;
+        Array.prototype.forEach.call(tabs, function (b) {
+          var v = b.getAttribute('data-view');
+          if (!m[v] || !m[v].length) {
+            b.style.display = 'none';
+          } else if (firstAvailable === null) {
+            firstAvailable = v;
+          }
+        });
+        switchView(firstAvailable || 'axi');
       })
       .catch(function (err) {
         console.error('Paulo MRI manifest failed', manifestUrl, err);
