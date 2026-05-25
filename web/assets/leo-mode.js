@@ -276,15 +276,38 @@
         '<h2 class="section-title">AI summary · Leo Keller</h2>' +
         '<p class="section-desc">Synthesised across the lab, vitals and imaging history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.</p>' +
 
+        // Risk-tag legend
+        '<div class="leo-risk-legend" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12px;color:var(--text-muted);margin-bottom:14px;">' +
+          '<span style="font-family:\'IBM Plex Mono\',monospace;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">Risk tags</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-flag">High</span> immediate clinical attention</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-watch">Medium</span> watch / address near-term</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-ok">Follow-up</span> routine recheck</span>' +
+        '</div>' +
+
         '<div class="two-col mb-3">' +
           '<div class="list-card">' +
             '<h4>What the data shows</h4>' +
-            '<ul>' +
-              '<li><strong>Blood pressure</strong> is the primary axis under active management. The 249-reading dataset sits in Stage 1–2 territory (mean ~135 / 90 mmHg) with a peak of 172 / 116. Perindopril 4 mg/day is the single agent on board.</li>' +
-              '<li><strong>Borderline-elevated creatinine (1.30 mg/dL)</strong> with preserved eGFR (&gt; 60 mL/min) — without nephrotoxic co-medication, this most likely reflects hydration noise + muscle mass, but it deserves a repeat in 8–12 weeks under standardised hydration.</li>' +
-              '<li><strong>Elevated homocysteine (14.40 µmol/L)</strong> against normal serum B12 and folate is consistent with sub-optimal one-carbon metabolism (suspected MTHFR polymorphism). Independent cardiovascular risk factor; pair with the BP picture.</li>' +
-              '<li><strong>Cervical spine MRI</strong> shows multi-level degenerative change C3/4–C6/7 with mild bilateral foraminal narrowing — no cord signal abnormality. Conservative management on imaging grounds.</li>' +
-              '<li><strong>Vitamin D, HbA1c, HDL, testosterone</strong> are all in the optimal range. Liver function preserved.</li>' +
+            '<ul class="leo-risk-list" style="list-style:none;padding-left:0;">' +
+              '<li style="padding-left:0;margin-bottom:10px;">' +
+                '<span class="pill pill-flag" style="margin-right:8px;vertical-align:1px;">High</span>' +
+                '<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading dataset sits in Stage 1–2 territory (mean ~135 / 90 mmHg) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — confirm BP response in 4–6 weeks; if mean stays above 130/80, escalate.' +
+              '</li>' +
+              '<li style="padding-left:0;margin-bottom:10px;">' +
+                '<span class="pill pill-watch" style="margin-right:8px;vertical-align:1px;">Medium</span>' +
+                '<strong>Elevated homocysteine (14.40 µmol/L)</strong> against normal serum B12 and folate — consistent with sub-optimal one-carbon metabolism (suspected MTHFR polymorphism). Independent cardiovascular risk factor that stacks with the BP picture; consider MTHFR testing + methylated B-complex trial.' +
+              '</li>' +
+              '<li style="padding-left:0;margin-bottom:10px;">' +
+                '<span class="pill pill-watch" style="margin-right:8px;vertical-align:1px;">Medium</span>' +
+                '<strong>Cervical spine MRI</strong> — multi-level degenerative change C3/4–C6/7 with mild bilateral foraminal narrowing. No cord signal abnormality. Conservative management on imaging grounds; physiotherapy if symptoms present.' +
+              '</li>' +
+              '<li style="padding-left:0;margin-bottom:10px;">' +
+                '<span class="pill pill-ok" style="margin-right:8px;vertical-align:1px;">Follow-up</span>' +
+                '<strong>Borderline-elevated creatinine (1.30 mg/dL)</strong> with preserved eGFR (&gt; 60 mL/min). Without nephrotoxic co-medication this most likely reflects hydration noise + muscle mass — repeat in 8–12 weeks under standardised hydration, add Cystatin C if it persists.' +
+              '</li>' +
+              '<li style="padding-left:0;margin-bottom:10px;">' +
+                '<span class="pill pill-ok" style="margin-right:8px;vertical-align:1px;">Follow-up</span>' +
+                '<strong>Vitamin D, HbA1c, HDL, testosterone, liver enzymes</strong> all in optimal range. Re-check on the standard annual panel cadence.' +
+              '</li>' +
             '</ul>' +
           '</div>' +
           '<div class="list-card">' +
