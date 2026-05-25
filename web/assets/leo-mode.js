@@ -73,6 +73,13 @@
     [/\b33 yrs\b/g, '35 yrs'],
     [/\bage:\s*33\b/gi, 'age: 35'],
     [/\(33\)/g, '(35)'],
+    [/· 33 ·/g, '· 35 ·'],          // "Leo Keller · 33 · Paris" header pattern
+    [/· 33 anos/g, '· 35 anos'],    // pt counterpart
+    [/, 33,/g, ', 35,'],
+    [/Leo, 33/g, 'Leo, 35'],
+    [/age 33\b/g, 'age 35'],
+    [/aged 33\b/g, 'aged 35'],
+    [/, age 33/g, ', age 35'],
 
     // Residence — Joao lives in London (GB); Leo in Paris (FR).
     [/\bLondon\b/g, 'Paris'],
@@ -247,9 +254,22 @@
       'A single antihypertensive (Perindopril 4 mg/day) on the current regimen. The lab, vitals and imaging history on the platform mirror the underlying clinical dataset; the AI insights have been regenerated to reflect this minimal medication context.</span>';
   }
 
+  // Also update the <title> tag, which lives in <head> and isn't
+  // touched by walkText (we walk from document.body).
+  function rewriteTitle() {
+    if (document.title) {
+      document.title = document.title
+        .replace(/Joao Victor Creste/g, 'Leo Keller')
+        .replace(/João Victor Creste/g, 'Leo Keller')
+        .replace(/Joao/g, 'Leo')
+        .replace(/João/g, 'Leo');
+    }
+  }
+
   // ─── Run ────────────────────────────────────────────────────────
   function run() {
     walkText(document.body);
+    rewriteTitle();
     hideSelectors();
     stripNavLinks();
     rewriteHomeHeader();
