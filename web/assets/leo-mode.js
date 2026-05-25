@@ -131,6 +131,57 @@
     });
   }
 
+  // Joao-specific AI-insight callouts (lock pre-text-replacement, since
+  // walkText would have already swapped "Joao" → "Leo"). These callouts
+  // synthesise Joao's medication-driven story (Cymbalta taper, Lyrica
+  // step-up, Depakote add, Diprospan injection, benzodiazepine
+  // dependency). None of that applies to Leo.
+  function hideJoaoSpecificAlerts() {
+    var triggerWords = [
+      'Depakote', 'Cymbalta', 'duloxetine', 'Duloxetine', 'Lyrica',
+      'pregabalin', 'pregabalina', 'Pregabalin', 'Pregabalina',
+      'Diprospan', 'Diazepam', 'diazepam', 'benzodiazepine',
+      'benzodiazepínico', 'Quetiapine', 'Quetros', 'Valium',
+      'alprazolam', 'Alprazolam', 'Dr. Tisher', 'Dr. Eduardo Tisher',
+      'taper trajectory', 'medication regimen', 'AUDIT',
+      'overdose', 'OD episode', 'self-poisoning',
+    ];
+    var hideAlertSelectors = [
+      '.alert', '.alert-flag', '.alert-info', '.alert-watch', '.alert-warn',
+    ];
+    var seen = new Set();
+    hideAlertSelectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        if (seen.has(el)) return;
+        var t = el.textContent || '';
+        for (var i = 0; i < triggerWords.length; i++) {
+          if (t.indexOf(triggerWords[i]) !== -1) {
+            el.style.display = 'none';
+            seen.add(el);
+            break;
+          }
+        }
+      });
+    });
+
+    // Same logic for AI-narrative summary blocks on physical.html
+    // ("Three signals converging" + similar) — they synthesise Joao's
+    // April 2026 deterioration arc and reference his meds.
+    document.querySelectorAll('section, [class*="callout"], [class*="summary"]').forEach(function (el) {
+      var t = el.textContent || '';
+      if (
+        (t.includes('Depakote') || t.includes('Lyrica') || t.includes('Cymbalta')) &&
+        (t.includes('Three signals') || t.includes('Likely contributors') || t.includes('deterioration') ||
+         t.includes('crisis') && t.includes('29 April'))
+      ) {
+        // Only hide the immediate alert/callout, not the entire section
+        el.querySelectorAll('.alert, .alert-flag, .alert-info').forEach(function (a) {
+          a.style.display = 'none';
+        });
+      }
+    });
+  }
+
   // ─── 3. Strip nav links that don't apply to Leo's reduced view ──
   // (Leo has no medications nav target on physical, no osteopath
   // sub-target on vitals — keep the section-nav clean.)
@@ -268,6 +319,10 @@
 
   // ─── Run ────────────────────────────────────────────────────────
   function run() {
+    // Hide Joao-specific alerts BEFORE walking text — uses the
+    // original Joao names which are clearer trigger words than the
+    // post-replacement "Leo" version.
+    hideJoaoSpecificAlerts();
     walkText(document.body);
     rewriteTitle();
     hideSelectors();
