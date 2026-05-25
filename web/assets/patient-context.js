@@ -536,6 +536,153 @@
     );
   }
 
+  // Patient Zero's physical-exams page is hardcoded HTML — the cards
+  // don't pass through renderLabTest(). The historical-comparison table
+  // at the bottom of that page already carries every sample, doctor and
+  // lab; this function reads it, builds a per-marker history map, then
+  // upgrades each .lab-test card in place (badge + role/tabindex +
+  // appended .lab-test-history block) so the click-to-expand UX matches
+  // LLM-rendered patients. Idempotent. Also runs for Leo, who inherits
+  // Joao's static HTML.
+  function retrofitStaticLabHistory() {
+    var cmpTable = document.querySelector('.lab-cmp-table');
+    if (!cmpTable) return;
+
+    // ── 1. Read column metadata from <thead> ─────────────────────
+    var colHeaders = cmpTable.querySelectorAll('thead .lab-cmp-col-head');
+    var cols = [];
+    colHeaders.forEach(function (th) {
+      var d = th.querySelector('.lab-cmp-date');
+      var l = th.querySelector('.lab-cmp-lab');
+      var m = th.querySelector('.lab-cmp-md');
+      cols.push({
+        date: d ? d.textContent.trim() : '',
+        lab: l ? l.textContent.trim() : '',
+        doctor: m ? m.textContent.trim() : '',
+      });
+    });
+    if (!cols.length) return;
+
+    // ── 2. Build per-marker history map from <tbody> rows ────────
+    var markerHistory = {};
+    var bodyRows = cmpTable.querySelectorAll('tbody tr');
+    bodyRows.forEach(function (tr) {
+      if (tr.classList.contains('lab-cmp-section')) return;
+      var nameTh = tr.querySelector('.lab-cmp-marker');
+      if (!nameTh) return;
+      // Marker name: text content minus the <small class="lab-cmp-unit"> child.
+      var unitEl = nameTh.querySelector('.lab-cmp-unit');
+      var unitTxt = unitEl ? unitEl.textContent.replace(/^\s*\(|\)\s*$/g, '').trim() : '';
+      var clone = nameTh.cloneNode(true);
+      var cloneUnit = clone.querySelector('.lab-cmp-unit');
+      if (cloneUnit) cloneUnit.remove();
+      var markerName = clone.textContent.trim();
+      if (!markerName) return;
+
+      var valCells = tr.querySelectorAll('td.lab-cmp-val');
+      var samples = [];
+      valCells.forEach(function (td, i) {
+        var col = cols[i];
+        if (!col) return;
+        if (td.classList.contains('lab-cmp-empty')) return;
+        var raw = td.textContent.trim();
+        if (!raw || raw === '—' || raw === '-') return;
+        samples.push({
+          date: col.date,
+          lab: col.lab,
+          doctor: col.doctor,
+          value: raw,
+          unit: unitTxt,
+          flag: td.getAttribute('data-flag') || '',
+        });
+      });
+      if (samples.length > 1) {
+        markerHistory[markerName.toLowerCase()] = samples;
+      }
+    });
+    if (!Object.keys(markerHistory).length) return;
+
+    // ── 3. Walk every .lab-test card and upgrade where matching ──
+    var cards = document.querySelectorAll('.lab-test');
+    cards.forEach(function (card) {
+      if (card.classList.contains('lab-test-has-history')) return;
+      if (card.querySelector('.lab-test-history')) return;
+
+      var nameEl = card.querySelector('.lab-test-name');
+      if (!nameEl) return;
+      // Strip the PT alternative span before matching.
+      var nameClone = nameEl.cloneNode(true);
+      var ptEls = nameClone.querySelectorAll('.lab-name-pt');
+      ptEls.forEach(function (el) { el.remove(); });
+      var cardMarker = nameClone.textContent.trim().toLowerCase();
+
+      var samples = markerHistory[cardMarker];
+      if (!samples) return;
+
+      var rowsHtml = samples.map(function (s, i) {
+        var rowCls = 'lab-hist-row' + (i === 0 ? ' is-latest' : '');
+        var pillCls, pillLabel;
+        if (s.flag === 'high') {
+          pillCls = 'pill-flag';
+          pillLabel = '<span class="lang-en">High</span><span class="lang-pt">Alto</span>';
+        } else if (s.flag === 'low') {
+          pillCls = 'pill-flag';
+          pillLabel = '<span class="lang-en">Low</span><span class="lang-pt">Baixo</span>';
+        } else {
+          pillCls = 'pill-ok';
+          pillLabel = '<span class="lang-en">Normal</span><span class="lang-pt">Normal</span>';
+        }
+        var requested = (s.doctor && s.doctor !== '—')
+          ? escapeHtml(s.doctor)
+          : (s.lab && s.lab !== '—')
+            ? '<span class="lab-hist-lab">' + escapeHtml(s.lab) + '</span>'
+            : '<span class="lab-hist-empty">—</span>';
+        var unit = s.unit ? ' <span class="lab-hist-unit">' + escapeHtml(s.unit) + '</span>' : '';
+        return (
+          '<tr class="' + rowCls + '">' +
+            '<td class="lab-hist-date">' + escapeHtml(s.date) + '</td>' +
+            '<td class="lab-hist-doctor">' + requested + '</td>' +
+            '<td class="lab-hist-val">' + escapeHtml(s.value) + unit + '</td>' +
+            '<td class="lab-hist-status"><span class="pill ' + pillCls + '">' + pillLabel + '</span></td>' +
+          '</tr>'
+        );
+      }).join('');
+
+      var historyHtml =
+        '<div class="lab-test-history" aria-hidden="true">' +
+          '<table class="lab-test-history-table">' +
+            '<thead><tr>' +
+              '<th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th>' +
+              '<th><span class="lang-en">Requested by</span><span class="lang-pt">Solicitado por</span></th>' +
+              '<th><span class="lang-en">Result</span><span class="lang-pt">Resultado</span></th>' +
+              '<th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th>' +
+            '</tr></thead>' +
+            '<tbody>' + rowsHtml + '</tbody>' +
+          '</table>' +
+        '</div>';
+
+      card.classList.add('lab-test-has-history');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-expanded', 'false');
+
+      var meta = card.querySelector('.lab-test-meta');
+      if (meta && !meta.querySelector('.lab-test-history-badge')) {
+        var badge = document.createElement('span');
+        badge.className = 'lab-test-history-badge';
+        badge.setAttribute('aria-hidden', 'true');
+        badge.innerHTML =
+          '<span class="lab-test-history-count">' + samples.length + '</span>' +
+          '<svg class="lab-test-history-caret" width="9" height="9" viewBox="0 0 10 10" aria-hidden="true">' +
+            '<path d="M2 3.5 L5 7 L8 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '</svg>';
+        meta.appendChild(badge);
+      }
+
+      card.insertAdjacentHTML('beforeend', historyHtml);
+    });
+  }
+
   // Delegated click + keyboard toggler for .lab-test-has-history cards.
   // Idempotent: installs the listener once per page load.
   function installLabHistoryHandler() {
@@ -1192,9 +1339,18 @@
     // Patient Zero's home is a static page that ends in <footer> — we can
     // inject the danger zone right away, before the footer.
     if (patient === PATIENT_ZERO || patient === LEO_KELLER) {
-      if (currentSection() === 'home') {
+      var section0 = currentSection();
+      if (section0 === 'home') {
         injectStyles();
         injectDangerZone();
+      } else if (section0 === 'physical-exams') {
+        // Static lab cards on Joao's hardcoded page — read the
+        // historical comparison table at the bottom and graft the same
+        // click-to-expand history UX onto every card. Runs for Leo too
+        // (he inherits Joao's static HTML; leo-mode's hide pass only
+        // touches alerts/timeline rows, not .lab-test or .lab-cmp-table).
+        injectStyles();
+        retrofitStaticLabHistory();
       }
       return;
     }
