@@ -153,6 +153,99 @@
     });
   }
 
+  // Overdose / suicidality / benzodiazepine scrubber for Leo.
+  // Leo is on Perindopril only — no benzodiazepines, no SSRIs, no
+  // psychiatric history on file. The static HTML carries Joao's
+  // 29 Apr 2026 intentional overdose, related self-harm / suicidal
+  // ideation reclassification, and benzo-withdrawal narrative across
+  // home / physical / mental / spiritual / assessment / vitals. This
+  // function walks the DOM and hides every container that mentions any
+  // of those topics, climbing to the nearest sensible ancestor
+  // (.alert, tr, li, .psych-item, .sp-tl-item, .timeline-event,
+  // blockquote, .callout) so we drop a clean unit rather than a stray
+  // word.
+  function hideOverdoseSuicidalAndBenzo() {
+    var triggers = [
+      // Overdose / suicide attempt / SI vocabulary
+      'intentional overdose', 'Intentional overdose',
+      'intentional benzodiazepine overdose', 'Intentional benzodiazepine overdose',
+      'OD episode', 'OD now satisfies',
+      'self-poisoning', 'Self-poisoning',
+      'suicidality', 'suicidal ideation', 'Suicidal ideation',
+      'suicide risk', 'Suicide risk',
+      'suicide attempt', 'Suicide attempt', 'non-fatal suicide attempt',
+      'self-harm', 'Self-harm',
+      'Quasi-suicidal', 'quasi-suicidal',
+      'Recent intentional overdose',
+      // The 29 April 2026 anchor date (EN + PT variants)
+      '29 April 2026', '29 Apr 2026', '29 April overdose', '29 Apr overdose',
+      '29 abril 2026', '29 abr 2026', '29 de abril de 2026',
+      'Sobredose', 'sobredose',
+      // PT suicidality vocabulary
+      'Risco de suicídio', 'risco de suicídio',
+      'ideação suicida', 'Ideação suicida',
+      'auto-resgate',
+      // Self-rescue framing
+      '999 self-rescue', 'self-rescue via 999', '999 call',
+      // Benzodiazepines / Valium / Diazepam (Leo is not on these)
+      'benzodiazepine', 'Benzodiazepine',
+      'benzodiazepínico', 'Benzodiazepínico',
+      'Valium', 'Xanax', 'Xanax/Valium',
+      'Diazepam', 'diazepam',
+      'alprazolam', 'Alprazolam',
+      // Crisis narrative artefacts that are 29-Apr-tied
+      'Crisis Episode April',
+      'Eu_preciso_que_voce_ainda_viva',
+      // Polypharmacy fingerprint of the OD cocktail
+      'pregabalin, quetiapine, duloxetine and Depakote',
+      'pregabalina, quetiapina, duloxetina e Depakote',
+    ];
+
+    var containerSelectors = [
+      '.alert', '.alert-flag', '.alert-info', '.alert-watch', '.alert-warn', '.alert-ok',
+      '.psych-item', '.psych-subitem',
+      '.sp-tl-item',
+      '.timeline-event', '.timeline-entry', '.timeline-item',
+      'tr',
+      'li',
+      'blockquote',
+      '.callout',
+    ];
+
+    var candidates = document.querySelectorAll(
+      '.alert, .alert-flag, .alert-info, .alert-watch, .alert-warn, .alert-ok, ' +
+      '.psych-item, .psych-subitem, .sp-tl-item, ' +
+      '.timeline-event, .timeline-entry, .timeline-item, ' +
+      'tr, li, blockquote, p, td, .callout'
+    );
+
+    candidates.forEach(function (el) {
+      var t = el.textContent || '';
+      if (!t) return;
+      var hit = false;
+      for (var i = 0; i < triggers.length; i++) {
+        if (t.indexOf(triggers[i]) !== -1) { hit = true; break; }
+      }
+      if (!hit) return;
+      // Climb to the nearest hideable container.
+      var node = el;
+      var container = null;
+      while (node && node !== document.body) {
+        if (node.matches) {
+          for (var j = 0; j < containerSelectors.length; j++) {
+            if (node.matches(containerSelectors[j])) {
+              container = node;
+              break;
+            }
+          }
+          if (container) break;
+        }
+        node = node.parentElement;
+      }
+      (container || el).style.display = 'none';
+    });
+  }
+
   // Joao-specific AI-insight callouts (lock pre-text-replacement, since
   // walkText would have already swapped "Joao" → "Leo"). These callouts
   // synthesise Joao's medication-driven story (Cymbalta taper, Lyrica
@@ -379,6 +472,7 @@
     // Hide Joao-specific alerts BEFORE walking text — uses the
     // original Joao names which are clearer trigger words than the
     // post-replacement "Leo" version.
+    hideOverdoseSuicidalAndBenzo();
     hideJoaoSpecificAlerts();
     hidePatientPhotos();
     walkText(document.body);
