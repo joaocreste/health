@@ -12,6 +12,99 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+  /* AI vitals-synthesis card — top-of-page synthesis tying vitals to exams + mental.
+     Palette: navy/slate/gold/steel. Layout: lead paragraph, 3-column connection grid,
+     bottom-line callout. Gold top-border to mark it as interpretive (AI) content. */
+  .ai-synthesis-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E2DC;
+    border-top: 3px solid #B8954A;
+    border-radius: 10px;
+    padding: 26px 28px;
+    margin-top: 16px;
+  }
+  .ai-synthesis-lead {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: #1E2D3D;
+    margin: 0 0 22px;
+  }
+  .ai-synthesis-lead strong { color: #0D1B2A; }
+  .ai-synthesis-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 960px) {
+    .ai-synthesis-grid { grid-template-columns: 1fr; }
+  }
+  .ai-synthesis-block {
+    background: #F9F7F4;
+    border: 1px solid #E5E2DC;
+    border-left: 3px solid #B8954A;
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+  }
+  .ai-synthesis-eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #B8954A;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .ai-synthesis-block-title {
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #0D1B2A;
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .ai-synthesis-block-body {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #1E2D3D;
+    margin: 0 0 12px;
+    flex: 1;
+  }
+  .ai-synthesis-block-body strong { color: #0D1B2A; }
+  .ai-synthesis-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #B8954A;
+    text-decoration: none;
+    border: 1px solid #B8954A;
+    padding: 4px 10px;
+    border-radius: 6px;
+    align-self: flex-start;
+    font-weight: 600;
+  }
+  .ai-synthesis-link:hover { background: #FFF6E5; }
+  .ai-synthesis-bottom {
+    padding-top: 18px;
+    border-top: 1px solid #E5E2DC;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: #1E2D3D;
+  }
+  .ai-synthesis-bottom strong { color: #0D1B2A; }
+  /* Make AI pill align nicely with the section-title h2 */
+  .section-title .ai-pill { font-size: 10px; vertical-align: middle; margin-left: 8px; }
+</style>
 </head>
 <body class="has-side-nav">
 <!-- TOP NAV -->
@@ -49,10 +142,56 @@
 
 <div class="container"><div class="pt-pending-notice">Os blocos de conteúdo clínico abaixo (composição corporal, arquitetura do sono, atividade, cardiovascular, pressão, avaliação osteopática) estão sendo traduzidos para o português. Por enquanto, os textos detalhados continuam em inglês.</div></div>
 
+<!-- 01 · AI VITALS SYNTHESIS -->
+<section class="report-section" id="ai-synthesis">
+  <div class="container">
+    <div class="section-label">01 · AI vitals synthesis</div>
+    <h2 class="section-title">
+      <span class="lang-en">Read the data below with this in mind</span><span class="lang-pt">Leia os dados abaixo com isto em mente</span>
+      <span class="ai-pill">AI</span>
+    </h2>
+
+    <div class="ai-synthesis-card">
+      <p class="ai-synthesis-lead">
+        <span class="lang-en">Three independent data streams below tell the same story: the cardio-autonomic system is still in the trough of the post-crisis window that opened with the <strong>March cervical protrusion</strong> and ran through the <strong>29 April intentional benzodiazepine overdose</strong>. The numbers should be read against the <a href="physical-exams.html">Exams</a> page (inflammatory markers + cervical findings) and the <a href="mental.html">Mental</a> page (medication regime + 29 April event) — not as a snapshot of stable physiology.</span><span class="lang-pt">Três fluxos de dados independentes abaixo contam a mesma história: o sistema cardio-autonômico segue no vale da janela pós-crise aberta pela <strong>protrusão cervical de março</strong> e pela <strong>sobredose intencional de benzodiazepínico em 29 de abril</strong>. Os números devem ser lidos junto à página de <a href="physical-exams.html">Exames</a> (marcadores inflamatórios + achados cervicais) e à página <a href="mental.html">Mental</a> (regime de medicação + evento de 29 de abril) — não como um retrato de fisiologia estável.</span>
+      </p>
+
+      <div class="ai-synthesis-grid">
+        <div class="ai-synthesis-block">
+          <div class="ai-synthesis-eyebrow"><span class="lang-en">Vitals ↔ Exams</span><span class="lang-pt">Vitais ↔ Exames</span></div>
+          <h3 class="ai-synthesis-block-title"><span class="lang-en">Cardio-autonomic axis = inflammation + cervical pain</span><span class="lang-pt">Eixo cardio-autonômico = inflamação + dor cervical</span></h3>
+          <p class="ai-synthesis-block-body"><span class="lang-en">HRV monthly mean has slid <strong>Mar 23.7 → Apr 15.8 → May 13.8 ms</strong> (the lowest of the recorded period); RHR has climbed in parallel <strong>64.9 → 73.5 → 75.5 bpm</strong>; BP holds Stage 2 with the latest reading at 138/94. The same physiology shows up on the Exams page from three angles: <strong>hs-CRP 12.10 mg/L</strong> (≈4× the cardiovascular-risk threshold), low-bound cortisol + DHEA (adrenal depletion), and the March C5–C6 / C6–C7 protrusion crisis with peri-discal inflammation. Sympathetic dominance, systemic inflammation and somatic pain are the same axis.</span><span class="lang-pt">A média mensal de VFC caiu <strong>mar 23,7 → abr 15,8 → mai 13,8 ms</strong> (a mais baixa do período registrado); a FC em repouso subiu em paralelo <strong>64,9 → 73,5 → 75,5 bpm</strong>; a PA segue em Estágio 2 com a última leitura em 138/94. A mesma fisiologia aparece nos Exames vista de três ângulos: <strong>hs-CRP 12,10 mg/L</strong> (≈4× o limiar de risco cardiovascular), cortisol e DHEA no limite inferior (depleção adrenal) e a crise de protrusão C5–C6 / C6–C7 em março com inflamação peri-discal. Dominância simpática, inflamação sistêmica e dor somática são o mesmo eixo.</span></p>
+          <a class="ai-synthesis-link" href="physical-exams.html"><span class="lang-en">→ Inflammatory + cervical exams</span><span class="lang-pt">→ Exames inflamatórios + cervicais</span></a>
+        </div>
+
+        <div class="ai-synthesis-block">
+          <div class="ai-synthesis-eyebrow"><span class="lang-en">Vitals ↔ Mental</span><span class="lang-pt">Vitais ↔ Mental</span></div>
+          <h3 class="ai-synthesis-block-title"><span class="lang-en">Sleep architecture is medication-shaped</span><span class="lang-pt">A arquitetura do sono é desenhada pela medicação</span></h3>
+          <p class="ai-synthesis-block-body"><span class="lang-en">Volume is fine — total sleep median <strong>8h 29m</strong> across 215 nights — but the architecture carries the regimen&apos;s signature: <strong>REM 16%</strong> (vs healthy 20–25%) is benzodiazepine-driven; <strong>light 64%</strong> is the Quetiapine fingerprint; awake 1h 20m is elevated. The full regime on the Mental page — diazepam taper 40 → 35 → 32.5 mg/day, Lyrica stepped up to 300 mg/day, Depakote ER 1,000 mg/day, Quetiapine held at 50 mg, Cymbalta discontinued — is what is shaping the curves below. Architecture will lag those moves by weeks.</span><span class="lang-pt">O volume está adequado — mediana de sono total <strong>8h 29min</strong> em 215 noites — mas a arquitetura traz a assinatura do regime: <strong>REM 16%</strong> (vs saudável 20-25%) é induzido por benzodiazepínicos; <strong>sono leve 64%</strong> é a marca da Quetiapine; despertares de 1h 20min estão elevados. O regime completo na página Mental — desmame de diazepam 40 → 35 → 32,5 mg/dia, Lyrica aumentada para 300 mg/dia, Depakote ER 1.000 mg/dia, Quetiapine mantida em 50 mg, Cymbalta descontinuada — é o que desenha as curvas abaixo. A arquitetura ficará atrás dessas mudanças por semanas.</span></p>
+          <a class="ai-synthesis-link" href="mental.html#medications"><span class="lang-en">→ Current medication regime</span><span class="lang-pt">→ Regime medicamentoso atual</span></a>
+        </div>
+
+        <div class="ai-synthesis-block">
+          <div class="ai-synthesis-eyebrow"><span class="lang-en">Vitals ↔ Mental</span><span class="lang-pt">Vitais ↔ Mental</span></div>
+          <h3 class="ai-synthesis-block-title"><span class="lang-en">Stress &amp; resilience track the 29 April event</span><span class="lang-pt">Estresse e resiliência acompanham o evento de 29 de abril</span></h3>
+          <p class="ai-synthesis-block-body"><span class="lang-en">Daily high-stress minutes peaked at <strong>525 min (8h 45m) on 6 April</strong> — about three weeks before the 29 April intentional benzodiazepine overdose. Resilience-limited days have surged <strong>4× (5% → 20%)</strong> now that May is included; daily dips no longer recover within the usual ~3 days. This is the autonomic + behavioural half of what the Mental page describes clinically — the body has not yet caught up with the post-crisis treatment plan.</span><span class="lang-pt">Os minutos diários de alto estresse atingiram pico em <strong>525 min (8h 45min) em 6 de abril</strong> — cerca de três semanas antes da sobredose intencional de 29 de abril. Os dias de resiliência &quot;limitada&quot; subiram <strong>4× (5% → 20%)</strong> agora que maio foi incluído; as quedas diárias deixaram de se recuperar nos ~3 dias habituais. Essa é a metade autonômica e comportamental do que a página Mental descreve clinicamente — o corpo ainda não acompanhou o plano de tratamento pós-crise.</span></p>
+          <a class="ai-synthesis-link" href="mental.html#crisis-29apr"><span class="lang-en">→ 29 April incident detail</span><span class="lang-pt">→ Detalhe do evento de 29 de abril</span></a>
+        </div>
+      </div>
+
+      <div class="ai-synthesis-bottom">
+        <strong><span class="lang-en">Bottom line.</span><span class="lang-pt">Conclusão.</span></strong>
+        <span class="lang-en"> Read every number below with the timeline in mind: <strong>March cervical crisis → April acute autonomic deterioration → 29 April hospitalisation → the May data shows the recovery curve has not started</strong>. Worth flagging to Dr. Tisher and the GP at the next visit. Biomarkers to retest after 4–6 weeks of consolidated taper + alcohol abstinence: HRV trend, RHR, BP, hs-CRP, sleep REM percentage.</span><span class="lang-pt"> Leia cada número abaixo com a linha do tempo em mente: <strong>crise cervical em março → deterioração autonômica aguda em abril → hospitalização em 29 de abril → os dados de maio mostram que a curva de recuperação ainda não começou</strong>. Vale levar ao Dr. Tisher e ao clínico geral na próxima consulta. Biomarcadores a reavaliar após 4-6 semanas de desmame consolidado + abstinência alcoólica: tendência de VFC, FC em repouso, PA, hs-CRP, percentual de REM.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- IN-PAGE NAV -->
 <div class="section-nav">
   <div class="section-nav-inner">
+    <a href="#ai-synthesis">AI synthesis</a>
     <a href="#body">Body composition</a>
     <a href="#glucose">Glucose</a>
     <a href="#sleep">Sleep architecture</a>
