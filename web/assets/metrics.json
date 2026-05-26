@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-21",
+  "generated_at": "2026-05-26",
   "weight": {
     "series_recent": [
       {
@@ -130,42 +130,43 @@
     ]
   },
   "sleep": {
-    "n_nights": 184,
+    "n_nights": 215,
     "range": [
       "2025-10-18",
-      "2026-04-24"
+      "2026-05-25"
     ],
     "box": {
       "deep": {
-        "n": 184,
+        "n": 215,
         "min": 0.025,
-        "q1": 1.141,
-        "median": 1.592,
+        "q1": 1.125,
+        "median": 1.542,
         "q3": 1.933,
-        "max": 3.042,
-        "mean": 1.555,
+        "max": 3.05,
+        "mean": 1.535,
         "items": [
-          3.5
+          3.5,
+          3.575
         ]
       },
       "rem": {
-        "n": 184,
+        "n": 215,
         "min": 0.108,
-        "q1": 0.885,
-        "median": 1.358,
-        "q3": 1.965,
+        "q1": 0.9,
+        "median": 1.375,
+        "q3": 1.958,
         "max": 3.475,
-        "mean": 1.445,
+        "mean": 1.457,
         "items": []
       },
       "light": {
-        "n": 184,
+        "n": 215,
         "min": 2.092,
-        "q1": 4.644,
-        "median": 5.612,
-        "q3": 6.425,
+        "q1": 4.475,
+        "median": 5.467,
+        "q3": 6.325,
         "max": 9.017,
-        "mean": 5.603,
+        "mean": 5.46,
         "items": [
           1.392,
           1.642,
@@ -173,17 +174,19 @@
         ]
       },
       "awake": {
-        "n": 184,
+        "n": 215,
         "min": 0.466,
-        "q1": 1.023,
-        "median": 1.379,
-        "q3": 2.043,
-        "max": 3.545,
-        "mean": 1.724,
+        "q1": 1.003,
+        "median": 1.336,
+        "q3": 2.017,
+        "max": 3.308,
+        "mean": 1.676,
         "items": [
+          3.545,
           3.721,
           4.093,
           4.192,
+          4.267,
           4.325,
           4.4,
           4.466,
@@ -196,26 +199,23 @@
         ]
       },
       "total": {
-        "n": 184,
-        "min": 3.775,
-        "q1": 7.437,
-        "median": 8.617,
-        "q3": 9.923,
+        "n": 215,
+        "min": 3.267,
+        "q1": 7.0,
+        "median": 8.483,
+        "q3": 9.767,
         "max": 13.342,
-        "mean": 8.603,
-        "items": [
-          3.267,
-          3.3
-        ]
+        "mean": 8.452,
+        "items": []
       }
     },
     "efficiency_median": 85.0,
-    "bedtime_sd_h": 2.64,
-    "hrv_median": 17.0,
-    "hrv_mean": 21.1,
-    "rhr_median": 65.0,
-    "rhr_mean": 66.5,
-    "hrv_below20_pct": 59,
+    "bedtime_sd_h": 2.61,
+    "hrv_median": 16.0,
+    "hrv_mean": 20.2,
+    "rhr_median": 66.0,
+    "rhr_mean": 67.8,
+    "hrv_below20_pct": 62,
     "hrv_above60_n": 2,
     "hrv_by_month": {
       "2025-10": 19.4,
@@ -224,7 +224,8 @@
       "2026-01": 24.5,
       "2026-02": 24.6,
       "2026-03": 23.7,
-      "2026-04": 15.1
+      "2026-04": 15.8,
+      "2026-05": 13.8
     },
     "rhr_by_month": {
       "2025-10": 64.4,
@@ -233,7 +234,8 @@
       "2026-01": 64.4,
       "2026-02": 65.7,
       "2026-03": 64.9,
-      "2026-04": 72.5
+      "2026-04": 73.5,
+      "2026-05": 75.5
     },
     "series": [
       {
@@ -1155,25 +1157,180 @@
         "d": "2026-04-24",
         "hrv": 9.0,
         "rhr": 82.0
+      },
+      {
+        "d": "2026-04-25",
+        "hrv": 23.0,
+        "rhr": 73.0
+      },
+      {
+        "d": "2026-04-26",
+        "hrv": 15.0,
+        "rhr": 72.0
+      },
+      {
+        "d": "2026-04-27",
+        "hrv": 8.0,
+        "rhr": 89.0
+      },
+      {
+        "d": "2026-04-28",
+        "hrv": 6.0,
+        "rhr": 96.0
+      },
+      {
+        "d": "2026-04-29",
+        "hrv": 15.0,
+        "rhr": 75.0
+      },
+      {
+        "d": "2026-04-30",
+        "hrv": 45.0,
+        "rhr": 62.0
+      },
+      {
+        "d": "2026-05-01",
+        "hrv": 10.0,
+        "rhr": 79.0
+      },
+      {
+        "d": "2026-05-02",
+        "hrv": 13.0,
+        "rhr": 81.0
+      },
+      {
+        "d": "2026-05-03",
+        "hrv": 34.0,
+        "rhr": 65.0
+      },
+      {
+        "d": "2026-05-04",
+        "hrv": 13.0,
+        "rhr": 72.0
+      },
+      {
+        "d": "2026-05-05",
+        "hrv": 15.0,
+        "rhr": 66.0
+      },
+      {
+        "d": "2026-05-06",
+        "hrv": 12.0,
+        "rhr": 72.0
+      },
+      {
+        "d": "2026-05-07",
+        "hrv": 11.0,
+        "rhr": 78.0
+      },
+      {
+        "d": "2026-05-08",
+        "hrv": 12.0,
+        "rhr": 75.0
+      },
+      {
+        "d": "2026-05-10",
+        "hrv": 25.0,
+        "rhr": 66.0
+      },
+      {
+        "d": "2026-05-11",
+        "hrv": 8.0,
+        "rhr": 84.0
+      },
+      {
+        "d": "2026-05-12",
+        "hrv": 13.0,
+        "rhr": 73.0
+      },
+      {
+        "d": "2026-05-13",
+        "hrv": 9.0,
+        "rhr": 84.0
+      },
+      {
+        "d": "2026-05-14",
+        "hrv": 7.0,
+        "rhr": 95.0
+      },
+      {
+        "d": "2026-05-15",
+        "hrv": 8.0,
+        "rhr": 83.0
+      },
+      {
+        "d": "2026-05-16",
+        "hrv": 16.0,
+        "rhr": 77.0
+      },
+      {
+        "d": "2026-05-17",
+        "hrv": 29.0,
+        "rhr": 66.0
+      },
+      {
+        "d": "2026-05-18",
+        "hrv": 12.0,
+        "rhr": 69.0
+      },
+      {
+        "d": "2026-05-19",
+        "hrv": 9.0,
+        "rhr": 80.0
+      },
+      {
+        "d": "2026-05-19",
+        "hrv": 18.0,
+        "rhr": 67.0
+      },
+      {
+        "d": "2026-05-20",
+        "hrv": 6.0,
+        "rhr": 88.0
+      },
+      {
+        "d": "2026-05-21",
+        "hrv": 13.0,
+        "rhr": 80.0
+      },
+      {
+        "d": "2026-05-22",
+        "hrv": 12.0,
+        "rhr": 75.0
+      },
+      {
+        "d": "2026-05-23",
+        "hrv": 13.0,
+        "rhr": 72.0
+      },
+      {
+        "d": "2026-05-24",
+        "hrv": 12.0,
+        "rhr": 69.0
+      },
+      {
+        "d": "2026-05-25",
+        "hrv": 14.0,
+        "rhr": 71.0
       }
     ]
   },
   "sleep_score": {
-    "n": 181,
-    "median": 82,
-    "mean": 79.8,
+    "n": 212,
+    "median": 81.0,
+    "mean": 79.3,
     "iqr": [
-      76,
+      75,
       87
     ]
   },
   "readiness": {
-    "n": 181,
-    "median": 78,
-    "mean": 75.4
+    "n": 212,
+    "median": 77.0,
+    "mean": 73.4
   },
   "spo2": {
-    "n": 179,
+    "n": 209,
     "median": 96.0,
     "min": 90.4
   },
@@ -2694,36 +2851,284 @@
       {
         "d": "2026-04-24",
         "stress": 0.0,
-        "recovery": 150.0,
+        "recovery": 195.0,
         "score": 36.2,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-25",
+        "stress": 45.0,
+        "recovery": 30.0,
+        "score": 36.6,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-26",
+        "stress": 105.0,
+        "recovery": 15.0,
+        "score": 36.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-27",
+        "stress": 45.0,
+        "recovery": 0.0,
+        "score": 35.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-04-28",
+        "stress": 30.0,
+        "recovery": 360.0,
+        "score": 34.9,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-04-29",
+        "stress": 0.0,
+        "recovery": 165.0,
+        "score": 35.1,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-04-30",
+        "stress": 45.0,
+        "recovery": 135.0,
+        "score": 37.5,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-01",
+        "stress": 465.0,
+        "recovery": 15.0,
+        "score": 37.2,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-02",
+        "stress": 60.0,
+        "recovery": 210.0,
+        "score": 37.5,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-05-03",
+        "stress": 90.0,
+        "recovery": 30.0,
+        "score": 38.3,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-04",
+        "stress": 165.0,
+        "recovery": 0.0,
+        "score": 39.2,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-05",
+        "stress": 60.0,
+        "recovery": 0.0,
+        "score": 41.5,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-06",
+        "stress": 75.0,
+        "recovery": 45.0,
+        "score": 41.3,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-07",
+        "stress": 30.0,
+        "recovery": 165.0,
+        "score": 40.7,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-05-08",
+        "stress": 360.0,
+        "recovery": 30.0,
+        "score": 40.7,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-09",
+        "stress": 150.0,
+        "recovery": 45.0,
+        "score": 40.0,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-10",
+        "stress": 45.0,
+        "recovery": 150.0,
+        "score": 41.5,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-05-11",
+        "stress": 90.0,
+        "recovery": 30.0,
+        "score": 41.1,
+        "level": "limited",
+        "summary": null
+      },
+      {
+        "d": "2026-05-12",
+        "stress": 0.0,
+        "recovery": 375.0,
+        "score": 41.6,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-05-13",
+        "stress": 105.0,
+        "recovery": 75.0,
+        "score": 41.1,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-14",
+        "stress": 180.0,
+        "recovery": 60.0,
+        "score": 39.3,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-15",
+        "stress": 75.0,
+        "recovery": 75.0,
+        "score": 39.1,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-16",
+        "stress": 60.0,
+        "recovery": 45.0,
+        "score": 38.9,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-17",
+        "stress": 315.0,
+        "recovery": 15.0,
+        "score": 39.2,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-18",
+        "stress": 90.0,
+        "recovery": 75.0,
+        "score": 39.4,
+        "level": "limited",
+        "summary": null
+      },
+      {
+        "d": "2026-05-19",
+        "stress": 15.0,
+        "recovery": 15.0,
+        "score": 38.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-20",
+        "stress": 165.0,
+        "recovery": 0.0,
+        "score": 37.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-21",
+        "stress": 105.0,
+        "recovery": 60.0,
+        "score": 37.2,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-22",
+        "stress": 180.0,
+        "recovery": 60.0,
+        "score": 36.9,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-23",
+        "stress": 60.0,
+        "recovery": 150.0,
+        "score": 38.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-24",
+        "stress": 0.0,
+        "recovery": 165.0,
+        "score": 37.6,
+        "level": "limited",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-05-25",
+        "stress": 15.0,
+        "recovery": 75.0,
+        "score": 37.7,
         "level": "limited",
         "summary": "normal"
       }
     ],
-    "n_stress_days": 190,
-    "n_resilience_days": 166,
+    "n_stress_days": 221,
+    "n_resilience_days": 197,
     "stress_median_min": 60.0,
-    "stress_mean_min": 84.8,
+    "stress_mean_min": 87.5,
     "stress_peak": {
       "d": "2026-04-06",
       "stress_min": 525.0
     },
-    "score_median": 48.1,
-    "score_mean": 47.4,
+    "score_median": 47.7,
+    "score_mean": 46.0,
     "level_counts": {
       "solid": 118,
       "adequate": 36,
       "strong": 3,
-      "limited": 9
+      "limited": 40
     },
     "summary_counts": {
-      "normal": 96,
-      "restored": 42,
-      "stressful": 38
+      "normal": 112,
+      "restored": 49,
+      "stressful": 44
     },
     "range": [
       "2025-10-17",
-      "2026-04-24"
+      "2026-05-25"
     ]
   },
   "bp": {
@@ -3111,24 +3516,24 @@
     }
   },
   "activity": {
-    "n": 190,
+    "n": 221,
     "range": [
       "2025-10-17",
-      "2026-04-24"
+      "2026-05-25"
     ],
-    "steps_median": 5772,
-    "steps_mean": 6196,
+    "steps_median": 5910,
+    "steps_mean": 6208,
     "steps_iqr": [
-      3808,
-      8222
+      3820,
+      8066
     ],
-    "days_10k": 26,
-    "days_7k": 73,
-    "days_5k": 113,
-    "days_total": 189,
-    "sed_h_mean": 8.1,
-    "active_cal_mean": 331,
-    "zone2_min_per_day_mean": 34.0,
+    "days_10k": 29,
+    "days_7k": 86,
+    "days_5k": 134,
+    "days_total": 220,
+    "sed_h_mean": 8.19,
+    "active_cal_mean": 340,
+    "zone2_min_per_day_mean": 34.2,
     "series": [
       {
         "d": "2025-10-17",
@@ -3888,22 +4293,146 @@
       },
       {
         "d": "2026-04-24",
-        "steps": 4546
+        "steps": 5845
+      },
+      {
+        "d": "2026-04-25",
+        "steps": 6391
+      },
+      {
+        "d": "2026-04-26",
+        "steps": 7906
+      },
+      {
+        "d": "2026-04-27",
+        "steps": 3276
+      },
+      {
+        "d": "2026-04-28",
+        "steps": 3865
+      },
+      {
+        "d": "2026-04-29",
+        "steps": 1610
+      },
+      {
+        "d": "2026-04-30",
+        "steps": 4217
+      },
+      {
+        "d": "2026-05-01",
+        "steps": 6795
+      },
+      {
+        "d": "2026-05-02",
+        "steps": 731
+      },
+      {
+        "d": "2026-05-03",
+        "steps": 12237
+      },
+      {
+        "d": "2026-05-04",
+        "steps": 3494
+      },
+      {
+        "d": "2026-05-05",
+        "steps": 5607
+      },
+      {
+        "d": "2026-05-06",
+        "steps": 4074
+      },
+      {
+        "d": "2026-05-07",
+        "steps": 3297
+      },
+      {
+        "d": "2026-05-08",
+        "steps": 3219
+      },
+      {
+        "d": "2026-05-09",
+        "steps": 786
+      },
+      {
+        "d": "2026-05-10",
+        "steps": 8719
+      },
+      {
+        "d": "2026-05-11",
+        "steps": 7724
+      },
+      {
+        "d": "2026-05-12",
+        "steps": 4560
+      },
+      {
+        "d": "2026-05-13",
+        "steps": 11018
+      },
+      {
+        "d": "2026-05-14",
+        "steps": 7675
+      },
+      {
+        "d": "2026-05-15",
+        "steps": 14166
+      },
+      {
+        "d": "2026-05-16",
+        "steps": 8269
+      },
+      {
+        "d": "2026-05-17",
+        "steps": 7582
+      },
+      {
+        "d": "2026-05-18",
+        "steps": 5769
+      },
+      {
+        "d": "2026-05-19",
+        "steps": 7410
+      },
+      {
+        "d": "2026-05-20",
+        "steps": 8194
+      },
+      {
+        "d": "2026-05-21",
+        "steps": 7877
+      },
+      {
+        "d": "2026-05-22",
+        "steps": 7213
+      },
+      {
+        "d": "2026-05-23",
+        "steps": 6208
+      },
+      {
+        "d": "2026-05-24",
+        "steps": 6733
+      },
+      {
+        "d": "2026-05-25",
+        "steps": 6812
       }
     ]
   },
   "workouts": {
-    "n_total": 157,
+    "n_total": 183,
     "by_activity": {
       "walking": {
-        "n": 126,
-        "minutes": 2321,
-        "cal": 7389
+        "n": 146,
+        "minutes": 2762,
+        "cal": 8817
       },
       "cycling": {
-        "n": 27,
-        "minutes": 710,
-        "cal": 2737
+        "n": 33,
+        "minutes": 900,
+        "cal": 3612
       },
       "strengthTraining": {
         "n": 3,
@@ -3917,7 +4446,7 @@
       }
     },
     "by_intensity": {
-      "moderate": 157
+      "moderate": 183
     }
   },
   "tags": {
@@ -3929,7 +4458,8 @@
       "tag_generic_headache": 1,
       "Quetiapine": 1,
       "tag_sleep_stress": 1,
-      "tag_generic_travel": 1
+      "tag_generic_travel": 1,
+      "tag_generic_nap": 1
     },
     "alcohol_dates": [
       "2025-10-19",
@@ -3960,13 +4490,55 @@
     "most_recent_valium": "2025-11-05"
   },
   "ecgs": {
-    "n_total": 57,
+    "n_total": 63,
     "by_class": {
-      "High Heart Rate": 15,
-      "Sinus Rhythm": 39,
+      "Sinus Rhythm": 42,
+      "High Heart Rate": 18,
       "Poor Recording": 3
     },
     "records": [
+      {
+        "date": "2026-05-25",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-25.csv"
+      },
+      {
+        "date": "2026-05-06",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-06.csv"
+      },
+      {
+        "date": "2026-05-06",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-06_1.csv"
+      },
+      {
+        "date": "2026-05-03",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "Rapid, pounding, or fluttering heartbeat,Shortness of breath,Dizziness",
+        "file": "ecg_2026-05-03.csv"
+      },
+      {
+        "date": "2026-04-27",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-27.csv"
+      },
+      {
+        "date": "2026-04-26",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-26.csv"
+      },
       {
         "date": "2026-04-16",
         "class": "High Heart Rate",
@@ -4122,11 +4694,11 @@
         "file": "ecg_2024-07-01_1.csv"
       },
       {
-        "date": "2024-06-02",
+        "date": "2024-06-03",
         "class": "High Heart Rate",
         "avg_hr": "",
         "symptoms": "",
-        "file": "ecg_2024-06-02.csv"
+        "file": "ecg_2024-06-03.csv"
       },
       {
         "date": "2024-04-21",
@@ -4143,11 +4715,11 @@
         "file": "ecg_2024-04-05.csv"
       },
       {
-        "date": "2024-04-01",
+        "date": "2024-04-02",
         "class": "Sinus Rhythm",
         "avg_hr": "",
         "symptoms": "",
-        "file": "ecg_2024-04-01.csv"
+        "file": "ecg_2024-04-02.csv"
       },
       {
         "date": "2024-03-22",
@@ -4192,6 +4764,13 @@
         "file": "ecg_2024-02-11_1.csv"
       },
       {
+        "date": "2024-02-09",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "Rapid, pounding, or fluttering heartbeat,Shortness of breath",
+        "file": "ecg_2024-02-09.csv"
+      },
+      {
         "date": "2024-02-08",
         "class": "Sinus Rhythm",
         "avg_hr": "",
@@ -4199,18 +4778,11 @@
         "file": "ecg_2024-02-08.csv"
       },
       {
-        "date": "2024-02-08",
-        "class": "Sinus Rhythm",
-        "avg_hr": "",
-        "symptoms": "Rapid, pounding, or fluttering heartbeat,Shortness of breath",
-        "file": "ecg_2024-02-08_1.csv"
-      },
-      {
-        "date": "2024-01-26",
+        "date": "2024-01-27",
         "class": "Sinus Rhythm",
         "avg_hr": "",
         "symptoms": "",
-        "file": "ecg_2024-01-26.csv"
+        "file": "ecg_2024-01-27.csv"
       },
       {
         "date": "2024-01-19",
@@ -4248,7 +4820,7 @@
         "file": "ecg_2023-12-16.csv"
       },
       {
-        "date": "2023-11-06",
+        "date": "2023-11-07",
         "class": "Sinus Rhythm",
         "avg_hr": "",
         "symptoms": "",
@@ -4297,11 +4869,11 @@
         "file": "ecg_2023-10-16.csv"
       },
       {
-        "date": "2023-10-15",
+        "date": "2023-10-16",
         "class": "Sinus Rhythm",
         "avg_hr": "",
         "symptoms": "",
-        "file": "ecg_2023-10-15.csv"
+        "file": "ecg_2023-10-16_1.csv"
       },
       {
         "date": "2023-10-14",
@@ -4367,41 +4939,34 @@
         "file": "ecg_2023-10-05.csv"
       }
     ],
-    "recent_30_n": 4,
-    "recent_30_high": 3
+    "recent_30_n": 10,
+    "recent_30_high": 6
   },
   "medications": [
     {
       "name": "Depakote ER",
-      "dose": "750mg/day",
+      "dose": "1000mg/day",
       "class": "",
       "status": "",
       "note": ""
     },
     {
       "name": "Lyrica",
-      "dose": "225mg/day",
+      "dose": "300mg/day",
       "class": "",
       "status": "",
       "note": ""
     },
     {
       "name": "Quetiapine",
-      "dose": "50mg.day",
-      "class": "",
-      "status": "",
-      "note": ""
-    },
-    {
-      "name": "Duoloxetine",
-      "dose": "30mg/day",
+      "dose": "50mg/day",
       "class": "",
       "status": "",
       "note": ""
     },
     {
       "name": "Valium",
-      "dose": "35mg/day",
+      "dose": "32.5mg/day",
       "class": "",
       "status": "",
       "note": ""

@@ -36,7 +36,10 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
+# Patient Zero (Joao) lives under Patients/. Older versions of this script
+# read from ROOT/data; that folder is gone. Keep an env-var escape hatch in
+# case the layout shifts again or another patient is wired in.
+DATA = Path(os.environ.get("JC_DATA_DIR") or (ROOT / "Patients" / "Joao Victor Creste"))
 WEB  = ROOT / "web" / "assets"
 
 # ─── helpers ─────────────────────────────────────────────────────────────────
