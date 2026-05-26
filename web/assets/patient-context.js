@@ -2217,6 +2217,56 @@
       'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-label { color: #7A8FA6; }',
       'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-body { color: #7A8FA6; font-style: italic; }',
       '@media (max-width: 820px) { main.jc-paulo-exams .paulo-ai-insights { grid-template-columns: 1fr; } }',
+
+      // ── History section (cervical + lumbar timelines) ─────────────
+      'main.jc-paulo-exams #paulo-history { padding: 16px 0 40px; }',
+      'main.jc-paulo-exams #paulo-history > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-exams .ph-timeline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }',
+      '@media (max-width: 960px) { main.jc-paulo-exams .ph-timeline-grid { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-exams .ph-timeline { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; }',
+      'main.jc-paulo-exams .ph-timeline-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid #E5E2DC; }',
+      'main.jc-paulo-exams .ph-timeline-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; margin: 0; }',
+      'main.jc-paulo-exams .ph-timeline-span { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; color: #7A8FA6; }',
+      'main.jc-paulo-exams .ph-entry { position: relative; padding: 0 0 20px 22px; border-left: 1px solid #E5E2DC; }',
+      'main.jc-paulo-exams .ph-entry:last-child { padding-bottom: 0; }',
+      'main.jc-paulo-exams .ph-entry::before { content: ""; position: absolute; left: -5px; top: 5px; width: 9px; height: 9px; background: #B8954A; border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #B8954A; }',
+      'main.jc-paulo-exams .ph-entry-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      'main.jc-paulo-exams .ph-entry-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 2px 0 8px; }',
+      'main.jc-paulo-exams .ph-entry-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0 0 10px; }',
+      'main.jc-paulo-exams .ph-entry-body strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .ph-entry-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }',
+      'main.jc-paulo-exams .ph-badge { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }',
+      'main.jc-paulo-exams .ph-badge-stable { background: #E8F2E8; color: #2E5A2E; }',
+      'main.jc-paulo-exams .ph-badge-progress { background: #FFF1D6; color: #7C5B15; }',
+      'main.jc-paulo-exams .ph-badge-flag { background: #F7E1E1; color: #7E2929; }',
+      'main.jc-paulo-exams .ph-badge-baseline { background: rgba(13, 27, 42, 0.06); color: #244E6E; }',
+      'main.jc-paulo-exams .ph-entry-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 9px; border-radius: 6px; margin-left: 6px; }',
+      'main.jc-paulo-exams .ph-entry-pdf:hover { background: #FFF6E5; }',
+      'main.jc-paulo-exams .ph-takeaway { margin-top: 16px; padding-top: 14px; border-top: 1px dashed #E5E2DC; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      'main.jc-paulo-exams .ph-takeaway strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .ph-takeaway::before { content: "11-year arc · "; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 700; }',
+      'main.jc-paulo-exams .ph-takeaway.is-lumbar::before { content: "3-year arc · "; }',
+
+      // ── Other studies section ─────────────────────────────────────
+      'main.jc-paulo-exams #paulo-other-studies { padding: 16px 0 48px; }',
+      'main.jc-paulo-exams #paulo-other-studies > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-exams .po-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }',
+      '@media (max-width: 820px) { main.jc-paulo-exams .po-grid { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-exams .po-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }',
+      'main.jc-paulo-exams .po-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }',
+      'main.jc-paulo-exams .po-card-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      'main.jc-paulo-exams .po-card-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 2px 0 0; line-height: 1.25; }',
+      'main.jc-paulo-exams .po-card-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 4px 0 0; }',
+      'main.jc-paulo-exams .po-card-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; font-weight: 600; white-space: nowrap; }',
+      'main.jc-paulo-exams .po-findings { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; padding-left: 18px; }',
+      'main.jc-paulo-exams .po-findings li { margin-bottom: 6px; }',
+      'main.jc-paulo-exams .po-findings li:last-child { margin-bottom: 0; }',
+      'main.jc-paulo-exams .po-findings strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .po-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
+      'main.jc-paulo-exams .po-pending { display: inline-flex; align-items: center; gap: 6px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
+      'main.jc-paulo-exams .po-pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #B8954A; }',
+      'main.jc-paulo-exams .po-pdf { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
+      'main.jc-paulo-exams .po-pdf:hover { background: #FFF6E5; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -2337,6 +2387,332 @@
           studies.map(buildPauloReportColumn).join('') +
         '</div>' +
       '</div></div>'
+    );
+  }
+
+  /* ── Cervical & lumbar longitudinal history ─────────────────────
+     Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026)
+     all from CETAM. Renders side-by-side timelines so the progression
+     of disc-level findings is visible at a glance. */
+
+  function buildPauloHistoryEntry(e) {
+    var badgesHtml = (e.badges || []).map(function (b) {
+      return '<span class="ph-badge ph-badge-' + b.kind + '">' + t(b.en, b.pt) + '</span>';
+    }).join('');
+    var pdfHtml = e.pdfHref
+      ? '<a class="ph-entry-pdf" href="' + e.pdfHref + '" download>' + t('PDF', 'PDF') + '</a>'
+      : '';
+    return (
+      '<div class="ph-entry">' +
+        '<div class="ph-entry-date">' + t(e.dateEn, e.datePt) + '</div>' +
+        '<div class="ph-entry-meta">' + e.physician + ' · ' + e.provider + '</div>' +
+        '<p class="ph-entry-body lang-en">' + e.bodyEn + '</p>' +
+        '<p class="ph-entry-body lang-pt">' + e.bodyPt + '</p>' +
+        '<div class="ph-entry-badges">' + badgesHtml + pdfHtml + '</div>' +
+      '</div>'
+    );
+  }
+
+  function buildPauloHistorySection() {
+    var cervical = [
+      {
+        dateEn: 'Nov 2015 · age 54',
+        datePt: 'Nov 2015 · 54 anos',
+        physician: 'Dr. André Luis Tucci Semeghini',
+        provider: 'CETAM',
+        bodyEn: 'Earliest study on file. Incipient cervical spondylopathy with mild C6–C7 disc dehydration. Small posterior bulges at C4–C5, C5–C6 and C7–T1, plus a <strong>moderate posterocentral disc protrusion at C6–C7</strong> compressing the ventral dural sac. Mild bilateral foraminal narrowing at C6–C7 (right-greater) without frank stenosis. No extrusions.',
+        bodyPt: 'Primeiro estudo no histórico. Espondilopatia cervical incipiente com leve desidratação discal em C6–C7. Pequenos abaulamentos posteriores em C4–C5, C5–C6 e C7–T1 e <strong>protrusão moderada posterocentral em C6–C7</strong> comprimindo a face ventral do saco dural. Leve redução foraminal bilateral em C6–C7 (maior à direita) sem estenose franca. Sem extrusões.',
+        pdfHref: 'scans/paulo-cervical-mri-2015-11-23-report.pdf',
+        badges: [
+          { kind: 'baseline',  en: 'Baseline',         pt: 'Linha de base' },
+          { kind: 'progress',  en: 'C6–C7 dominant',   pt: 'C6–C7 dominante' },
+        ],
+      },
+      {
+        dateEn: 'Apr 2023 · age 61',
+        datePt: 'Abr 2023 · 61 anos',
+        physician: 'Dra. Juliane Giselle Hortolam',
+        provider: 'CETAM',
+        bodyEn: '<strong>New sinistro-convex axis deviation</strong> appears for the first time. The C6–C7 picture stabilises (still hypohydrated, still reduced height) but the disease has <strong>spread upward</strong>: C5–C6 now carries the dominant median protrusion impressing the ventral sac. C4–C5 bulge flattens the dural sac. Mild paravertebral muscle hypotrophy noted — first mention.',
+        bodyPt: '<strong>Surge pela primeira vez o desvio sinistro-convexo do eixo</strong>. O quadro de C6–C7 estabiliza (segue hipohidratado e com altura reduzida) mas a doença <strong>migrou para níveis superiores</strong>: C5–C6 passa a apresentar o componente protruso mediano dominante, com impressão sob a face ventral do saco dural. C4–C5 abaula e retifica o saco dural. Discreta hipotrofia da musculatura paravertebral — primeira menção.',
+        pdfHref: 'scans/paulo-cervical-mri-2023-04-26-report.pdf',
+        badges: [
+          { kind: 'progress', en: 'Axis deviation new',  pt: 'Desvio do eixo novo' },
+          { kind: 'progress', en: 'C5–C6 now dominant',  pt: 'C5–C6 agora dominante' },
+        ],
+      },
+      {
+        dateEn: 'May 2026 · age 64',
+        datePt: 'Mai 2026 · 64 anos',
+        physician: 'Dr. Marco Antonio de Carvalho',
+        provider: 'CETAM',
+        bodyEn: 'Most recent study. The C5–C6 lesion has progressed to a <strong>diffuse disco-osteophytic bulge with ventral cord contact</strong> (no myelopathy) and bilateral foraminal narrowing reaching both exiting roots. Mild C3–C4 and C4–C5 bulging. Uncovertebral / facet arthrosis with ligamentum flavum thickening — explicitly mentioned for the first time. The disease envelope keeps widening level by level.',
+        bodyPt: 'Estudo mais recente. A lesão de C5–C6 evoluiu para <strong>abaulamento disco-osteofitário difuso com contato medular ventral</strong> (sem mielopatia) e redução foraminal bilateral tocando ambas as raízes emergentes. Abaulamentos leves em C3–C4 e C4–C5. Artrose uncovertebral / facetária com espessamento do ligamento amarelo — citados pela primeira vez. O envoltório degenerativo segue se ampliando nível a nível.',
+        pdfHref: 'scans/paulo-cervical-mri-2026-05-15-report.pdf',
+        badges: [
+          { kind: 'flag',     en: 'Cord contact',           pt: 'Contato medular' },
+          { kind: 'progress', en: 'Multilevel progression', pt: 'Progressão multinível' },
+        ],
+      },
+    ];
+
+    var lumbar = [
+      {
+        dateEn: 'Apr 2023 · age 61',
+        datePt: 'Abr 2023 · 61 anos',
+        physician: 'Dra. Juliane Giselle Hortolam',
+        provider: 'CETAM',
+        bodyEn: 'First lumbar MRI on file. <strong>Discrete L3-over-L4 anterolisthesis</strong>, diffuse disc dehydration and height loss. L4–L5 discopathy with Modic II (fatty) endplate change. Bulges at L1–L2 (rectifies sac), L2–L3, L4–L5 and L3–L4 (touching emerging L3 roots). Most acute: <strong>L5–S1 left paramedian / foraminal protrusion</strong> combined with facet hypertrophy compressing the descending left S1 root. Moderate paravertebral muscle hypotrophy.',
+        bodyPt: 'Primeira RM lombar do histórico. <strong>Anterolistese discreta de L3 sobre L4</strong>, hipohidratação discal difusa e redução das alturas. Discopatia degenerativa em L4–L5 com Modic II (gordura). Abaulamentos em L1–L2 (retifica o saco), L2–L3, L4–L5 e L3–L4 (tocando as raízes emergentes de L3). Achado mais agudo: <strong>protrusão paramediana / foraminal esquerda em L5–S1</strong> associada a hipertrofia facetária comprimindo a raiz descendente esquerda de S1. Moderada hipotrofia paravertebral.',
+        pdfHref: 'scans/paulo-lombar-mri-2023-04-26-report.pdf',
+        badges: [
+          { kind: 'baseline', en: 'Baseline',                pt: 'Linha de base' },
+          { kind: 'flag',     en: 'L5–S1 S1-root contact',   pt: 'L5–S1 contato raiz S1' },
+        ],
+      },
+      {
+        dateEn: 'May 2026 · age 64',
+        datePt: 'Mai 2026 · 64 anos',
+        physician: 'Dr. Marco Antonio de Carvalho',
+        provider: 'CETAM',
+        bodyEn: 'Three-year follow-up. The L5–S1 extrusion <strong>persists with the same left-sided S1 compression pattern</strong>. New / clarified: L3–L4 spinal canal stenosis from pseudo-bulge + facet hypertrophy + ligamentum flavum thickening, compressing the anterior descending roots. Modic II change at L4–L5 confirmed; <strong>Modic I (active oedema) signal added at L1–L2, L2–L3 and L4–L5</strong>; interspinous-ligament oedema at L2–L3, L3–L4 and L5–S1 — markers of active inflammatory degeneration, not burnt-out disease.',
+        bodyPt: 'Seguimento de três anos. A extrusão em L5–S1 <strong>persiste com o mesmo padrão de compressão da raiz S1 à esquerda</strong>. Novo / esclarecido: estenose do canal em L3–L4 por pseudo-abaulamento + hipertrofia facetária + espessamento do ligamento amarelo, comprimindo as raízes descendentes anteriores. Modic II em L4–L5 confirmado; <strong>sinal Modic I (edema ativo) acrescentado em L1–L2, L2–L3 e L4–L5</strong>; edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1 — marcadores de degeneração ativa, não de doença encerrada.',
+        pdfHref: 'scans/paulo-lombar-mri-2026-05-15-report.pdf',
+        badges: [
+          { kind: 'flag',     en: 'L3–L4 canal stenosis',  pt: 'L3–L4 estenose do canal' },
+          { kind: 'progress', en: 'Modic I — active',      pt: 'Modic I — ativo' },
+        ],
+      },
+    ];
+
+    return (
+      '<section class="report-section" id="paulo-history">' +
+        '<div class="container">' +
+          '<div class="section-label">' +
+            t('09B · Longitudinal history', '09B · Histórico longitudinal') +
+          '</div>' +
+          '<h2 class="section-title">' +
+            t('How cervical and lumbar findings evolved',
+              'Como os achados cervicais e lombares evoluíram') +
+          '</h2>' +
+          '<p class="section-desc">' +
+            t('Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. Each entry is a synthesis of the reporting radiologist&apos;s impression — not a re-interpretation — anchored to the level of disease at that moment. Read top-to-bottom to see how the dominant lesion has migrated and which findings are genuinely new.',
+              'Três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. Cada entrada é uma síntese da impressão do radiologista — não uma re-interpretação — ancorada no nível doente no momento. Leia de cima para baixo para acompanhar a migração da lesão dominante e identificar quais achados são genuinamente novos.') +
+          '</p>' +
+          '<div class="ph-timeline-grid">' +
+            '<div class="ph-timeline">' +
+              '<div class="ph-timeline-head">' +
+                '<h3 class="ph-timeline-title">' + t('Cervical spine', 'Coluna cervical') + '</h3>' +
+                '<span class="ph-timeline-span">' + t('2015 → 2026 · 3 studies', '2015 → 2026 · 3 estudos') + '</span>' +
+              '</div>' +
+              cervical.map(buildPauloHistoryEntry).join('') +
+              '<div class="ph-takeaway">' +
+                '<span class="lang-en">The dominant lesion <strong>migrated upward</strong> over eleven years — from C6–C7 (2015) to C5–C6 (2023, still dominant in 2026). What was a focal disc protrusion in 2015 became a <strong>diffuse disco-osteophytic bulge with ventral cord contact</strong> by 2026, with explicit involvement of the uncovertebral and facet joints. Cord signal remains normal — no myelopathy, but the cord is being touched.</span>' +
+                '<span class="lang-pt">A lesão dominante <strong>migrou cranialmente</strong> ao longo de onze anos — de C6–C7 (2015) para C5–C6 (2023, ainda dominante em 2026). O que era protrusão discal focal em 2015 tornou-se <strong>abaulamento disco-osteofitário difuso com contato medular ventral</strong> em 2026, com envolvimento explícito das articulações uncovertebrais e facetárias. O sinal medular permanece normal — sem mielopatia, mas a medula está sendo tocada.</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ph-timeline">' +
+              '<div class="ph-timeline-head">' +
+                '<h3 class="ph-timeline-title">' + t('Lumbar spine', 'Coluna lombar') + '</h3>' +
+                '<span class="ph-timeline-span">' + t('2023 → 2026 · 2 studies', '2023 → 2026 · 2 estudos') + '</span>' +
+              '</div>' +
+              lumbar.map(buildPauloHistoryEntry).join('') +
+              '<div class="ph-takeaway is-lumbar">' +
+                '<span class="lang-en">The L5–S1 left-S1 compression pattern is <strong>stable across both studies</strong>, but the surrounding picture worsened: <strong>L3–L4 canal stenosis</strong> emerges as a second focus, and the addition of <strong>Modic I (oedema)</strong> signal at multiple levels means the degeneration is currently <em>active</em>, not chronically settled.</span>' +
+                '<span class="lang-pt">O padrão de compressão da raiz S1 esquerda em L5–S1 é <strong>estável entre os dois estudos</strong>, mas o quadro ao redor piorou: <strong>estenose do canal em L3–L4</strong> aparece como segundo foco, e o aparecimento de sinal <strong>Modic I (edema)</strong> em múltiplos níveis indica que a degeneração está atualmente <em>ativa</em>, e não cronicamente estabilizada.</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
+  /* ── Other studies on file (images coming later) ────────────────
+     Five additional reports already on file — shoulder MRI (2015),
+     right-knee MRI (2019), abdomen/pelvis CT (2022), cranium CT (2023),
+     face/sinus CT (2023). Each card carries the radiologist's key
+     findings and a link to the original PDF. Image viewers will be
+     added once DICOM exports are imported. */
+
+  function buildPauloOtherStudyCard(c) {
+    var findingsHtml = (c.findingsEn || []).map(function (_, i) {
+      return (
+        '<li><span class="lang-en">' + c.findingsEn[i] + '</span>' +
+        '<span class="lang-pt">' + c.findingsPt[i] + '</span></li>'
+      );
+    }).join('');
+    return (
+      '<article class="po-card">' +
+        '<header class="po-card-head">' +
+          '<div>' +
+            '<div class="po-card-eyebrow">' + t(c.eyebrowEn, c.eyebrowPt) + '</div>' +
+            '<h3 class="po-card-title">' + t(c.titleEn, c.titlePt) + '</h3>' +
+            '<div class="po-card-meta">' + c.physician + ' · ' + c.provider + '</div>' +
+          '</div>' +
+          '<div class="po-card-date">' + t(c.dateEn, c.datePt) + '</div>' +
+        '</header>' +
+        '<ul class="po-findings">' + findingsHtml + '</ul>' +
+        '<div class="po-card-foot">' +
+          '<span class="po-pending">' +
+            t('Imaging not yet uploaded', 'Imagens ainda não carregadas') +
+          '</span>' +
+          '<a class="po-pdf" href="' + c.pdfHref + '" download>' +
+            t('Report PDF', 'Laudo PDF') +
+          '</a>' +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  function buildPauloOtherStudiesSection() {
+    var cards = [
+      {
+        eyebrowEn: '09C · MRI · Right shoulder',
+        eyebrowPt: '09C · RM · Ombro direito',
+        titleEn:   'Right shoulder MRI',
+        titlePt:   'RM do ombro direito',
+        dateEn: '23 Nov 2015',
+        datePt: '23 nov 2015',
+        physician: 'Dr. André Luis Tucci Semeghini',
+        provider:  'CETAM',
+        pdfHref: 'scans/paulo-right-shoulder-mri-2015-11-23-report.pdf',
+        findingsEn: [
+          '<strong>Intense hypertrophic acromioclavicular arthropathy</strong> — irregular contours, marginal osteophytes, subchondral cysts, bone oedema / contusion, moderate capsular distension.',
+          'Rotator cuff tendons with normal thickness and signal.',
+          'Long-head biceps tendon centred in the bicipital groove, normal calibre and signal.',
+          'No subacromial-subdeltoid bursal effusion. No joint effusion.',
+        ],
+        findingsPt: [
+          '<strong>Intensa artropatia acromioclavicular hipertrófica</strong> — contornos irregulares, osteófitos marginais, cistos subcondrais, edema / contusão óssea, moderada distensão capsular.',
+          'Tendões do manguito rotador com espessuras e sinais normais.',
+          'Tendão do cabo longo do bíceps centrado na goteira, calibre e sinal habituais.',
+          'Ausência de efusão na bursa subacromial-subdeltoidea. Sem derrame articular.',
+        ],
+      },
+      {
+        eyebrowEn: '09C · MRI · Right knee',
+        eyebrowPt: '09C · RM · Joelho direito',
+        titleEn:   'Right knee MRI',
+        titlePt:   'RM do joelho direito',
+        dateEn: '01 Aug 2019',
+        datePt: '01 ago 2019',
+        physician: 'Dra. Carla Catarina Horr',
+        provider:  'CETAM',
+        pdfHref: 'scans/paulo-right-knee-mri-2019-08-01-report.pdf',
+        findingsEn: [
+          'Signs suggestive of <strong>anterior tibial spine avulsion</strong> with distal patellar tendon oedema / tendinosis — possible Osgood-Schlatter sequela.',
+          'Cicatricial changes of the collateral ligaments and medial patellofemoral ligament — no current ruptures.',
+          'Mucinoid degeneration of the medial meniscus (no tear traces in current study).',
+          'Free-border amputation at body / posterior-horn transition of the <strong>lateral meniscus</strong> — possible prior radial tear.',
+          '<strong>Grade III femoropatellar chondropathy</strong> at the medial articular margin. Moderate joint effusion.',
+        ],
+        findingsPt: [
+          'Sinais sugestivos de <strong>avulsão da espinha tibial anterior</strong> com edema / tendinose na inserção distal do tendão patelar — possível sequela de Osgood-Schlatter.',
+          'Alterações cicatriciais dos ligamentos colaterais e do patelofemoral medial — sem rupturas atuais.',
+          'Degeneração mucinoide do menisco medial (sem traços de ruptura no estudo atual).',
+          'Amputação da borda livre na transição corpo / corno posterior do <strong>menisco lateral</strong> — possível ruptura radial prévia.',
+          '<strong>Condropatia femoropatelar grau III</strong> na margem medial da articulação. Moderado derrame articular.',
+        ],
+      },
+      {
+        eyebrowEn: '09C · CT · Abdomen & pelvis',
+        eyebrowPt: '09C · TC · Abdome e pelve',
+        titleEn:   'Abdomen & pelvis CT (with contrast)',
+        titlePt:   'TC de abdome e pelve (com contraste)',
+        dateEn: '31 Mar 2022',
+        datePt: '31 mar 2022',
+        physician: 'Dr. Rodney Jose Massa Ferro Ferraz',
+        provider:  'CETAM',
+        pdfHref: 'scans/paulo-abdomen-pelvis-ct-2022-03-31-report.pdf',
+        findingsEn: [
+          'Liver: lobulated contours, mild right-lobe volume reduction, <strong>tiny 4 mm hypodensity in segment IVb</strong> (cannot rule out small cyst).',
+          'Pancreas: moderate adipose substitution. Small atheromatous calcification of the aortic wall.',
+          '<strong>Bladder wall thickening with irregular contours</strong>; mildly globose prostate with small calcifications impressing the bladder floor — urology workup recommended.',
+          '<strong>Diverticulosis</strong> in descending colon and sigmoid (no pericolic stranding).',
+          '<strong>Marked dorsolumbar degenerative changes</strong> with severe L4–L5 discopathy — corroborates the MRI findings below.',
+          'Volume reduction of regional musculature (paraspinal + gluteal). Calcified granuloma in left gluteal subcutaneous tissue.',
+        ],
+        findingsPt: [
+          'Fígado: contornos lobulados, discreta redução do lobo direito, <strong>diminuta hipodensidade de 4 mm no segmento IVb</strong> (não se afasta diminuto cisto).',
+          'Pâncreas: substituição adiposa moderada. Pequena calcificação ateromatosa na parede da aorta.',
+          '<strong>Espessamento das paredes da bexiga com contornos irregulares</strong>; próstata levemente globosa com pequenas calcificações, impressão no assoalho vesical — recomenda-se investigação urológica.',
+          '<strong>Diverticulose</strong> no cólon descendente e sigmoide (sem borramento da gordura pericólica).',
+          '<strong>Alterações degenerativas acentuadas da coluna dorsolombar</strong> com discopatia L4–L5 grave — corrobora os achados de RM abaixo.',
+          'Redução volumétrica da musculatura regional (paravertebral + glútea). Granuloma calcificado no subcutâneo da região glútea esquerda.',
+        ],
+      },
+      {
+        eyebrowEn: '09C · CT · Cranium',
+        eyebrowPt: '09C · TC · Crânio',
+        titleEn:   'Cranium CT (non-contrast)',
+        titlePt:   'TC de crânio (sem contraste)',
+        dateEn: '26 Apr 2023',
+        datePt: '26 abr 2023',
+        physician: 'Dr. Rodney Jose Massa Ferro Ferraz',
+        provider:  'CETAM',
+        pdfHref: 'scans/paulo-cranium-ct-2023-04-26-report.pdf',
+        findingsEn: [
+          'No intracranial haemorrhagic collection. Parenchymal attenuation values normal. Midline structures centred.',
+          '<strong>Several small hyperdense foci scattered through the basal cisterns, sella turcica, left sylvian fissure and posterior fossa</strong> — correlate with clinical history of prior <em>myelography</em> (residual contrast).',
+          'Mild widening of frontoparietal sulci and sylvian fissures (volumetric, age-appropriate).',
+          'Falx and parietal-table-adjacent calcifications. Possible minimal perivascular-space enlargement in the right basal ganglia.',
+          'Mild mucosal thickening in the left sphenoid sinus and right maxillary sinus. No fracture.',
+        ],
+        findingsPt: [
+          'Sem coleção hemorrágica intracraniana. Atenuação parenquimatosa normal. Estruturas da linha média centradas.',
+          '<strong>Várias pequenas imagens hiperdensas esparsas nas cisternas basais, sela túrcica, fissura sylviana esquerda e fossa posterior</strong> — correlacionar com história clínica de <em>mielografia</em> antiga (resíduo de contraste).',
+          'Acentuação discreta dos sulcos frontoparietais e alargamentos discretos das fissuras sylvianas (volumétrico, compatível com a idade).',
+          'Calcificações em torno da foice cerebral e adjacentes à tábua óssea parietal. Possível mínimo alargamento de espaço perivascular nos núcleos da base à direita.',
+          'Discreto espessamento mucoso no seio esfenoidal esquerdo e no maxilar direito. Sem fratura.',
+        ],
+      },
+      {
+        eyebrowEn: '09C · CT · Face / sinuses',
+        eyebrowPt: '09C · TC · Face / seios',
+        titleEn:   'Face & sinuses CT (non-contrast)',
+        titlePt:   'TC dos seios da face (sem contraste)',
+        dateEn: '14 Mar 2023',
+        datePt: '14 mar 2023',
+        physician: 'Dr. Ivan de Picoli Dantas (req.)',
+        provider:  'CETAM',
+        pdfHref: 'scans/paulo-face-sinus-ct-2023-03-14-report.pdf',
+        findingsEn: [
+          '<strong>Mucosal thickening</strong> in maxillary sinuses, left sphenoid sinus and ethmoid cells — consistent with low-grade chronic sinus inflammation.',
+          '<strong>Septal deviation</strong> — irregular, tortuous nasal septum deviating leftward in its mid portion; 4 mm bony thickening on the left lateral septal face.',
+          'Irregular contours of the nasal turbinates (normal volume). Osteomeatal complexes patent.',
+          'Asymmetric olfactory fossae (Keros type II). Pterygopalatine fossae and parapharyngeal spaces normal.',
+          'Incidental: possible residue of old myelography contrast in basal cisterns — cross-references the cranium CT finding above.',
+        ],
+        findingsPt: [
+          '<strong>Espessamento mucoso</strong> nos seios maxilares, esfenoidal esquerdo e células etmoidais — compatível com sinusopatia crônica de baixo grau.',
+          '<strong>Desvio do septo nasal</strong> — septo irregular e tortuoso desviando para a esquerda na porção média; espessamento ósseo de 4 mm na face lateral esquerda do septo.',
+          'Contornos irregulares dos cornetos nasais (volume normal). Complexos osteomeatais livres.',
+          'Fossas olfatórias assimétricas (Keros tipo II). Fossas pterigopalatinas e espaços parafaríngeos normais.',
+          'Achado adjacente: possível resíduo de mielografia antiga nas cisternas da base — cruza-se com o achado da TC de crânio acima.',
+        ],
+      },
+    ];
+
+    return (
+      '<section class="report-section" id="paulo-other-studies">' +
+        '<div class="container">' +
+          '<div class="section-label">' +
+            t('09C · Other studies on file', '09C · Outros exames disponíveis') +
+          '</div>' +
+          '<h2 class="section-title">' +
+            t('Beyond the spine — five additional reports',
+              'Além da coluna — outros cinco laudos') +
+          '</h2>' +
+          '<p class="section-desc">' +
+            t('Five additional radiology reports already on file. The full PDFs are linked from each card; image viewers will be added once the DICOM exports are imported.',
+              'Cinco laudos adicionais já no histórico. Cada cartão traz o PDF completo; os visualizadores de imagem serão acrescentados quando os exports DICOM forem importados.') +
+          '</p>' +
+          '<div class="po-grid">' +
+            cards.map(buildPauloOtherStudyCard).join('') +
+          '</div>' +
+        '</div>' +
+      '</section>'
     );
   }
 
@@ -2771,9 +3147,12 @@
         examsHtml +
       '</section>';
 
+    var history      = buildPauloHistorySection();
+    var otherStudies = buildPauloOtherStudiesSection();
+
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery;
+    main.innerHTML = hero + aiSummary + imagery + history + otherStudies;
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
