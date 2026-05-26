@@ -2201,6 +2201,20 @@
       'main.jc-paulo-exams .paulo-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
       'main.jc-paulo-exams .paulo-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
       'main.jc-paulo-exams .paulo-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      // Sub-heading row inside the synthesis card ("Current snapshot", "Longitudinal evolution")
+      'main.jc-paulo-exams .paulo-ai-subhead { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; margin: 8px 0 10px; }',
+      // Evolution-arc block (cervical + lumbar arc cards inside the AI synthesis card)
+      'main.jc-paulo-exams .paulo-ai-arcs-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      'main.jc-paulo-exams .paulo-ai-arcs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }',
+      '@media (max-width: 820px) { main.jc-paulo-exams .paulo-ai-arcs { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-exams .paulo-ai-arc { background: #F9F7F4; border: 1px solid #E5E2DC; border-left: 3px solid #B8954A; border-radius: 8px; padding: 14px 16px; }',
+      'main.jc-paulo-exams .paulo-ai-arc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #E5E2DC; }',
+      'main.jc-paulo-exams .paulo-ai-arc-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0; }',
+      'main.jc-paulo-exams .paulo-ai-arc-span { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
+      'main.jc-paulo-exams .paulo-ai-arc-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 0; }',
+      'main.jc-paulo-exams .paulo-ai-arc-body strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .paulo-ai-arcs-cross { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
+      'main.jc-paulo-exams .paulo-ai-arcs-cross strong { color: #0D1B2A; }',
       'main.jc-paulo-exams .paulo-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
       'main.jc-paulo-exams .paulo-ai-summary-body p { margin: 0 0 10px; }',
       'main.jc-paulo-exams .paulo-ai-summary-body p:last-child { margin-bottom: 0; }',
@@ -2234,6 +2248,16 @@
       'main.jc-paulo-exams .ph-entry-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 2px 0 8px; }',
       'main.jc-paulo-exams .ph-entry-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0 0 10px; }',
       'main.jc-paulo-exams .ph-entry-body strong { color: #0D1B2A; }',
+      // Per-entry AI evolution callout (between meta and body)
+      'main.jc-paulo-exams .ph-evolution { background: #FFFBF1; border: 1px solid #EAD9A8; border-left: 3px solid #B8954A; border-radius: 8px; padding: 12px 14px; margin: 8px 0 12px; }',
+      'main.jc-paulo-exams .ph-evolution-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
+      'main.jc-paulo-exams .ph-evolution-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C5B15; font-weight: 700; }',
+      'main.jc-paulo-exams .ph-evolution-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      'main.jc-paulo-exams .ph-evolution-body strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .ph-evolution-body em { color: #7C5B15; font-style: italic; }',
+      // Section title with inline AI pill
+      'main.jc-paulo-exams .ph-section-title { display: inline-flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }',
+      'main.jc-paulo-exams .ph-section-title .ai-pill { font-size: 10px; }',
       'main.jc-paulo-exams .ph-entry-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }',
       'main.jc-paulo-exams .ph-badge { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }',
       'main.jc-paulo-exams .ph-badge-stable { background: #E8F2E8; color: #2E5A2E; }',
@@ -2402,10 +2426,25 @@
     var pdfHtml = e.pdfHref
       ? '<a class="ph-entry-pdf" href="' + e.pdfHref + '" download>' + t('PDF', 'PDF') + '</a>'
       : '';
+    var aiEvolutionHtml = '';
+    if (e.aiEvolutionEn || e.aiEvolutionPt) {
+      var aiLabelEn = e.isBaseline ? 'Baseline · AI read' : 'Δ vs. previous · AI';
+      var aiLabelPt = e.isBaseline ? 'Linha de base · leitura da IA' : 'Δ vs. anterior · IA';
+      aiEvolutionHtml =
+        '<div class="ph-evolution">' +
+          '<div class="ph-evolution-head">' +
+            '<span class="ph-evolution-label">' + t(aiLabelEn, aiLabelPt) + '</span>' +
+            '<span class="ai-pill">AI</span>' +
+          '</div>' +
+          '<p class="ph-evolution-body lang-en">' + (e.aiEvolutionEn || '') + '</p>' +
+          '<p class="ph-evolution-body lang-pt">' + (e.aiEvolutionPt || '') + '</p>' +
+        '</div>';
+    }
     return (
       '<div class="ph-entry">' +
         '<div class="ph-entry-date">' + t(e.dateEn, e.datePt) + '</div>' +
         '<div class="ph-entry-meta">' + e.physician + ' · ' + e.provider + '</div>' +
+        aiEvolutionHtml +
         '<p class="ph-entry-body lang-en">' + e.bodyEn + '</p>' +
         '<p class="ph-entry-body lang-pt">' + e.bodyPt + '</p>' +
         '<div class="ph-entry-badges">' + badgesHtml + pdfHtml + '</div>' +
@@ -2420,6 +2459,9 @@
         datePt: 'Nov 2015 · 54 anos',
         physician: 'Dr. André Luis Tucci Semeghini',
         provider: 'CETAM',
+        isBaseline: true,
+        aiEvolutionEn: 'Earliest cervical study on file — sets the starting point. Disease is <strong>focal at C6–C7</strong>: moderate posterocentral protrusion, mild bilateral foraminal narrowing (right-greater), no frank stenosis. Adjacent bulges at C4–C5, C5–C6 and C7–T1 are present but minor. <strong>No extrusions, no cord contact, no axis deviation yet</strong> — none of the secondary features that will appear over the next eleven years.',
+        aiEvolutionPt: 'Primeiro estudo cervical do histórico — fixa o ponto de partida. Doença <strong>focal em C6–C7</strong>: protrusão moderada posterocentral, leve redução foraminal bilateral (maior à direita), sem estenose franca. Abaulamentos adjacentes em C4–C5, C5–C6 e C7–T1, mas menores. <strong>Sem extrusões, sem contato medular, sem desvio do eixo</strong> — nenhuma das características secundárias que aparecerão ao longo dos onze anos seguintes.',
         bodyEn: 'Earliest study on file. Incipient cervical spondylopathy with mild C6–C7 disc dehydration. Small posterior bulges at C4–C5, C5–C6 and C7–T1, plus a <strong>moderate posterocentral disc protrusion at C6–C7</strong> compressing the ventral dural sac. Mild bilateral foraminal narrowing at C6–C7 (right-greater) without frank stenosis. No extrusions.',
         bodyPt: 'Primeiro estudo no histórico. Espondilopatia cervical incipiente com leve desidratação discal em C6–C7. Pequenos abaulamentos posteriores em C4–C5, C5–C6 e C7–T1 e <strong>protrusão moderada posterocentral em C6–C7</strong> comprimindo a face ventral do saco dural. Leve redução foraminal bilateral em C6–C7 (maior à direita) sem estenose franca. Sem extrusões.',
         pdfHref: 'scans/paulo-cervical-mri-2015-11-23-report.pdf',
@@ -2433,6 +2475,8 @@
         datePt: 'Abr 2023 · 61 anos',
         physician: 'Dra. Juliane Giselle Hortolam',
         provider: 'CETAM',
+        aiEvolutionEn: '<strong>Δ vs. 2015 (8-year gap).</strong> C6–C7 stabilised — still hypohydrated, still reduced in height — but the <strong>dominance migrated upward</strong>: C5–C6 now carries the dominant median protrusion. Two genuinely new findings absent in 2015: <strong>sinistro-convex axis deviation</strong> (first appearance) and <strong>mild paravertebral muscle hypotrophy</strong> (first mention). Still no cord contact, still no extrusions.',
+        aiEvolutionPt: '<strong>Δ vs. 2015 (intervalo de 8 anos).</strong> C6–C7 estabilizou — segue hipohidratado e com altura reduzida — mas a <strong>dominância migrou para cima</strong>: C5–C6 passa a apresentar o componente protruso mediano dominante. Dois achados genuinamente novos, ausentes em 2015: <strong>desvio sinistro-convexo do eixo</strong> (primeira aparição) e <strong>hipotrofia leve da musculatura paravertebral</strong> (primeira menção). Ainda sem contato medular, ainda sem extrusões.',
         bodyEn: '<strong>New sinistro-convex axis deviation</strong> appears for the first time. The C6–C7 picture stabilises (still hypohydrated, still reduced height) but the disease has <strong>spread upward</strong>: C5–C6 now carries the dominant median protrusion impressing the ventral sac. C4–C5 bulge flattens the dural sac. Mild paravertebral muscle hypotrophy noted — first mention.',
         bodyPt: '<strong>Surge pela primeira vez o desvio sinistro-convexo do eixo</strong>. O quadro de C6–C7 estabiliza (segue hipohidratado e com altura reduzida) mas a doença <strong>migrou para níveis superiores</strong>: C5–C6 passa a apresentar o componente protruso mediano dominante, com impressão sob a face ventral do saco dural. C4–C5 abaula e retifica o saco dural. Discreta hipotrofia da musculatura paravertebral — primeira menção.',
         pdfHref: 'scans/paulo-cervical-mri-2023-04-26-report.pdf',
@@ -2446,6 +2490,8 @@
         datePt: 'Mai 2026 · 64 anos',
         physician: 'Dr. Marco Antonio de Carvalho',
         provider: 'CETAM',
+        aiEvolutionEn: '<strong>Δ vs. 2023 (3-year gap).</strong> C5–C6 progressed from a focal median protrusion to a <strong>diffuse disco-osteophytic bulge</strong>, and for the first time <strong>contacts the ventral cord</strong> (cord signal remains normal — no myelopathy). Newly explicit on this report: uncovertebral and facet arthrosis with diffuse ligamentum-flavum thickening at the lower cervical levels. C3–C4 and C4–C5 now also bulge mildly with bilateral foraminal narrowing — the disease envelope keeps widening level by level.',
+        aiEvolutionPt: '<strong>Δ vs. 2023 (intervalo de 3 anos).</strong> C5–C6 evoluiu de protrusão mediana focal para <strong>abaulamento disco-osteofitário difuso</strong> e, pela primeira vez, <strong>toca a face ventral da medula</strong> (sinal medular permanece normal — sem mielopatia). Novidades explicitadas neste laudo: artrose uncovertebral e facetária com espessamento difuso do ligamento amarelo nos níveis cervicais inferiores. C3–C4 e C4–C5 também passam a abaular discretamente com redução foraminal bilateral — o envoltório degenerativo segue se ampliando nível a nível.',
         bodyEn: 'Most recent study. The C5–C6 lesion has progressed to a <strong>diffuse disco-osteophytic bulge with ventral cord contact</strong> (no myelopathy) and bilateral foraminal narrowing reaching both exiting roots. Mild C3–C4 and C4–C5 bulging. Uncovertebral / facet arthrosis with ligamentum flavum thickening — explicitly mentioned for the first time. The disease envelope keeps widening level by level.',
         bodyPt: 'Estudo mais recente. A lesão de C5–C6 evoluiu para <strong>abaulamento disco-osteofitário difuso com contato medular ventral</strong> (sem mielopatia) e redução foraminal bilateral tocando ambas as raízes emergentes. Abaulamentos leves em C3–C4 e C4–C5. Artrose uncovertebral / facetária com espessamento do ligamento amarelo — citados pela primeira vez. O envoltório degenerativo segue se ampliando nível a nível.',
         pdfHref: 'scans/paulo-cervical-mri-2026-05-15-report.pdf',
@@ -2462,6 +2508,9 @@
         datePt: 'Abr 2023 · 61 anos',
         physician: 'Dra. Juliane Giselle Hortolam',
         provider: 'CETAM',
+        isBaseline: true,
+        aiEvolutionEn: 'First lumbar MRI on file — fixes the lumbar starting point. The <strong>single most acute lesion of either spine region at this date</strong>: L5–S1 left paramedian / foraminal protrusion combined with facet hypertrophy, compressing the descending left S1 root. Sinistro-convex axis deviation already present here (the cervical only catches up to this in the same year). Secondary findings: L3-over-L4 anterolisthesis, Modic II (fatty) at L4–L5, moderate paravertebral hypotrophy.',
+        aiEvolutionPt: 'Primeira RM lombar do histórico — fixa o ponto de partida lombar. A <strong>lesão mais aguda das duas regiões da coluna nesta data</strong>: protrusão paramediana / foraminal esquerda em L5–S1 associada a hipertrofia facetária, comprimindo a raiz descendente esquerda de S1. O desvio sinistro-convexo do eixo já está aqui (a cervical só alcança no mesmo ano). Achados secundários: anterolistese de L3 sobre L4, Modic II (gordura) em L4–L5, hipotrofia paravertebral moderada.',
         bodyEn: 'First lumbar MRI on file. <strong>Discrete L3-over-L4 anterolisthesis</strong>, diffuse disc dehydration and height loss. L4–L5 discopathy with Modic II (fatty) endplate change. Bulges at L1–L2 (rectifies sac), L2–L3, L4–L5 and L3–L4 (touching emerging L3 roots). Most acute: <strong>L5–S1 left paramedian / foraminal protrusion</strong> combined with facet hypertrophy compressing the descending left S1 root. Moderate paravertebral muscle hypotrophy.',
         bodyPt: 'Primeira RM lombar do histórico. <strong>Anterolistese discreta de L3 sobre L4</strong>, hipohidratação discal difusa e redução das alturas. Discopatia degenerativa em L4–L5 com Modic II (gordura). Abaulamentos em L1–L2 (retifica o saco), L2–L3, L4–L5 e L3–L4 (tocando as raízes emergentes de L3). Achado mais agudo: <strong>protrusão paramediana / foraminal esquerda em L5–S1</strong> associada a hipertrofia facetária comprimindo a raiz descendente esquerda de S1. Moderada hipotrofia paravertebral.',
         pdfHref: 'scans/paulo-lombar-mri-2023-04-26-report.pdf',
@@ -2475,6 +2524,8 @@
         datePt: 'Mai 2026 · 64 anos',
         physician: 'Dr. Marco Antonio de Carvalho',
         provider: 'CETAM',
+        aiEvolutionEn: '<strong>Δ vs. 2023 (3-year gap).</strong> The L5–S1 extrusion is <strong>geometrically stable</strong> — same left-S1 compression pattern, same morphology. Two genuinely new findings absent in 2023: <strong>L3–L4 spinal-canal stenosis</strong> (pseudo-bulge + facet hypertrophy + ligamentum-flavum thickening compressing the anterior descending roots) emerges as a second focus, and <strong>Modic I (active oedema)</strong> signal appears at L1–L2, L2–L3 and L4–L5 plus interspinous-ligament oedema at three levels. Headline reading: the main lesion held its shape; the surrounding disc-bone interface turned <em>active</em>.',
+        aiEvolutionPt: '<strong>Δ vs. 2023 (intervalo de 3 anos).</strong> A extrusão em L5–S1 está <strong>geometricamente estável</strong> — mesmo padrão de compressão da S1 à esquerda, mesma morfologia. Dois achados genuinamente novos, ausentes em 2023: <strong>estenose do canal em L3–L4</strong> (pseudo-abaulamento + hipertrofia facetária + espessamento do ligamento amarelo comprimindo as descendentes anteriores) surge como segundo foco e o sinal <strong>Modic I (edema ativo)</strong> aparece em L1–L2, L2–L3 e L4–L5, junto com edema do ligamento interespinhoso em três níveis. Leitura central: a lesão principal manteve a forma; a interface disco-óssea ao redor ficou <em>ativa</em>.',
         bodyEn: 'Three-year follow-up. The L5–S1 extrusion <strong>persists with the same left-sided S1 compression pattern</strong>. New / clarified: L3–L4 spinal canal stenosis from pseudo-bulge + facet hypertrophy + ligamentum flavum thickening, compressing the anterior descending roots. Modic II change at L4–L5 confirmed; <strong>Modic I (active oedema) signal added at L1–L2, L2–L3 and L4–L5</strong>; interspinous-ligament oedema at L2–L3, L3–L4 and L5–S1 — markers of active inflammatory degeneration, not burnt-out disease.',
         bodyPt: 'Seguimento de três anos. A extrusão em L5–S1 <strong>persiste com o mesmo padrão de compressão da raiz S1 à esquerda</strong>. Novo / esclarecido: estenose do canal em L3–L4 por pseudo-abaulamento + hipertrofia facetária + espessamento do ligamento amarelo, comprimindo as raízes descendentes anteriores. Modic II em L4–L5 confirmado; <strong>sinal Modic I (edema ativo) acrescentado em L1–L2, L2–L3 e L4–L5</strong>; edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1 — marcadores de degeneração ativa, não de doença encerrada.',
         pdfHref: 'scans/paulo-lombar-mri-2026-05-15-report.pdf',
@@ -2489,15 +2540,16 @@
       '<section class="report-section" id="paulo-history">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('09B · Longitudinal history', '09B · Histórico longitudinal') +
+            t('09B · AI longitudinal analysis', '09B · Análise longitudinal por IA') +
           '</div>' +
-          '<h2 class="section-title">' +
+          '<h2 class="section-title ph-section-title">' +
             t('How cervical and lumbar findings evolved',
               'Como os achados cervicais e lombares evoluíram') +
+            ' <span class="ai-pill">AI</span>' +
           '</h2>' +
           '<p class="section-desc">' +
-            t('Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. Each entry is a synthesis of the reporting radiologist&apos;s impression — not a re-interpretation — anchored to the level of disease at that moment. Read top-to-bottom to see how the dominant lesion has migrated and which findings are genuinely new.',
-              'Três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. Cada entrada é uma síntese da impressão do radiologista — não uma re-interpretação — ancorada no nível doente no momento. Leia de cima para baixo para acompanhar a migração da lesão dominante e identificar quais achados são genuinamente novos.') +
+            t('Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. Each entry carries an <strong>AI Δ-from-previous read</strong> at the top — what moved, what stabilised, what is genuinely new — followed by the underlying radiologist&apos;s synthesis. Read top-to-bottom to see the dominant lesion migrate and the disease envelope widen level by level.',
+              'Três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. Cada entrada traz uma <strong>leitura Δ-vs.-anterior da IA</strong> no topo — o que mudou, o que estabilizou, o que é genuinamente novo — seguida da síntese do radiologista. Leia de cima para baixo para ver a lesão dominante migrar e o envoltório degenerativo se ampliar nível a nível.') +
           '</p>' +
           '<div class="ph-timeline-grid">' +
             '<div class="ph-timeline">' +
@@ -3053,8 +3105,8 @@
               'Exames de imagem · Paulo Silotto Souza') +
           '</h1>' +
           '<p class="hero-sub">' +
-            t('Two MRI studies acquired on 15 May 2026 at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Each viewer carries axial, coronal and sagittal acquisitions — switch plane with the AXI / COR / SAG buttons inside the viewer, then drag the slider (or use mouse wheel, click-and-drag, or arrow keys) to walk through the slices. The radiologist&apos;s full report is rendered below each viewer, with the original Portuguese and an English translation that follow the top-bar language toggle.',
-              'Dois estudos de RM realizados em 15 de maio de 2026 no CETAM Diagnóstico, laudados pelo Dr. Marco Antonio de Carvalho (CRM-99607). Cada visualizador contém as aquisições axial, coronal e sagital — alterne o plano com os botões AXI / COR / SAG dentro do visualizador e depois arraste o controle (ou use a rolagem do mouse, clicar-e-arrastar ou as setas) para percorrer os cortes. O laudo completo do radiologista está renderizado abaixo de cada visualizador, com o original em português e uma tradução em inglês que acompanham o seletor de idioma da barra superior.') +
+            t('Eleven years of spine imaging — three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. The latest pair (15 May 2026, Dr. Marco Antonio de Carvalho · CRM-99607) loads in the unified viewer below; each repeated study is commented by AI in the longitudinal section, with the radiologists&apos; original reports rendered in full underneath.',
+              'Onze anos de imagens da coluna — três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. O par mais recente (15 de maio de 2026, Dr. Marco Antonio de Carvalho · CRM-99607) carrega no visualizador unificado abaixo; cada estudo repetido recebe comentário da IA na seção longitudinal, com os laudos originais dos radiologistas renderizados em seguida.') +
           '</p>' +
           '<div class="hero-meta">' +
             '<div class="hero-meta-item">' +
@@ -3065,12 +3117,12 @@
               '<span>' + t('14 Jul 1961 · 64', '14 jul 1961 · 64') + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
-              '<span>' + t('Exam date', 'Data do exame') + '</span>' +
-              '<span>' + t('15 May 2026', '15 mai 2026') + '</span>' +
+              '<span>' + t('Imaging arc', 'Arco de imagens') + '</span>' +
+              '<span>' + t('2015 → 2026 · 5 MRIs', '2015 → 2026 · 5 RMs') + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
-              '<span>' + t('Reporting physician', 'Médico responsável') + '</span>' +
-              '<span>Dr. Marco A. de Carvalho · CRM-99607</span>' +
+              '<span>' + t('Latest exam', 'Exame mais recente') + '</span>' +
+              '<span>' + t('15 May 2026', '15 mai 2026') + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
               '<span>' + t('Provider', 'Prestador') + '</span>' +
@@ -3087,12 +3139,15 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('AI summary · Cervical &amp; lumbar MRI', 'Resumo da IA · RM cervical e lombar') + '</h2>' +
+              '<h2>' + t('AI synthesis · Imaging arc', 'Síntese da IA · Arco de imagens') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
-              t('Synthesised from both radiology reports · 15 May 2026 · CETAM Diagnóstico',
-                'Sintetizado a partir dos dois laudos radiológicos · 15 de maio de 2026 · CETAM Diagnóstico') +
+              t('Synthesised from 5 spine MRI reports · CETAM Diagnóstico · 2015 → 2026 · plus 5 single-occurrence studies',
+                'Sintetizado a partir de 5 laudos de RM da coluna · CETAM Diagnóstico · 2015 → 2026 · mais 5 estudos isolados') +
+            '</div>' +
+            '<div class="paulo-ai-subhead">' +
+              t('Current snapshot · 15 May 2026', 'Quadro atual · 15 de maio de 2026') +
             '</div>' +
             '<div class="paulo-ai-summary-body lang-en">' +
               '<p>Same-day MRI of the cervical and lumbar spine demonstrates <strong>widespread multi-level degenerative disc disease</strong>, with three findings that warrant clinical attention. <strong>L5–S1:</strong> a left paramedian / foraminal disc extrusion compressing the ipsilateral descending S1 nerve root — the most acute finding of the pair. <strong>L3–L4:</strong> spinal canal stenosis from a pseudo-bulge combined with facet joint hypertrophy and ligamentum flavum thickening, compressing the anterior descending roots. <strong>C5–C6:</strong> a diffuse disco-osteophytic bulge with ventral cord compression — no cord signal change (no myelopathy) at this point, but the cord is being contacted.</p>' +
@@ -3103,6 +3158,32 @@
               '<p>As RM cervical e lombar do mesmo dia demonstram <strong>doença discal degenerativa difusa e multinivelar</strong>, com três achados que merecem atenção clínica. <strong>L5–S1:</strong> extrusão discal paramediana / foraminal esquerda comprimindo a raiz descendente S1 ipsilateral — o achado mais agudo do par. <strong>L3–L4:</strong> estenose do canal vertebral por pseudo-abaulamento associado a hipertrofia facetária e espessamento dos ligamentos amarelos, com compressão das descendentes anteriores. <strong>C5–C6:</strong> abaulamento disco-osteofitário difuso com compressão ventral da medula — sem alteração de sinal medular (sem mielopatia) neste momento, porém com contato medular.</p>' +
               '<p>Achados comuns às duas regiões: desvio sinistro-convexo do eixo, osteófitos marginais, hipohidratação discal difusa e hipotrofia da musculatura paravertebral (discreta na cervical, moderada na lombar). O segmento lombar mostra ainda <strong>anterolistese discreta de L3 sobre L4</strong>, sinal <strong>Modic I (edema)</strong> em L1–L2, L2–L3 e L4–L5, <strong>Modic II (gordura)</strong> em L4–L5 e edema do ligamento interespinhoso em L2–L3, L3–L4 e L5–S1 — marcadores de alteração degenerativa inflamatória ativa, não apenas degeneração crônica encerrada.</p>' +
               '<p><strong>Próximo passo recomendado:</strong> correlação clínica com os sintomas radiculares atuais — território S1 à esquerda a partir da extrusão L5–S1; território C6 / C7 a partir do abaulamento C5–C6 — e avaliação por especialista em coluna para ponderar manejo conservador vs. opções intervencionistas frente à estenose em L3–L4, ao estreitamento foraminal multinível e ao contato medular ventral em C5–C6.</p>' +
+            '</div>' +
+            '<div class="paulo-ai-arcs-block">' +
+              '<div class="paulo-ai-subhead">' +
+                t('Longitudinal evolution · how the same exam has changed over time',
+                  'Evolução longitudinal · como o mesmo exame mudou ao longo do tempo') +
+              '</div>' +
+              '<div class="paulo-ai-arcs">' +
+                '<div class="paulo-ai-arc">' +
+                  '<div class="paulo-ai-arc-head">' +
+                    '<h3 class="paulo-ai-arc-title">' + t('Cervical spine', 'Coluna cervical') + '</h3>' +
+                    '<span class="paulo-ai-arc-span">' + t('11-year arc · 3 MRIs', 'Arco de 11 anos · 3 RMs') + '</span>' +
+                  '</div>' +
+                  '<p class="paulo-ai-arc-body lang-en">Three cervical MRIs span eleven years (2015 → 2023 → 2026). Disease progressed by two complementary mechanisms: <strong>cranial migration</strong> — the dominant lesion shifted from C6–C7 (2015) up to C5–C6 (2023, still dominant in 2026) — and <strong>envelope widening</strong> — what began as a focal posterocentral protrusion is now a diffuse disco-osteophytic bulge with explicit uncovertebral / facet arthrosis and ligamentum-flavum thickening. The critical new finding in 2026 is <strong>ventral cord contact at C5–C6</strong> (cord signal still normal — no myelopathy yet). Velocity: slow, but the disease envelope keeps widening level by level.</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">Três RMs cervicais cobrem onze anos (2015 → 2023 → 2026). A doença evoluiu por dois mecanismos complementares: <strong>migração cranial</strong> — a lesão dominante saiu de C6–C7 (2015) e subiu para C5–C6 (2023, ainda dominante em 2026) — e <strong>ampliação do envoltório</strong> — o que começou como protrusão posterocentral focal hoje é abaulamento disco-osteofitário difuso com artrose uncovertebral / facetária e espessamento do ligamento amarelo explicitados. O achado novo crítico em 2026 é <strong>contato medular ventral em C5–C6</strong> (sinal medular ainda normal — sem mielopatia). Velocidade: lenta, mas o envoltório degenerativo segue se ampliando nível a nível.</p>' +
+                '</div>' +
+                '<div class="paulo-ai-arc">' +
+                  '<div class="paulo-ai-arc-head">' +
+                    '<h3 class="paulo-ai-arc-title">' + t('Lumbar spine', 'Coluna lombar') + '</h3>' +
+                    '<span class="paulo-ai-arc-span">' + t('3-year arc · 2 MRIs', 'Arco de 3 anos · 2 RMs') + '</span>' +
+                  '</div>' +
+                  '<p class="paulo-ai-arc-body lang-en">Two lumbar MRIs cover three years (2023 → 2026). Pattern differs from the cervical: the headline lesion is <strong>stable</strong> — the L5–S1 left paramedian / foraminal extrusion still compresses the descending S1 root with the same geometry — but the <strong>surrounding tissue is angrier</strong>: a new L3–L4 spinal-canal stenosis appears as a second focus, and <strong>Modic I (active oedema)</strong> signal now lights up at L1–L2, L2–L3 and L4–L5 alongside interspinous-ligament oedema at three levels. The lumbar disease is currently inflammatory, not chronically burnt-out.</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">Duas RMs lombares cobrem três anos (2023 → 2026). Padrão difere do cervical: a lesão principal está <strong>estável</strong> — a extrusão paramediana / foraminal esquerda em L5–S1 continua comprimindo a raiz descendente S1 com a mesma geometria — mas o <strong>tecido ao redor está mais ativo</strong>: surge a estenose do canal em L3–L4 como segundo foco e o sinal <strong>Modic I (edema ativo)</strong> aparece em L1–L2, L2–L3 e L4–L5, junto com edema do ligamento interespinhoso em três níveis. A doença lombar está atualmente inflamatória, não cronicamente encerrada.</p>' +
+                '</div>' +
+              '</div>' +
+              '<p class="paulo-ai-arcs-cross lang-en"><strong>Cross-region pattern.</strong> Sinistro-convex axis deviation appeared in the cervical only in 2023 but was already present in the lumbar 2023 baseline — consistent with whole-spine postural adaptation rather than a focal mechanical event. Paravertebral muscle hypotrophy is present in both regions (mild cervical, moderate lumbar) — a muscular dimension that constrains how far conservative management can go without targeted strengthening.</p>' +
+              '<p class="paulo-ai-arcs-cross lang-pt"><strong>Padrão entre regiões.</strong> O desvio sinistro-convexo do eixo só aparece na cervical em 2023 mas já estava presente na lombar de 2023 — compatível com adaptação postural de toda a coluna, e não com evento mecânico focal. A hipotrofia paravertebral está presente nas duas regiões (discreta na cervical, moderada na lombar) — um eixo muscular que limita até onde o manejo conservador pode ir sem fortalecimento direcionado.</p>' +
             '</div>' +
             '<div class="paulo-ai-insights-block">' +
               '<div class="paulo-ai-insights-head">' +
