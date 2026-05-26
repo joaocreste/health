@@ -2002,8 +2002,8 @@
   var PAULO_STUDIES = [
     {
       slug: 'paulo-cervical-mri-2026-05-15',
-      labelEn: '09B · MRI · Cervical spine',
-      labelPt: '09B · RM · Coluna cervical',
+      labelEn: '2A · MRI · Cervical spine',
+      labelPt: '2A · RM · Coluna cervical',
       titleEn: 'MRI cervical spine · 15 May 2026',
       titlePt: 'RM da coluna cervical · 15 de maio de 2026',
       blurbEn: 'MRI of the cervical spine without intravenous contrast. Three orientations were acquired — axial T2 (35 slices), coronal T2 (12) and sagittal (45, across T1 / T2 / STIR weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -2066,8 +2066,8 @@
     },
     {
       slug: 'paulo-lombar-mri-2026-05-15',
-      labelEn: '09B · MRI · Lumbar spine',
-      labelPt: '09B · RM · Coluna lombar',
+      labelEn: '2B · MRI · Lumbar spine',
+      labelPt: '2B · RM · Coluna lombar',
       titleEn: 'MRI lumbar spine · 15 May 2026',
       titlePt: 'RM da coluna lombar · 15 de maio de 2026',
       blurbEn: 'MRI of the lumbar spine without intravenous contrast. Three orientations were acquired — axial T2 (25 slices), coronal T2 (12) and sagittal (48, across STIR / T2 CLEAR / T1 weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -2358,7 +2358,7 @@
 
     return (
       '<div class="imagery-exam" id="paulo-spine-mri"><div class="container">' +
-        '<div class="section-label">' + t('09B · MRI · Spine', '09B · RM · Coluna') + '</div>' +
+        '<div class="section-label">' + t('2 · MRI · Spine', '2 · RM · Coluna') + '</div>' +
         '<h2 class="section-title">' + t('Spine MRI · 15 May 2026', 'RM da coluna · 15 de maio de 2026') + '</h2>' +
         '<p class="section-desc">' +
           t('Same-day cervical and lumbar MRI at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Pick the region (Cervical / Lumbar) and the plane (AXI / COR / SAG), then drag the slider, scroll the wheel, click-and-drag the image, or use the arrow keys to walk through the slices. The two reports follow side-by-side beneath the viewer.',
@@ -2540,7 +2540,7 @@
       '<section class="report-section" id="paulo-history">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('09C · AI longitudinal analysis', '09C · Análise longitudinal por IA') +
+            t('3 · AI longitudinal analysis', '3 · Análise longitudinal por IA') +
           '</div>' +
           '<h2 class="section-title ph-section-title">' +
             t('How cervical and lumbar findings evolved',
@@ -2554,7 +2554,7 @@
           '<div class="ph-timeline-grid">' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('Cervical spine', 'Coluna cervical') + '</h3>' +
+                '<h3 class="ph-timeline-title">' + t('3A · Cervical spine', '3A · Coluna cervical') + '</h3>' +
                 '<span class="ph-timeline-span">' + t('2015 → 2026 · 3 studies', '2015 → 2026 · 3 estudos') + '</span>' +
               '</div>' +
               cervical.map(buildPauloHistoryEntry).join('') +
@@ -2565,7 +2565,7 @@
             '</div>' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('Lumbar spine', 'Coluna lombar') + '</h3>' +
+                '<h3 class="ph-timeline-title">' + t('3B · Lumbar spine', '3B · Coluna lombar') + '</h3>' +
                 '<span class="ph-timeline-span">' + t('2023 → 2026 · 2 studies', '2023 → 2026 · 2 estudos') + '</span>' +
               '</div>' +
               lumbar.map(buildPauloHistoryEntry).join('') +
@@ -2620,8 +2620,8 @@
   function buildPauloOtherStudiesSection() {
     var cards = [
       {
-        eyebrowEn: '09D · MRI · Right shoulder',
-        eyebrowPt: '09D · RM · Ombro direito',
+        eyebrowEn: '4A · MRI · Right shoulder',
+        eyebrowPt: '4A · RM · Ombro direito',
         titleEn:   'Right shoulder MRI',
         titlePt:   'RM do ombro direito',
         dateEn: '23 Nov 2015',
@@ -2643,8 +2643,8 @@
         ],
       },
       {
-        eyebrowEn: '09D · MRI · Right knee',
-        eyebrowPt: '09D · RM · Joelho direito',
+        eyebrowEn: '4B · MRI · Right knee',
+        eyebrowPt: '4B · RM · Joelho direito',
         titleEn:   'Right knee MRI',
         titlePt:   'RM do joelho direito',
         dateEn: '01 Aug 2019',
@@ -2668,8 +2668,8 @@
         ],
       },
       {
-        eyebrowEn: '09D · CT · Abdomen & pelvis',
-        eyebrowPt: '09D · TC · Abdome e pelve',
+        eyebrowEn: '4C · CT · Abdomen & pelvis',
+        eyebrowPt: '4C · TC · Abdome e pelve',
         titleEn:   'Abdomen & pelvis CT (with contrast)',
         titlePt:   'TC de abdome e pelve (com contraste)',
         dateEn: '31 Mar 2022',
@@ -2695,8 +2695,8 @@
         ],
       },
       {
-        eyebrowEn: '09D · CT · Cranium',
-        eyebrowPt: '09D · TC · Crânio',
+        eyebrowEn: '4D · CT · Cranium',
+        eyebrowPt: '4D · TC · Crânio',
         titleEn:   'Cranium CT (non-contrast)',
         titlePt:   'TC de crânio (sem contraste)',
         dateEn: '26 Apr 2023',
@@ -2720,8 +2720,8 @@
         ],
       },
       {
-        eyebrowEn: '09D · CT · Face / sinuses',
-        eyebrowPt: '09D · TC · Face / seios',
+        eyebrowEn: '4E · CT · Face / sinuses',
+        eyebrowPt: '4E · TC · Face / seios',
         titleEn:   'Face & sinuses CT (non-contrast)',
         titlePt:   'TC dos seios da face (sem contraste)',
         dateEn: '14 Mar 2023',
@@ -2750,7 +2750,7 @@
       '<section class="report-section" id="paulo-other-studies">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('09D · Other studies on file', '09D · Outros exames disponíveis') +
+            t('4 · Other studies on file', '4 · Outros exames disponíveis') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Beyond the spine — five additional reports',
@@ -3139,7 +3139,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('09A · AI synthesis · Imaging arc', '09A · Síntese da IA · Arco de imagens') + '</h2>' +
+              '<h2>' + t('1 · AI synthesis · Imaging arc', '1 · Síntese da IA · Arco de imagens') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -3215,7 +3215,7 @@
       '<section class="report-section" id="imagery">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('09B · Imagery', '09B · Imagem') +
+            t('2 · Imagery', '2 · Imagem') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Imaging exam', 'Exame de imagem') +
