@@ -1,0 +1,10 @@
+# Lumen Health · Cloudflare Pages config
+#
+# R2 binding intentionally NOT declared here — bindings have to be set via the
+# Cloudflare dashboard (Pages > lumenhealth > Settings > Functions > R2 bucket
+# bindings). Once set there, the binding survives deploys without needing to
+# live in this file. Reference: variable name "R2_BUCKET", bucket name
+# "jc-health-uploads".
+name = "lumenhealth"
+compatibility_date = "2026-04-28"
+pages_build_output_dir = "web"
