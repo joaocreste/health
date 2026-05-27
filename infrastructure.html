@@ -416,8 +416,8 @@ footer.doc-footer {
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Database tables</div>
-        <div class="stat-card-value">32<small>Postgres tables</small></div>
-        <div class="stat-card-foot">Drizzle ORM · schema in <span class="mono">db/schema.ts</span></div>
+        <div class="stat-card-value">31<small>Postgres tables · 10 domains</small></div>
+        <div class="stat-card-foot">Drizzle ORM · 9 enums · schema in <span class="mono">db/schema.ts</span></div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Claude models</div>
@@ -1001,50 +1001,417 @@ footer.doc-footer {
   </div>
 </section>
 
-<!-- ────────────────── 06 · STORAGE ─────────────────── -->
+<!-- ────────────────── 06 · DATABASE STRUCTURE ─────────────────── -->
 <section class="report">
   <div class="container">
-    <div class="section-label">06 · Storage</div>
-    <h2 class="section-title">Postgres + R2 — what goes where</h2>
+    <div class="section-label">06 · Database structure</div>
+    <h2 class="section-title">Neon Postgres — schema, conventions, and the structured / unstructured split</h2>
     <p class="section-desc">
-      Structured rows (medications, vitals, lab values, imaging metadata, writings,
-      audit log) live in Neon Postgres. Bulky binaries (raw uploaded PDFs, audio,
-      DICOM archives) live in Cloudflare R2 — Postgres only stores the R2 key, not
-      the bytes. This is deliberate: it keeps the database small and lets a
-      patient delete request cascade cleanly.
+      <strong>31 tables in 10 domains</strong>, defined in a single Drizzle file
+      (<span class="mono">db/schema.ts</span>, 591 LOC). The schema is deliberately
+      small and patient-centric: every clinical row carries a
+      <span class="mono">patient_id</span> foreign key with
+      <span class="mono">ON DELETE CASCADE</span>, so a single patient deletion
+      walks the entire graph cleanly — a hard requirement for GDPR / LGPD
+      right-to-erasure. Bulky binaries (PDFs, DICOM, audio) live in R2; the
+      database stores the R2 key, not the bytes.
     </p>
+
+    <div class="stat-ribbon" style="margin-bottom: 8px;">
+      <div class="stat-card">
+        <div class="stat-card-label">Tables</div>
+        <div class="stat-card-value">31</div>
+        <div class="stat-card-foot">organised into 10 schema domains</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Enums</div>
+        <div class="stat-card-value">9</div>
+        <div class="stat-card-foot">domain-restricted text columns (e.g. <span class="mono">user_role</span>, <span class="mono">imaging_modality</span>)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Primary-key shape</div>
+        <div class="stat-card-value">UUID v4<small>+ 2 bigint</small></div>
+        <div class="stat-card-foot">High-volume append-only tables (<span class="mono">glucose_points</span>, <span class="mono">audit_log</span>) use <span class="mono">bigint identity</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Region</div>
+        <div class="stat-card-value">Frankfurt<small>EU-Central</small></div>
+        <div class="stat-card-foot">Neon Serverless · connection-pooled <span class="mono">@neondatabase/serverless</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Three storage shapes — sometimes combined in the same row</h3>
+    <p style="font-size:14px;color:var(--slate);max-width:72ch;">
+      The platform mixes three patterns across its 31 tables: <strong>strict
+      typed columns</strong> for facts that fit a schema, <strong>JSONB
+      payloads</strong> for shape-flexible structured data, and <strong>R2 blob
+      keys</strong> for content that should never live inside the database.
+      Most tables combine two or three of these patterns in the same row.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-head">
+        <div class="diagram-card-title">Three storage patterns · how a row is shaped</div>
+        <div class="diagram-card-meta">SVG · 1080 × 540</div>
+      </div>
+
+      <svg viewBox="0 0 1080 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three storage patterns diagram">
+        <defs>
+          <marker id="arr5-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#1E2D3D"/>
+          </marker>
+        </defs>
+
+        <!-- Zone labels -->
+        <text x="20" y="22" class="dg-zone-label">Three row shapes · all live inside Postgres rows</text>
+        <line x1="20" y1="32" x2="1060" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+        <!-- ───── COLUMN 1 · Structured ───── -->
+        <g>
+          <rect x="20" y="58" width="340" height="370" rx="10" class="dg-box-bg dg-box-stroke-navy"/>
+
+          <text x="36" y="84" class="dg-eyebrow">PATTERN 01 · STRUCTURED</text>
+          <text x="36" y="106" class="dg-title">Strict typed columns</text>
+          <text x="36" y="124" class="dg-body">One row = one fact. Plottable directly.</text>
+
+          <!-- Sample table -->
+          <rect x="36" y="142" width="308" height="28" rx="4" fill="#244E6E"/>
+          <text x="48" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #FFFFFF; font-weight: 600;">medications</text>
+          <text x="332" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; fill: rgba(255,255,255,0.6);" text-anchor="end">type</text>
+
+          <rect x="36" y="172" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="187" class="dg-mono">id</text>
+          <text x="332" y="187" class="dg-mono" text-anchor="end">uuid · pk</text>
+
+          <rect x="36" y="196" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="211" class="dg-mono">patient_id</text>
+          <text x="332" y="211" class="dg-mono" text-anchor="end">uuid · fk → users.id</text>
+
+          <rect x="36" y="220" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="235" class="dg-mono">name</text>
+          <text x="332" y="235" class="dg-mono" text-anchor="end">text · not null</text>
+
+          <rect x="36" y="244" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="259" class="dg-mono">dose</text>
+          <text x="332" y="259" class="dg-mono" text-anchor="end">text</text>
+
+          <rect x="36" y="268" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="283" class="dg-mono">started_at</text>
+          <text x="332" y="283" class="dg-mono" text-anchor="end">date</text>
+
+          <rect x="36" y="292" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E5E2DC"/>
+          <text x="48" y="307" class="dg-mono">ended_at</text>
+          <text x="332" y="307" class="dg-mono" text-anchor="end">date</text>
+
+          <line x1="36" y1="328" x2="344" y2="328" stroke="#E5E2DC" stroke-width="1"/>
+
+          <text x="36" y="350" class="dg-eyebrow">OTHER TABLES OF THIS SHAPE</text>
+          <text x="36" y="370" class="dg-body">vitals_daily · glucose_points</text>
+          <text x="36" y="386" class="dg-body">supplements · surgeries · injuries</text>
+          <text x="36" y="402" class="dg-body">lab_results · prescriptions</text>
+          <text x="36" y="418" class="dg-body">taper_history · life_events · pgx_findings</text>
+        </g>
+
+        <!-- ───── COLUMN 2 · Semi-structured (JSONB) ───── -->
+        <g>
+          <rect x="375" y="58" width="340" height="370" rx="10" class="dg-box-fill-gold dg-box-stroke-gold"/>
+
+          <text x="391" y="84" class="dg-eyebrow">PATTERN 02 · SEMI-STRUCTURED</text>
+          <text x="391" y="106" class="dg-title">Typed envelope + JSONB payload</text>
+          <text x="391" y="124" class="dg-body">Schema where it makes sense, flex where it doesn&apos;t.</text>
+
+          <!-- Sample table -->
+          <rect x="391" y="142" width="308" height="28" rx="4" fill="#B8954A"/>
+          <text x="403" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #FFFFFF; font-weight: 600;">risk_assessments</text>
+          <text x="687" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; fill: rgba(255,255,255,0.7);" text-anchor="end">type</text>
+
+          <rect x="391" y="172" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E0C681"/>
+          <text x="403" y="187" class="dg-mono">id</text>
+          <text x="687" y="187" class="dg-mono" text-anchor="end">uuid · pk</text>
+
+          <rect x="391" y="196" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E0C681"/>
+          <text x="403" y="211" class="dg-mono">patient_id</text>
+          <text x="687" y="211" class="dg-mono" text-anchor="end">uuid · fk</text>
+
+          <rect x="391" y="220" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E0C681"/>
+          <text x="403" y="235" class="dg-mono">kind</text>
+          <text x="687" y="235" class="dg-mono" text-anchor="end">text · &apos;AUDIT&apos; · &apos;PHQ-9&apos;…</text>
+
+          <rect x="391" y="244" width="308" height="22" rx="2" fill="#FFF6E5" stroke="#B8954A" stroke-width="1.4"/>
+          <text x="403" y="259" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;fill:#7C5B15;font-weight:600;">payload</text>
+          <text x="687" y="259" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;fill:#7C5B15;font-weight:600;" text-anchor="end">jsonb · not null</text>
+
+          <rect x="391" y="268" width="308" height="22" rx="2" fill="#FFFFFF" stroke="#E0C681"/>
+          <text x="403" y="283" class="dg-mono">recorded_at</text>
+          <text x="687" y="283" class="dg-mono" text-anchor="end">timestamptz</text>
+
+          <!-- Payload preview -->
+          <rect x="391" y="296" width="308" height="32" rx="4" fill="#FFFBF1" stroke="#E0C681" stroke-dasharray="3 2"/>
+          <text x="399" y="311" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#7C5B15;">{ "score": 13, "harmful": true,</text>
+          <text x="399" y="323" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;fill:#7C5B15;">  "items": { … }, "version": "10" }</text>
+
+          <line x1="391" y1="346" x2="699" y2="346" stroke="#E0C681" stroke-width="1"/>
+
+          <text x="391" y="368" class="dg-eyebrow">OTHER TABLES OF THIS SHAPE</text>
+          <text x="391" y="388" class="dg-body">wheel_of_life_assessments (16 axes in scores)</text>
+          <text x="391" y="404" class="dg-body">vitals_daily.extras · panic_events.symptoms</text>
+          <text x="391" y="420" class="dg-body">audit_log.metadata · imports.errors</text>
+        </g>
+
+        <!-- ───── COLUMN 3 · Blob-backed ───── -->
+        <g>
+          <rect x="730" y="58" width="330" height="370" rx="10" class="dg-box-fill-blue dg-box-stroke-navy"/>
+
+          <text x="746" y="84" class="dg-eyebrow">PATTERN 03 · BLOB-BACKED</text>
+          <text x="746" y="106" class="dg-title">Postgres pointer · R2 bytes</text>
+          <text x="746" y="124" class="dg-body">Row stays small. Binary content lives in R2.</text>
+
+          <rect x="746" y="142" width="298" height="28" rx="4" fill="#1B3B54"/>
+          <text x="758" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #FFFFFF; font-weight: 600;">documents</text>
+          <text x="1032" y="161" style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; fill: rgba(255,255,255,0.6);" text-anchor="end">type</text>
+
+          <rect x="746" y="172" width="298" height="22" rx="2" fill="#FFFFFF" stroke="#B5D2E5"/>
+          <text x="758" y="187" class="dg-mono">id</text>
+          <text x="1032" y="187" class="dg-mono" text-anchor="end">uuid · pk</text>
+
+          <rect x="746" y="196" width="298" height="22" rx="2" fill="#FFFFFF" stroke="#B5D2E5"/>
+          <text x="758" y="211" class="dg-mono">patient_id</text>
+          <text x="1032" y="211" class="dg-mono" text-anchor="end">uuid · fk</text>
+
+          <rect x="746" y="220" width="298" height="22" rx="2" fill="#FFFFFF" stroke="#B5D2E5"/>
+          <text x="758" y="235" class="dg-mono">kind</text>
+          <text x="1032" y="235" class="dg-mono" text-anchor="end">text · &apos;genetics&apos; · &apos;lab&apos;…</text>
+
+          <rect x="746" y="244" width="298" height="22" rx="2" fill="#FFFFFF" stroke="#B5D2E5"/>
+          <text x="758" y="259" class="dg-mono">original_filename</text>
+          <text x="1032" y="259" class="dg-mono" text-anchor="end">text</text>
+
+          <rect x="746" y="268" width="298" height="22" rx="2" fill="#EEF5FA" stroke="#3E7CA3" stroke-width="1.4"/>
+          <text x="758" y="283" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;fill:#1B3B54;font-weight:600;">blob_key</text>
+          <text x="1032" y="283" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;fill:#1B3B54;font-weight:600;" text-anchor="end">text → R2 object</text>
+
+          <rect x="746" y="292" width="298" height="22" rx="2" fill="#FFFFFF" stroke="#B5D2E5"/>
+          <text x="758" y="307" class="dg-mono">size_bytes</text>
+          <text x="1032" y="307" class="dg-mono" text-anchor="end">bigint</text>
+
+          <!-- Arrow → R2 -->
+          <path d="M 1044 282 L 1062 282" class="dg-arrow" marker-end="url(#arr5-slate)"/>
+
+          <line x1="746" y1="328" x2="1044" y2="328" stroke="#B5D2E5" stroke-width="1"/>
+
+          <text x="746" y="350" class="dg-eyebrow">OTHER TABLES OF THIS SHAPE</text>
+          <text x="746" y="370" class="dg-body">imaging_studies (blob_prefix → multi-file)</text>
+          <text x="746" y="386" class="dg-body">writings · ecg_events · import_files</text>
+          <text x="746" y="402" class="dg-body">Plus <span class="dg-mono">source_blob_key</span> on most clinical tables</text>
+          <text x="746" y="418" class="dg-body">(provenance link to original PDF)</text>
+        </g>
+
+        <!-- ───── Bottom strip ───── -->
+        <line x1="20" y1="450" x2="1060" y2="450" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="20" y="472" class="dg-zone-label">Combined-pattern reality</text>
+        <text x="20" y="496" class="dg-body">A typical row carries all three: typed columns for the facts you query (<span class="dg-mono">patient_id, name, dose</span>), an optional JSONB payload for instrument-specific data (<span class="dg-mono">payload</span>, <span class="dg-mono">metadata</span>, <span class="dg-mono">extras</span>), and an optional <span class="dg-mono">source_blob_key</span> pointing back to the original PDF or CSV in R2 for audit / re-parsing.</text>
+        <text x="20" y="520" class="dg-body">The schema chooses pattern by query shape: <strong>structured</strong> when you plot it, <strong>JSONB</strong> when the shape varies per row, <strong>R2</strong> when the bytes shouldn&apos;t bloat the database.</text>
+      </svg>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Conventions enforced across the schema</h3>
 
     <div class="two-col">
       <div class="list-card">
-        <h4>Neon Postgres · 32 tables · region: Frankfurt</h4>
+        <h4>Identity &amp; access invariants</h4>
         <ul>
-          <li><strong>Identity:</strong> <code>users</code>, <code>doctor_profiles</code>, <code>patient_profiles</code>, <code>patient_access</code></li>
-          <li><strong>Clinical:</strong> <code>medications</code>, <code>supplements</code>, <code>surgeries</code>, <code>injuries</code>, <code>clinical_history</code>, <code>risk_assessments</code></li>
-          <li><strong>Labs &amp; vitals:</strong> <code>lab_results</code>, <code>vitals_daily</code>, <code>glucose_points</code></li>
-          <li><strong>Artifacts:</strong> <code>imaging_studies</code>, <code>writings</code>, <code>documents</code></li>
-          <li><strong>Self-report:</strong> <code>wheel_of_life</code></li>
-          <li><strong>Pipeline:</strong> <code>imports</code>, <code>import_files</code> (per-upload provenance)</li>
-          <li><strong>Audit:</strong> <code>audit_log</code> (every mutation, JSONB metadata)</li>
+          <li><strong>Patient ownership.</strong> Every clinical row has <code>patient_id uuid not null references users.id on delete cascade</code> — a single patient delete walks the graph.</li>
+          <li><strong>Reference data exception.</strong> <code>psych_dimensions</code> is the only patient-independent table (13 AMPD axes, seeded by a migration).</li>
+          <li><strong>Time always with zone.</strong> <code>timestamptz</code> everywhere; never naive timestamps. <code>date</code> used only when no clock-time information exists upstream (e.g. <code>started_at</code> on a medication).</li>
+          <li><strong>UUID v4 primary keys</strong> for general rows; <code>bigint identity</code> for high-volume append-only tables (<code>glucose_points</code>, <code>audit_log</code>).</li>
+          <li><strong>Provenance.</strong> Most rows carry <code>source_blob_key text</code> pointing back to the original document in R2 — so a row can always be re-parsed against the original source.</li>
         </ul>
       </div>
       <div class="list-card">
-        <h4>Cloudflare R2 · binding <code>R2_BUCKET</code></h4>
+        <h4>Indexing &amp; constraints</h4>
         <ul>
-          <li><strong>Stores:</strong> the bytes of every uploaded file — labs PDFs, ECG CSV exports, audio, DICOM archives, generic documents</li>
+          <li><strong>Patient-time composite index</strong> on every chart-bearing table: <code>(patient_id, &lt;date_field&gt;)</code>. Enables a "show me marker X over Y window" query without table scans.</li>
+          <li><strong>Unique constraints</strong> on natural keys: <code>(patient_id, day, source)</code> for <code>vitals_daily</code>, <code>(patient_id, ts)</code> for <code>glucose_points</code>.</li>
+          <li><strong>CHECK constraints</strong> for ranged numeric fields (<code>mood_entries.valence -5..5</code>, <code>panic_events.severity 1..10</code>).</li>
+          <li><strong>Full-text search</strong> on <code>writings.extracted_text</code> via a Postgres <code>tsvector</code> + GIN index (declared in migration SQL, not in Drizzle).</li>
+          <li><strong>Enums for closed sets</strong> (9 of them — see below); free <code>text</code> for sets with a long tail.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Domain inventory — 10 schema sections, 31 tables</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 50px;">§</th>
+          <th>Domain</th>
+          <th style="width: 36px;">N</th>
+          <th>Tables</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>01</strong></td>
+          <td><strong>Identity &amp; access</strong><br><span style="font-size:12px;color:var(--steel);">Who is in the system; who can see whom.</span></td>
+          <td><strong>4</strong></td>
+          <td><code>users</code> · <code>doctor_profiles</code> · <code>patient_profiles</code> · <code>patient_access</code></td>
+        </tr>
+        <tr>
+          <td><strong>02</strong></td>
+          <td><strong>Clinical structured data</strong><br><span style="font-size:12px;color:var(--steel);">Plot-bearing rows. The heart of the chart pages.</span></td>
+          <td><strong>9</strong></td>
+          <td><code>medications</code> · <code>supplements</code> · <code>surgeries</code> · <code>injuries</code> · <code>clinical_history</code> · <code>risk_assessments</code><sup>JSONB</sup> · <code>lab_results</code> · <code>vitals_daily</code><sup>JSONB</sup> · <code>glucose_points</code></td>
+        </tr>
+        <tr>
+          <td><strong>03</strong></td>
+          <td><strong>Patient artifacts</strong><br><span style="font-size:12px;color:var(--steel);">Rows that point at R2 bytes.</span></td>
+          <td><strong>3</strong></td>
+          <td><code>imaging_studies</code><sup>R2</sup> · <code>writings</code><sup>R2 + FTS</sup> · <code>documents</code><sup>R2 + JSONB</sup></td>
+        </tr>
+        <tr>
+          <td><strong>04</strong></td>
+          <td><strong>Self-assessment</strong><br><span style="font-size:12px;color:var(--steel);">Patient-reported snapshots.</span></td>
+          <td><strong>1</strong></td>
+          <td><code>wheel_of_life_assessments</code><sup>JSONB</sup> (16 axes in <code>scores</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>05</strong></td>
+          <td><strong>Pipeline (imports)</strong><br><span style="font-size:12px;color:var(--steel);">Per-upload provenance chain.</span></td>
+          <td><strong>2</strong></td>
+          <td><code>imports</code><sup>JSONB</sup> · <code>import_files</code><sup>R2 + JSONB</sup></td>
+        </tr>
+        <tr>
+          <td><strong>06</strong></td>
+          <td><strong>Audit log</strong><br><span style="font-size:12px;color:var(--steel);">Every mutation, append-only.</span></td>
+          <td><strong>1</strong></td>
+          <td><code>audit_log</code><sup>JSONB · bigint pk</sup></td>
+        </tr>
+        <tr>
+          <td><strong>07</strong></td>
+          <td><strong>Mental health — psych architecture</strong><br><span style="font-size:12px;color:var(--steel);">LLM-derived synthesis with quotable evidence.</span></td>
+          <td><strong>3</strong></td>
+          <td><code>psych_dimensions</code><sup>reference · global</sup> · <code>psych_items</code> · <code>psych_evidence</code></td>
+        </tr>
+        <tr>
+          <td><strong>08</strong></td>
+          <td><strong>Mental health — state &amp; events</strong><br><span style="font-size:12px;color:var(--steel);">Subjective ratings + acute episodes.</span></td>
+          <td><strong>2</strong></td>
+          <td><code>mood_entries</code><sup>CHECK</sup> · <code>panic_events</code><sup>JSONB · CHECK</sup></td>
+        </tr>
+        <tr>
+          <td><strong>09</strong></td>
+          <td><strong>Clinical encounters &amp; prescriptions</strong><br><span style="font-size:12px;color:var(--steel);">Visits + audit trail of every Rx and dose change.</span></td>
+          <td><strong>3</strong></td>
+          <td><code>encounters</code> · <code>prescriptions</code> · <code>taper_history</code></td>
+        </tr>
+        <tr>
+          <td><strong>10</strong></td>
+          <td><strong>ECG, PGx, life-event timeline</strong><br><span style="font-size:12px;color:var(--steel);">Discrete-event tables that don&apos;t fit elsewhere.</span></td>
+          <td><strong>3</strong></td>
+          <td><code>ecg_events</code><sup>R2</sup> · <code>pgx_findings</code> · <code>life_events</code><sup>CHECK</sup></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>Superscript legend.</strong> <sup>JSONB</sup> = at least one
+      <code>jsonb</code> payload column · <sup>R2</sup> = at least one
+      <code>blob_key</code> or <code>blob_prefix</code> pointing into Cloudflare R2 ·
+      <sup>FTS</sup> = full-text search via Postgres <code>tsvector</code> · <sup>CHECK</sup>
+      = a row-level constraint enforces a numeric range · <sup>reference · global</sup>
+      = not patient-scoped (the only such table is <code>psych_dimensions</code>).
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Enums — closed value sets enforced by Postgres</h3>
+    <p style="font-size:14px;color:var(--slate);margin-bottom:14px;">
+      <strong>9 <code>pgEnum</code> types</strong> guard the columns where the set
+      of valid values is bounded. Anything with a long tail (drug class, doctor
+      specialty, panic-event intervention) stays as free <code>text</code> so
+      ingestion isn&apos;t blocked by an unanticipated value.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Enum</th><th>Values</th><th>Used by</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>user_role</code></td><td><code>admin</code> · <code>doctor</code> · <code>patient</code></td><td><code>users.role</code></td></tr>
+        <tr><td><code>sex</code></td><td><code>male</code> · <code>female</code> · <code>other</code> · <code>unknown</code></td><td><code>patient_profiles.sex</code></td></tr>
+        <tr><td><code>import_status</code></td><td><code>pending</code> · <code>uploading</code> · <code>processing</code> · <code>completed</code> · <code>failed</code> · <code>partial</code></td><td><code>imports.status</code></td></tr>
+        <tr><td><code>import_source</code></td><td><code>self_zip</code> · <code>self_files</code> · <code>admin_upload</code> · <code>migration</code></td><td><code>imports.source</code></td></tr>
+        <tr><td><code>import_file_status</code></td><td><code>received</code> · <code>classified</code> · <code>parsed</code> · <code>skipped</code> · <code>failed</code></td><td><code>import_files.status</code></td></tr>
+        <tr><td><code>imaging_modality</code></td><td><code>MRI</code> · <code>CT</code> · <code>PET</code> · <code>US</code> · <code>XR</code> · <code>EEG</code> · <code>ECG</code> · <code>OTHER</code></td><td><code>imaging_studies.modality</code></td></tr>
+        <tr><td><code>imaging_source_format</code></td><td><code>DICOM</code> · <code>JPEG</code> · <code>PNG</code> · <code>MIXED</code></td><td><code>imaging_studies.source_format</code></td></tr>
+        <tr><td><code>encounter_type</code></td><td><code>in_person</code> · <code>remote</code> · <code>phone</code> · <code>er</code> · <code>admission</code> · <code>lab_followup</code> · <code>other</code></td><td><code>encounters.encounter_type</code></td></tr>
+        <tr><td><code>taper_direction</code></td><td><code>increase</code> · <code>decrease</code> · <code>hold</code> · <code>stop</code> · <code>restart</code></td><td><code>taper_history.change_direction</code></td></tr>
+        <tr><td><code>ecg_classification</code></td><td><code>sinus_rhythm</code> · <code>high_heart_rate</code> · <code>low_heart_rate</code> · <code>atrial_fibrillation</code> · <code>poor_recording</code> · <code>inconclusive</code> · <code>other</code></td><td><code>ecg_events.classification</code></td></tr>
+        <tr><td><code>pgx_category</code></td><td><code>pharmacokinetic</code> · <code>pharmacodynamic</code> · <code>condition_risk</code> · <code>other</code></td><td><code>pgx_findings.category</code></td></tr>
+        <tr><td><code>life_event_category</code></td><td><code>birth</code> · <code>move</code> · <code>marriage</code> · <code>divorce</code> · <code>job</code> · <code>education</code> · <code>hospitalization</code> · <code>diagnosis</code> · <code>loss</code> · <code>crisis</code> · <code>other</code></td><td><code>life_events.category</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Structured vs. unstructured — where each kind of data ends up</h3>
+
+    <div class="three-col">
+      <div class="list-card">
+        <h4>Structured (most rows)</h4>
+        <ul>
+          <li><strong>What:</strong> Plottable numerics, dates, foreign keys, free-text fields that are short and stable.</li>
+          <li><strong>Where:</strong> Postgres columns with explicit types.</li>
+          <li><strong>Examples:</strong> <code>vitals_daily.hrv_ms</code>, <code>lab_results.value</code>, <code>medications.dose</code>, <code>glucose_points.mg_dl</code>.</li>
+          <li><strong>Query shape:</strong> SQL aggregates; never opens R2.</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Semi-structured (JSONB)</h4>
+        <ul>
+          <li><strong>What:</strong> Data with a stable envelope and a flexible payload — instrument-specific results, source-specific wearable extras, structured event metadata.</li>
+          <li><strong>Where:</strong> Typed columns + a single <code>jsonb</code> column.</li>
+          <li><strong>Examples:</strong> <code>risk_assessments.payload</code> (per-instrument scoring), <code>wheel_of_life_assessments.scores</code> (16 axes), <code>vitals_daily.extras</code> (per-source fields), <code>audit_log.metadata</code> (per-action context).</li>
+          <li><strong>Query shape:</strong> SQL on the envelope; JSON path operators (<code>-&gt;</code>, <code>-&gt;&gt;</code>) on the payload when needed.</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Unstructured (R2 blobs)</h4>
+        <ul>
+          <li><strong>What:</strong> PDFs, DICOM bundles, audio, raw uploaded zips, ECG CSV exports, long-form patient writings.</li>
+          <li><strong>Where:</strong> Cloudflare R2 object storage. Postgres holds the <code>blob_key</code> (single file) or <code>blob_prefix</code> (multi-file bundle).</li>
+          <li><strong>Examples:</strong> <code>documents.blob_key</code>, <code>imaging_studies.blob_prefix</code>, <code>writings.blob_key</code>, <code>ecg_events.blob_key</code>.</li>
+          <li><strong>Query shape:</strong> never queried by content from SQL. Worker reads bytes via <code>env.R2_BUCKET.get(key)</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--font-display);font-weight:700;font-size:18px;color:var(--navy);margin:30px 0 10px;">Cloudflare R2 — the unstructured half</h3>
+    <div class="two-col">
+      <div class="list-card">
+        <h4>R2 layout · binding <code>R2_BUCKET</code></h4>
+        <ul>
           <li><strong>Key shape:</strong> <code>patients/&lt;clerk_id&gt;/&lt;import_id&gt;/&lt;filename&gt;</code></li>
-          <li><strong>Indirection:</strong> Postgres stores <code>blob_key</code> or <code>blob_prefix</code>; downloads are signed URLs</li>
-          <li><strong>GDPR erasure:</strong> patient delete walks every R2 prefix and removes objects in batches of 1,000 (the R2 binding cap)</li>
-          <li><strong>No DB blobs:</strong> Postgres never holds raw file bytes</li>
+          <li><strong>Per-study prefixes:</strong> <code>imaging_studies.blob_prefix</code> lets one row reference an entire DICOM bundle (many files).</li>
+          <li><strong>Downloads:</strong> Worker streams bytes via signed responses; no R2 URL is ever exposed to the browser.</li>
+          <li><strong>Cap on batch deletes:</strong> 1,000 objects per call — the GDPR-erasure routine pages through prefixes until empty.</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>How the bytes connect back</h4>
+        <ul>
+          <li><strong>Single-file rows:</strong> <code>blob_key</code> column → one R2 object.</li>
+          <li><strong>Multi-file rows:</strong> <code>blob_prefix</code> column → R2 list-objects under that prefix.</li>
+          <li><strong>Provenance pointers:</strong> 14 clinical tables carry <code>source_blob_key</code> as an audit trail — the row was parsed out of this PDF.</li>
+          <li><strong>JPEG previews:</strong> DICOM bundles get pre-rendered to PNG under <code>jpeg_preview_prefix</code> so the viewer doesn&apos;t need a DICOM decoder in the browser.</li>
         </ul>
       </div>
     </div>
 
     <div class="callout-info">
       <strong>Schema source of truth.</strong> The full schema lives in
-      <code>db/schema.ts</code> (Drizzle). Migrations are version-controlled under
-      <code>db/migrations/</code>. Local commands: <code>npm run db:generate</code>
-      to diff the schema, <code>db:migrate</code> to apply, <code>db:studio</code>
-      for the web UI inspector.
+      <code>db/schema.ts</code> (Drizzle, 591 LOC). Migrations are version-controlled
+      under <code>db/migrations/</code>. Local commands: <code>npm run db:generate</code>
+      to diff the schema against migrations, <code>db:migrate</code> to apply,
+      <code>db:push</code> for a fast schema sync against the dev database, and
+      <code>db:studio</code> for a web UI inspector.
     </div>
   </div>
 </section>
