@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infrastructure · JC Advisory Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Brand tokens (mirrors web/assets/styles.css) ────────────────── */
+:root {
+  --navy: #0D1B2A;
+  --slate: #1E2D3D;
+  --gold: #B8954A;
+  --gold-soft: #FFF6E5;
+  --gold-line: #E0C681;
+  --steel: #7A8FA6;
+  --offwhite: #F9F7F4;
+  --surface: #F4F7FA;
+  --surface-warm: #FAF8F4;
+  --border: #E5E2DC;
+  --ink: #1A2129;
+  --ink-soft: #6E7B8A;
+  --ink-faint: #94A0AE;
+  --blue-50:  #EEF5FA;
+  --blue-100: #D8E8F2;
+  --blue-300: #8BB8D2;
+  --blue-500: #3E7CA3;
+  --blue-700: #244E6E;
+  --blue-800: #1B3B54;
+  --green-500: #3D9460;
+  --red-500: #C73E3E;
+
+  --font-display: 'Raleway', system-ui, sans-serif;
+  --font-body:    'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--offwhite);
+  color: var(--slate);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.hero {
+  background: var(--navy);
+  color: #FFFFFF;
+  padding: 56px 0 64px;
+  border-bottom: 3px solid var(--gold);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 12px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 0 0 14px;
+  letter-spacing: -0.01em;
+}
+.hero-sub {
+  color: rgba(255,255,255,0.78);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 72ch;
+  margin: 0 0 26px;
+}
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  margin-top: 8px;
+}
+.hero-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-meta-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.hero-meta-value {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+.hero-meta-value strong { color: var(--gold); font-weight: 700; }
+
+/* ── Sections ────────────────────────────────────────────────────── */
+section.report {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--navy);
+  margin: 0 0 14px;
+  line-height: 1.2;
+}
+.section-desc {
+  color: var(--slate);
+  font-size: 15px;
+  line-height: 1.65;
+  max-width: 72ch;
+  margin: 0 0 26px;
+}
+.section-desc strong { color: var(--navy); }
+
+/* ── Stat ribbon ─────────────────────────────────────────────────── */
+.stat-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 28px 0 0;
+}
+.stat-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.stat-card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--steel);
+  margin-bottom: 6px;
+}
+.stat-card-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--navy);
+  line-height: 1.15;
+}
+.stat-card-value small {
+  font-size: 12px;
+  color: var(--steel);
+  font-weight: 400;
+  margin-left: 4px;
+}
+.stat-card-foot {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+
+/* ── Diagram cards ───────────────────────────────────────────────── */
+.diagram-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  margin: 24px 0;
+  overflow: auto;
+}
+.diagram-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.diagram-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--navy);
+}
+.diagram-card-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--steel);
+}
+.diagram-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  margin: 20px 0;
+}
+.data-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--steel);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #FFFFFF;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #EFEBE3;
+  vertical-align: top;
+  background: #FFFFFF;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table code, .mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--blue-700);
+  background: var(--blue-50);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── Two-col / three-col ─────────────────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin: 20px 0;
+}
+@media (max-width: 760px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}
+.list-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.list-card h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.list-card ul {
+  list-style: none;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--slate);
+}
+.list-card li {
+  padding: 6px 0;
+  border-bottom: 1px dashed #EFEBE3;
+}
+.list-card li:last-child { border-bottom: none; }
+.list-card li strong { color: var(--navy); }
+.list-card li code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--blue-700);
+}
+
+/* ── Callouts ────────────────────────────────────────────────────── */
+.callout {
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-line);
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 20px 0;
+  font-size: 14px;
+  color: var(--slate);
+}
+.callout strong { color: var(--navy); }
+
+.callout-info {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-left: 3px solid var(--blue-500);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 20px 0;
+  font-size: 14px;
+  color: var(--slate);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+footer.doc-footer {
+  padding: 32px 0 48px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ── SVG diagram class hooks (used inside <svg>) ─────────────────── */
+.dg-box-bg { fill: #FFFFFF; }
+.dg-box-stroke-navy { stroke: #0D1B2A; stroke-width: 1.5; }
+.dg-box-stroke-steel { stroke: #7A8FA6; stroke-width: 1; stroke-dasharray: 4 3; }
+.dg-box-stroke-gold { stroke: #B8954A; stroke-width: 1.5; }
+.dg-box-fill-gold { fill: #FFF6E5; }
+.dg-box-fill-navy { fill: #0D1B2A; }
+.dg-box-fill-blue { fill: #EEF5FA; }
+.dg-title { font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 13px; fill: #0D1B2A; }
+.dg-title-on-navy { font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 13px; fill: #FFFFFF; }
+.dg-body { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #1E2D3D; }
+.dg-body-on-navy { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: rgba(255,255,255,0.85); }
+.dg-mono { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; fill: #244E6E; }
+.dg-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; fill: #B8954A; font-weight: 700; }
+.dg-eyebrow-on-navy { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.08em; fill: #B8954A; font-weight: 700; }
+.dg-arrow { stroke: #1E2D3D; stroke-width: 1.5; fill: none; }
+.dg-arrow-gold { stroke: #B8954A; stroke-width: 1.8; fill: none; }
+.dg-zone-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; fill: #7A8FA6; font-weight: 600; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- ────────────────────────── HERO ────────────────────────── -->
+<header class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">JC Advisory · Health Platform · Engineering documentation</div>
+    <h1 class="hero-title">Infrastructure &amp; ETL workflow</h1>
+    <p class="hero-sub">
+      End-to-end architecture of the JC Advisory health webapp — how raw exports from
+      wearables, scales, blood-pressure cuffs, CGMs, DICOM workstations and lab PDFs
+      become charts, AI insights and bilingual narrative pages. Static-build pipeline
+      runs locally; live runtime is fully Cloudflare-native with a Neon Postgres
+      database (Frankfurt) and the Anthropic Claude API for ingestion and chat.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Hosting</span>
+        <span class="hero-meta-value"><strong>Cloudflare Pages + Workers</strong></span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Database</span>
+        <span class="hero-meta-value"><strong>Neon Postgres</strong> · Frankfurt</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Object storage</span>
+        <span class="hero-meta-value"><strong>Cloudflare R2</strong></span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">AI provider</span>
+        <span class="hero-meta-value"><strong>Anthropic Claude</strong> · 3 models</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Auth</span>
+        <span class="hero-meta-value">Custom (Clerk-style cookie sessions)</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">Deploy</span>
+        <span class="hero-meta-value">Wrangler CLI · manual</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ────────────────── 01 · AT A GLANCE ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">01 · At a glance</div>
+    <h2 class="section-title">What lives where</h2>
+    <p class="section-desc">
+      The platform separates a <strong>build-time path</strong> (Python ETL on a laptop)
+      from a <strong>runtime path</strong> (Cloudflare-native serverless). Patient
+      data sources are heterogeneous — proprietary device exports, DICOM, PDFs and
+      free-form writings — so the design intentionally splits "what becomes a
+      static chart" from "what stays in the database for queries and AI synthesis".
+    </p>
+
+    <div class="stat-ribbon">
+      <div class="stat-card">
+        <div class="stat-card-label">Data sources</div>
+        <div class="stat-card-value">7<small>device + manual streams</small></div>
+        <div class="stat-card-foot">Oura, Apple Health, Withings, CGM, DICOM, manual CSVs, patient writings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Database tables</div>
+        <div class="stat-card-value">32<small>Postgres tables</small></div>
+        <div class="stat-card-foot">Drizzle ORM · schema in <span class="mono">db/schema.ts</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Claude models</div>
+        <div class="stat-card-value">3<small>tiers</small></div>
+        <div class="stat-card-foot">Opus 4.7 (chat) · Sonnet 4.6 (ingest / dashboard) · Haiku 4.5 (classify)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Deploy cadence</div>
+        <div class="stat-card-value">Manual<small>wrangler CLI</small></div>
+        <div class="stat-card-foot">Git push ≠ deploy. Live URL only updates after <span class="mono">wrangler pages deploy</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 02 · BIG PICTURE ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">02 · Big picture</div>
+    <h2 class="section-title">End-to-end topology</h2>
+    <p class="section-desc">
+      Two halves: <strong>build-time</strong> (left, runs on the engineer's laptop)
+      converts raw exports into static JavaScript + JSON artifacts bundled with
+      the HTML. <strong>Runtime</strong> (right, fully Cloudflare) serves the
+      static pages and dispatches API calls through a Worker into Neon, R2 and
+      Anthropic.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-head">
+        <div class="diagram-card-title">Topology · build path (left) → runtime path (right)</div>
+        <div class="diagram-card-meta">SVG · 1080 × 620</div>
+      </div>
+
+      <svg viewBox="0 0 1080 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="End-to-end topology diagram">
+        <!-- Arrow head marker -->
+        <defs>
+          <marker id="arrow-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#1E2D3D"/>
+          </marker>
+          <marker id="arrow-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#B8954A"/>
+          </marker>
+        </defs>
+
+        <!-- Zone labels -->
+        <text x="20" y="22" class="dg-zone-label">Build-time · local laptop</text>
+        <line x1="20" y1="32" x2="540" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+        <text x="560" y="22" class="dg-zone-label">Runtime · Cloudflare-native</text>
+        <line x1="560" y1="32" x2="1060" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+        <!-- Build zone — Data sources column -->
+        <g>
+          <text x="40" y="62" class="dg-eyebrow">01 · DATA SOURCES</text>
+
+          <!-- Devices stack -->
+          <rect x="40" y="78" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="52" y="98" class="dg-title">Oura Ring · CSV exports</text>
+
+          <rect x="40" y="118" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="52" y="138" class="dg-title">Apple Health · ECG + XML</text>
+
+          <rect x="40" y="158" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="52" y="178" class="dg-title">Withings · scale + BP cuff</text>
+
+          <rect x="40" y="198" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="52" y="218" class="dg-title">FreeStyle Libre CGM</text>
+
+          <rect x="40" y="238" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-steel"/>
+          <text x="52" y="258" class="dg-title">DICOM workstation</text>
+
+          <rect x="40" y="278" width="200" height="32" rx="6" class="dg-box-bg dg-box-stroke-steel"/>
+          <text x="52" y="298" class="dg-title">Manual CSVs · writings</text>
+        </g>
+
+        <!-- Arrow → ETL -->
+        <path d="M 240 194 L 290 194" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+
+        <!-- ETL box -->
+        <g>
+          <text x="300" y="62" class="dg-eyebrow">02 · ETL</text>
+          <rect x="300" y="78" width="200" height="232" rx="8" class="dg-box-fill-gold dg-box-stroke-gold"/>
+          <text x="392" y="105" class="dg-title" text-anchor="middle">bin/extract.py</text>
+          <text x="392" y="124" class="dg-body" text-anchor="middle">Python 3 · CLI</text>
+          <line x1="320" y1="138" x2="480" y2="138" stroke="#E0C681" stroke-width="1"/>
+          <text x="312" y="158" class="dg-body">• reads patient folder</text>
+          <text x="312" y="176" class="dg-body">• aggregates per-day series</text>
+          <text x="312" y="194" class="dg-body">• Tukey boxplots, percentiles</text>
+          <text x="312" y="212" class="dg-body">• ECG classification</text>
+          <text x="312" y="230" class="dg-body">• rolling means, IQRs</text>
+          <line x1="320" y1="244" x2="480" y2="244" stroke="#E0C681" stroke-width="1"/>
+          <text x="312" y="262" class="dg-mono">JC_DATA_DIR env var</text>
+          <text x="312" y="280" class="dg-mono">overrides default path</text>
+          <text x="312" y="300" class="dg-eyebrow">RUN MANUALLY</text>
+        </g>
+
+        <!-- Arrow → artifacts -->
+        <path d="M 500 194 L 550 194" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+
+        <!-- Static artifacts column -->
+        <g>
+          <text x="556" y="62" class="dg-eyebrow">03 · ARTIFACTS</text>
+
+          <rect x="556" y="78" width="220" height="40" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="568" y="98" class="dg-title">web/assets/data.js</text>
+          <text x="568" y="112" class="dg-body">daily time-series arrays</text>
+
+          <rect x="556" y="128" width="220" height="40" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="568" y="148" class="dg-title">web/assets/metrics.json</text>
+          <text x="568" y="162" class="dg-body">summary stats &amp; medians</text>
+
+          <rect x="556" y="178" width="220" height="40" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="568" y="198" class="dg-title">web/*.html (bilingual)</text>
+          <text x="568" y="212" class="dg-body">static EN + PT pages</text>
+
+          <rect x="556" y="228" width="220" height="40" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="568" y="248" class="dg-title">web/scans/*.png</text>
+          <text x="568" y="262" class="dg-body">DICOM-rendered slices</text>
+
+          <rect x="556" y="278" width="220" height="40" rx="6" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="568" y="298" class="dg-title">web/_worker.js</text>
+          <text x="568" y="312" class="dg-body">Cloudflare Worker bundle</text>
+        </g>
+
+        <!-- Arrow → wrangler -->
+        <path d="M 776 248 L 826 248" class="dg-arrow-gold" marker-end="url(#arrow-gold)"/>
+        <text x="800" y="240" class="dg-eyebrow" text-anchor="middle">DEPLOY</text>
+
+        <!-- Wrangler / CF Pages box -->
+        <g>
+          <text x="836" y="62" class="dg-eyebrow">04 · DEPLOY</text>
+          <rect x="836" y="78" width="220" height="232" rx="8" class="dg-box-fill-navy dg-box-stroke-navy"/>
+          <text x="946" y="100" class="dg-title-on-navy" text-anchor="middle">wrangler CLI</text>
+          <text x="946" y="118" class="dg-body-on-navy" text-anchor="middle">npx wrangler pages deploy web</text>
+          <line x1="856" y1="132" x2="1036" y2="132" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+          <text x="946" y="156" class="dg-title-on-navy" text-anchor="middle">Cloudflare Pages</text>
+          <text x="946" y="174" class="dg-body-on-navy" text-anchor="middle">jc-advisory-health.pages.dev</text>
+          <line x1="856" y1="188" x2="1036" y2="188" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+          <text x="848" y="208" class="dg-body-on-navy">• serves static HTML/JS/PNG</text>
+          <text x="848" y="226" class="dg-body-on-navy">• routes /api/* → Worker</text>
+          <text x="848" y="244" class="dg-body-on-navy">• global edge CDN</text>
+          <text x="848" y="262" class="dg-eyebrow-on-navy">MANUAL · NOT GIT-TRIGGERED</text>
+        </g>
+
+        <!-- ───── Runtime row (bottom half) ───── -->
+        <line x1="20" y1="350" x2="1060" y2="350" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="20" y="372" class="dg-zone-label">Runtime · user-facing request path</text>
+
+        <!-- User browser -->
+        <rect x="40" y="400" width="180" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="130" y="425" class="dg-title" text-anchor="middle">User browser</text>
+        <text x="130" y="445" class="dg-body" text-anchor="middle">EN / PT toggle</text>
+        <text x="130" y="461" class="dg-body" text-anchor="middle">role-aware nav</text>
+
+        <!-- Arrow -->
+        <path d="M 220 440 L 280 440" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+        <text x="250" y="432" class="dg-mono" text-anchor="middle">HTTPS</text>
+
+        <!-- CF Pages box -->
+        <rect x="290" y="400" width="220" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="400" y="425" class="dg-title" text-anchor="middle">Cloudflare Pages</text>
+        <text x="400" y="445" class="dg-body" text-anchor="middle">static · HTML + data.js</text>
+        <text x="400" y="461" class="dg-body" text-anchor="middle">edge cache · global CDN</text>
+
+        <!-- Arrow → Worker -->
+        <path d="M 510 440 L 570 440" class="dg-arrow-gold" marker-end="url(#arrow-gold)"/>
+        <text x="540" y="432" class="dg-mono" text-anchor="middle">/api/*</text>
+
+        <!-- Worker box -->
+        <rect x="580" y="400" width="200" height="80" rx="8" class="dg-box-fill-gold dg-box-stroke-gold"/>
+        <text x="680" y="425" class="dg-title" text-anchor="middle">_worker.js</text>
+        <text x="680" y="445" class="dg-body" text-anchor="middle">router · authenticate · fan-out</text>
+        <text x="680" y="461" class="dg-body" text-anchor="middle">~13 endpoints</text>
+
+        <!-- Arrows fan out to three services -->
+        <path d="M 780 425 L 850 410" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+        <path d="M 780 440 L 850 470" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+        <path d="M 780 460 L 850 530" class="dg-arrow" marker-end="url(#arrow-slate)"/>
+
+        <!-- Three service boxes -->
+        <rect x="850" y="395" width="200" height="38" rx="6" class="dg-box-fill-blue dg-box-stroke-navy"/>
+        <text x="862" y="416" class="dg-title">Neon Postgres · EU</text>
+        <text x="1042" y="416" class="dg-mono" text-anchor="end">@neondatabase/serverless</text>
+
+        <rect x="850" y="453" width="200" height="38" rx="6" class="dg-box-fill-blue dg-box-stroke-navy"/>
+        <text x="862" y="474" class="dg-title">Cloudflare R2</text>
+        <text x="1042" y="474" class="dg-mono" text-anchor="end">env.R2_BUCKET binding</text>
+
+        <rect x="850" y="511" width="200" height="38" rx="6" class="dg-box-fill-blue dg-box-stroke-navy"/>
+        <text x="862" y="532" class="dg-title">Anthropic Claude API</text>
+        <text x="1042" y="532" class="dg-mono" text-anchor="end">Opus / Sonnet / Haiku</text>
+
+        <!-- Bottom legend -->
+        <text x="540" y="595" class="dg-mono" text-anchor="middle" fill="#7A8FA6">
+          Solid borders = data-bearing services · Dashed = optional / manual feed · Gold = ETL or AI boundary
+        </text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 03 · DATA SOURCES ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">03 · Data sources</div>
+    <h2 class="section-title">Where the raw signal comes from</h2>
+    <p class="section-desc">
+      All inputs live under <span class="mono">Patients/&lt;Patient&gt;/</span> at the
+      repository root. The ETL script accepts a <span class="mono">JC_DATA_DIR</span>
+      environment variable so a different patient folder can be swapped in without
+      touching the code. Bytes that are too large to commit (DICOM exports, Apple
+      Health full XML, audio transcripts) are gitignored locally and live only on
+      the engineer's laptop until they have been processed into smaller artifacts.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Folder</th>
+          <th>Format</th>
+          <th>Refreshed</th>
+          <th>What's extracted</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Oura Ring</strong></td>
+          <td><code>Oura/App Data/</code></td>
+          <td>~45 CSVs</td>
+          <td>~monthly export</td>
+          <td>Per-night sleep stages, HRV, RHR, sleep score, daily activity, stress, resilience, SpO2, workouts, tags</td>
+        </tr>
+        <tr>
+          <td><strong>Apple Health</strong></td>
+          <td><code>Apple Health/</code></td>
+          <td>XML + ECG CSVs + GPX</td>
+          <td>~monthly export</td>
+          <td>ECGs (63), workout-route GPX (188). The 866 MB <code>export.xml</code> is not fully parsed — Oura covers HR/HRV/sleep.</td>
+        </tr>
+        <tr>
+          <td><strong>Withings</strong></td>
+          <td><code>Withings/</code></td>
+          <td>~20 CSVs</td>
+          <td>~monthly export</td>
+          <td>Bio-impedance weight + body composition (121 readings since 2015), BP cuff (249 readings)</td>
+        </tr>
+        <tr>
+          <td><strong>FreeStyle Libre</strong></td>
+          <td><code>glucose_timeline.csv</code></td>
+          <td>CSV · 5-min interval</td>
+          <td>per sensor cycle</td>
+          <td>Continuous glucose timeline (1,712 readings, Apr 26 → May 2 2026)</td>
+        </tr>
+        <tr>
+          <td><strong>DICOM workstation</strong></td>
+          <td><code>Imagery/</code></td>
+          <td>DICOM stacks</td>
+          <td>per radiology visit</td>
+          <td>Pre-converted to PNG slices + per-stack manifest.json before deploy; viewer is a slider over the PNGs</td>
+        </tr>
+        <tr>
+          <td><strong>Lab PDFs</strong></td>
+          <td><code>Blood/</code></td>
+          <td>PDF</td>
+          <td>per visit</td>
+          <td>Marker values transcribed into Postgres via the ingest API (Claude Sonnet 4.6)</td>
+        </tr>
+        <tr>
+          <td><strong>Manual CSVs</strong></td>
+          <td>root of patient folder</td>
+          <td>small CSVs</td>
+          <td>edited by hand</td>
+          <td><code>medications.csv</code>, <code>supplements.csv</code>, <code>audit.csv</code>, <code>clinical_history.csv</code>, <code>alcohol_pattern.csv</code>, <code>injuries.csv</code>, <code>surgeries.csv</code>, <code>wheel_of_life.csv</code>, etc.</td>
+        </tr>
+        <tr>
+          <td><strong>Writings + transcripts</strong></td>
+          <td><code>Writtings/</code>, <code>Therapy Transcripts/</code></td>
+          <td>.txt / .json</td>
+          <td>as authored</td>
+          <td>Patient first-person material — quoted into the Mental page; never auto-rewritten.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>Trust boundary.</strong> Patient first-person material (writings, therapy transcripts) is treated as ground truth and quoted verbatim. Wearable streams are numerical and feed charts directly. Lab PDFs go through Claude Sonnet for transcription with a human review step before they reach Postgres.
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 04 · BUILD-TIME ETL ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">04 · Build-time ETL</div>
+    <h2 class="section-title">Python pipeline · <span class="mono" style="font-size:18px;">bin/extract.py</span></h2>
+    <p class="section-desc">
+      A single Python script reads every CSV / JSON / PDF under the patient folder,
+      aggregates per-day series, computes Tukey box-statistics + percentiles, and
+      writes two artifacts back into the web bundle. The script is idempotent —
+      running it twice with the same inputs produces byte-identical outputs (apart
+      from the timestamp comment). It is invoked manually after each new export
+      lands on the laptop.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-head">
+        <div class="diagram-card-title">ETL flow · raw exports → aggregated JS + JSON</div>
+        <div class="diagram-card-meta">SVG · 1080 × 480</div>
+      </div>
+
+      <svg viewBox="0 0 1080 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ETL pipeline diagram">
+        <defs>
+          <marker id="arr2-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#1E2D3D"/>
+          </marker>
+          <marker id="arr2-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#B8954A"/>
+          </marker>
+        </defs>
+
+        <!-- LEFT — Inputs -->
+        <text x="20" y="22" class="dg-zone-label">Inputs · Patients/Joao Victor Creste/</text>
+        <line x1="20" y1="32" x2="320" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+        <g>
+          <rect x="20" y="56" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="74" class="dg-mono">Oura/App Data/sleepmodel.csv</text>
+
+          <rect x="20" y="92" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="110" class="dg-mono">Oura/App Data/dailyactivity.csv</text>
+
+          <rect x="20" y="128" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="146" class="dg-mono">Oura/App Data/dailysleep.csv</text>
+
+          <rect x="20" y="164" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="182" class="dg-mono">Oura/App Data/dailystress.csv</text>
+
+          <rect x="20" y="200" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="218" class="dg-mono">Oura/App Data/heartrate.csv</text>
+
+          <rect x="20" y="236" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="254" class="dg-mono">Withings/weight.csv</text>
+
+          <rect x="20" y="272" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="290" class="dg-mono">Withings/bp.csv</text>
+
+          <rect x="20" y="308" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="32" y="326" class="dg-mono">Apple Health/electrocardiograms/*</text>
+
+          <rect x="20" y="344" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-steel"/>
+          <text x="32" y="362" class="dg-mono">glucose_timeline.csv</text>
+
+          <rect x="20" y="380" width="300" height="28" rx="5" class="dg-box-bg dg-box-stroke-steel"/>
+          <text x="32" y="398" class="dg-mono">medications.csv · audit.csv · …</text>
+        </g>
+
+        <!-- Arrow bundle going into extract.py -->
+        <path d="M 320 232 L 400 232" class="dg-arrow" marker-end="url(#arr2-slate)"/>
+
+        <!-- CENTER — Pipeline box -->
+        <g>
+          <text x="410" y="22" class="dg-zone-label">Transforms</text>
+          <line x1="410" y1="32" x2="710" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+          <rect x="410" y="56" width="280" height="352" rx="10" class="dg-box-fill-gold dg-box-stroke-gold"/>
+          <text x="550" y="85" class="dg-title" text-anchor="middle">bin/extract.py</text>
+          <text x="550" y="103" class="dg-body" text-anchor="middle">Python 3 · pure stdlib</text>
+          <line x1="430" y1="118" x2="670" y2="118" stroke="#E0C681" stroke-width="1"/>
+
+          <text x="424" y="140" class="dg-eyebrow">PER-NIGHT</text>
+          <text x="424" y="158" class="dg-body">Tukey boxplots for sleep stages</text>
+          <text x="424" y="176" class="dg-body">HRV / RHR monthly aggregates</text>
+
+          <text x="424" y="202" class="dg-eyebrow">PER-DAY</text>
+          <text x="424" y="220" class="dg-body">steps · sedentary · active cal</text>
+          <text x="424" y="238" class="dg-body">stress min · resilience score</text>
+
+          <text x="424" y="264" class="dg-eyebrow">PER-WEEK / MONTH</text>
+          <text x="424" y="282" class="dg-body">BP weekly bands (±1 SD, ±2 SD)</text>
+          <text x="424" y="300" class="dg-body">HR-by-time-of-day folds</text>
+
+          <text x="424" y="326" class="dg-eyebrow">PARSE</text>
+          <text x="424" y="344" class="dg-body">ECG classification + dates</text>
+          <text x="424" y="362" class="dg-body">Oura self-tags (alcohol, valium)</text>
+
+          <line x1="430" y1="376" x2="670" y2="376" stroke="#E0C681" stroke-width="1"/>
+          <text x="550" y="397" class="dg-mono" text-anchor="middle">python3 bin/extract.py</text>
+        </g>
+
+        <!-- Arrow → outputs -->
+        <path d="M 690 232 L 760 232" class="dg-arrow-gold" marker-end="url(#arr2-gold)"/>
+
+        <!-- RIGHT — Outputs -->
+        <g>
+          <text x="770" y="22" class="dg-zone-label">Outputs · web/assets/</text>
+          <line x1="770" y1="32" x2="1060" y2="32" stroke="#E5E2DC" stroke-width="1"/>
+
+          <rect x="770" y="100" width="290" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="782" y="122" class="dg-title">data.js</text>
+          <text x="782" y="140" class="dg-body">~74 KB · WEIGHT, HRV_RHR, STEPS,</text>
+          <text x="782" y="156" class="dg-body">SLEEP_BOX, STRESS_RES, BP, …</text>
+          <text x="782" y="172" class="dg-mono">/* generated YYYY-MM-DD */</text>
+
+          <rect x="770" y="200" width="290" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+          <text x="782" y="222" class="dg-title">metrics.json</text>
+          <text x="782" y="240" class="dg-body">~96 KB · medians, IQRs, n, ranges</text>
+          <text x="782" y="256" class="dg-body">consumed by HTML inline scripts</text>
+          <text x="782" y="272" class="dg-mono">{ "sleep": {…}, "ecgs": {…}, … }</text>
+
+          <text x="770" y="320" class="dg-eyebrow">READS AT BROWSER</text>
+          <text x="770" y="338" class="dg-body">Chart.js · plots from data.js arrays</text>
+          <text x="770" y="356" class="dg-body">Plotly · time-of-day fold from JSON</text>
+          <text x="770" y="374" class="dg-body">HTML inline scripts read both files</text>
+        </g>
+
+        <!-- Bottom note -->
+        <line x1="20" y1="430" x2="1060" y2="430" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="540" y="455" class="dg-mono" text-anchor="middle" fill="#7A8FA6">
+          Pipeline is pure-stdlib Python · idempotent · run manually · no scheduled jobs · no cloud compute
+        </text>
+      </svg>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card">
+        <h4>Inputs (read paths)</h4>
+        <ul>
+          <li><strong>Resolved path:</strong> <code>Patients/Joao Victor Creste/</code> by default; override with <code>JC_DATA_DIR</code></li>
+          <li><strong>Subfolder convention:</strong> <code>Oura/App Data/</code>, <code>Apple Health/electrocardiograms/</code>, <code>Withings/</code>, plus root-level manual CSVs</li>
+          <li><strong>Missing files:</strong> are tolerated — the script logs the gap and continues</li>
+          <li><strong>Format quirks:</strong> Oura uses semicolon-separated CSVs with JSON-encoded sub-objects in single cells; the script parses these inline</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Outputs (written into web/)</h4>
+        <ul>
+          <li><strong><code>web/assets/data.js</code></strong> — single-file JS module exporting top-level constants (<code>WEIGHT</code>, <code>HRV_RHR</code>, <code>STEPS</code>, etc.) consumed directly by the static pages</li>
+          <li><strong><code>web/assets/metrics.json</code></strong> — every computed summary metric, keyed by name, for one-shot reads</li>
+          <li><strong>Stdout summary:</strong> a console table of the headline numbers so the engineer can verify before deploying</li>
+          <li><strong>Manual sources panel:</strong> reports which small CSVs are present vs empty (templates)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>When to re-run.</strong> After every new export from Oura, Apple Health,
+      Withings or the CGM; after editing any manual CSV; and after any change to
+      <code>bin/extract.py</code> itself. Then commit the regenerated <code>data.js</code>
+      / <code>metrics.json</code> in the same commit as any narrative refresh — the
+      two are bound together.
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 05 · RUNTIME PATH ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">05 · Runtime path</div>
+    <h2 class="section-title">What happens when a user clicks a link</h2>
+    <p class="section-desc">
+      Static pages are served straight from Cloudflare Pages — no Worker invocation,
+      no database read. The Worker only wakes up for <span class="mono">/api/*</span>
+      routes: chat, dashboards, ingestion, the admin console. This split keeps the
+      static-data path cheap (CDN cache hits) and quarantines all data-sensitive
+      logic to a single file (<span class="mono">web/_worker.js</span>, ~1,200 LOC).
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-head">
+        <div class="diagram-card-title">Request lifecycle · static vs. /api/* split</div>
+        <div class="diagram-card-meta">SVG · 1080 × 500</div>
+      </div>
+
+      <svg viewBox="0 0 1080 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Runtime request diagram">
+        <defs>
+          <marker id="arr3-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#1E2D3D"/>
+          </marker>
+          <marker id="arr3-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#B8954A"/>
+          </marker>
+        </defs>
+
+        <!-- User -->
+        <rect x="20" y="200" width="160" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="100" y="226" class="dg-title" text-anchor="middle">User browser</text>
+        <text x="100" y="244" class="dg-body" text-anchor="middle">role: admin / doctor /</text>
+        <text x="100" y="258" class="dg-body" text-anchor="middle">patient</text>
+
+        <!-- Arrow -->
+        <path d="M 180 240 L 240 240" class="dg-arrow" marker-end="url(#arr3-slate)"/>
+        <text x="210" y="232" class="dg-mono" text-anchor="middle">GET</text>
+
+        <!-- CF Pages CDN -->
+        <rect x="250" y="180" width="200" height="120" rx="8" class="dg-box-fill-blue dg-box-stroke-navy"/>
+        <text x="350" y="202" class="dg-title" text-anchor="middle">Cloudflare Pages</text>
+        <text x="350" y="218" class="dg-body" text-anchor="middle">global edge CDN</text>
+        <line x1="266" y1="232" x2="434" y2="232" stroke="#B5D2E5" stroke-width="1"/>
+        <text x="350" y="252" class="dg-body" text-anchor="middle">static *.html, .js, .png</text>
+        <text x="350" y="270" class="dg-body" text-anchor="middle">served from cache</text>
+        <text x="350" y="290" class="dg-eyebrow" text-anchor="middle">FAST PATH</text>
+
+        <!-- Branch decision -->
+        <path d="M 450 240 L 500 240" class="dg-arrow" marker-end="url(#arr3-slate)"/>
+        <text x="475" y="232" class="dg-mono" text-anchor="middle">/api/*?</text>
+
+        <!-- Worker box -->
+        <rect x="510" y="180" width="220" height="120" rx="8" class="dg-box-fill-gold dg-box-stroke-gold"/>
+        <text x="620" y="202" class="dg-title" text-anchor="middle">_worker.js</text>
+        <text x="620" y="218" class="dg-body" text-anchor="middle">~1,200 LOC · single file</text>
+        <line x1="526" y1="232" x2="714" y2="232" stroke="#E0C681" stroke-width="1"/>
+        <text x="514" y="252" class="dg-body">• authenticate(request, env)</text>
+        <text x="514" y="270" class="dg-body">• route /api/&lt;handler&gt;</text>
+        <text x="514" y="288" class="dg-body">• fan out → services below</text>
+
+        <!-- Fan out arrows -->
+        <path d="M 730 220 L 820 130" class="dg-arrow" marker-end="url(#arr3-slate)"/>
+        <path d="M 730 240 L 820 240" class="dg-arrow" marker-end="url(#arr3-slate)"/>
+        <path d="M 730 260 L 820 360" class="dg-arrow" marker-end="url(#arr3-slate)"/>
+
+        <!-- Three external services -->
+        <rect x="820" y="80" width="240" height="100" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="832" y="102" class="dg-title">Neon Postgres · Frankfurt</text>
+        <text x="832" y="120" class="dg-body">@neondatabase/serverless</text>
+        <text x="832" y="138" class="dg-body">32 tables · Drizzle ORM</text>
+        <text x="832" y="156" class="dg-mono">env.DATABASE_URL</text>
+        <text x="832" y="172" class="dg-mono">SELECT, INSERT, UPDATE, DELETE</text>
+
+        <rect x="820" y="190" width="240" height="100" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="832" y="212" class="dg-title">Cloudflare R2</text>
+        <text x="832" y="230" class="dg-body">large blobs (PDFs, raw uploads,</text>
+        <text x="832" y="246" class="dg-body">audio, DICOM bundles)</text>
+        <text x="832" y="264" class="dg-mono">env.R2_BUCKET binding</text>
+        <text x="832" y="280" class="dg-mono">put · get · list · delete</text>
+
+        <rect x="820" y="300" width="240" height="100" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="832" y="322" class="dg-title">Anthropic Claude API</text>
+        <text x="832" y="340" class="dg-body">@anthropic-ai/sdk</text>
+        <text x="832" y="358" class="dg-body">3 model tiers (see §07)</text>
+        <text x="832" y="376" class="dg-mono">env.ANTHROPIC_API_KEY</text>
+        <text x="832" y="392" class="dg-mono">messages.create / stream</text>
+
+        <!-- ─── Endpoint cluster (bottom) ─── -->
+        <line x1="20" y1="430" x2="1060" y2="430" stroke="#E5E2DC" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="20" y="452" class="dg-zone-label">Worker endpoint cluster</text>
+        <text x="20" y="478" class="dg-mono">/api/chat · /api/me · /api/patient-summary · /api/patient-exams · /api/login · /api/patient-dashboard · /api/patient-dashboard-build · /api/patient-wipe-data · /api/patients · /api/admin/*</text>
+      </svg>
+    </div>
+
+    <div class="three-col">
+      <div class="list-card">
+        <h4>Static path (95% of traffic)</h4>
+        <ul>
+          <li><strong>What:</strong> HTML pages, <code>data.js</code>, <code>metrics.json</code>, images, fonts</li>
+          <li><strong>Where:</strong> served from Cloudflare's global edge cache</li>
+          <li><strong>Cost:</strong> effectively zero per request</li>
+          <li><strong>Latency:</strong> typically &lt; 50 ms anywhere in the world</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Worker path (data + AI)</h4>
+        <ul>
+          <li><strong>What:</strong> auth, dashboards, ingestion, AI chat, admin actions</li>
+          <li><strong>Where:</strong> Cloudflare Workers runtime (V8 isolates)</li>
+          <li><strong>Boot:</strong> ~5 ms cold start per region</li>
+          <li><strong>Limits:</strong> 30-second CPU max per request; the chat stream stays inside that</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Patient routing</h4>
+        <ul>
+          <li><strong>Client side:</strong> <code>web/assets/patient-context.js</code> reads <code>?patient=</code> or session, renders the right view per patient</li>
+          <li><strong>Patient Zero (Joao):</strong> static hand-crafted HTML</li>
+          <li><strong>Bespoke patients (Paulo, Silvana, Leo):</strong> per-patient renderers in the same file</li>
+          <li><strong>Generic patients:</strong> data-driven from <code>/api/patient-summary</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 06 · STORAGE ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">06 · Storage</div>
+    <h2 class="section-title">Postgres + R2 — what goes where</h2>
+    <p class="section-desc">
+      Structured rows (medications, vitals, lab values, imaging metadata, writings,
+      audit log) live in Neon Postgres. Bulky binaries (raw uploaded PDFs, audio,
+      DICOM archives) live in Cloudflare R2 — Postgres only stores the R2 key, not
+      the bytes. This is deliberate: it keeps the database small and lets a
+      patient delete request cascade cleanly.
+    </p>
+
+    <div class="two-col">
+      <div class="list-card">
+        <h4>Neon Postgres · 32 tables · region: Frankfurt</h4>
+        <ul>
+          <li><strong>Identity:</strong> <code>users</code>, <code>doctor_profiles</code>, <code>patient_profiles</code>, <code>patient_access</code></li>
+          <li><strong>Clinical:</strong> <code>medications</code>, <code>supplements</code>, <code>surgeries</code>, <code>injuries</code>, <code>clinical_history</code>, <code>risk_assessments</code></li>
+          <li><strong>Labs &amp; vitals:</strong> <code>lab_results</code>, <code>vitals_daily</code>, <code>glucose_points</code></li>
+          <li><strong>Artifacts:</strong> <code>imaging_studies</code>, <code>writings</code>, <code>documents</code></li>
+          <li><strong>Self-report:</strong> <code>wheel_of_life</code></li>
+          <li><strong>Pipeline:</strong> <code>imports</code>, <code>import_files</code> (per-upload provenance)</li>
+          <li><strong>Audit:</strong> <code>audit_log</code> (every mutation, JSONB metadata)</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Cloudflare R2 · binding <code>R2_BUCKET</code></h4>
+        <ul>
+          <li><strong>Stores:</strong> the bytes of every uploaded file — labs PDFs, ECG CSV exports, audio, DICOM archives, generic documents</li>
+          <li><strong>Key shape:</strong> <code>patients/&lt;clerk_id&gt;/&lt;import_id&gt;/&lt;filename&gt;</code></li>
+          <li><strong>Indirection:</strong> Postgres stores <code>blob_key</code> or <code>blob_prefix</code>; downloads are signed URLs</li>
+          <li><strong>GDPR erasure:</strong> patient delete walks every R2 prefix and removes objects in batches of 1,000 (the R2 binding cap)</li>
+          <li><strong>No DB blobs:</strong> Postgres never holds raw file bytes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout-info">
+      <strong>Schema source of truth.</strong> The full schema lives in
+      <code>db/schema.ts</code> (Drizzle). Migrations are version-controlled under
+      <code>db/migrations/</code>. Local commands: <code>npm run db:generate</code>
+      to diff the schema, <code>db:migrate</code> to apply, <code>db:studio</code>
+      for the web UI inspector.
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 07 · AI LAYER ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">07 · AI layer</div>
+    <h2 class="section-title">Three Claude models, three jobs</h2>
+    <p class="section-desc">
+      Different tasks have different latency and accuracy budgets. The platform uses
+      three tiers of Claude — Opus for the user-facing chat, Sonnet for ingestion
+      and dashboard composition, Haiku for high-volume classification. All three
+      share the same Anthropic API endpoint and SDK; only the <span class="mono">model</span>
+      identifier changes.
+    </p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Identifier</th>
+          <th>Use</th>
+          <th>Called from</th>
+          <th>Why this tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Claude Opus 4.7</strong></td>
+          <td><code>claude-opus-4-7</code></td>
+          <td>Patient-facing chat — questions about the record</td>
+          <td><code>handleChat</code> in <code>web/_worker.js</code></td>
+          <td>User-visible reasoning quality matters most. Strict system prompt: only answer from the bundled <code>patient-record.txt</code>; never invent facts.</td>
+        </tr>
+        <tr>
+          <td><strong>Claude Sonnet 4.6</strong></td>
+          <td><code>claude-sonnet-4-6</code></td>
+          <td>Lab PDF transcription, document ingest, dashboard composition</td>
+          <td><code>lib/ingest.js</code>, <code>lib/dashboard.js</code></td>
+          <td>Strong vision + structured-output reliability. Used for the heavy lifting that lands in Postgres.</td>
+        </tr>
+        <tr>
+          <td><strong>Claude Haiku 4.5</strong></td>
+          <td><code>claude-haiku-4-5-20251001</code></td>
+          <td>Document classification, reclassification, doctor-name backfill</td>
+          <td><code>lib/ingest.js</code> (taxonomy steps)</td>
+          <td>High-volume, low-stakes calls. Latency and cost matter; accuracy is a bonus.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>One key, three models.</strong> The Cloudflare Worker reads
+      <code>env.ANTHROPIC_API_KEY</code> at request time. Each call site
+      pins its own model identifier; there is no auto-routing or fallback
+      cascade. If a tier is the wrong choice for a job, that is a code change,
+      not a config change.
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 08 · AUTH & ACCESS ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">08 · Auth &amp; access</div>
+    <h2 class="section-title">Identity, sessions, role-based access</h2>
+    <p class="section-desc">
+      Authentication is handled by a custom cookie-session layer
+      (<span class="mono">lib/auth.js</span>) modeled on Clerk's API surface.
+      Three roles are defined in the <span class="mono">user_role</span> enum:
+      <strong>admin</strong>, <strong>doctor</strong>, <strong>patient</strong>.
+      Every API handler in the Worker calls <span class="mono">authenticate(request, env)</span>
+      before touching any data; doctor-↔-patient access is gated by rows in
+      <span class="mono">patient_access</span>.
+    </p>
+
+    <div class="three-col">
+      <div class="list-card">
+        <h4>Admin</h4>
+        <ul>
+          <li>Full read / write across every patient</li>
+          <li>Creates other users (doctors + patients)</li>
+          <li>Deletes patients (cascades through Postgres + R2)</li>
+          <li>Access: <code>/api/admin/*</code></li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Doctor</h4>
+        <ul>
+          <li>Read access to patients they are linked to via <code>patient_access</code></li>
+          <li>Can write dashboard sections + clinical notes</li>
+          <li>No create-user / delete-user rights</li>
+          <li>Access: <code>/api/patient-*</code> for linked patients only</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Patient</h4>
+        <ul>
+          <li>Read access to their own record only</li>
+          <li>Can upload documents via the ingest path</li>
+          <li>Can wipe their own data (right to erasure)</li>
+          <li>Access: chat + their own static pages</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 09 · DEPLOYMENT ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">09 · Deployment</div>
+    <h2 class="section-title">Source vs. deploy — two separate operations</h2>
+    <p class="section-desc">
+      The GitHub repository is source of truth for code. <strong>It does not deploy
+      anything.</strong> The live URL only updates when an engineer runs the Wrangler
+      CLI against the local <span class="mono">web/</span> folder. This separation
+      is intentional — every deploy is an explicit, reviewed step.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-head">
+        <div class="diagram-card-title">Deploy flow · code change → live URL</div>
+        <div class="diagram-card-meta">SVG · 1080 × 280</div>
+      </div>
+
+      <svg viewBox="0 0 1080 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Deployment flow diagram">
+        <defs>
+          <marker id="arr4-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#1E2D3D"/>
+          </marker>
+          <marker id="arr4-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 Z" fill="#B8954A"/>
+          </marker>
+        </defs>
+
+        <!-- Engineer -->
+        <rect x="20" y="100" width="160" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="100" y="126" class="dg-title" text-anchor="middle">Engineer · laptop</text>
+        <text x="100" y="144" class="dg-body" text-anchor="middle">edits source +</text>
+        <text x="100" y="160" class="dg-body" text-anchor="middle">runs ETL locally</text>
+
+        <!-- Branch 1: source -->
+        <path d="M 180 130 L 250 90" class="dg-arrow" marker-end="url(#arr4-slate)"/>
+        <text x="215" y="80" class="dg-mono" text-anchor="middle">git push</text>
+
+        <rect x="260" y="50" width="220" height="80" rx="8" class="dg-box-bg dg-box-stroke-steel"/>
+        <text x="370" y="76" class="dg-title" text-anchor="middle">GitHub</text>
+        <text x="370" y="94" class="dg-body" text-anchor="middle">joaocreste/health</text>
+        <text x="370" y="110" class="dg-body" text-anchor="middle">source-of-truth only</text>
+        <text x="370" y="122" class="dg-eyebrow" text-anchor="middle">DOES NOT DEPLOY</text>
+
+        <!-- Branch 2: deploy -->
+        <path d="M 180 150 L 250 190" class="dg-arrow-gold" marker-end="url(#arr4-gold)"/>
+        <text x="215" y="210" class="dg-mono" text-anchor="middle">npx wrangler pages deploy web</text>
+
+        <rect x="260" y="150" width="220" height="80" rx="8" class="dg-box-fill-gold dg-box-stroke-gold"/>
+        <text x="370" y="176" class="dg-title" text-anchor="middle">Wrangler CLI</text>
+        <text x="370" y="194" class="dg-body" text-anchor="middle">uploads web/ folder</text>
+        <text x="370" y="210" class="dg-body" text-anchor="middle">--commit-dirty=true</text>
+
+        <!-- → CF Pages -->
+        <path d="M 480 190 L 540 190" class="dg-arrow-gold" marker-end="url(#arr4-gold)"/>
+
+        <rect x="550" y="150" width="240" height="80" rx="8" class="dg-box-fill-navy dg-box-stroke-navy"/>
+        <text x="670" y="176" class="dg-title-on-navy" text-anchor="middle">Cloudflare Pages</text>
+        <text x="670" y="194" class="dg-body-on-navy" text-anchor="middle">jc-advisory-health.pages.dev</text>
+        <text x="670" y="212" class="dg-body-on-navy" text-anchor="middle">unique preview URL per deploy</text>
+
+        <!-- → User -->
+        <path d="M 790 190 L 850 190" class="dg-arrow" marker-end="url(#arr4-slate)"/>
+
+        <rect x="860" y="150" width="180" height="80" rx="8" class="dg-box-bg dg-box-stroke-navy"/>
+        <text x="950" y="176" class="dg-title" text-anchor="middle">User · live URL</text>
+        <text x="950" y="194" class="dg-body" text-anchor="middle">global CDN</text>
+        <text x="950" y="210" class="dg-body" text-anchor="middle">≈seconds after deploy</text>
+
+        <!-- Note -->
+        <text x="540" y="265" class="dg-mono" text-anchor="middle" fill="#7A8FA6">
+          Git push and deploy are independent · the engineer always does both, in either order, never one without the other
+        </text>
+      </svg>
+    </div>
+
+    <div class="two-col">
+      <div class="list-card">
+        <h4>Daily flow · what gets committed</h4>
+        <ul>
+          <li><code>git add web/&lt;changed-files&gt; bin/&lt;changed-files&gt;</code></li>
+          <li><code>git commit -m "..."</code> (ASCII arrows only — wrangler chokes on Unicode →)</li>
+          <li><code>git push</code> (informational; doesn't trigger anything)</li>
+          <li><code>npx wrangler pages deploy web --commit-dirty=true</code> (this is the actual deploy)</li>
+          <li><code>curl</code> the printed preview URL to verify the new code is live</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Environment</h4>
+        <ul>
+          <li><code>ANTHROPIC_API_KEY</code> — Worker secret; the chat / ingest tier reads it</li>
+          <li><code>DATABASE_URL</code> — Neon connection string; serverless pooled</li>
+          <li><code>R2_BUCKET</code> — R2 binding declared in the Pages dashboard</li>
+          <li><code>ASSETS</code> — Pages-provided binding for serving the static bundle</li>
+          <li><code>JC_DATA_DIR</code> — local-only env var for the Python ETL</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 10 · SECURITY POSTURE ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">10 · Security &amp; compliance posture</div>
+    <h2 class="section-title">Where we are, where we still need to get to</h2>
+    <p class="section-desc">
+      The architecture is shaped for eventual HIPAA / LGPD / GDPR compliance, but no
+      formal certification is in place yet. Neon's EU region was chosen to keep
+      data inside the most permissive jurisdiction; Cloudflare's Pages + R2 + Workers
+      can all be configured for data-residency once the patient base grows.
+    </p>
+
+    <div class="three-col">
+      <div class="list-card">
+        <h4>In place today</h4>
+        <ul>
+          <li>EU-only Postgres region (Frankfurt)</li>
+          <li>Row-level patient ownership with <code>ON DELETE CASCADE</code></li>
+          <li>R2 binding scoped to single bucket; per-patient key prefixes</li>
+          <li>Audit log of every mutation</li>
+          <li>Role-based API gating on every Worker handler</li>
+          <li>HTTPS-only · Cloudflare-managed TLS</li>
+          <li>Right-to-erasure: <code>/api/patient-wipe-data</code> cascades through Postgres + R2</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Deferred until real patients</h4>
+        <ul>
+          <li>HIPAA Business Associate Agreement (BAA) with Cloudflare</li>
+          <li>HIPAA BAA with Anthropic (Enterprise plan)</li>
+          <li>Neon Enterprise plan (encryption-at-rest options)</li>
+          <li>SOC 2 / ISO 27001 attestations</li>
+          <li>Formal DPIA + LGPD Article 50 documentation</li>
+          <li>Penetration test on the Worker surface</li>
+        </ul>
+      </div>
+      <div class="list-card">
+        <h4>Compensating controls</h4>
+        <ul>
+          <li>Patient writings are local-only until explicitly ingested</li>
+          <li>The 866 MB Apple Health XML is gitignored — never reaches the public repo or the deploy bundle</li>
+          <li>Wearable exports are kept off git for any non-Patient-Zero patient</li>
+          <li>Anthropic system prompt explicitly forbids inventing facts outside the record</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Current posture in one sentence.</strong> Single-engineer, single-patient
+      (plus three bespoke demo patients), pre-revenue, pre-certification — the
+      stack is sized for &lt;10 patients on Cloudflare's free / Pro plans plus a
+      Neon Free or Launch plan. Upgrades to Enterprise tiers happen once real
+      patients sign on and the compliance paperwork is signed.
+    </div>
+  </div>
+</section>
+
+<!-- ────────────────── 11 · FILE MAP ─────────────────── -->
+<section class="report">
+  <div class="container">
+    <div class="section-label">11 · File map</div>
+    <h2 class="section-title">Where to find each piece in the repo</h2>
+    <table class="data-table">
+      <thead>
+        <tr><th>Concern</th><th>Path</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ETL pipeline</td><td><code>bin/extract.py</code></td><td>Single Python script · stdlib only · ~1,000 LOC</td></tr>
+        <tr><td>Static pages</td><td><code>web/*.html</code></td><td>Hand-authored bilingual HTML · one file per section</td></tr>
+        <tr><td>Patient routing</td><td><code>web/assets/patient-context.js</code></td><td>~4,300 LOC · per-patient renderers + auth shim</td></tr>
+        <tr><td>Page styles</td><td><code>web/assets/styles.css</code></td><td>Single CSS file · custom-property design tokens</td></tr>
+        <tr><td>App shell JS</td><td><code>web/assets/app.js</code></td><td>Language toggle, export-to-PDF, sign-out, nav</td></tr>
+        <tr><td>Pre-computed data</td><td><code>web/assets/data.js</code></td><td>Generated by ETL · 74 KB · committed</td></tr>
+        <tr><td>Pre-computed metrics</td><td><code>web/assets/metrics.json</code></td><td>Generated by ETL · 96 KB · committed</td></tr>
+        <tr><td>Worker / API</td><td><code>web/_worker.js</code></td><td>Cloudflare Pages Worker · ~1,200 LOC</td></tr>
+        <tr><td>Worker helpers</td><td><code>lib/auth.js</code>, <code>lib/ingest.js</code>, <code>lib/dashboard.js</code></td><td>Imported by the Worker · isolated for testability</td></tr>
+        <tr><td>DB schema</td><td><code>db/schema.ts</code></td><td>Drizzle ORM · 32 tables · 591 LOC</td></tr>
+        <tr><td>DB migrations</td><td><code>db/migrations/</code></td><td>Auto-generated by <code>drizzle-kit generate</code></td></tr>
+        <tr><td>DB scripts</td><td><code>scripts/*.mjs</code></td><td>One-off ops: seed, aggregate, build patient record</td></tr>
+        <tr><td>Patient data</td><td><code>Patients/&lt;Patient&gt;/</code></td><td>Raw exports · ETL reads from here · gitignored for non-Patient-Zero</td></tr>
+        <tr><td>Doc + reference</td><td><code>branding.html</code>, <code>health-palette.html</code>, <code>infrastructure.html</code></td><td>Root-level engineering docs · not deployed</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="container">
+    JC Advisory · Health Platform · Infrastructure documentation · Strictly confidential — for engineering reference only
+  </div>
+</footer>
+
+</body>
+</html>
