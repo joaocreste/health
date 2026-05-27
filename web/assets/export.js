@@ -1,4 +1,4 @@
-/* JC Advisory — Export to PDF
+/* Lumen Health — Export to PDF
  *
  * Wires up the topnav "Export" button. Opens a modal with a checkbox tree of
  * exportable categories; on Continue, loads each selected source page in a
@@ -604,7 +604,7 @@
         <div class="pdf-cover-brand">
           <img src="assets/logo.svg" alt="">
           <div>
-            <div class="pdf-cover-brand-name">JC Advisory</div>
+            <div class="pdf-cover-brand-name">Lumen Health</div>
             <div class="pdf-cover-brand-tag">${lang() === 'pt' ? 'Dos dados aos insights' : 'From data to insights'}</div>
           </div>
         </div>

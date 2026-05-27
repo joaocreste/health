@@ -1,4 +1,4 @@
-/* JC Advisory — Chart.js defaults & nav helpers (health-palette tokens) */
+/* Lumen Health — Chart.js defaults & nav helpers (health-palette tokens) */
 (function () {
   'use strict';
 

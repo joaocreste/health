@@ -1,4 +1,4 @@
-# JC Advisory — public access, all crawlers welcome.
+# Lumen Health — public access, all crawlers welcome.
 User-agent: *
 Allow: /
 

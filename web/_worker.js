@@ -4,7 +4,7 @@ import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
 import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
 
-const SYSTEM_INSTRUCTIONS = `You are the JC Advisory health-portal assistant for the patient Joao Victor Creste.
+const SYSTEM_INSTRUCTIONS = `You are the Lumen Health portal assistant for the patient Joao Victor Creste.
 
 STRICT RULES — non-negotiable:
 1. Answer ONLY using information present in the <patient_record> below. Treat the record as your single source of truth.

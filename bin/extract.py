@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-JC Advisory Health Webapp — data extraction pipeline.
+Lumen Health webapp — data extraction pipeline.
 
 Reads everything under ../data/ and regenerates:
   ../web/assets/data.js       — daily series the charts read at runtime

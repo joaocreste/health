@@ -1,4 +1,4 @@
-/* JC Advisory — patient-context.js
+/* Lumen Health — patient-context.js
  *
  * Runs on every section page. Resolves the current patient, injects the
  * "Change patient" button, and — for any patient other than Patient Zero
@@ -245,7 +245,7 @@
     var p = (summary && summary.patient) || {};
     var name = p.full_name || 'this patient';
 
-    document.title = 'JC Advisory — Health Summary · ' + name;
+    document.title = 'Lumen Health — Health Summary · ' + name;
 
     // ── Hero meta values ──────────────────────────────────────────
     var months = ['January','February','March','April','May','June',
@@ -909,7 +909,7 @@
     var pending = (opts.summary && opts.summary.pending_files) || [];
     var anyValue = (opts.metrics || []).some(function (m) { return m.value > 0; });
 
-    document.title = 'JC Advisory — ' + opts.title + ' · ' + (p.full_name || 'Patient');
+    document.title = 'Lumen Health — ' + opts.title + ' · ' + (p.full_name || 'Patient');
 
     var view = document.createElement('main');
     view.className = 'jc-overview jc-section';
@@ -3094,7 +3094,7 @@
   function renderPauloPhysicalExams() {
     injectPauloExamsStyles();
 
-    document.title = 'JC Advisory — Physical · Imaging exams · Paulo Silotto Souza';
+    document.title = 'Lumen Health — Physical · Imaging exams · Paulo Silotto Souza';
 
     var hero =
       '<section class="hero">' +
@@ -3617,7 +3617,7 @@
   function renderSilvanaPhysicalLanding() {
     injectSilvanaStyles();
     injectSilvanaLandingStyles();
-    document.title = 'JC Advisory — Physical · Silvana Creste';
+    document.title = 'Lumen Health — Physical · Silvana Creste';
 
     var hero =
       '<section class="hero">' +
@@ -3725,7 +3725,7 @@
       return;
     }
     injectSilvanaStyles();
-    document.title = 'JC Advisory — Physical · Exams · Silvana Creste';
+    document.title = 'Lumen Health — Physical · Exams · Silvana Creste';
 
     var data = window.SILVANA_LABS;
     var dates = [];
@@ -4348,7 +4348,7 @@
   function renderSilvanaVitals() {
     injectSilvanaStyles();
     injectSilvanaVitalsStyles();
-    document.title = 'JC Advisory — Vitals · Silvana Creste';
+    document.title = 'Lumen Health — Vitals · Silvana Creste';
 
     var data = SILVANA_INBODY;
 

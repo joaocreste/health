@@ -1,4 +1,4 @@
-/* JC Advisory — Silvana Creste lab history
+/* Lumen Health — Silvana Creste lab history
  *
  * Structured data manually curated from 12 PDFs in
  * Other Patients/SIlvana Exams. The corresponding source PDFs live in

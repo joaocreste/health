@@ -1,4 +1,4 @@
-/* JC Advisory health-record chatbot
+/* Lumen Health health-record chatbot
    Bottom-left floating icon → opens chat panel → POSTs to /api/chat (streams).
    Bilingual: reads document.documentElement.lang, re-renders on change. */
 

@@ -1,16 +1,26 @@
 /* ─────────────────────────────────────────────
-   JC Advisory — Health Webapp · Light Theme
-   Built on the health-palette.html design system
+   Lumen Health — Webapp · Design Tokens
+   Built on the Lumen Health brand system v3
+   (see /branding.html for the full preview)
    ───────────────────────────────────────────── */
 
 :root {
-  /* ── Surfaces ── */
+  /* ── Surfaces · light ── */
   --surface-canvas: #F4F7FA;
   --surface-base:   #F8FAFC;
   --surface-raised: #FCFDFE;
   --surface-warm:   #FAF8F4;
   --surface-cool:   #EEF3F6;
   --surface-pure:   #FFFFFF;
+
+  /* ── Surfaces · dark (midnight stack — heroes, splash, intro) ── */
+  --surface-dark-intro:    #060D1C;
+  --surface-dark-canvas:   #050C1A;
+  --surface-dark-base:     #0A1428;
+  --surface-dark-raised:   #131F37;
+  --surface-dark-warm:     #1A2230;
+  --surface-dark-cool:     #0F1B30;
+  --surface-dark-elevated: #1A2542;
 
   /* ── Blue (primary) ── */
   --blue-50:  #EEF5FA;
@@ -73,18 +83,31 @@
   --neutral-800: #2A333D;
   --neutral-900: #1A2129;
 
+  /* ── Lumen brand accents ── */
+  --accent-petrol:        #244E6E;                       /* primary action — light theme */
+  --accent-petrol-light:  #4D7BA0;                       /* hover-step, dark-theme primary */
+  --accent-petrol-dark:   #6BA3C7;                       /* primary on dark backgrounds */
+  --petrol-fill:          rgba(36, 78, 110, 0.10);       /* tinted blocks on light */
+  --petrol-fill-dark:     rgba(107, 163, 199, 0.10);     /* tinted blocks on dark */
+  --accent-gold:          #B8860B;                       /* honey-gold — light theme */
+  --accent-gold-dark:     #F4B942;                       /* honey-gold — dark theme */
+  --accent-gold-soft:     rgba(184, 134, 11, 0.10);
+
+  /* Brand textual primary — Lumen petrol-leaning ink */
+  --brand-ink:            #0D1B33;
+
   /* ── Semantic mappings ── */
   --text-primary:   var(--neutral-900);
   --text-secondary: var(--neutral-700);
   --text-muted:     var(--neutral-500);
   --text-faint:     var(--neutral-400);
   --text-on-brand:  #FFFFFF;
-  --text-link:      var(--blue-600);
+  --text-link:      var(--accent-petrol);
 
   --border-subtle:  var(--neutral-200);
   --border-default: var(--neutral-300);
   --border-strong:  var(--neutral-500);
-  --border-focus:   var(--blue-500);
+  --border-focus:   var(--accent-petrol);
 
   --shadow-sm: 0 1px 2px rgba(18,42,61,0.04), 0 1px 1px rgba(18,42,61,0.03);
   --shadow-md: 0 4px 12px rgba(18,42,61,0.06), 0 2px 4px rgba(18,42,61,0.04);
@@ -116,11 +139,11 @@ a:hover { color: var(--blue-700); }
 
 code, .mono, .tabular { font-family: var(--font-mono); }
 
-/* ── TOP NAV (dark petrol-indigo header band) ── */
+/* ── TOP NAV (Lumen midnight band) ── */
 .topnav {
   position: sticky; top: 0; z-index: 50;
-  background: #0F2238;              /* deep petrol-indigo */
-  border-bottom: 1px solid #1B3B54; /* blue-800 hairline */
+  background: var(--surface-dark-base);  /* #0A1428 — Lumen midnight base */
+  border-bottom: 1px solid var(--surface-dark-elevated); /* #1A2542 hairline */
   padding: 0 2rem;
   height: 60px;
   display: flex;
@@ -156,7 +179,7 @@ code, .mono, .tabular { font-family: var(--font-mono); }
   text-transform: uppercase;
   color: var(--blue-200);
 }
-.topnav-links a.active,
+.topnav-links a.active { color: var(--accent-gold-dark); }
 .topnav-links a:hover { color: #FFFFFF; }
 
 /* ── LAYOUT ── */
@@ -167,13 +190,13 @@ code, .mono, .tabular { font-family: var(--font-mono); }
 }
 .container-narrow { max-width: 980px; }
 
-/* ── HERO (deep petrol-indigo band) ── */
+/* ── HERO (Lumen midnight band) ── */
 .hero {
   position: relative;
-  background: #0F2238;
+  background: var(--surface-dark-intro);          /* #060D1C — Lumen midnight intro */
   padding: 6rem 2rem 5rem;
   overflow: hidden;
-  border-bottom: 1px solid #1B3B54;
+  border-bottom: 1px solid var(--surface-dark-elevated);
 }
 .hero::before {
   content: '';
@@ -600,19 +623,22 @@ section.report-section.light             { background: var(--surface-base); } /*
   line-height: 1.5;
 }
 
-/* ── BADGES (replaces the old "pill") ── */
+/* ── BADGES · Lumen full-pill style ── */
 .pill, .badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;                /* Lumen: full pill */
+  font-family: var(--font-body);
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0;
+  line-height: 1.4;
   background: var(--neutral-100);
   color: var(--neutral-700);
   border: 1px solid var(--neutral-200);
   text-transform: none;
+  white-space: nowrap;
 }
 .pill-info,    .badge-info    { background: var(--blue-50);  color: var(--blue-700);  border-color: var(--blue-200);  }
 .pill-ok,      .badge-success { background: var(--green-50); color: var(--green-700); border-color: var(--green-200); }

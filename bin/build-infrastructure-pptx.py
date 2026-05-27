@@ -4,7 +4,7 @@ Builds infrastructure.pptx — a 12-slide deck mirroring infrastructure.html.
 
 Each diagram element is a native PowerPoint shape so individual rectangles,
 arrows and labels can be lifted into a pitch deck. Brand-consistent with the
-JC Advisory Health webapp (navy / slate / gold / steel / off-white).
+Lumen Health webapp (navy / slate / gold / steel / off-white).
 
 Run from the project root:
     python3 bin/build-infrastructure-pptx.py
@@ -152,7 +152,7 @@ def slide_header(slide, idx, eyebrow_label, title_text, subtitle_text=None):
                  subtitle_text, font=FONT_BODY, size=14, bold=False,
                  color=SLATE)
 
-def slide_footer(slide, footer_text="JC Advisory · Health Platform · Infrastructure"):
+def slide_footer(slide, footer_text="Lumen Health · Infrastructure"):
     add_text(slide, Inches(0.5), Inches(7.1), Inches(12.3), Inches(0.3),
              footer_text, font=FONT_MONO, size=9, color=INK_SOFT)
 
@@ -179,7 +179,7 @@ add_rect(s, 0, Inches(3.3), Inches(13.333), Inches(0.08),
 
 # Eyebrow
 add_text(s, Inches(1), Inches(2.8), Inches(11), Inches(0.4),
-         "JC ADVISORY · HEALTH PLATFORM",
+         "LUMEN HEALTH · ENGINEERING DOCS",
          font=FONT_MONO, size=14, bold=True, color=GOLD)
 
 # Big title

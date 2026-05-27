@@ -1,4 +1,4 @@
-/* JC Advisory — leo-mode.js
+/* Lumen Health — leo-mode.js
  *
  * Leo Keller is a demo patient that inherits Patient Zero's clinical
  * data (labs, vitals, imaging) but with different demographics and a

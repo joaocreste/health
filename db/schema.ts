@@ -1,5 +1,5 @@
 /**
- * JC Advisory Health — Postgres schema (Drizzle).
+ * Lumen Health — Postgres schema (Drizzle).
  *
  * One file because the model is small. Sections, top → bottom:
  *   1. Identity & access  (users, profiles, doctor↔patient links)
