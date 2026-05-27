@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://jc-advisory-health.pages.dev/sitemap.xml
+Sitemap: https://lumenhealth.io/sitemap.xml

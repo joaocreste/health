@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://jc-advisory-health.pages.dev/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/home.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/physical.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/physical-vitals.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/physical-exams.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/physical-genetics.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/mental.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://jc-advisory-health.pages.dev/spiritual.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://lumenhealth.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://lumenhealth.io/home.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://lumenhealth.io/physical.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lumenhealth.io/physical-vitals.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://lumenhealth.io/physical-exams.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://lumenhealth.io/physical-genetics.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://lumenhealth.io/mental.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://lumenhealth.io/spiritual.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>

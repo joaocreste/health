@@ -50,7 +50,7 @@ file, just syncs schema to DB). Don't use it once production has data.
    `-pooler` in the host — gives you a per-Worker connection through pgbouncer).
 3. Set it as a Cloudflare Pages secret:
    ```
-   npx wrangler pages secret put DATABASE_URL --project-name=jc-advisory-health
+   npx wrangler pages secret put DATABASE_URL --project-name=lumenhealth
    ```
 4. Set it locally as well to run migrations from your laptop:
    ```
