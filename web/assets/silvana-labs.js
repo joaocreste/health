@@ -35,6 +35,130 @@ window.SILVANA_LABS = {
     { date: '2019-06-13', laboratory: 'Lab. ICD · Ribeirão Preto',    doctor: 'Dra. Daniela Souza Alvarenga',            pdf: 'silvana-source-pdfs/resultado658832.pdf',                    title_en: 'Comprehensive panel — Dra. Alvarenga (13 Jun 2019)',title_pt: 'Painel completo — Dra. Alvarenga (13 jun 2019)' },
   ],
 
+  /* Imaging, pathology, endoscopy and functional studies (non-lab diagnostic
+   * exams). Transcribed from photographed source reports in
+   * Patients/SIlvana Exams/Exams/New; images live in
+   * web/scans/silvana-source-pdfs/ and are linked from each card. Newest first. */
+  studies: [
+    {
+      date: '2026-02-09', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Cervical / thyroid ultrasound', title_pt: 'Ultrassonografia cervical / tireoide',
+      laboratory: 'Instituto de Radiologia', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. José Álvaro Gonçalves Junior · Dr. Oswaldo Tonini',
+      conclusion_en: 'Two left-lobe thyroid nodules: inferior pole 7.9 × 7.2 × 3.8 mm (TIRADS 4, stable) and superior third 9.1 × 7.8 × 7.2 mm (TIRADS 3). No suspicious lymphadenopathy or masses. Compared with 30 Mar 2023.',
+      conclusion_pt: 'Dois nódulos no lobo esquerdo da tireoide: polo inferior 7,9 × 7,2 × 3,8 mm (TIRADS 4, estável) e terço superior 9,1 × 7,8 × 7,2 mm (TIRADS 3). Sem linfonodomegalias ou massas suspeitas. Comparado a 30 mar 2023.',
+      images: ['silvana-source-pdfs/silvana-thyroid-us-2026-02-09.jpeg'],
+    },
+    {
+      date: '2026-02-09', category: 'imaging',
+      modality_en: 'Sinus CT', modality_pt: 'TC dos seios da face',
+      title_en: 'CT of the paranasal sinuses', title_pt: 'Tomografia dos seios da face',
+      laboratory: 'Instituto de Radiologia', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. José Álvaro Gonçalves Junior · Dra. Danyela O. Gonçalves Prado',
+      conclusion_en: 'Nasal septum deviated to the left with a large bony spur (0.6 cm). Paranasal sinuses normally aerated, no opacification; ostiomeatal complexes free. Indication: nasal obstruction.',
+      conclusion_pt: 'Desvio do septo nasal para a esquerda, com grande esporão ósseo (0,6 cm). Seios da face com aeração normal, sem velamentos; complexos óstio-meatais livres. Indicação: obstrução nasal.',
+      images: ['silvana-source-pdfs/silvana-sinus-ct-2026-02-09.jpeg'],
+    },
+    {
+      date: '2025-05-21', category: 'imaging',
+      modality_en: 'Mammography', modality_pt: 'Mamografia',
+      title_en: 'Bilateral digital mammography', title_pt: 'Mamografia digital bilateral',
+      laboratory: 'Instituto de Radiologia', requested_by: 'Dra. Elisabete Pinheiro Ferreira Pires', doctor: 'Dr. José Álvaro Gonçalves Neto · Dr. José Álvaro Gonçalves Junior',
+      conclusion_en: 'BI-RADS 2 (right and left). Fatty-replaced breasts with rare scattered punctiform calcifications; no grouped microcalcifications or other signs of malignancy. No significant change vs 16 Sep 2022.',
+      conclusion_pt: 'BI-RADS 2 (direita e esquerda). Mamas lipossubstituídas com raras calcificações puntiformes esparsas; sem microcalcificações agrupadas ou sinais de malignidade. Sem alteração significativa vs 16 set 2022.',
+      images: ['silvana-source-pdfs/silvana-mammography-2025-05-21.jpeg'],
+    },
+    {
+      date: '2025-04-14', category: 'pathology',
+      modality_en: 'Cervical cytology', modality_pt: 'Citologia cervical',
+      title_en: 'Cervical cytology (Pap smear)', title_pt: 'Citopatológico cervical (Papanicolaou)',
+      laboratory: 'MM · Lab. de Patologia e Citologia', requested_by: 'Dra. Elisabete Pinheiro Ferreira Pires', doctor: 'Dra. Giovana Bachega Badiale Biagi · Dra. Margarida M. F. S. Moraes',
+      conclusion_en: 'Benign cellular changes — inflammation and mild hypotrophy; inflammatory hypotrophic smear (Bethesda; Papanicolaou class II). No malignancy; microbiology absent.',
+      conclusion_pt: 'Alterações celulares benignas — inflamação e hipotrofia leve; esfregaço hipotrófico inflamatório (Bethesda; classe II de Papanicolaou). Sem malignidade; microbiologia ausente.',
+      images: ['silvana-source-pdfs/silvana-cytology-2025-04-14.jpeg'],
+    },
+    {
+      date: '2023-04-18', category: 'endoscopy',
+      modality_en: 'Colonoscopy + biopsy', modality_pt: 'Colonoscopia + biópsia',
+      title_en: 'Colonoscopy with polypectomy and biopsy', title_pt: 'Colonoscopia com polipectomia e biópsia',
+      laboratory: 'ProctoGastro Clínica · biópsia: MM Lab.', requested_by: 'Dr. Fernando Luiz de Almeida Galante', doctor: 'Dr. Marley Ribeiro Feitosa',
+      conclusion_en: '2 mm sessile sigmoid polyp removed; biopsy = hyperplastic polyp, benign, no malignancy. Internal hemorrhoids; remaining colon and rectum normal. Repeat in 5 years.',
+      conclusion_pt: 'Pólipo séssil de 2 mm no sigmoide removido; biópsia = pólipo hiperplásico, benigno, sem malignidade. Hemorroidas internas; demais cólon e reto normais. Repetir em 5 anos.',
+      images: ['silvana-source-pdfs/silvana-colonoscopy-2023-04-18.jpeg', 'silvana-source-pdfs/silvana-colon-biopsy-2023-04-18.jpeg'],
+    },
+    {
+      date: '2023-04-13', category: 'imaging',
+      modality_en: 'Abdominal ultrasound', modality_pt: 'Ultrassom de abdome',
+      title_en: 'Total abdomen ultrasound', title_pt: 'Ultrassonografia de abdome total',
+      laboratory: 'Radiologia · Ribeirão Preto', requested_by: 'Dr. Fernando Luiz de Almeida Galante', doctor: 'Dra. Flávia Lemos de Oliveira',
+      conclusion_en: 'Mild hepatic steatosis and a gallbladder polyp (3.6 mm on the anterior wall). Kidneys, spleen, pancreas and pelvic organs normal. No significant change vs 18 Nov 2020.',
+      conclusion_pt: 'Esteatose hepática de discreta intensidade e pólipo vesicular (3,6 mm na parede anterior). Rins, baço, pâncreas e órgãos pélvicos normais. Sem alteração significativa vs 18 nov 2020.',
+      images: ['silvana-source-pdfs/silvana-abdominal-us-2023-04-13.jpeg'],
+    },
+    {
+      date: '2023-03-30', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Thyroid ultrasound with Doppler', title_pt: 'Ultrassonografia de tireoide com Doppler',
+      laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
+      conclusion_en: 'Reduced-volume thyroid (4.28 cm³) with stable left-lobe nodules; reactional cervical lymph nodes. No significant change vs 18 Jan 2022.',
+      conclusion_pt: 'Tireoide de volume reduzido (4,28 cm³) com nódulos estáveis no lobo esquerdo; linfonodos cervicais reacionais. Sem alteração significativa vs 18 jan 2022.',
+      images: ['silvana-source-pdfs/silvana-thyroid-us-2023-03-30.jpeg'],
+    },
+    {
+      date: '2022-09-19', category: 'functional',
+      modality_en: 'Urodynamic study', modality_pt: 'Estudo urodinâmico',
+      title_en: 'Urodynamics (uroflowmetry, cystometry, pressure-flow)', title_pt: 'Urodinâmica (urofluxometria, cistometria, pressão-fluxo)',
+      laboratory: 'Centro Avançado de Urologia · Ribeirão Preto', requested_by: 'Dr. Marcelo Baptistussi', doctor: 'Dra. Maria Teresa Pereira Cavalcante',
+      conclusion_en: 'Normal free flow (Qmax 21 mL/s, minimal residue); voiding pressures suggest infravesical obstruction from vaginal dystopia. Impression: urethral instability, vaginal dystopia, vesical hyperactivity. Chief complaint: urinary urgency.',
+      conclusion_pt: 'Fluxo livre normal (Qmáx 21 mL/s, resíduo mínimo); pressões miccionais sugerem obstrução infravesical por distopia vaginal. Parecer: instabilidade uretral, distopia vaginal, hiperatividade vesical. Queixa principal: urgência miccional.',
+      images: ['silvana-source-pdfs/silvana-urodynamics-2022-09-19-1.jpeg', 'silvana-source-pdfs/silvana-urodynamics-2022-09-19-2.jpeg', 'silvana-source-pdfs/silvana-urodynamics-2022-09-19-3.jpeg', 'silvana-source-pdfs/silvana-urodynamics-2022-09-19-4.jpeg', 'silvana-source-pdfs/silvana-urodynamics-2022-09-19-5.jpeg'],
+    },
+    {
+      date: '2022-01-18', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Thyroid ultrasound with Doppler', title_pt: 'Ultrassonografia de tireoide com Doppler',
+      laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
+      conclusion_en: 'Reduced-volume thyroid (3.78 cm³) with stable left-lobe nodules; mildly enlarged right cervical lymph node — continue follow-up.',
+      conclusion_pt: 'Tireoide de volume reduzido (3,78 cm³) com nódulos estáveis no lobo esquerdo; linfonodo cervical direito discretamente aumentado — manter seguimento.',
+      images: ['silvana-source-pdfs/silvana-thyroid-us-2022-01-18.jpeg'],
+    },
+    {
+      date: '2022-01-18', category: 'imaging',
+      modality_en: 'Sinus CT', modality_pt: 'TC dos seios da face',
+      title_en: 'CT of the paranasal sinuses', title_pt: 'Tomografia dos seios da face',
+      laboratory: 'CEDIRP', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dra. Fabiana de Deus Vieira',
+      conclusion_en: 'Retention cyst / polyp in the left maxillary sinus (4 mm) and leftward nasal septal deviation. Indication: sinusopathy.',
+      conclusion_pt: 'Cisto de retenção / pólipo no seio maxilar esquerdo (4 mm) e desvio do septo nasal para a esquerda. Indicação: sinusopatia.',
+      images: ['silvana-source-pdfs/silvana-sinus-ct-2022-01-18.jpeg'],
+    },
+    {
+      date: '2021-07-13', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Thyroid ultrasound with Doppler', title_pt: 'Ultrassonografia de tireoide com Doppler',
+      laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
+      conclusion_en: 'Thyroid 4.06 cm³ with left-lobe nodules (superior nodule now with more cystic content); reactional right cervical lymph node.',
+      conclusion_pt: 'Tireoide de 4,06 cm³ com nódulos no lobo esquerdo (nódulo superior agora com conteúdo mais cístico); linfonodo cervical direito reacional.',
+      images: ['silvana-source-pdfs/silvana-thyroid-us-2021-07-13.jpeg'],
+    },
+    {
+      date: '2020-06-18', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Thyroid ultrasound with Doppler', title_pt: 'Ultrassonografia de tireoide com Doppler',
+      laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
+      conclusion_en: 'Left-lobe nodule and cyst; total thyroid volume 4.29 cm³. Reactional right cervical lymph node.',
+      conclusion_pt: 'Nódulo e cisto no lobo esquerdo; volume tireoidiano total 4,29 cm³. Linfonodo cervical direito reacional.',
+      images: ['silvana-source-pdfs/silvana-thyroid-us-2020-06-18.jpeg'],
+    },
+    {
+      date: '2017-12-15', category: 'pathology',
+      modality_en: 'Colon biopsy', modality_pt: 'Biópsia de cólon',
+      title_en: 'Sigmoid colon biopsy (histopathology)', title_pt: 'Biópsia de cólon sigmoide (anatomopatológico)',
+      laboratory: 'Dr. Prates · Lab. de Patologia Cirúrgica', requested_by: 'Dr. Marcelo de Mello Torquato', doctor: 'Dr. Dayr Kiomizu Kazava',
+      conclusion_en: 'Tubular adenoma with mild dysplasia (low-grade intraepithelial neoplasia, WHO) in the sigmoid colon; lesion base without atypia.',
+      conclusion_pt: 'Adenoma tubular com displasia leve (neoplasia intraepitelial de baixo grau, OMS) no cólon sigmoide; base da lesão sem atipias.',
+      images: ['silvana-source-pdfs/silvana-colon-biopsy-2017-12-15.jpeg'],
+    },
+  ],
+
   /* Panels and markers, with history.
    * Reference ranges use Adults/Female where applicable.
    * For markers reported with multiple historical rows in the source PDF,
@@ -75,6 +199,7 @@ window.SILVANA_LABS = {
           ref_text_en: 'Euthyroid: 0.80 – 2.00 ng/dL',
           ref_text_pt: 'Eutiroidianos: 0,80 a 2,00 ng/dL',
           points: [
+            { date: '2026-04-25', value: 1.26 },
             { date: '2026-02-18', value: 1.15 },
             { date: '2025-10-24', value: 1.19 },
             { date: '2024-02-27', value: 1.04 },
@@ -94,6 +219,17 @@ window.SILVANA_LABS = {
           points: [
             { date: '2025-10-24', value: 3.10 },
             { date: '2024-02-27', value: 3.20 },
+          ],
+        },
+        {
+          marker_en: 'T3 Total',
+          marker_pt: 'T3 total (triiodotironina)',
+          unit: 'ng/dL',
+          ref_low: 80, ref_high: 200,
+          ref_text_en: '80 – 200 ng/dL',
+          ref_text_pt: '80,0 a 200,0 ng/dL',
+          points: [
+            { date: '2026-04-25', value: 96.26 },
           ],
         },
         {
@@ -145,6 +281,7 @@ window.SILVANA_LABS = {
             { date: '2026-02-18', value: 127.1 },
             { date: '2024-02-27', value: 119.9 },
             { date: '2023-02-16', value: 140, flag: 'H' },
+            { date: '2019-06-13', value: 122 },
           ],
         },
         {
@@ -483,6 +620,7 @@ window.SILVANA_LABS = {
           ref_text_en: '136 – 145 mmol/L',
           ref_text_pt: '136 a 145 mmol/L',
           points: [
+            { date: '2026-04-25', value: 142.5 },
             { date: '2023-02-16', value: 140 },
             { date: '2019-06-13', value: 142 },
           ],
@@ -495,6 +633,7 @@ window.SILVANA_LABS = {
           ref_text_en: '3.5 – 5.1 mmol/L',
           ref_text_pt: '3,5 a 5,1 mmol/L',
           points: [
+            { date: '2026-04-25', value: 4.7 },
             { date: '2023-02-16', value: 4.7 },
             { date: '2019-06-13', value: 4.4 },
           ],

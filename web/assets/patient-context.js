@@ -3824,6 +3824,51 @@
     return '<ul class="silv-docs">' + items + '</ul>';
   }
 
+  function silvanaStudyCategoryLabel(cat) {
+    return ({
+      imaging:    ['Imaging', 'Imagem'],
+      pathology:  ['Pathology', 'Patologia'],
+      endoscopy:  ['Endoscopy', 'Endoscopia'],
+      functional: ['Functional', 'Funcional'],
+    })[cat] || ['Study', 'Exame'];
+  }
+
+  // Imaging / pathology / endoscopy / functional studies — newest first.
+  function silvanaStudiesList(studies) {
+    var items = (studies || []).slice().sort(function (a, b) {
+      return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+    }).map(function (s) {
+      var cat = silvanaStudyCategoryLabel(s.category);
+      var imgs = (s.images || []).map(function (src, i) {
+        return '<a href="scans/' + escapeHtml(src) + '" target="_blank" rel="noopener" class="silv-study-src">' +
+          t('View source', 'Ver laudo') + (s.images.length > 1 ? ' ' + (i + 1) : '') + '</a>';
+      }).join('');
+      return (
+        '<div class="silv-study silv-study-' + escapeHtml(s.category) + '">' +
+          '<div class="silv-study-head">' +
+            '<span class="silv-study-cat silv-study-cat-' + escapeHtml(s.category) + '">' + t(cat[0], cat[1]) + '</span>' +
+            '<span class="silv-study-date">' + escapeHtml(formatDate(s.date)) + '</span>' +
+          '</div>' +
+          '<div class="silv-study-title">' +
+            '<span class="lang-en">' + escapeHtml(s.title_en) + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(s.title_pt) + '</span>' +
+          '</div>' +
+          '<div class="silv-study-meta">' +
+            escapeHtml(s.laboratory || '—') +
+            (s.doctor ? ' · ' + escapeHtml(s.doctor) : '') +
+            (s.requested_by ? ' · ' + t('req. ', 'sol. ') + escapeHtml(s.requested_by) : '') +
+          '</div>' +
+          '<p class="silv-study-concl">' +
+            '<span class="lang-en">' + escapeHtml(s.conclusion_en) + '</span>' +
+            '<span class="lang-pt">' + escapeHtml(s.conclusion_pt) + '</span>' +
+          '</p>' +
+          (imgs ? '<div class="silv-study-srcs">' + imgs + '</div>' : '') +
+        '</div>'
+      );
+    }).join('');
+    return '<div class="silv-studies">' + items + '</div>';
+  }
+
   function injectSilvanaStyles() {
     if (document.getElementById('silvana-exams-styles')) return;
     var s = document.createElement('style');
@@ -3895,6 +3940,27 @@
       'main.jc-silvana-exams .silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
       'main.jc-silvana-exams .silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
       'main.jc-silvana-exams .silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+
+      // Imaging & diagnostic studies
+      'main.jc-silvana-exams .silv-studies { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }',
+      'main.jc-silvana-exams .silv-study { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 4px solid #7A8FA6; border-radius: 10px; padding: 16px 18px; }',
+      'main.jc-silvana-exams .silv-study-imaging    { border-left-color: #244E6E; }',
+      'main.jc-silvana-exams .silv-study-pathology  { border-left-color: #7A2E22; }',
+      'main.jc-silvana-exams .silv-study-endoscopy  { border-left-color: #B8954A; }',
+      'main.jc-silvana-exams .silv-study-functional { border-left-color: #3E7CA3; }',
+      'main.jc-silvana-exams .silv-study-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }',
+      'main.jc-silvana-exams .silv-study-cat { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: #EEF1F4; color: #566; }',
+      'main.jc-silvana-exams .silv-study-cat-imaging    { background: #E7EEF5; color: #244E6E; }',
+      'main.jc-silvana-exams .silv-study-cat-pathology  { background: #F4E7E3; color: #7A2E22; }',
+      'main.jc-silvana-exams .silv-study-cat-endoscopy  { background: #F7F0DD; color: #8a6d23; }',
+      'main.jc-silvana-exams .silv-study-cat-functional { background: #E8F0F4; color: #2c6080; }',
+      'main.jc-silvana-exams .silv-study-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      'main.jc-silvana-exams .silv-study-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.25; color: #0D1B2A; margin-bottom: 5px; }',
+      'main.jc-silvana-exams .silv-study-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 9px; line-height: 1.5; }',
+      'main.jc-silvana-exams .silv-study-concl { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.55; color: #1E2D3D; margin: 0 0 10px; }',
+      'main.jc-silvana-exams .silv-study-srcs { display: flex; flex-wrap: wrap; gap: 8px; }',
+      'main.jc-silvana-exams .silv-study-src { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #244E6E; text-decoration: none; border: 1px solid #E5E2DC; border-radius: 6px; padding: 4px 10px; background: #F4F1EA; }',
+      'main.jc-silvana-exams .silv-study-src:hover { border-color: #B8954A; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -4058,6 +4124,10 @@
               '<span>' + t('Markers tracked', 'Marcadores') + '</span>' +
               '<span>' + data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0) + '</span>' +
             '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Imaging & studies', 'Imagem & estudos') + '</span>' +
+              '<span>' + ((data.studies && data.studies.length) || 0) + '</span>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</section>';
@@ -4156,6 +4226,15 @@
             data.panels.map(silvanaPanelDetails).join('') +
           '</div>' +
           silvanaHistoricalComparison(data.panels) +
+          (data.studies && data.studies.length ?
+            '<div class="section-label" style="margin-top:32px;">' + t('09B · Imaging & studies', '09B · Imagem & estudos') + '</div>' +
+            '<h2 class="section-title">' + t('Imaging & diagnostic studies', 'Estudos de imagem e diagnósticos') + '</h2>' +
+            '<p class="section-desc">' +
+              t('Non-lab diagnostic exams — imaging, pathology, endoscopy and functional studies — newest first. Each card links its original report.',
+                'Exames diagnósticos não laboratoriais — imagem, patologia, endoscopia e estudos funcionais — mais recentes primeiro. Cada cartão traz o laudo original.') +
+            '</p>' +
+            silvanaStudiesList(data.studies)
+          : '') +
           '<div class="section-label" style="margin-top:32px;">' + t('Source PDFs', 'PDFs originais') + '</div>' +
           '<h2 class="section-title">' + t('Original lab reports', 'Laudos originais') + '</h2>' +
           '<p class="section-desc">' +
