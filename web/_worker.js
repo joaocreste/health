@@ -576,19 +576,45 @@ async function handlePatientDashboardBuild(request, env, ctx) {
   }
 }
 
-/* GET /api/patient-dashboard-build/status?job_id=...  — poll endpoint. */
+/* GET /api/patient-dashboard-build/status
+   - ?job_id=...  -> that job's status (poll).
+   - ?patient=... -> the latest in-flight (queued|running) job for this patient,
+     or { status:"idle" } if none. Side-effect free — lets a freshly-loaded page
+     attach to a job started elsewhere WITHOUT starting one. */
 async function handleInsightJobStatus(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
   const jobId = String(url.searchParams.get("job_id") || "").trim();
-  if (!jobId) return jsonError(400, "job_id_required");
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId)) {
-    return jsonError(404, "job_not_found");
-  }
+  const patientClerk = String(url.searchParams.get("patient") || "").trim();
   const viewerClerk = request.headers.get("X-Viewer-Clerk") || url.searchParams.get("viewer") || "";
   try {
     const sql = neon(env.DATABASE_URL);
     await ensureInsightJobsTable(sql);
+
+    // Patient-scoped probe (no job_id): return the latest active job, if any.
+    if (!jobId) {
+      if (!patientClerk) return jsonError(400, "job_id_or_patient_required");
+      const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+            AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+      if (pr.length === 0) return jsonError(404, "patient_not_found");
+      const patientId = pr[0].id;
+      const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+      if (!access.ok) return jsonError(access.status, access.reason);
+      const active = await sql`
+        SELECT id, status, progress, stage, insights_version FROM insight_jobs
+        WHERE patient_id = ${patientId} AND status IN ('queued','running')
+        ORDER BY started_at DESC LIMIT 1`;
+      if (active.length === 0) return new Response(JSON.stringify({ status: "idle" }), { headers: JSON_HEADERS });
+      const j = active[0];
+      return new Response(JSON.stringify({
+        job_id: j.id, status: j.status, progress: j.progress, stage: j.stage,
+        insights_version: j.insights_version,
+      }), { headers: JSON_HEADERS });
+    }
+
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId)) {
+      return jsonError(404, "job_not_found");
+    }
     const rows = await sql`
       SELECT id, patient_id, status, progress, stage, error, insights_version,
              started_at, updated_at, finished_at

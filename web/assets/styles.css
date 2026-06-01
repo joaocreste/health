@@ -51,6 +51,12 @@
   --amber-50:  #FDF8EC;
   --amber-100: #FAEFCD;
   --amber-200: #F4DD9C;
+
+  /* ── AI insight cards (design-system rule 7a) ──
+     Every TEXT-based AI insight renders amber. Reusable app-wide via
+     .ai-insight-card. Coexists with the purple .ai-pill badge. */
+  --ai-insight-bg:     #FDF8EC;
+  --ai-insight-stroke: #F4DD9C;
   --amber-300: #ECC662;
   --amber-400: #DDAD3C;
   --amber-500: #C29327;
@@ -1152,12 +1158,13 @@ section.report-section.light             { background: var(--surface-base); } /*
    Pairs with the purple .ai-pill that marks the same content. Scoped to
    genuine AI cards (incl. Leo's injected summary); the shared .list-card
    stays neutral on every non-AI page. */
+.ai-insight-card,
 .ai-text-card,
 .ai-synthesis-card,
 .chart-card.ai-comments,
 #leo-ai-summary .list-card {
-  background: #FDF8EC;
-  border: 1px solid #F4DD9C;
+  background: var(--ai-insight-bg, #FDF8EC);
+  border: 1px solid var(--ai-insight-stroke, #F4DD9C);
 }
 .list-card h4 {
   font-family: var(--font-display);

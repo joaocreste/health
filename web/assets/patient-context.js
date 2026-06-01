@@ -1351,6 +1351,7 @@
         // touches alerts/timeline rows, not .lab-test or .lab-cmp-table).
         injectStyles();
         retrofitStaticLabHistory();
+        decorateExamsWithAiOutliers(); // 9a — AI outlier explanation onto static lab cards
       }
       // LLM-authored AI insights (patient_dashboards / section 'ai-insights').
       // Static pages otherwise skip the dashboard layer, so do it here. No-ops
@@ -1389,11 +1390,12 @@
       }
       if (patient === SILVANA_CRESTE) {
         renderSilvanaPhysicalExams();
+      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
         return;
       }
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); })
+        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); decorateExamsWithAiOutliers(); })
         .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); });
       return;
     }
@@ -1422,6 +1424,7 @@
     }
     if (patient === SILVANA_CRESTE && section === 'physical-exams') {
       renderSilvanaPhysicalExams();
+      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
       return;
     }
     if (patient === SILVANA_CRESTE && section === 'physical-genetics') {
@@ -1841,7 +1844,7 @@
         + '<div class="ai-detail-body">' + aiBt(it.detail) + '</div>'
         + aiEvidence(it.evidence) + aiClin(it.clinician_note) + '</details>'
       : (aiEvidence(it.evidence) + aiClin(it.clinician_note));
-    return '<div class="ai-card ai-sevedge-' + sev + '">'
+    return '<div class="ai-card ai-insight-card ai-sevedge-' + sev + '">'
       + '<div class="ai-card-head">' + aiPill()
       + (it.kind === 'attention' ? aiSevChip(it.severity) : '<span class="ai-chip ai-sevchip-strength">' + t('strength', 'força') + '</span>')
       + '<span class="ai-card-title">' + aiBt(it.title) + '</span></div>'
@@ -1850,12 +1853,12 @@
   }
   function aiCrossCard(l) {
     if (!l || !l.summary) return '';
-    return '<div class="ai-card ai-sevedge-cross">' + aiPill()
+    return '<div class="ai-card ai-insight-card ai-sevedge-cross">' + aiPill()
       + '<p class="ai-card-summary">' + aiBt(l.summary) + '</p>' + aiEvidence(l.evidence) + '</div>';
   }
   function aiInlineCard(x) {
     if (!x || !x.title) return '';
-    return '<div class="ai-card ai-sevedge-' + (x.severity || 'info') + '">'
+    return '<div class="ai-card ai-insight-card ai-sevedge-' + (x.severity || 'info') + '">'
       + '<div class="ai-card-head">' + aiPill() + aiSevChip(x.severity)
       + (x.trigger ? '<span class="ai-trigger">' + escapeHtml(String(x.trigger).replace(/_/g, ' ')) + '</span>' : '')
       + '<span class="ai-card-title">' + aiBt(x.title) + '</span></div>'
@@ -1937,7 +1940,9 @@
       '.ai-ins-sub{font-size:1rem;line-height:1.5;color:#1E2D3D;margin:12px 0 0;font-weight:500;}',
       '.ai-sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#7A8FA6;margin:22px 0 10px;}',
       '.ai-sub.ai-pillar-h{color:#B8954A;border-top:1px solid #EFEAE0;padding-top:14px;}',
-      '.ai-card{background:#fff;border:1px solid #E5E2DC;border-left:4px solid #7A8FA6;border-radius:10px;padding:14px 16px;margin:10px 0;box-shadow:0 1px 2px rgba(13,27,42,.04);}',
+      // Amber AI-insight card (design-system rule 7a): every text-based AI insight
+      // reads amber. Tokens from styles.css; literal fallbacks keep it robust.
+      '.ai-card{background:var(--ai-insight-bg,#FDF8EC);border:1px solid var(--ai-insight-stroke,#F4DD9C);border-left:4px solid #7A8FA6;border-radius:10px;padding:14px 16px;margin:10px 0;box-shadow:0 1px 2px rgba(13,27,42,.04);}',
       '.ai-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
       '.ai-card-title{font-weight:600;color:#0D1B2A;font-size:.96rem;}',
       '.ai-card-summary{margin:4px 0 0;color:#1E2D3D;font-size:.9rem;line-height:1.5;}',
@@ -1956,6 +1961,20 @@
       '.ai-detail{margin-top:8px;}.ai-detail summary{cursor:pointer;font-size:.78rem;color:#B8954A;font-weight:600;}',
       '.ai-detail-body{margin:8px 0 0;color:#1E2D3D;font-size:.86rem;line-height:1.55;}',
       '.ai-clin{margin:8px 0 0;font-size:.82rem;color:#0D1B2A;}.ai-clin-body{color:#3a4a5a;}',
+      // Exam outlier explanation (9a) — attached inside each .lab-test card.
+      '.lab-ai-explain{margin-top:12px;padding-top:12px;border-top:1px dashed #EAE6DE;}',
+      '.lab-ai-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
+      '.lab-ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;color:#7A8FA6;}',
+      '.lab-ai-interp{margin:2px 0 10px;color:#1E2D3D;font-size:.88rem;line-height:1.5;}',
+      '.lab-ai-cf{border-radius:10px;padding:12px 14px;margin:8px 0;}',
+      '.lab-ai-cf-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:#8a6d23;font-weight:700;}',
+      '.lab-ai-cf-disc{font-size:.74rem;font-style:italic;color:#8a6d23;margin:4px 0 8px;}',
+      '.lab-ai-cf-list{list-style:disc;margin:0;padding-left:18px;}',
+      '.lab-ai-cf-list li{font-size:.84rem;color:#3a4a5a;margin:3px 0;line-height:1.45;}',
+      '.lab-ai-next{margin-top:8px;}',
+      '.lab-ai-next-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:#7A8FA6;margin-bottom:3px;}',
+      '.lab-ai-next ul{list-style:disc;margin:0;padding-left:18px;}',
+      '.lab-ai-next li{font-size:.82rem;color:#3a4a5a;margin:2px 0;line-height:1.45;}',
     ].join('');
     var s = document.createElement('style');
     s.id = 'ai-ins-styles';
@@ -1985,6 +2004,83 @@
         else document.body.appendChild(sec);
       });
   }
+
+  // ── Exam-page outlier explanation cards (9a) ───────────────────────
+  // For each AI lab inline insight (out_of_range_lab / trending_lab) carrying the
+  // structured card fields, attach an interpretation + amber POSSIBLE CONTRIBUTING
+  // FACTORS block + next-steps onto the matching .lab-test card. The reference bar
+  // and clickable history (9b) are already rendered by renderLabTest /
+  // retrofitStaticLabHistory. No-op for analytes with no AI insight (those cards
+  // keep their data-only view). Generated one-per-outlier — never hand-curated.
+  function normAnalyte(s) {
+    return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+  }
+  function aiOutlierExplainHtml(x) {
+    var interp = (x.interpretation && (x.interpretation.en || x.interpretation.pt)) ? aiBt(x.interpretation) : '';
+    var cf = (x.contributing_factors || []).filter(Boolean).map(function (f) { return '<li>' + aiBt(f) + '</li>'; }).join('');
+    var ns = (x.next_steps || []).filter(Boolean).map(function (s) { return '<li>' + aiBt(s) + '</li>'; }).join('');
+    if (!interp && !cf && !ns) return '';
+    var html = '<div class="lab-ai-head">' + aiPill() + aiSevChip(x.severity)
+      + '<span class="lab-ai-trigger">' + t('AI reading', 'Leitura por IA') + '</span></div>';
+    if (interp) html += '<p class="lab-ai-interp">' + interp + '</p>';
+    if (cf) html += '<div class="ai-insight-card lab-ai-cf">'
+      + '<div class="lab-ai-cf-head">' + t('Possible contributing factors', 'Possíveis fatores contribuintes') + '</div>'
+      + '<p class="lab-ai-cf-disc">' + t(
+          '— suggestive only, based on current medication and history. Does not replace clinical evaluation.',
+          '— apenas sugestivo, com base na medicação e no histórico atuais. Não substitui avaliação clínica.') + '</p>'
+      + '<ul class="lab-ai-cf-list">' + cf + '</ul></div>';
+    if (ns) html += '<div class="lab-ai-next"><div class="lab-ai-next-head">' + t('Next steps', 'Próximos passos') + '</div><ul>' + ns + '</ul></div>';
+    return html;
+  }
+  function decorateExamsWithAiOutliers() {
+    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
+      .catch(function () { return { sections: {} }; })
+      .then(function (data) {
+        var rec = data && data.sections && data.sections['ai-insights'];
+        var payload = rec && rec.cards_json;
+        var inl = payload && payload.inline_insights;
+        if (!inl || !inl.length) return;
+        var byKey = {};
+        inl.forEach(function (x) {
+          if (!x) return;
+          if (x.trigger !== 'out_of_range_lab' && x.trigger !== 'trending_lab') return;
+          var k = normAnalyte(x.analyte || (x.title && (x.title.en || x.title.pt)) || x.anchor);
+          if (k && !byKey[k]) byKey[k] = x;
+        });
+        if (!Object.keys(byKey).length) return;
+        injectAiInsightsStyles();
+        var cards = document.querySelectorAll('.lab-test');
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          if (card.querySelector('.lab-ai-explain')) continue;
+          var nameEl = card.querySelector('.lab-test-name');
+          if (!nameEl) continue;
+          var x = byKey[normAnalyte(nameEl.textContent)];
+          if (!x) continue;
+          var html = aiOutlierExplainHtml(x);
+          if (!html) continue;
+          var div = document.createElement('div');
+          div.className = 'lab-ai-explain';
+          div.innerHTML = html;
+          var hist = card.querySelector('.lab-test-history');
+          if (hist) card.insertBefore(div, hist); else card.appendChild(div);
+        }
+      });
+  }
+  // Exposed so a rebuild can refresh the per-outlier cards too.
+  window.jcDecorateExamOutliers = decorateExamsWithAiOutliers;
+
+  // Exposed so assets/insights-update.js can re-render the insight cards in place
+  // after a rebuild job succeeds — no full page reload. Safe/idempotent: it
+  // removes any prior [data-ai-insights] block before re-inserting.
+  window.jcRefreshAiInsights = function (sec) {
+    try {
+      decorateWithAiInsights(sec || currentSection());
+      if ((sec || currentSection()) === 'physical-exams') decorateExamsWithAiOutliers();
+    } catch (e) { /* keep existing cards */ }
+  };
 
   function dashboardCardHtml(dashSection, record, opts) {
     opts = opts || {};
