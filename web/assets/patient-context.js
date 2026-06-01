@@ -1233,6 +1233,62 @@
   // (non-Patient-Zero), pass the just-appended <main> so the zone lands
   // beneath it. When omitted (Patient Zero's static page), fall back to
   // "before footer" → "append to body".
+  /* ── Bottom dock: Update-AI-Insights + AI cards (left) side by side with the
+     Danger zone (right). The three pieces are injected by different code paths
+     (this file + insights-update.js) at different times, so rather than fight
+     placement we REFLOW: gather whatever exists into a two-column row pinned to
+     the visual bottom of the page. Idempotent — safe to call repeatedly. ── */
+  function injectBottomDockStyles() {
+    if (document.getElementById('jc-bottom-dock-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'jc-bottom-dock-styles';
+    s.textContent = [
+      '.jc-bottom-dock { max-width: 1080px; margin: 32px auto; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }',
+      '.jc-bottom-dock .jc-bottom-ai { flex: 1 1 520px; min-width: 0; }',
+      '.jc-bottom-dock .jc-bottom-danger { flex: 0 1 340px; min-width: 0; }',
+      '.jc-bottom-dock .jc-bottom-ai:empty, .jc-bottom-dock .jc-bottom-danger:empty { display: none; }',
+      // neutralise each child\'s own centring/width so the columns control layout
+      '.jc-bottom-dock .iu-wrap { max-width: none; margin: 0 0 16px; padding: 0; }',
+      '.jc-bottom-dock .ai-ins-block { max-width: none; margin: 0; padding: 0; border-top: none; }',
+      '.jc-bottom-dock .jc-danger-zone { max-width: none; margin: 0; padding: 0; }',
+      '@media (max-width: 880px) { .jc-bottom-dock { gap: 18px; } .jc-bottom-dock .jc-bottom-ai, .jc-bottom-dock .jc-bottom-danger { flex: 1 1 100%; } }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function ensureBottomDock() {
+    injectBottomDockStyles();
+    var dock = document.querySelector('.jc-bottom-dock');
+    if (dock) return dock;
+    dock = document.createElement('div');
+    dock.className = 'jc-bottom-dock';
+    dock.innerHTML = '<div class="jc-bottom-ai" data-bottom-ai></div><div class="jc-bottom-danger" data-bottom-danger></div>';
+    // Pin to the visual bottom: before a VISIBLE footer (static pages) or at the
+    // end of <body> (dynamic pages hide the original footer and append content).
+    var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
+    var footerVisible = footer && footer.offsetParent !== null;
+    if (footerVisible && footer.parentNode) footer.parentNode.insertBefore(dock, footer);
+    else document.body.appendChild(dock);
+    return dock;
+  }
+
+  function reflowBottomDock() {
+    var iu = document.querySelector('.iu-wrap[data-insights-update]');
+    var ai = document.querySelector('section[data-ai-insights]');
+    var danger = document.querySelector('.jc-danger-zone');
+    if (!iu && !ai && !danger) return;
+    var dock = ensureBottomDock();
+    var aiCol = dock.querySelector('[data-bottom-ai]');
+    var dangerCol = dock.querySelector('[data-bottom-danger]');
+    if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
+    if (iu && iu.parentNode !== aiCol) aiCol.appendChild(iu);
+    if (iu && aiCol.firstChild !== iu) aiCol.insertBefore(iu, aiCol.firstChild); // button above the AI cards
+    if (danger && danger.parentNode !== dangerCol) dangerCol.appendChild(danger);
+  }
+  // Exposed so assets/insights-update.js can trigger a reflow after it mounts /
+  // refreshes the button + cards.
+  window.jcReflowBottom = reflowBottomDock;
+
   function injectDangerZone(insertAfterEl) {
     if (document.querySelector('.jc-danger-zone')) return;
     var zone = document.createElement('section');
@@ -1257,6 +1313,7 @@
       else document.body.appendChild(zone);
     }
     zone.querySelector('.jc-danger-btn').addEventListener('click', openDangerModal);
+    reflowBottomDock(); // move the danger zone into the side-by-side bottom dock
   }
 
   function openDangerModal() {
@@ -2002,6 +2059,7 @@
         var footer = document.querySelector('footer');
         if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer);
         else document.body.appendChild(sec);
+        reflowBottomDock(); // dock the AI cards next to the danger zone
       });
   }
 

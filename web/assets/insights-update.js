@@ -223,8 +223,11 @@
 
     function refreshCards() {
       try {
-        if (typeof window.jcRefreshAiInsights === 'function') window.jcRefreshAiInsights(section());
-        else location.reload();
+        if (typeof window.jcRefreshAiInsights === 'function') {
+          window.jcRefreshAiInsights(section());
+          // re-dock the freshly rendered cards next to the danger zone
+          if (typeof window.jcReflowBottom === 'function') setTimeout(window.jcReflowBottom, 300);
+        } else { location.reload(); }
       } catch (e) { /* leave existing cards in place */ }
     }
 
@@ -346,6 +349,14 @@
       ref.appendChild(wrap);                      // bottom of the bespoke main
     }
     wire(wrap);
+    // Move the button (and, as they arrive, the AI cards) into the bottom dock
+    // so they sit side by side with the Danger zone. patient-context.js owns the
+    // dock; reflow is idempotent. A deferred call catches the async AI block.
+    if (typeof window.jcReflowBottom === 'function') {
+      window.jcReflowBottom();
+      setTimeout(window.jcReflowBottom, 400);
+      setTimeout(window.jcReflowBottom, 1500);
+    }
     return true;
   }
   function mount() {
