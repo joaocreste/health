@@ -72,24 +72,24 @@
     if (document.getElementById('iu-styles')) return;
     var css = [
       '.iu-wrap{max-width:880px;margin:26px auto 4px;padding:0 22px;font-family:var(--font-body,system-ui);}',
-      '.iu-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}',
-      '.iu-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--accent-petrol,#244E6E);',
-        'background:var(--accent-petrol,#244E6E);color:#fff;font-family:var(--font-display,sans-serif);',
-        'font-size:.9rem;font-weight:600;padding:10px 16px;border-radius:10px;cursor:pointer;',
-        'transition:background .15s,box-shadow .15s;box-shadow:var(--shadow-sm,0 1px 2px rgba(18,42,61,.06));}',
-      '.iu-btn:hover{background:var(--accent-petrol-light,#4D7BA0);border-color:var(--accent-petrol-light,#4D7BA0);}',
-      '.iu-btn:disabled{opacity:.55;cursor:not-allowed;background:var(--accent-petrol,#244E6E);}',
+      // card — mirrors .jc-danger-card structure, purple stroke instead of red
+      '.iu-card{background:#FFFFFF;border:1px solid #d9c6f5;border-radius:10px;padding:20px 24px;display:flex;flex-direction:column;gap:10px;}',
+      '.iu-eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono,monospace);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6b3fb5;}',
+      '.iu-title{font-family:var(--font-display,sans-serif);font-weight:700;font-size:15px;color:#0D1B2A;margin:0;}',
+      '.iu-body{font-family:var(--font-body,sans-serif);font-size:13px;color:#1E2D3D;line-height:1.5;margin:0;}',
+      // button — outline purple, mirrors .jc-danger-btn
+      '.iu-btn{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-family:var(--font-body,sans-serif);font-size:13px;font-weight:500;color:#6b3fb5;background:#FFFFFF;border:1px solid #d9c6f5;border-radius:6px;cursor:pointer;transition:background .15s,color .15s;}',
+      '.iu-btn:hover{background:#6b3fb5;color:#FFFFFF;border-color:#6b3fb5;}',
+      '.iu-btn:disabled{opacity:.55;cursor:not-allowed;}',
       '.iu-btn svg{flex:none;}',
-      '.iu-sub{font-size:.76rem;color:var(--text-muted,#7A8FA6);line-height:1.4;}',
-      '.iu-meta{font-size:.76rem;color:var(--text-muted,#7A8FA6);}',
-      '.iu-newdata{font-size:.72rem;color:var(--accent-gold,#B8860B);font-weight:600;}',
+      '.iu-meta{font-size:12px;color:var(--text-muted,#7A8FA6);}',
       // progress
-      '.iu-prog{display:none;flex-direction:column;gap:7px;width:100%;max-width:460px;}',
+      '.iu-prog{display:none;flex-direction:column;gap:7px;width:100%;}',
       '.iu-prog.iu-on{display:flex;}',
       '.iu-prog-top{display:flex;justify-content:space-between;align-items:baseline;font-size:.8rem;color:var(--text-secondary,#1E2D3D);}',
-      '.iu-prog-pct{font-family:var(--font-mono,monospace);font-weight:600;color:var(--accent-petrol,#244E6E);}',
-      '.iu-bar{height:8px;border-radius:999px;background:var(--surface-cool,#EEF3F6);overflow:hidden;}',
-      '.iu-bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--accent-petrol,#244E6E),var(--accent-petrol-light,#4D7BA0));transition:width .6s ease;}',
+      '.iu-prog-pct{font-family:var(--font-mono,monospace);font-weight:600;color:#6b3fb5;}',
+      '.iu-bar{height:8px;border-radius:999px;background:#efe7fb;overflow:hidden;}',
+      '.iu-bar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#8b5fd0,#6b3fb5);transition:width .6s ease;}',
       '.iu-err{display:none;margin-top:8px;font-size:.82rem;color:#8a3a2e;background:#fbeae6;border:1px solid #f3cfc6;border-radius:8px;padding:8px 11px;}',
       '.iu-err.iu-on{display:block;}',
       // confirm modal
@@ -119,17 +119,21 @@
       '<path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>';
 
   function buildWrap() {
-    var wrap = document.createElement('div');
+    // Card structure mirrors the "Delete my health data" danger card:
+    // eyebrow -> title -> body -> outline button (purple instead of red).
+    var wrap = document.createElement('section');
     wrap.className = 'iu-wrap';
     wrap.setAttribute('data-insights-update', '1');
     wrap.innerHTML =
-      '<div class="iu-row">' +
+      '<div class="iu-card">' +
+        '<div class="iu-eyebrow">' + t('AI insights', 'Insights de IA') + '</div>' +
+        '<h3 class="iu-title">' + t('Update AI Insights', 'Atualizar Insights de IA') + '</h3>' +
+        '<p class="iu-body">' +
+          t('Re-reviews all your data and refreshes insights across every page. Your underlying health data is not changed.',
+            'Revisa todos os seus dados e atualiza os insights em todas as páginas. Seus dados de saúde não são alterados.') +
+        '</p>' +
         '<button type="button" class="iu-btn" data-iu-btn>' + refreshIcon +
           t('Update AI Insights', 'Atualizar Insights de IA') + '</button>' +
-        '<div class="iu-sub" data-iu-sub>' +
-          t('Re-reviews all your data and refreshes insights across every page',
-            'Revisa todos os seus dados e atualiza os insights em todas as páginas') +
-        '</div>' +
         '<div class="iu-prog" data-iu-prog>' +
           '<div class="iu-prog-top">' +
             '<span data-iu-stage>' + t('Updating', 'Atualizando') + '</span>' +
@@ -137,9 +141,9 @@
           '</div>' +
           '<div class="iu-bar"><div class="iu-bar-fill" data-iu-fill></div></div>' +
         '</div>' +
-      '</div>' +
-      '<div class="iu-meta" data-iu-meta></div>' +
-      '<div class="iu-err" data-iu-err></div>';
+        '<div class="iu-meta" data-iu-meta></div>' +
+        '<div class="iu-err" data-iu-err></div>' +
+      '</div>';
     return wrap;
   }
 
@@ -177,7 +181,6 @@
   /* ── controller per mounted wrap ── */
   function wire(wrap) {
     var btn = q(wrap, '[data-iu-btn]');
-    var sub = q(wrap, '[data-iu-sub]');
     var prog = q(wrap, '[data-iu-prog]');
     var stageEl = q(wrap, '[data-iu-stage]');
     var pctEl = q(wrap, '[data-iu-pct]');
@@ -194,12 +197,10 @@
 
     function setIdle() {
       prog.classList.remove('iu-on');
-      sub.style.display = '';
       btn.style.display = '';
       btn.disabled = false;
     }
     function setProgressUI(pct, stageKey) {
-      sub.style.display = 'none';
       btn.style.display = 'none';
       prog.classList.add('iu-on');
       var p = Math.max(0, Math.min(100, pct || 0));
