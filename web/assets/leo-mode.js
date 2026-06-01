@@ -423,7 +423,7 @@
           '02 · Synthesis <span class="ai-pill">AI</span>' +
         '</div>' +
         '<h2 class="section-title">AI summary · Leo Keller</h2>' +
-        '<p class="section-desc">Synthesised across the lab, vitals and imaging history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.</p>' +
+        '<p class="section-desc">Synthesised across the lab, vitals, imaging and genetics history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.</p>' +
 
         // Risk-tag legend
         '<div class="leo-risk-legend" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12px;color:var(--text-muted);margin-bottom:14px;">' +
@@ -438,15 +438,15 @@
             '<h4>What the data shows</h4>' +
             '<ul class="leo-risk-list" style="list-style:disc;padding-left:20px;">' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading dataset sits in Stage 1–2 territory (mean ~135 / 90 mmHg) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — confirm BP response in 4–6 weeks; if mean stays above 130/80, escalate.' +
+                '<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading home dataset (since 13 Nov 2025) sits in Stage 1–2 territory (mean <strong>135.2 / 90.8 mmHg</strong>) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — worth confirming BP response with your clinician in 4–6 weeks; if the mean stays above 130/80, an escalation is reasonable to discuss.' +
                 '&nbsp;<span class="pill pill-flag" style="margin-left:4px;vertical-align:1px;">High</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Elevated homocysteine (14.40 µmol/L)</strong> against normal serum B12 and folate — consistent with sub-optimal one-carbon metabolism (suspected MTHFR polymorphism). Independent cardiovascular risk factor that stacks with the BP picture; consider MTHFR testing + methylated B-complex trial.' +
+                '<strong>Elevated homocysteine (14.40 µmol/L)</strong> despite high-normal serum B12 (863) and normal folate, now explained by a <strong>confirmed MTHFR compound heterozygote</strong> on the genetics panel (C677T <em>rs1801133</em> + A1298C <em>rs1801131</em>, ~50% reduced enzyme activity) — the classic pattern where unmethylated B-vitamins fail to clear homocysteine. An independent cardiovascular risk factor that stacks with the BP axis; an L-methylfolate adjunct is the targeted, low-cost step worth discussing with your clinician.' +
                 '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Cervical spine MRI</strong> — multi-level degenerative change C3/4–C6/7 with mild bilateral foraminal narrowing. No cord signal abnormality. Conservative management on imaging grounds; physiotherapy if symptoms present.' +
+                '<strong>Cervical spine MRI (26 Mar 2026)</strong> — multi-level degenerative change C3–C7 with mild bilateral foraminal narrowing and a normal cord signal. Conservative management on imaging grounds; physiotherapy if symptoms present.' +
                 '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
@@ -471,7 +471,7 @@
 
         '<div class="alert alert-info">' +
           '<strong>Recommended next step.</strong> Repeat the full blood &amp; urine panel under standardised conditions to confirm the creatinine trend and re-baseline homocysteine. ' +
-          'Independently, an MTHFR polymorphism test (or methylated B-complex supplementation trial) is a reasonable, low-cost diagnostic step given the homocysteine pattern.' +
+          'Because the MTHFR compound-heterozygote genotype is already confirmed on the genetics panel, the open question is response rather than diagnosis — an L-methylfolate trial is a reasonable, low-cost step worth discussing with your clinician.' +
         '</div>' +
       '</div>';
 
