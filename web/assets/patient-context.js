@@ -1278,6 +1278,16 @@
     var danger = document.querySelector('.jc-danger-zone');
     if (!iu && !ai && !danger) return;
     var dock = ensureBottomDock();
+    // Re-pin the dock to the visual bottom on every reflow. The dock can be
+    // created early (insights-update mounts on DOMContentLoaded) while the page's
+    // main content is appended later by an async render — without this the dock
+    // would sit ABOVE the summary. Move it after the last rendered content.
+    var pinFooter = document.querySelector('footer.doc-footer') || document.querySelector('footer');
+    if (pinFooter && pinFooter.offsetParent !== null) {
+      if (pinFooter.previousElementSibling !== dock) pinFooter.parentNode.insertBefore(dock, pinFooter);
+    } else if (document.body.lastElementChild !== dock) {
+      document.body.appendChild(dock);
+    }
     var aiCol = dock.querySelector('[data-bottom-ai]');
     var dangerCol = dock.querySelector('[data-bottom-danger]');
     if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
