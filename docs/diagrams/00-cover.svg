@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif">
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.22em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .num    { font-family:'IBM Plex Mono', monospace; fill:#F4B942; letter-spacing:0.05em; }
+      .item   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#0A1428"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1600" height="6" fill="#F4B942"/>
+
+  <!-- big logo -->
+  <g transform="translate(150,250) scale(2.4)">
+    <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+    <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="96" y="430" class="ntitle" font-size="78" font-weight="300" letter-spacing="0.03em">Lumen Health</text>
+  <text x="100" y="486" class="ntitle" font-size="30" font-weight="300" fill="#A4B2CC" letter-spacing="0.02em">System &amp; Data Architecture</text>
+  <text x="100" y="540" class="mono" font-size="13">FROM DATA TO INSIGHTS</text>
+  <text x="100" y="828" class="mono" font-size="12" fill="#6F7E9A">DARK THEME · SELF-CONTAINED SVG · DRAWN FROM THE REPOSITORY · 2026</text>
+
+  <!-- contents -->
+  <g>
+    <text x="820" y="150" class="mono" font-size="13" fill="#F4B942">CONTENTS</text>
+    <g font-size="20">
+      <text x="820" y="206" class="num">01</text><text x="876" y="206" class="item">System architecture</text>
+      <text x="820" y="262" class="num">02</text><text x="876" y="262" class="item">Ingestion / ETL pipeline</text>
+      <text x="820" y="318" class="num">03</text><text x="876" y="318" class="item">Data treatment &amp; routing</text>
+      <text x="820" y="374" class="num">04</text><text x="876" y="374" class="item">Data residency &amp; locations</text>
+      <text x="820" y="430" class="num">05</text><text x="876" y="430" class="item">AI / LLM architecture &amp; IP boundary</text>
+      <text x="820" y="486" class="num">06</text><text x="876" y="486" class="item">Database schema</text>
+      <text x="820" y="542" class="num">07</text><text x="876" y="542" class="item">Auth &amp; role-based access</text>
+      <text x="820" y="598" class="num">08</text><text x="876" y="598" class="item">Multi-tenant rendering</text>
+      <text x="820" y="654" class="num">09</text><text x="876" y="654" class="item">Compliance state machine</text>
+    </g>
+    <line x1="820" y1="694" x2="1500" y2="694" stroke="#283655"/>
+    <text x="820" y="730" class="body" font-size="15">9 diagrams · backend operations and frontend needs</text>
+  </g>
+</svg>

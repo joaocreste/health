@@ -16,6 +16,10 @@ Each file is a single `.svg` with an inline `<style>` block, no external scripts
 | [`08-multitenancy-rendering.svg`](08-multitenancy-rendering.svg) | `patient-context.js` section dispatch → default **data-driven renderer** vs. **bespoke renderers** (Patient Zero static; Paulo/Silvana/Leo). Universal **hero-first landing rule** (hero → Reports → AI cards → rest; never above hero) and Mental-section `.ai-pill`/disclaimer/ICD-10/collapse conventions. |
 | [`09-compliance-state-machine.svg`](09-compliance-state-machine.svg) | Two states: **today (dev tier) — not compliant by design** vs. **the flip (first real patient) — Enterprise + BAA** across Cloudflare/Anthropic/Neon/Clerk, audit log required, DPAs + SCCs. Architecture unchanged — only connection strings/billing move. |
 
+## Deck
+
+[`Lumen-Health-Architecture.pptx`](Lumen-Health-Architecture.pptx) — all nine diagrams plus a branded cover/contents slide ([`00-cover.svg`](00-cover.svg)) in one 16:9 PowerPoint, dark background, ready for investor decks. Each slide is the diagram rasterized at high resolution on a matching `#0A1428` background. To rebuild after editing any SVG: `rsvg-convert -w 2600 <file>.svg -o <file>.png` for each, then assemble with `python-pptx` (fit-to-slide, centered, cover full-bleed).
+
 ## Notes
 
 - **Source of truth:** drawn from the repo as of generation — `web/_worker.js`, `lib/ingest.js`, `lib/dashboard.js`, `db/schema.ts` + migrations, `web/assets/patient-context.js`, `scripts/build-patient-record.mjs`, `branding.html`, and `PROJECT-MEMORY-EXPORT.md`. Where the original brief differed from the code, the code won (e.g. ingestion is currently direct multipart `POST /api/ingest`; signed-URL-direct-to-R2 is shown as the target/planned path; DICOM `dcmjs`/JPEG-preview generation is marked planned; classification uses Haiku 4.5 / Sonnet 4.6 while chat & insights use Opus 4.7).
