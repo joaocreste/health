@@ -521,6 +521,138 @@
     }
   }
 
+  // ─── 7. Inject Leo-appropriate lab explanation cards on outliers ─
+  // The static page's per-marker notes + "Possible contributing
+  // factors" lists are written around Joao's polypharmacy and are hidden
+  // for Leo (see HIDE_SELECTORS / hideJoaoSpecificAlerts). For each
+  // out-of-range marker in the Blood & urine panel we graft a
+  // Leo-specific explanation (Perindopril-only context, the confirmed
+  // MTHFR genotype, no psych meds) so every outlier carries a short
+  // explanation + a next step. Reuses the native .lab-note / .lab-causes
+  // markup so styling matches the rest of the panel. MUST run after
+  // hideSelectors() so these injected blocks are not swept by the hide
+  // pass. Idempotent (guards on .leo-lab-explain). Matches only
+  // non-normal cards to avoid grabbing a same-named normal marker.
+  var LEO_LAB_OUTLIERS = [
+    {
+      key: 'Homocysteine',
+      note: 'Above the upper reference limit (14.40 vs &lt;10 µmol/L). An independent cardiovascular risk marker that compounds the blood-pressure picture.',
+      factors: [
+        'Confirmed MTHFR compound heterozygote (C677T + A1298C, ~50% reduced enzyme activity) on the genetics panel — the methylation bottleneck that lets homocysteine accumulate.',
+        'Serum B12 (863) and folate are normal, so the issue is conversion, not substrate.',
+        'No B6 deficiency signals elsewhere on the panel.',
+        'Next step: a trial of L-methylfolate, which bypasses the MTHFR step, with a recheck in 8–12 weeks — worth discussing with your clinician.',
+      ],
+    },
+    {
+      key: 'hs-CRP',
+      note: 'Markedly above the 3 mg/L cardiovascular threshold (12.10 mg/L). At this magnitude it usually reflects an acute or recent inflammatory or infectious process at the time of the draw rather than a stable baseline.',
+      factors: [
+        'A transient infection, recent illness or minor injury near the collection date can push hs-CRP into double digits.',
+        'Local musculoskeletal inflammation (the cervical degenerative change on MRI) can add a smaller contribution.',
+        'Adiposity-driven low-grade inflammation is a minor chronic contributor.',
+        'Next step: repeat once fully symptom-free to separate a transient spike from a persistent elevation; if it stays above 3 mg/L it becomes relevant to the cardiovascular risk already flagged by the BP and homocysteine — discuss with your clinician.',
+      ],
+    },
+    {
+      key: 'Creatinine',
+      note: 'At the upper edge of normal (1.30 mg/dL) with a preserved eGFR above 60 mL/min — filtration remains in range.',
+      factors: [
+        'Perindopril, the single active medication, lowers intraglomerular pressure; a small creatinine rise after starting an ACE inhibitor is expected and usually benign (up to roughly 30 percent).',
+        'Hydration at collection and muscle mass both raise creatinine independently of kidney function.',
+        'No nephrotoxic co-medication is on the regimen.',
+        'Next step: recheck creatinine and electrolytes 1–2 weeks after any Perindopril dose change, and add Cystatin C if the value persists — worth discussing with your clinician.',
+      ],
+    },
+    {
+      key: 'Total Cholesterol',
+      note: 'At the top of the desirable band (199 mg/dL). Total cholesterol on its own is not actionable — the fractions are what matter.',
+      factors: [
+        'Total cholesterol bundles HDL (protective) and LDL (atherogenic); a high HDL can lift the total without raising risk.',
+        'Diet and genetics are the usual drivers.',
+        'Next step: a fasting lipid panel (LDL, HDL, triglycerides, non-HDL) to see which fraction is driving the number — relevant because BP and homocysteine already place this in a cardiovascular-risk context.',
+      ],
+    },
+    {
+      key: 'Estradiol',
+      note: 'Mildly elevated for an adult male (47.62 pg/mL). A single reading is sensitive to timing and assay.',
+      factors: [
+        'Peripheral aromatisation of testosterone to estradiol in adipose tissue is the most common driver in men.',
+        'Collection timing and the specific immunoassay can shift the number.',
+        'Next step: repeat on a morning sample alongside total testosterone and SHBG to read the testosterone-to-estradiol balance rather than estradiol in isolation.',
+      ],
+    },
+    {
+      key: 'DHEA',
+      note: 'Exactly at the lower limit of the male range (2.50 ng/mL). On its own this is a soft signal of adrenal-axis output.',
+      factors: [
+        'DHEA declines naturally with age and falls further under sustained stress and short sleep.',
+        'No medication on the current regimen suppresses the adrenal axis — Perindopril does not.',
+        'Read alongside a morning cortisol: a low-bound cortisol with a low-bound DHEA points to adrenal depletion rather than insufficiency, which is clinically distinct from primary adrenal insufficiency (Addison disease).',
+        'Next step: recheck DHEA-S with an 8 a.m. cortisol before drawing conclusions from a single lower-limit value.',
+      ],
+    },
+    {
+      key: 'Urinary specific gravity',
+      note: 'A dilute urine sample (1.005). This is mainly a flag about collection conditions rather than a kidney finding.',
+      factors: [
+        'High fluid intake before collection produces a dilute sample (1.005 sits at the low end).',
+        'A dilute sample also lowers the apparent concentration of other markers measured on the same urine.',
+        'Next step: repeat with a first-morning, pre-hydration sample for a representative concentrating-ability reading.',
+      ],
+    },
+    {
+      key: 'Progesterone',
+      note: 'Expected to be low in an adult male (&lt;0.21 ng/mL) — shown for completeness. No action indicated.',
+      factors: [],
+    },
+  ];
+
+  function injectLeoLabExplanations() {
+    var cards = document.querySelectorAll('.lab-test');
+    if (!cards.length) return;
+    var DISCLAIMER =
+      '<span class="lab-causes-disclaimer"><span class="lang-en">— suggestive only, ' +
+      'based on current medication and history. Does not replace clinical evaluation.</span></span>';
+
+    LEO_LAB_OUTLIERS.forEach(function (o) {
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        if (card.classList.contains('lab-test-normal')) continue;
+        var nameEl = card.querySelector('.lab-test-name');
+        if (!nameEl || (nameEl.textContent || '').indexOf(o.key) === -1) continue;
+        if (card.querySelector('.leo-lab-explain')) return; // already injected
+        var wrap = document.createElement('div');
+        wrap.className = 'leo-lab-explain';
+        var html = '';
+        if (o.note) {
+          html += '<div class="lab-note"><span class="lang-en">' + o.note + '</span></div>';
+        }
+        if (o.factors && o.factors.length) {
+          var lis = o.factors.map(function (f) { return '<li>' + f + '</li>'; }).join('');
+          html +=
+            '<div class="lab-causes">' +
+              '<div class="lab-causes-title">' +
+                '<span class="lang-en">Possible contributing factors</span>' +
+                DISCLAIMER +
+              '</div>' +
+              '<ul class="lab-causes-list lang-en">' + lis + '</ul>' +
+            '</div>';
+        }
+        wrap.innerHTML = html;
+        // Insert after the reference foot so the explanation sits above
+        // any click-to-expand history table grafted by patient-context.
+        var foot = card.querySelector('.lab-test-foot');
+        if (foot && foot.parentNode) {
+          foot.parentNode.insertBefore(wrap, foot.nextSibling);
+        } else {
+          card.appendChild(wrap);
+        }
+        return; // one card per outlier
+      }
+    });
+  }
+
   // ─── Run ────────────────────────────────────────────────────────
   function run() {
     // Hide Joao-specific alerts BEFORE walking text — uses the
@@ -537,6 +669,7 @@
     rewriteHomeHeader();
     injectLeoSummary();
     injectPerindoprilCard();
+    injectLeoLabExplanations();
   }
 
   if (document.readyState === 'loading') {
