@@ -419,17 +419,38 @@ async function handlePatientDashboardBuild(request, env) {
     if (patientRows.length === 0) return jsonError(404, "patient_not_found");
     const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
 
-    // Full single-pass AI-insights rebuild (whole record, Opus). Distinct from
-    // the per-section card generator below.
+    // Full single-pass AI-insights rebuild (whole record, Opus). Streamed as
+    // SSE so bytes flow during the long generation and Cloudflare doesn't 524.
+    // Heartbeats during thinking; a final {done,result} event carries the payload.
     if (isAiInsights) {
-      const result = await rebuildAiInsights({
-        sql, anthropic,
-        patientId: patientRows[0].id,
-        viewerId: viewerRows[0]?.id || null,
-        version: Number.isInteger(body?.insights_version) ? body.insights_version : null,
+      const patientId = patientRows[0].id;
+      const viewerId = viewerRows[0]?.id || null;
+      const version = Number.isInteger(body?.insights_version) ? body.insights_version : null;
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const send = (obj) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+          let ticks = 0;
+          try {
+            send({ status: "started" });
+            const result = await rebuildAiInsights({
+              sql, anthropic, patientId, viewerId, version,
+              onTick: () => { if (++ticks % 20 === 0) send({ status: "generating", ticks }); },
+            });
+            send({ done: true, ok: true, result });
+          } catch (e) {
+            send({ done: true, ok: false, error: e?.message || String(e) });
+          } finally {
+            controller.close();
+          }
+        },
       });
-      return new Response(JSON.stringify({ ok: true, ...result }), {
-        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Accel-Buffering": "no",
+        },
       });
     }
 
