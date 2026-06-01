@@ -1352,6 +1352,10 @@
         injectStyles();
         retrofitStaticLabHistory();
       }
+      // LLM-authored AI insights (patient_dashboards / section 'ai-insights').
+      // Static pages otherwise skip the dashboard layer, so do it here. No-ops
+      // when the patient has no insights row yet (e.g. Leo).
+      decorateWithAiInsights(section0);
       return;
     }
 
@@ -1793,6 +1797,194 @@
     'multi-marker-timeline':  renderCardMultiMarkerTimeline,
     'flag-list':              renderCardFlagList,
   };
+
+  /* ── AI insights renderer (single-pass whole-record payload) ───────
+     Consumes patient_dashboards.cards_json for section 'ai-insights'
+     (see lib/ai-insights.js). Renders per current page, always inserted
+     below the hero + Reports (before <footer>) per the hero-first rule.   */
+
+  function aiBt(o) {
+    if (!o) return '';
+    var en = o.en || o.pt || '', pt = o.pt || o.en || '';
+    return t(escapeHtml(en), escapeHtml(pt));
+  }
+  function aiPill() { return '<span class="ai-pill">AI</span>'; }
+  function aiSevChip(sev) {
+    if (!sev) return '';
+    return '<span class="ai-chip ai-sevchip-' + sev + '">' + escapeHtml(sev) + '</span>';
+  }
+  function aiEvidence(ev) {
+    if (!ev || !ev.length) return '';
+    var items = ev.map(function (e) {
+      if (!e) return '';
+      var main = [];
+      if (e.ref) main.push('<strong>' + escapeHtml(e.ref) + '</strong>');
+      if (e.value) main.push(escapeHtml(e.value));
+      var meta = [];
+      if (e.source) meta.push(escapeHtml(e.source));
+      if (e.date) meta.push(escapeHtml(formatDate(e.date)));
+      return '<li>' + main.join(' — ') + (meta.length ? ' <span class="ai-ev-meta">' + meta.join(' · ') + '</span>' : '') + '</li>';
+    }).join('');
+    return '<ul class="ai-ev">' + items + '</ul>';
+  }
+  function aiClin(note) {
+    if (!note || !(note.en || note.pt)) return '';
+    return '<p class="ai-clin">' + t('Discuss with your clinician', 'Converse com seu médico') + ': '
+      + '<span class="ai-clin-body">' + aiBt(note).replace(/^<span/, '<span') + '</span></p>';
+  }
+  function aiInsightCard(it) {
+    if (!it || !it.title) return '';
+    var sev = it.kind === 'attention' ? (it.severity || 'watch') : 'strength';
+    var hasDetail = it.detail && (it.detail.en || it.detail.pt);
+    var foot = hasDetail
+      ? '<details class="ai-detail"><summary>' + t('More', 'Mais') + '</summary>'
+        + '<div class="ai-detail-body">' + aiBt(it.detail) + '</div>'
+        + aiEvidence(it.evidence) + aiClin(it.clinician_note) + '</details>'
+      : (aiEvidence(it.evidence) + aiClin(it.clinician_note));
+    return '<div class="ai-card ai-sevedge-' + sev + '">'
+      + '<div class="ai-card-head">' + aiPill()
+      + (it.kind === 'attention' ? aiSevChip(it.severity) : '<span class="ai-chip ai-sevchip-strength">' + t('strength', 'força') + '</span>')
+      + '<span class="ai-card-title">' + aiBt(it.title) + '</span></div>'
+      + '<p class="ai-card-summary">' + aiBt(it.summary) + '</p>'
+      + foot + '</div>';
+  }
+  function aiCrossCard(l) {
+    if (!l || !l.summary) return '';
+    return '<div class="ai-card ai-sevedge-cross">' + aiPill()
+      + '<p class="ai-card-summary">' + aiBt(l.summary) + '</p>' + aiEvidence(l.evidence) + '</div>';
+  }
+  function aiInlineCard(x) {
+    if (!x || !x.title) return '';
+    return '<div class="ai-card ai-sevedge-' + (x.severity || 'info') + '">'
+      + '<div class="ai-card-head">' + aiPill() + aiSevChip(x.severity)
+      + (x.trigger ? '<span class="ai-trigger">' + escapeHtml(String(x.trigger).replace(/_/g, ' ')) + '</span>' : '')
+      + '<span class="ai-card-title">' + aiBt(x.title) + '</span></div>'
+      + (x.anchor ? '<p class="ai-anchor">' + escapeHtml(x.anchor) + '</p>' : '')
+      + '<p class="ai-card-summary">' + aiBt(x.body) + '</p>' + aiEvidence(x.evidence) + '</div>';
+  }
+  function aiPillarCards(page) {
+    if (!page) return '';
+    var att = (page.attention_points || []).map(aiInsightCard).join('');
+    var str = (page.strengths || []).map(aiInsightCard).join('');
+    if (!att && !str) return '';
+    return (att ? '<h3 class="ai-sub">' + t('Attention points', 'Pontos de atenção') + '</h3>' + att : '')
+      + (str ? '<h3 class="ai-sub">' + t('Strengths', 'Pontos fortes') + '</h3>' + str : '');
+  }
+  function aiHeader(titleEn, titlePt, subHtml) {
+    return '<div class="ai-ins-header">'
+      + '<div class="ai-ins-titlerow">' + aiPill() + '<h2 class="ai-ins-title">' + t(escapeHtml(titleEn), escapeHtml(titlePt)) + '</h2></div>'
+      + '<p class="ai-ins-disc">' + t(
+        'AI-generated synthesis over your record — for discussion with your clinician, not a diagnosis.',
+        'Síntese gerada por IA sobre seu prontuário — para discussão com seu médico, não um diagnóstico.') + '</p>'
+      + (subHtml ? '<p class="ai-ins-sub">' + subHtml + '</p>' : '') + '</div>';
+  }
+
+  function buildAiInsightsHtml(p, section) {
+    var pages = p.pages || {};
+    var headline = p.summary && p.summary.headline ? aiBt(p.summary.headline) : '';
+    var INLINE_FOR = {
+      'physical-exams': ['labs', 'imaging'],
+      'physical-vitals': ['vitals', 'ecg'],
+      'physical-genetics': ['pgx'],
+    };
+
+    if (section === 'home') {
+      var links = ((p.summary && p.summary.cross_domain_links) || []).map(aiCrossCard).join('');
+      if (!headline && !links) return '';
+      return aiHeader('Health synthesis', 'Síntese de saúde', headline)
+        + (links ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links : '');
+    }
+    if (section === 'assessment') {
+      var links2 = ((p.summary && p.summary.cross_domain_links) || []).map(aiCrossCard).join('');
+      var allInline = (p.inline_insights || []).map(aiInlineCard).join('');
+      var body = (links2 ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links2 : '');
+      [['physical', 'Physical', 'Físico'], ['mental', 'Mental', 'Mental'], ['spiritual', 'Spiritual', 'Espiritual']].forEach(function (d) {
+        var pc = aiPillarCards(pages[d[0]]);
+        if (pc) body += '<h3 class="ai-sub ai-pillar-h">' + t(d[1], d[2]) + '</h3>' + pc;
+      });
+      if (allInline) body += '<h3 class="ai-sub">' + t('Specific findings', 'Achados específicos') + '</h3>' + allInline;
+      if (!headline && !body) return '';
+      return aiHeader('AI health overview', 'Visão geral por IA', headline) + body;
+    }
+    if (section === 'physical' || section === 'mental' || section === 'spiritual') {
+      var cards = aiPillarCards(pages[section]);
+      var extra = '';
+      if (section === 'mental') {
+        var w = (p.inline_insights || []).filter(function (x) { return x.subpage === 'writings'; }).map(aiInlineCard).join('');
+        if (w) extra = '<h3 class="ai-sub">' + t('From your writings', 'A partir dos seus textos') + '</h3>' + w;
+      }
+      if (!cards && !extra) return '';
+      var lbl = { physical: ['Physical', 'Físico'], mental: ['Mental', 'Mental'], spiritual: ['Spiritual', 'Espiritual'] }[section];
+      return aiHeader(lbl[0] + ' — AI synthesis', lbl[1] + ' — síntese por IA') + cards + extra;
+    }
+    if (INLINE_FOR[section]) {
+      var subs = INLINE_FOR[section];
+      var inl = (p.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
+      if (!inl) return '';
+      return aiHeader('Specific findings', 'Achados específicos') + inl;
+    }
+    return '';
+  }
+
+  function injectAiInsightsStyles() {
+    if (document.getElementById('ai-ins-styles')) return;
+    var css = [
+      '.ai-ins-block{max-width:880px;margin:32px auto 8px;padding:28px 22px 8px;border-top:1px solid #E5E2DC;}',
+      '.ai-ins-header{margin-bottom:18px;}',
+      '.ai-ins-titlerow{display:flex;align-items:center;gap:10px;}',
+      '.ai-ins-title{font-family:Raleway,system-ui,sans-serif;font-size:1.25rem;color:#0D1B2A;margin:0;}',
+      '.ai-ins-disc{font-size:.78rem;color:#7A8FA6;margin:6px 0 0;}',
+      '.ai-ins-sub{font-size:1rem;line-height:1.5;color:#1E2D3D;margin:12px 0 0;font-weight:500;}',
+      '.ai-sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#7A8FA6;margin:22px 0 10px;}',
+      '.ai-sub.ai-pillar-h{color:#B8954A;border-top:1px solid #EFEAE0;padding-top:14px;}',
+      '.ai-card{background:#fff;border:1px solid #E5E2DC;border-left:4px solid #7A8FA6;border-radius:10px;padding:14px 16px;margin:10px 0;box-shadow:0 1px 2px rgba(13,27,42,.04);}',
+      '.ai-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
+      '.ai-card-title{font-weight:600;color:#0D1B2A;font-size:.96rem;}',
+      '.ai-card-summary{margin:4px 0 0;color:#1E2D3D;font-size:.9rem;line-height:1.5;}',
+      '.ai-sevedge-high{border-left-color:#c0392b;}.ai-sevedge-elevated{border-left-color:#d97706;}',
+      '.ai-sevedge-watch{border-left-color:#B8954A;}.ai-sevedge-info{border-left-color:#7A8FA6;}',
+      '.ai-sevedge-strength{border-left-color:#2e7d52;}.ai-sevedge-cross{border-left-color:#B8954A;background:#FBF8F2;}',
+      '.ai-chip{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#EEF1F4;color:#566;}',
+      '.ai-sevchip-high{background:#fbe9e7;color:#c0392b;}.ai-sevchip-elevated{background:#fef3e2;color:#b45309;}',
+      '.ai-sevchip-watch{background:#f7f0dd;color:#8a6d23;}.ai-sevchip-info{background:#eef1f4;color:#566;}',
+      '.ai-sevchip-strength{background:#e6f4ec;color:#2e7d52;}',
+      '.ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;color:#7A8FA6;}',
+      '.ai-anchor{font-size:.74rem;color:#7A8FA6;margin:2px 0 4px;}',
+      '.ai-ev{list-style:none;margin:8px 0 0;padding:0;border-top:1px dashed #EAE6DE;padding-top:8px;}',
+      '.ai-ev li{font-size:.8rem;color:#3a4a5a;margin:3px 0;line-height:1.4;}',
+      '.ai-ev-meta{color:#9aa7b4;font-size:.72rem;}',
+      '.ai-detail{margin-top:8px;}.ai-detail summary{cursor:pointer;font-size:.78rem;color:#B8954A;font-weight:600;}',
+      '.ai-detail-body{margin:8px 0 0;color:#1E2D3D;font-size:.86rem;line-height:1.55;}',
+      '.ai-clin{margin:8px 0 0;font-size:.82rem;color:#0D1B2A;}.ai-clin-body{color:#3a4a5a;}',
+    ].join('');
+    var s = document.createElement('style');
+    s.id = 'ai-ins-styles';
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  function decorateWithAiInsights(section) {
+    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
+      .catch(function () { return { sections: {} }; })
+      .then(function (data) {
+        var rec = data && data.sections && data.sections['ai-insights'];
+        var payload = rec && rec.cards_json;
+        if (!payload || !payload.pages) return;
+        var html = buildAiInsightsHtml(payload, section);
+        if (!html) return;
+        injectAiInsightsStyles();
+        var prior = document.querySelector('section[data-ai-insights]');
+        if (prior) prior.remove();
+        var sec = document.createElement('section');
+        sec.className = 'ai-ins-block';
+        sec.setAttribute('data-ai-insights', '1');
+        sec.innerHTML = html;
+        var footer = document.querySelector('footer');
+        if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer);
+        else document.body.appendChild(sec);
+      });
+  }
 
   function dashboardCardHtml(dashSection, record, opts) {
     opts = opts || {};
