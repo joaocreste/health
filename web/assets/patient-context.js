@@ -3869,6 +3869,76 @@
     return '<div class="silv-studies">' + items + '</div>';
   }
 
+  function silvanaStudyGroupMeta(cat) {
+    return ({
+      imaging:    { en: 'Imaging', pt: 'Imagem' },
+      endoscopy:  { en: 'Endoscopy', pt: 'Endoscopia' },
+      pathology:  { en: 'Pathology', pt: 'Patologia' },
+      functional: { en: 'Functional', pt: 'Funcional' },
+    })[cat] || { en: cat, pt: cat };
+  }
+
+  /* Curated AI synthesis per study category — grounded in this patient's own
+     studies. Rendered as an amber .ai-insight-card (design-system rule 7a) with
+     the purple .ai-pill, one per section. */
+  var SILVANA_STUDY_AI = {
+    imaging: {
+      en: '<p>Nine imaging studies span 2020 to 2026. The <strong>thyroid</strong> has been followed yearly: a small, reduced-volume gland with stable left-lobe nodules. The most recent scan (9 Feb 2026) describes a TIRADS 4 nodule (7.9 x 7.2 x 3.8 mm) alongside a TIRADS 3 nodule, so continued ultrasound surveillance and a clinician discussion about whether fine-needle aspiration is warranted are both reasonable. The <strong>abdominal ultrasound</strong> (Apr 2023) shows mild hepatic steatosis plus a 3.6 mm gallbladder polyp; the steatosis lines up with the borderline-atherogenic lipid pattern in her bloodwork, the clearest cross-domain link, and small gallbladder polyps like this are typically just monitored. <strong>Sinus CT</strong> shows a progressing leftward septal deviation (now with a bony spur) and a left maxillary retention cyst, consistent with the nasal-obstruction complaint. <strong>Mammography</strong> (May 2025) is reassuring at BI-RADS 2 and unchanged.</p>',
+      pt: '<p>Nove exames de imagem cobrem de 2020 a 2026. A <strong>tireoide</strong> vem sendo acompanhada anualmente: glandula pequena, de volume reduzido, com nodulos estaveis no lobo esquerdo. O exame mais recente (9 fev 2026) descreve um nodulo TIRADS 4 (7,9 x 7,2 x 3,8 mm) ao lado de um nodulo TIRADS 3, portanto manter a vigilancia por ultrassom e discutir com o medico a necessidade de puncao aspirativa por agulha fina sao condutas razoaveis. O <strong>ultrassom de abdome</strong> (abr 2023) mostra esteatose hepatica discreta e um polipo vesicular de 3,6 mm; a esteatose conversa com o perfil lipidico borderline aterogenico dos exames de sangue, a conexao entre dominios mais clara, e polipos vesiculares pequenos como este costumam apenas ser monitorados. A <strong>TC dos seios da face</strong> mostra desvio do septo para a esquerda em progressao (agora com esporao osseo) e cisto de retencao no seio maxilar esquerdo, compativel com a queixa de obstrucao nasal. A <strong>mamografia</strong> (mai 2025) e tranquilizadora, BI-RADS 2 e sem alteracao.</p>',
+    },
+    endoscopy: {
+      en: '<p>One colonoscopy (18 Apr 2023): a 2 mm sessile sigmoid polyp was removed and proved hyperplastic (benign), with internal hemorrhoids and an otherwise normal exam; a 5-year repeat (around 2028) was advised. Read together with the 2017 sigmoid adenoma in Pathology, this is a reassuring follow-up, but that earlier adenoma is exactly why the surveillance interval matters. Worth making sure the next colonoscopy is scheduled and not missed.</p>',
+      pt: '<p>Uma colonoscopia (18 abr 2023): um polipo sessil de 2 mm no sigmoide foi removido e mostrou-se hiperplasico (benigno), com hemorroidas internas e o restante do exame normal; foi indicada repeticao em 5 anos (por volta de 2028). Lida junto com o adenoma de sigmoide de 2017 (em Patologia), e um seguimento tranquilizador, mas e justamente aquele adenoma anterior que torna o intervalo de vigilancia importante. Vale garantir que a proxima colonoscopia seja agendada e nao esquecida.</p>',
+    },
+    pathology: {
+      en: '<p>Two tissue diagnoses. The 2017 sigmoid biopsy showed a <strong>tubular adenoma with low-grade dysplasia</strong>, a removed pre-malignant lesion that establishes a real colorectal-surveillance indication (its benign hyperplastic follow-up in 2023 sits under Endoscopy). The 2025 cervical cytology is benign, an inflammatory and hypotrophic (post-menopausal atrophic) smear, Bethesda / Papanicolaou class II, which is routine. Neither shows malignancy.</p>',
+      pt: '<p>Dois diagnosticos de tecido. A biopsia de sigmoide de 2017 mostrou um <strong>adenoma tubular com displasia de baixo grau</strong>, uma lesao pre-maligna removida que estabelece uma indicacao real de vigilancia colorretal (o seguimento hiperplasico benigno de 2023 esta em Endoscopia). A citologia cervical de 2025 e benigna, um esfregaco inflamatorio e hipotrofico (atrofia pos-menopausa), classe II de Bethesda / Papanicolaou, o que e rotineiro. Nenhum mostra malignidade.</p>',
+    },
+    functional: {
+      en: '<p>One urodynamic study (Sep 2022) for urinary urgency: free flow was normal (Qmax 21 mL/s, minimal residue), but the pressure-flow phase suggested infravesical obstruction from vaginal dystopia, with an impression of urethral instability, vaginal dystopia and vesical hyperactivity. That pattern points toward pelvic-floor and urogynecology follow-up rather than a primary bladder-muscle problem.</p>',
+      pt: '<p>Um estudo urodinamico (set 2022) por urgencia miccional: o fluxo livre foi normal (Qmax 21 mL/s, residuo minimo), mas a fase de pressao-fluxo sugeriu obstrucao infravesical por distopia vaginal, com parecer de instabilidade uretral, distopia vaginal e hiperatividade vesical. Esse padrao aponta para acompanhamento de assoalho pelvico e uroginecologia, e nao para um problema primario da musculatura vesical.</p>',
+    },
+  };
+
+  function silvanaStudyAiCard(cat) {
+    var ai = SILVANA_STUDY_AI[cat];
+    if (!ai) return '';
+    return (
+      '<div class="ai-insight-card silv-study-ai">' +
+        '<div class="silv-study-ai-head">' +
+          '<span class="ai-pill">AI</span>' +
+          '<span class="silv-study-ai-title">' + t('AI Insights', 'Insights de IA') + '</span>' +
+        '</div>' +
+        '<div class="silv-study-ai-body lang-en">' + ai.en + '</div>' +
+        '<div class="silv-study-ai-body lang-pt">' + ai.pt + '</div>' +
+        '<p class="silv-study-ai-disc">' +
+          t('AI-generated synthesis over these studies — for discussion with your clinician, not a diagnosis.',
+            'Sintese gerada por IA sobre estes exames — para discussao com seu medico, nao um diagnostico.') +
+        '</p>' +
+      '</div>'
+    );
+  }
+
+  // Group studies by type into separate sections (Imaging, Endoscopy, Pathology,
+  // Functional). Each section: a heading, an amber AI Insights card, then the
+  // study cards for that type (newest first).
+  function silvanaStudiesSections(studies) {
+    var order = ['imaging', 'endoscopy', 'pathology', 'functional'];
+    var byCat = {};
+    (studies || []).forEach(function (s) { (byCat[s.category] = byCat[s.category] || []).push(s); });
+    return order.filter(function (c) { return byCat[c] && byCat[c].length; }).map(function (cat) {
+      var meta = silvanaStudyGroupMeta(cat);
+      return (
+        '<div class="silv-study-group silv-study-group-' + cat + '">' +
+          '<h3 class="silv-study-group-head">' + t(meta.en, meta.pt) +
+            ' <span class="silv-study-group-count">' + byCat[cat].length + '</span></h3>' +
+          silvanaStudyAiCard(cat) +
+          silvanaStudiesList(byCat[cat]) +
+        '</div>'
+      );
+    }).join('');
+  }
+
   function injectSilvanaStyles() {
     if (document.getElementById('silvana-exams-styles')) return;
     var s = document.createElement('style');
@@ -3961,6 +4031,19 @@
       'main.jc-silvana-exams .silv-study-srcs { display: flex; flex-wrap: wrap; gap: 8px; }',
       'main.jc-silvana-exams .silv-study-src { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #244E6E; text-decoration: none; border: 1px solid #E5E2DC; border-radius: 6px; padding: 4px 10px; background: #F4F1EA; }',
       'main.jc-silvana-exams .silv-study-src:hover { border-color: #B8954A; }',
+
+      // Grouped sections (Imaging / Endoscopy / Pathology / Functional) + amber AI card
+      'main.jc-silvana-exams .silv-study-group { margin-bottom: 30px; }',
+      'main.jc-silvana-exams .silv-study-group-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 20px 0 12px; display: flex; align-items: center; gap: 9px; }',
+      'main.jc-silvana-exams .silv-study-group-count { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500; color: #7A8FA6; background: #EEF1F4; border-radius: 999px; padding: 1px 9px; }',
+      // amber background + stroke come from the shared .ai-insight-card token rule in styles.css
+      'main.jc-silvana-exams .silv-study-ai { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }',
+      'main.jc-silvana-exams .silv-study-ai-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }',
+      'main.jc-silvana-exams .silv-study-ai-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: #0D1B2A; }',
+      'main.jc-silvana-exams .silv-study-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      'main.jc-silvana-exams .silv-study-ai-body p { margin: 0; }',
+      'main.jc-silvana-exams .silv-study-ai-body strong { color: #0D1B2A; }',
+      'main.jc-silvana-exams .silv-study-ai-disc { font-size: 11px; font-style: italic; color: #8a6d23; margin: 8px 0 0; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -4230,10 +4313,10 @@
             '<div class="section-label" style="margin-top:32px;">' + t('09B · Imaging & studies', '09B · Imagem & estudos') + '</div>' +
             '<h2 class="section-title">' + t('Imaging & diagnostic studies', 'Estudos de imagem e diagnósticos') + '</h2>' +
             '<p class="section-desc">' +
-              t('Non-lab diagnostic exams — imaging, pathology, endoscopy and functional studies — newest first. Each card links its original report.',
-                'Exames diagnósticos não laboratoriais — imagem, patologia, endoscopia e estudos funcionais — mais recentes primeiro. Cada cartão traz o laudo original.') +
+              t('Non-lab diagnostic exams grouped by type — Imaging, Endoscopy, Pathology and Functional. Each group opens with an AI Insights synthesis; the cards beneath it are newest-first and link their original report.',
+                'Exames diagnósticos não laboratoriais agrupados por tipo — Imagem, Endoscopia, Patologia e Funcional. Cada grupo abre com uma síntese de Insights de IA; os cartões abaixo vêm dos mais recentes aos mais antigos e trazem o laudo original.') +
             '</p>' +
-            silvanaStudiesList(data.studies)
+            silvanaStudiesSections(data.studies)
           : '') +
           '<div class="section-label" style="margin-top:32px;">' + t('Source PDFs', 'PDFs originais') + '</div>' +
           '<h2 class="section-title">' + t('Original lab reports', 'Laudos originais') + '</h2>' +
