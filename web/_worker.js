@@ -391,82 +391,271 @@ async function handlePatientDashboard(request, env) {
   }
 }
 
-async function handlePatientDashboardBuild(request, env) {
+/* ════════════════════════════════════════════════════════════════════════════
+ * "Update AI Insights" — async whole-patient AI Insight Update.
+ *
+ * Click -> POST /api/patient-dashboard-build { patient } -> 202 { job_id }.
+ * The page polls GET /api/patient-dashboard-build/status?job_id=... until done.
+ * The actual rebuild (lib/ai-insights.js, Opus, whole record) runs in
+ * ctx.waitUntil() and writes ONLY to insight_jobs + patient_dashboards — never
+ * to any clinical/source table. See runInsightJob().
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+const INSIGHT_COOLDOWN_MS = 3 * 60 * 1000; // min gap between AI-insight rebuilds (3 min)
+const INSIGHT_JOB_STAGES = ["fetching", "interpolating", "generating", "validating", "persisting"];
+
+// The live DB is only reachable through the deployed Worker's secret, so we
+// apply the 0008 migration idempotently here on first use (memoized per isolate).
+// Mirrors db/migrations/0008_insight_jobs.sql exactly.
+let _insightJobsReady = null;
+function ensureInsightJobsTable(sql) {
+  if (_insightJobsReady) return _insightJobsReady;
+  _insightJobsReady = (async () => {
+    await sql`DO $$ BEGIN
+      CREATE TYPE "insight_job_status" AS ENUM ('queued','running','succeeded','failed');
+    EXCEPTION WHEN duplicate_object THEN null; END $$`;
+    await sql`CREATE TABLE IF NOT EXISTS insight_jobs (
+      id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      patient_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      status           insight_job_status NOT NULL DEFAULT 'queued',
+      progress         integer NOT NULL DEFAULT 0,
+      stage            text,
+      error            text,
+      insights_version integer,
+      started_at       timestamptz NOT NULL DEFAULT now(),
+      updated_at       timestamptz NOT NULL DEFAULT now(),
+      finished_at      timestamptz
+    )`;
+    await sql`CREATE INDEX IF NOT EXISTS insight_jobs_patient_status_idx ON insight_jobs (patient_id, status)`;
+    await sql`CREATE INDEX IF NOT EXISTS insight_jobs_started_idx ON insight_jobs (patient_id, started_at)`;
+  })().catch((e) => { _insightJobsReady = null; throw e; });
+  return _insightJobsReady;
+}
+
+// Partial update of a job row. Null fields keep their existing value (COALESCE);
+// finished_at is stamped to now() only when finished:true is passed.
+async function updateInsightJob(sql, jobId, f) {
+  await sql`
+    UPDATE insight_jobs SET
+      status           = COALESCE(${f.status ?? null}::insight_job_status, status),
+      progress         = COALESCE(${f.progress ?? null}::int, progress),
+      stage            = COALESCE(${f.stage ?? null}::text, stage),
+      error            = COALESCE(${f.error ?? null}::text, error),
+      insights_version = COALESCE(${f.insights_version ?? null}::int, insights_version),
+      finished_at      = CASE WHEN ${f.finished === true} THEN now() ELSE finished_at END,
+      updated_at       = now()
+    WHERE id = ${jobId}`;
+}
+
+// Next insights_version for this patient (mirrors lib/ai-insights.js nextVersion).
+async function nextInsightsVersion(sql, patientId) {
+  const rows = await sql`
+    SELECT cards_json FROM patient_dashboards
+    WHERE patient_id = ${patientId} AND section = ${AI_INSIGHTS_SECTION} LIMIT 1`;
+  const prev = rows[0]?.cards_json?.insights_version;
+  return Number.isInteger(prev) ? prev + 1 : 1;
+}
+
+// Demo-phase access gate (Clerk not yet wired). The viewer asserts its
+// clerk_user_id via the X-Viewer-Clerk header; we resolve it server-side and
+// allow only: the patient themselves, an admin, or a user holding patient_access
+// to this patient. Never trust the client's claim of role/identity beyond the id.
+async function resolveInsightAccess(sql, viewerClerk, patientId) {
+  if (!viewerClerk) return { ok: false, status: 401, reason: "viewer_required" };
+  const rows = await sql`SELECT id, role FROM users
+    WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`;
+  if (rows.length === 0) return { ok: false, status: 401, reason: "viewer_not_in_db" };
+  const viewer = rows[0];
+  if (viewer.id === patientId || viewer.role === "admin") {
+    return { ok: true, viewerId: viewer.id, role: viewer.role };
+  }
+  const acc = await sql`SELECT 1 FROM patient_access
+    WHERE user_id = ${viewer.id} AND patient_id = ${patientId} LIMIT 1`;
+  if (acc.length > 0) return { ok: true, viewerId: viewer.id, role: viewer.role };
+  return { ok: false, status: 403, reason: "forbidden" };
+}
+
+const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
+
+/* POST /api/patient-dashboard-build
+   - New (async) contract: body { patient } (or { patient_clerk }) with no/AI
+     section -> START a whole-patient AI Insight Update job, return 202 { job_id }.
+   - Legacy (sync) contract: body { patient_clerk, section } for a real dashboard
+     section -> the per-section LLM build (admin tool), unchanged. */
+async function handlePatientDashboardBuild(request, env, ctx) {
   if (request.method !== "POST") return jsonError(405, "method_not_allowed");
   if (!env.DATABASE_URL)       return jsonError(500, "DATABASE_URL not configured.");
   if (!env.ANTHROPIC_API_KEY)  return jsonError(500, "anthropic_api_key_not_configured");
   let body;
   try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
-  const patientClerk = String(body?.patient_clerk || "").trim();
+  const patientClerk = String(body?.patient || body?.patient_clerk || "").trim();
   const section = String(body?.section || "").trim();
   const mode = String(body?.mode || "").trim();
-  const isAiInsights = mode === "ai-insights" || section === AI_INSIGHTS_SECTION;
-  if (!patientClerk) return jsonError(400, "patient_clerk_required");
-  if (!isAiInsights && !DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
+  if (!patientClerk) return jsonError(400, "patient_required");
 
+  // Whole-patient async rebuild unless an explicit legacy dashboard section is asked for.
+  const wantsRebuild = mode === "ai-insights" || section === AI_INSIGHTS_SECTION || (!section && !mode);
   const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
 
   try {
     const sql = neon(env.DATABASE_URL);
-    const [patientRows, viewerRows] = await Promise.all([
-      sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
-            AND role = 'patient' AND archived_at IS NULL LIMIT 1`,
-      viewerClerk
-        ? sql`SELECT id FROM users WHERE clerk_user_id = ${viewerClerk}
-              AND archived_at IS NULL LIMIT 1`
-        : Promise.resolve([]),
-    ]);
+    const patientRows = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+          AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
     if (patientRows.length === 0) return jsonError(404, "patient_not_found");
-    const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
+    const patientId = patientRows[0].id;
 
-    // Full single-pass AI-insights rebuild (whole record, Opus). Streamed as
-    // SSE so bytes flow during the long generation and Cloudflare doesn't 524.
-    // Heartbeats during thinking; a final {done,result} event carries the payload.
-    if (isAiInsights) {
-      const patientId = patientRows[0].id;
-      const viewerId = viewerRows[0]?.id || null;
-      const version = Number.isInteger(body?.insights_version) ? body.insights_version : null;
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        async start(controller) {
-          const send = (obj) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
-          let ticks = 0;
-          try {
-            send({ status: "started" });
-            const result = await rebuildAiInsights({
-              sql, anthropic, patientId, viewerId, version,
-              onTick: () => { if (++ticks % 20 === 0) send({ status: "generating", ticks }); },
-            });
-            send({ done: true, ok: true, result });
-          } catch (e) {
-            send({ done: true, ok: false, error: e?.message || String(e) });
-          } finally {
-            controller.close();
-          }
-        },
+    // ── Legacy per-section dashboard build (admin tool) — synchronous, unchanged ──
+    if (!wantsRebuild) {
+      if (!DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
+      const viewerRows = viewerClerk
+        ? await sql`SELECT id FROM users WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`
+        : [];
+      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
+      const result = await buildOneSection({
+        sql, anthropic, patientId, section, viewerId: viewerRows[0]?.id || null,
       });
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/event-stream; charset=utf-8",
-          "Cache-Control": "no-store",
-          "X-Accel-Buffering": "no",
-        },
-      });
+      return new Response(JSON.stringify({ ok: true, ...result }), { headers: JSON_HEADERS });
     }
 
-    const result = await buildOneSection({
-      sql, anthropic,
-      patientId: patientRows[0].id,
-      section,
-      viewerId: viewerRows[0]?.id || null,
-    });
-    return new Response(JSON.stringify({ ok: true, ...result }), {
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    // ── Async whole-patient AI Insight Update ──
+    await ensureInsightJobsTable(sql);
+
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return jsonError(access.status, access.reason);
+
+    // Concurrency lock: if a job is already queued/running for this patient,
+    // attach to it instead of starting a second (no double runs, no swap race).
+    const running = await sql`
+      SELECT id, status, progress, stage, insights_version FROM insight_jobs
+      WHERE patient_id = ${patientId} AND status IN ('queued','running')
+      ORDER BY started_at DESC LIMIT 1`;
+    if (running.length > 0) {
+      const j = running[0];
+      return new Response(JSON.stringify({
+        ok: true, job_id: j.id, status: j.status, progress: j.progress,
+        stage: j.stage, insights_version: j.insights_version, already_running: true,
+      }), { status: 200, headers: JSON_HEADERS });
+    }
+
+    // Cooldown: refuse a rebuild < INSIGHT_COOLDOWN_MS after the last generation.
+    const last = await sql`
+      SELECT generated_at FROM patient_dashboards
+      WHERE patient_id = ${patientId} AND section = ${AI_INSIGHTS_SECTION} LIMIT 1`;
+    if (last.length > 0 && last[0].generated_at) {
+      const ageMs = Date.now() - new Date(last[0].generated_at).getTime();
+      if (ageMs >= 0 && ageMs < INSIGHT_COOLDOWN_MS) {
+        return new Response(JSON.stringify({
+          ok: false, error: "cooldown", generated_at: last[0].generated_at,
+          minutes_ago: Math.floor(ageMs / 60000),
+          retry_after_seconds: Math.ceil((INSIGHT_COOLDOWN_MS - ageMs) / 1000),
+        }), { status: 429, headers: JSON_HEADERS });
+      }
+    }
+
+    // Create the job row and return immediately; run the work after the response.
+    const created = await sql`
+      INSERT INTO insight_jobs (patient_id, status, progress, stage)
+      VALUES (${patientId}, 'queued', 0, 'queued') RETURNING id`;
+    const jobId = created[0].id;
+
+    // TODO(scale): ctx.waitUntil keeps the isolate alive after the response, but a
+    // long Opus high-effort run can approach Pages wall-clock limits. The upgrade
+    // path is Cloudflare Queues (enqueue here, drain in a queue consumer). Not
+    // blocking the feature now — the rebuild typically finishes well inside budget.
+    const work = runInsightJob(jobId, patientId, access.viewerId, env);
+    if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work);
+    else work.catch(() => {});
+
+    return new Response(JSON.stringify({ ok: true, job_id: jobId, status: "queued", progress: 0 }), {
+      status: 202, headers: JSON_HEADERS,
     });
   } catch (e) {
     const msg = e?.message || String(e);
     const rateLimited = /\b429\b|rate_limit/i.test(msg);
     return jsonError(rateLimited ? 429 : 500, `Build failed: ${msg}`);
+  }
+}
+
+/* GET /api/patient-dashboard-build/status?job_id=...  — poll endpoint. */
+async function handleInsightJobStatus(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const jobId = String(url.searchParams.get("job_id") || "").trim();
+  if (!jobId) return jsonError(400, "job_id_required");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId)) {
+    return jsonError(404, "job_not_found");
+  }
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || url.searchParams.get("viewer") || "";
+  try {
+    const sql = neon(env.DATABASE_URL);
+    await ensureInsightJobsTable(sql);
+    const rows = await sql`
+      SELECT id, patient_id, status, progress, stage, error, insights_version,
+             started_at, updated_at, finished_at
+      FROM insight_jobs WHERE id = ${jobId} LIMIT 1`;
+    if (rows.length === 0) return jsonError(404, "job_not_found");
+    const job = rows[0];
+    const access = await resolveInsightAccess(sql, viewerClerk, job.patient_id);
+    if (!access.ok) return jsonError(access.status, access.reason);
+    return new Response(JSON.stringify({
+      job_id: job.id, status: job.status, progress: job.progress, stage: job.stage,
+      error: job.error, insights_version: job.insights_version,
+      started_at: job.started_at, updated_at: job.updated_at, finished_at: job.finished_at,
+    }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return jsonError(500, `Status failed: ${e.message}`);
+  }
+}
+
+/* The background worker. Runs the ENTIRE update autonomously — no user input
+   after the confirmation click. Stages update insight_jobs.progress/stage in
+   Neon as they complete. GENERATE -> VALIDATE -> SWAP: rebuildAiInsights builds
+   and validates the payload BEFORE it upserts the single patient_dashboards row,
+   so a failure leaves the patient's previous insights fully intact. */
+async function runInsightJob(jobId, patientId, viewerId, env) {
+  const sql = neon(env.DATABASE_URL);
+  // maxRetries:2 gives transient model/network errors a small fixed number of
+  // automatic retries before the job is marked failed — autonomy, not a prompt.
+  const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+  try {
+    await updateInsightJob(sql, jobId, { status: "running", stage: "fetching", progress: 8 });
+
+    // interpolating: choose the next version up front so the job row reflects it.
+    const version = await nextInsightsVersion(sql, patientId);
+    await updateInsightJob(sql, jobId, { stage: "interpolating", progress: 18, insights_version: version });
+
+    // generating: no real sub-progress on the long model call, so advance a timer
+    // toward a 90 ceiling while awaiting (throttled DB writes ~every 1.5s).
+    let progress = 20;
+    let lastWrite = 0;
+    await updateInsightJob(sql, jobId, { stage: "generating", progress });
+    const onTick = () => {
+      const now = Date.now();
+      if (now - lastWrite < 1500) return;
+      lastWrite = now;
+      if (progress < 90) {
+        progress += 1;
+        updateInsightJob(sql, jobId, { stage: "generating", progress }).catch(() => {});
+      }
+    };
+
+    // PHI / TIER TODO: on the current Anthropic standard tier, PHI must not reach
+    // the model. There is no de-identification step at this boundary yet — the
+    // assembled record is sent as-is, exactly as /api/chat already does. Run the
+    // record through de-identification here (or gate this on the Scale-plan + BAA
+    // flip) before onboarding real patients. See compliance posture memory.
+    const result = await rebuildAiInsights({ sql, anthropic, patientId, viewerId, version, onTick });
+
+    // validate/persist already happened inside rebuildAiInsights (parse + sanitize
+    // + atomic upsert). Reflect that tail in the bar, then finish.
+    await updateInsightJob(sql, jobId, { stage: "validating", progress: 93 });
+    await updateInsightJob(sql, jobId, {
+      status: "succeeded", stage: "persisting", progress: 100,
+      insights_version: result.insights_version, finished: true,
+    });
+  } catch (e) {
+    const msg = (e?.message || String(e)).slice(0, 500);
+    await updateInsightJob(sql, jobId, { status: "failed", error: msg, finished: true }).catch(() => {});
   }
 }
 
@@ -1423,8 +1612,11 @@ export default {
     if (url.pathname === "/api/patient-dashboard") {
       return handlePatientDashboard(request, env);
     }
+    if (url.pathname === "/api/patient-dashboard-build/status") {
+      return handleInsightJobStatus(request, env);
+    }
     if (url.pathname === "/api/patient-dashboard-build") {
-      return handlePatientDashboardBuild(request, env);
+      return handlePatientDashboardBuild(request, env, ctx);
     }
     if (url.pathname === "/api/patient-wipe-data") {
       return handlePatientWipeData(request, env);
