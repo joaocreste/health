@@ -711,6 +711,146 @@ function slugifyForClerkPlaceholder(name) {
   return `pending:${base}-${suffix}`;
 }
 
+// Run an array of tagged-template queries in chunked transactions (one HTTP
+// round-trip per chunk). Returns the number of statements executed.
+async function runChunked(sql, queries, size = 150) {
+  for (let i = 0; i < queries.length; i += size) {
+    const slice = queries.slice(i, i + size);
+    if (slice.length) await sql.transaction(slice);
+  }
+  return queries.length;
+}
+
+const N = (v) => (v === undefined ? null : v); // normalize undefined -> null for params
+
+// Build INSERT queries for one clinical table from a rows array. Each table has
+// an explicit column list; jsonb columns are cast inline. Idempotency is handled
+// by the caller's wipe step + ON CONFLICT where a natural key exists.
+function buildSeedQueries(sql, table, pid, rows) {
+  switch (table) {
+    case "vitals_daily":
+      return rows.map((v) => sql`
+        INSERT INTO vitals_daily (patient_id, day, source, steps, calories_active, calories_passive,
+          hrv_ms, resting_hr, sleep_minutes, deep_sleep_minutes, rem_sleep_minutes, spo2_pct,
+          weight_kg, blood_pressure_sys, blood_pressure_dia)
+        VALUES (${pid}, ${v.day}, ${v.source || "aggregate"}, ${N(v.steps)}, ${N(v.calories_active)}, ${N(v.calories_passive)},
+          ${N(v.hrv_ms)}, ${N(v.resting_hr)}, ${N(v.sleep_minutes)}, ${N(v.deep_sleep_minutes)}, ${N(v.rem_sleep_minutes)}, ${N(v.spo2_pct)},
+          ${N(v.weight_kg)}, ${N(v.blood_pressure_sys)}, ${N(v.blood_pressure_dia)})
+        ON CONFLICT (patient_id, day, source) DO UPDATE SET
+          steps=EXCLUDED.steps, hrv_ms=EXCLUDED.hrv_ms, resting_hr=EXCLUDED.resting_hr,
+          sleep_minutes=EXCLUDED.sleep_minutes, spo2_pct=EXCLUDED.spo2_pct, weight_kg=EXCLUDED.weight_kg,
+          blood_pressure_sys=EXCLUDED.blood_pressure_sys, blood_pressure_dia=EXCLUDED.blood_pressure_dia`);
+    case "glucose_points":
+      return rows.map((g) => sql`
+        INSERT INTO glucose_points (patient_id, ts, mg_dl, source)
+        VALUES (${pid}, ${g.ts}, ${g.mg_dl}, ${g.source || "cgm"})
+        ON CONFLICT (patient_id, ts) DO NOTHING`);
+    case "ecg_events":
+      return rows.map((e) => sql`
+        INSERT INTO ecg_events (patient_id, recorded_at, classification, average_hr, duration_seconds, source, blob_key, notes)
+        VALUES (${pid}, ${e.recorded_at}, ${N(e.classification)}, ${N(e.average_hr)}, ${N(e.duration_seconds)}, ${N(e.source)}, ${N(e.blob_key)}, ${N(e.notes)})`);
+    case "medications":
+      return rows.map((m) => sql`
+        INSERT INTO medications (patient_id, name, dose, drug_class, status, note, started_at, ended_at)
+        VALUES (${pid}, ${m.name}, ${N(m.dose)}, ${N(m.drug_class)}, ${N(m.status)}, ${N(m.note)}, ${N(m.started_at)}, ${N(m.ended_at)})`);
+    case "supplements":
+      return rows.map((s) => sql`
+        INSERT INTO supplements (patient_id, name, dose, started_at, ended_at)
+        VALUES (${pid}, ${s.name}, ${N(s.dose)}, ${N(s.started_at)}, ${N(s.ended_at)})`);
+    case "surgeries":
+      return rows.map((s) => sql`
+        INSERT INTO surgeries (patient_id, name, performed_on, notes)
+        VALUES (${pid}, ${s.name}, ${N(s.performed_on)}, ${N(s.notes)})`);
+    case "injuries":
+      return rows.map((i) => sql`
+        INSERT INTO injuries (patient_id, name, occurred_on, notes)
+        VALUES (${pid}, ${i.name}, ${N(i.occurred_on)}, ${N(i.notes)})`);
+    case "clinical_history":
+      return rows.map((c) => sql`
+        INSERT INTO clinical_history (patient_id, category, heading, detail, occurred_on)
+        VALUES (${pid}, ${c.category}, ${c.heading}, ${N(c.detail)}, ${N(c.occurred_on)})`);
+    case "risk_assessments":
+      return rows.map((r) => sql`
+        INSERT INTO risk_assessments (patient_id, kind, payload, recorded_at)
+        VALUES (${pid}, ${r.kind}, ${JSON.stringify(r.payload || {})}::jsonb, ${r.recorded_at})`);
+    case "lab_results":
+      return rows.map((l) => sql`
+        INSERT INTO lab_results (patient_id, panel, marker, value, value_text, unit, ref_low, ref_high, flag, taken_at, laboratory, requesting_doctor)
+        VALUES (${pid}, ${N(l.panel)}, ${l.marker}, ${N(l.value)}, ${N(l.value_text)}, ${N(l.unit)}, ${N(l.ref_low)}, ${N(l.ref_high)}, ${N(l.flag)}, ${l.taken_at}, ${N(l.laboratory)}, ${N(l.requesting_doctor)})`);
+    case "imaging_studies":
+      return rows.map((im) => sql`
+        INSERT INTO imaging_studies (patient_id, modality, body_part, study_date, source_format, blob_prefix, report_blob_key, file_count, notes)
+        VALUES (${pid}, ${im.modality}, ${N(im.body_part)}, ${im.study_date}, ${im.source_format || "MIXED"}, ${im.blob_prefix || ""}, ${N(im.report_blob_key)}, ${N(im.file_count)}, ${N(im.notes)})`);
+    case "pgx_findings":
+      return rows.map((p) => sql`
+        INSERT INTO pgx_findings (patient_id, gene, variant, phenotype, category, drug_class_impact, recommendation, confidence, assay_name, reported_on)
+        VALUES (${pid}, ${p.gene}, ${N(p.variant)}, ${N(p.phenotype)}, ${N(p.category)}, ${N(p.drug_class_impact)}, ${N(p.recommendation)}, ${N(p.confidence)}, ${N(p.assay_name)}, ${N(p.reported_on)})`);
+    case "writings":
+      return rows.map((w) => sql`
+        INSERT INTO writings (patient_id, title, written_at, language, blob_key, extracted_text)
+        VALUES (${pid}, ${w.title}, ${N(w.written_at)}, ${N(w.language)}, ${w.blob_key || ""}, ${N(w.extracted_text)})`);
+    case "mood_entries":
+      return rows.map((m) => sql`
+        INSERT INTO mood_entries (patient_id, ts, valence, arousal, primary_emotion, note, source)
+        VALUES (${pid}, ${m.ts}, ${N(m.valence)}, ${N(m.arousal)}, ${N(m.primary_emotion)}, ${N(m.note)}, ${m.source || "manual"})`);
+    case "panic_events":
+      return rows.map((p) => sql`
+        INSERT INTO panic_events (patient_id, occurred_at, duration_minutes, severity, triggers, symptoms, location, intervention, notes)
+        VALUES (${pid}, ${p.occurred_at}, ${N(p.duration_minutes)}, ${N(p.severity)}, ${N(p.triggers)}, ${p.symptoms ? JSON.stringify(p.symptoms) : null}::jsonb, ${N(p.location)}, ${N(p.intervention)}, ${N(p.notes)})`);
+    case "life_events":
+      return rows.map((e) => sql`
+        INSERT INTO life_events (patient_id, occurred_on, category, title, description, location, significance)
+        VALUES (${pid}, ${e.occurred_on}, ${e.category}, ${e.title}, ${N(e.description)}, ${N(e.location)}, ${N(e.significance)})`);
+    case "psych_items":
+      return rows.map((p) => sql`
+        INSERT INTO psych_items (patient_id, dimension_id, legacy_anchor, title, synthesis, rank, generated_at, generated_by)
+        VALUES (${pid}, ${p.dimension_id}, ${N(p.legacy_anchor)}, ${p.title}, ${p.synthesis}, ${N(p.rank)}, now(), ${p.generated_by || "llm:opus-4-7"})`);
+    case "psych_evidence":
+      // Links to psych_items (by legacy_anchor) and optionally to a writing (by title).
+      return rows.map((e) => sql`
+        INSERT INTO psych_evidence (psych_item_id, writing_id, quote, source_filename, source_paragraph, is_translated, original_language, rank)
+        SELECT pi.id,
+               (SELECT w.id FROM writings w WHERE w.patient_id=${pid} AND w.title=${N(e.writing_title)} LIMIT 1),
+               ${e.quote}, ${N(e.source_filename)}, ${N(e.source_paragraph)}, ${e.is_translated === true}, ${N(e.original_language)}, ${N(e.rank)}
+        FROM psych_items pi
+        WHERE pi.patient_id=${pid} AND pi.legacy_anchor=${e.legacy_anchor}
+        LIMIT 1`);
+    case "wheel_of_life_assessments":
+      return rows.map((w) => sql`
+        INSERT INTO wheel_of_life_assessments (patient_id, taken_on, scores, notes)
+        VALUES (${pid}, ${w.taken_on}, ${JSON.stringify(w.scores || {})}::jsonb, ${N(w.notes)})
+        ON CONFLICT (patient_id, taken_on) DO UPDATE SET scores=EXCLUDED.scores, notes=EXCLUDED.notes`);
+    default:
+      return null; // unknown table
+  }
+}
+
+// Scoped wipe before re-insert, so the seed is idempotent per table.
+function wipeQuery(sql, table, pid) {
+  switch (table) {
+    case "vitals_daily":   return sql`DELETE FROM vitals_daily   WHERE patient_id=${pid} AND source='aggregate'`;
+    case "glucose_points": return sql`DELETE FROM glucose_points WHERE patient_id=${pid}`;
+    case "ecg_events":     return sql`DELETE FROM ecg_events     WHERE patient_id=${pid}`;
+    case "medications":    return sql`DELETE FROM medications    WHERE patient_id=${pid}`;
+    case "supplements":    return sql`DELETE FROM supplements    WHERE patient_id=${pid}`;
+    case "surgeries":      return sql`DELETE FROM surgeries      WHERE patient_id=${pid}`;
+    case "injuries":       return sql`DELETE FROM injuries       WHERE patient_id=${pid}`;
+    case "clinical_history": return sql`DELETE FROM clinical_history WHERE patient_id=${pid}`;
+    case "risk_assessments": return sql`DELETE FROM risk_assessments WHERE patient_id=${pid}`;
+    case "lab_results":    return sql`DELETE FROM lab_results    WHERE patient_id=${pid}`;
+    case "imaging_studies":return sql`DELETE FROM imaging_studies WHERE patient_id=${pid}`;
+    case "pgx_findings":   return sql`DELETE FROM pgx_findings   WHERE patient_id=${pid}`;
+    case "writings":       return sql`DELETE FROM writings       WHERE patient_id=${pid}`;
+    case "mood_entries":   return sql`DELETE FROM mood_entries   WHERE patient_id=${pid}`;
+    case "panic_events":   return sql`DELETE FROM panic_events   WHERE patient_id=${pid}`;
+    case "life_events":    return sql`DELETE FROM life_events    WHERE patient_id=${pid}`;
+    case "psych_items":    return sql`DELETE FROM psych_items    WHERE patient_id=${pid}`;
+    case "psych_evidence": return null; // cascades from psych_items wipe
+    case "wheel_of_life_assessments": return null; // ON CONFLICT handles update
+    default: return null;
+  }
+}
+
 async function handleAdmin(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const sql = neon(env.DATABASE_URL);
@@ -1203,6 +1343,38 @@ async function handleAdmin(request, env) {
       const msg = e?.message || String(e);
       const rateLimited = /\b429\b|rate_limit/i.test(msg);
       return jsonError(rateLimited ? 429 : 500, `Backfill failed: ${msg}`);
+    }
+  }
+
+  // POST /api/admin/seed-clinical — { patient_clerk, table, rows, wipe? }
+  // Bulk-insert one clinical table for a patient. Idempotent when wipe=true
+  // (default): scoped DELETE then INSERT. One table per call.
+  if (path === "/api/admin/seed-clinical" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const patientClerk = String(body?.patient_clerk || "").trim();
+    const table = String(body?.table || "").trim();
+    const rows = Array.isArray(body?.rows) ? body.rows : null;
+    const wipe = body?.wipe !== false;
+    if (!patientClerk) return jsonError(400, "patient_clerk_required");
+    if (!rows) return jsonError(400, "rows_array_required");
+
+    try {
+      const patientRows = await sql`
+        SELECT id, role FROM users WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1`;
+      if (patientRows.length === 0 || patientRows[0].role !== "patient") return jsonError(404, "patient_not_found");
+      const pid = patientRows[0].id;
+
+      const queries = buildSeedQueries(sql, table, pid, rows);
+      if (queries === null) return jsonError(400, `unsupported_table: ${table}`);
+
+      if (wipe) { const w = wipeQuery(sql, table, pid); if (w) await w; }
+      const inserted = await runChunked(sql, queries);
+      return new Response(JSON.stringify({ ok: true, table, inserted }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `Seed failed for ${table}: ${e.message}`);
     }
   }
 

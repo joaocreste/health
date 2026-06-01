@@ -15,9 +15,11 @@
  *
  * Usage:
  *   node scripts/ingest-joao-wave1.mjs            # dry run (default) — no DB writes
- *   node scripts/ingest-joao-wave1.mjs --apply    # writes to DATABASE_URL (from .env)
+ *   node scripts/ingest-joao-wave1.mjs --apply    # POSTs to the live Worker seed endpoint
  *
- * Idempotent: scoped DELETE for this patient then INSERT, so re-running is safe.
+ * Writes go through POST /api/admin/seed-clinical on the deployed Worker (which
+ * holds the live DATABASE_URL secret), so no local Neon credentials are needed.
+ * Idempotent: the endpoint does a scoped DELETE then INSERT per table.
  */
 
 import fs from "node:fs";
@@ -159,86 +161,31 @@ function summary() {
   console.log(`wheel_of_life  : ${Object.keys(wheel.scores).length} dimensions on ${wheel.taken_on}`);
 }
 
-/* ───── Apply ───────────────────────────────────────────────────── */
+/* ───── Apply (via the live Worker seed endpoint) ───────────────── */
+
+const BASE = process.env.LUMEN_BASE || "https://lumenhealth.io";
+const ADMIN = process.env.LUMEN_ADMIN_CLERK || "pending:admin";
+
+async function seed(table, rows) {
+  const resp = await fetch(`${BASE}/api/admin/seed-clinical`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Viewer-Clerk": ADMIN },
+    body: JSON.stringify({ patient_clerk: CLERK, table, rows }),
+  });
+  const text = await resp.text();
+  let j; try { j = JSON.parse(text); } catch { j = { raw: text.slice(0, 300) }; }
+  if (!resp.ok || !j.ok) throw new Error(`${table}: HTTP ${resp.status} ${JSON.stringify(j)}`);
+  console.log(`  ✓ ${table}: inserted ${j.inserted}`);
+}
 
 async function apply() {
-  const { Pool, neonConfig } = await import("@neondatabase/serverless");
-  neonConfig.webSocketConstructor = globalThis.WebSocket;
-  let url = (fs.readFileSync(path.join(root, ".env"), "utf8")
-    .split(/\r?\n/).find((l) => l.startsWith("DATABASE_URL")) || "")
-    .replace(/^DATABASE_URL=/, "").trim().replace(/^"|"$/g, "");
-  if (!url) throw new Error("DATABASE_URL not found in .env");
-  const pool = new Pool({ connectionString: url });
-  try {
-    const pr = await pool.query("SELECT id FROM users WHERE clerk_user_id=$1 AND role='patient' LIMIT 1", [CLERK]);
-    if (!pr.rows.length) throw new Error(`patient ${CLERK} not found`);
-    const pid = pr.rows[0].id;
-    console.log(`patient_id = ${pid}`);
-
-    // Idempotent: clear this patient's Wave-1 tables, then insert.
-    await pool.query("BEGIN");
-    await pool.query("DELETE FROM vitals_daily WHERE patient_id=$1 AND source=$2", [pid, VITALS_SOURCE]);
-    await pool.query("DELETE FROM glucose_points WHERE patient_id=$1 AND source='libre'", [pid]);
-    await pool.query("DELETE FROM ecg_events WHERE patient_id=$1 AND source='apple_watch'", [pid]);
-    await pool.query("DELETE FROM medications WHERE patient_id=$1", [pid]);
-    await pool.query("DELETE FROM wheel_of_life_assessments WHERE patient_id=$1", [pid]);
-
-    for (const v of vitals) {
-      await pool.query(
-        `INSERT INTO vitals_daily (patient_id, day, source, steps, hrv_ms, resting_hr, sleep_minutes, weight_kg, blood_pressure_sys, blood_pressure_dia)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-         ON CONFLICT (patient_id, day, source) DO UPDATE SET
-           steps=EXCLUDED.steps, hrv_ms=EXCLUDED.hrv_ms, resting_hr=EXCLUDED.resting_hr,
-           sleep_minutes=EXCLUDED.sleep_minutes, weight_kg=EXCLUDED.weight_kg,
-           blood_pressure_sys=EXCLUDED.blood_pressure_sys, blood_pressure_dia=EXCLUDED.blood_pressure_dia`,
-        [pid, v.day, VITALS_SOURCE, v.steps ?? null, v.hrv_ms ?? null, v.resting_hr ?? null,
-         v.sleep_minutes ?? null, v.weight_kg ?? null, v.blood_pressure_sys ?? null, v.blood_pressure_dia ?? null]
-      );
-    }
-    // Glucose in chunks to keep statements small.
-    for (let i = 0; i < glucose.length; i += 500) {
-      const chunk = glucose.slice(i, i + 500);
-      const vals = [];
-      const params = [];
-      chunk.forEach((g, j) => {
-        const b = j * 3;
-        vals.push(`($${b + 1},$${b + 2},$${b + 3})`);
-        params.push(pid, g.ts, g.mg_dl);
-      });
-      await pool.query(
-        `INSERT INTO glucose_points (patient_id, ts, mg_dl) VALUES ${vals.join(",")}
-         ON CONFLICT (patient_id, ts) DO NOTHING`,
-        params
-      );
-    }
-    for (const e of ecg) {
-      await pool.query(
-        `INSERT INTO ecg_events (patient_id, recorded_at, classification, source, blob_key, notes)
-         VALUES ($1,$2,$3,$4,$5,$6)`,
-        [pid, e.recorded_at, e.classification, e.source, e.blob_key, e.notes]
-      );
-    }
-    for (const m of meds) {
-      await pool.query(
-        `INSERT INTO medications (patient_id, name, dose, drug_class, status, note)
-         VALUES ($1,$2,$3,$4,$5,$6)`,
-        [pid, m.name, m.dose, m.drug_class, m.status, m.note]
-      );
-    }
-    await pool.query(
-      `INSERT INTO wheel_of_life_assessments (patient_id, taken_on, scores, notes)
-       VALUES ($1,$2,$3,$4)
-       ON CONFLICT (patient_id, taken_on) DO UPDATE SET scores=EXCLUDED.scores, notes=EXCLUDED.notes`,
-      [pid, wheel.taken_on, JSON.stringify(wheel.scores), wheel.notes]
-    );
-    await pool.query("COMMIT");
-    console.log("✓ Wave 1 applied.");
-  } catch (e) {
-    await pool.query("ROLLBACK").catch(() => {});
-    throw e;
-  } finally {
-    await pool.end();
-  }
+  console.log(`\nApplying via ${BASE} (admin=${ADMIN}) …`);
+  await seed("vitals_daily", vitals.map((v) => ({ ...v, source: VITALS_SOURCE })));
+  await seed("glucose_points", glucose);
+  await seed("ecg_events", ecg);
+  await seed("medications", meds);
+  await seed("wheel_of_life_assessments", [wheel]);
+  console.log("✓ Wave 1 applied.");
 }
 
 /* ───── Main ────────────────────────────────────────────────────── */
