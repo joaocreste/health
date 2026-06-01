@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 880" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — Compliance Posture: Now vs. The Flip</title>
+  <desc id="d">A two-state compliance model. Today, on developer tiers with no real patients, the platform is deliberately not HIPAA-compliant: Cloudflare, Neon, Clerk and Anthropic are on standard tiers with no BAA, and PHI must not reach the model. When the first real patient onboards — the flip — every sub-processor moves to Enterprise plus BAA, the audit log becomes required, and DPAs and SCCs are signed. The architecture stays the same; only connection strings and billing change.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.20em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .bodyhi { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2.6; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="880" fill="#0A1428"/>
+  <rect width="1600" height="880" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">09 · COMPLIANCE STATE MACHINE</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- ===== STATE 1 ===== -->
+  <g>
+    <rect x="56" y="176" width="604" height="512" rx="16" class="card"/>
+    <text x="80" y="206" class="mono" font-size="10" fill="#6F7E9A">STATE 1 · TODAY · DEV TIER · NO REAL PATIENTS</text>
+    <!-- posture badge -->
+    <rect x="80" y="220" width="320" height="40" rx="10" fill="rgba(232,148,148,0.10)" stroke="#E89494"/>
+    <text x="98" y="246" class="bodyhi" font-size="14" fill="#E89494">NOT COMPLIANT — BY DESIGN</text>
+    <text x="80" y="288" class="body" font-size="13">A deliberate deferred line item, not a gap. Build clean</text>
+    <text x="80" y="310" class="body" font-size="13">and migratable; don’t apply HIPAA rigor prematurely.</text>
+
+    <g class="body" font-size="13">
+      <text x="80" y="352">—  Cloudflare standard plan · no BAA</text>
+      <text x="80" y="382">—  Neon free/standard · not HIPAA-eligible</text>
+      <text x="80" y="412">—  Clerk free · not HIPAA-eligible</text>
+      <text x="80" y="442">—  Anthropic standard · not HIPAA-eligible</text>
+      <text x="100" y="466" class="cap" font-size="11" fill="#E89494">PHI must not be sent to the model on this tier</text>
+      <text x="80" y="498">—  audit_log present but “nice to have”</text>
+    </g>
+
+    <rect x="80" y="520" width="556" height="64" rx="10" fill="rgba(134,217,166,0.07)" stroke="rgba(134,217,166,0.4)"/>
+    <text x="98" y="546" class="bodyhi" font-size="13" fill="#86D9A6">Already in place: EU residency (Frankfurt)</text>
+    <text x="98" y="568" class="body" font-size="12">GDPR groundwork laid from day one — see · 04</text>
+
+    <text x="80" y="624" class="cap" font-size="11">Posture: safe because no real PHI exists yet —</text>
+    <text x="80" y="646" class="cap" font-size="11">only synthetic / consented founder data (Patient Zero).</text>
+  </g>
+
+  <!-- ===== THE FLIP ===== -->
+  <g>
+    <rect x="688" y="316" width="224" height="232" rx="16" fill="rgba(244,185,66,0.06)" stroke="#F4B942" stroke-width="1.8"/>
+    <text x="800" y="352" class="mono" font-size="10" fill="#F4B942" text-anchor="middle">TRANSITION</text>
+    <text x="800" y="392" class="ntitle" font-size="22" text-anchor="middle">THE FLIP</text>
+    <text x="800" y="430" class="body" font-size="12.5" text-anchor="middle">First real patient</text>
+    <text x="800" y="450" class="body" font-size="12.5" text-anchor="middle">onboards</text>
+    <line x1="720" y1="470" x2="880" y2="470" stroke="#283655"/>
+    <text x="800" y="498" class="cap" font-size="10" text-anchor="middle">one-way · gated by</text>
+    <text x="800" y="516" class="cap" font-size="10" text-anchor="middle">plan + BAA signing</text>
+  </g>
+  <!-- transition arrows -->
+  <path class="flowg" d="M660 432 L 686 432" marker-end="url(#arrowGold)"/>
+  <path class="flowg" d="M912 432 L 940 432" marker-end="url(#arrowGold)"/>
+
+  <!-- ===== STATE 2 ===== -->
+  <g>
+    <rect x="940" y="176" width="604" height="512" rx="16" class="card"/>
+    <text x="964" y="206" class="mono" font-size="10" fill="#6F7E9A">STATE 2 · AT FIRST REAL PATIENT · ENTERPRISE</text>
+    <rect x="964" y="220" width="300" height="40" rx="10" fill="rgba(134,217,166,0.10)" stroke="#86D9A6"/>
+    <text x="982" y="246" class="bodyhi" font-size="14" fill="#86D9A6">COMPLIANT — BAAs + DPAs</text>
+    <text x="964" y="288" class="body" font-size="13">Same architecture, flipped onto compliant plan tiers.</text>
+    <text x="964" y="310" class="body" font-size="13">Each sub-processor under contract before any PHI lands.</text>
+
+    <g class="body" font-size="13">
+      <text x="964" y="352" fill="#86D9A6">+  Cloudflare Enterprise + BAA</text>
+      <text x="984" y="376" class="cap" font-size="10.5">Workers / R2 / KV HIPAA-eligible · confirm D1 at upgrade</text>
+      <text x="964" y="406" fill="#86D9A6">+  Anthropic Scale + BAA</text>
+      <text x="984" y="430" class="cap" font-size="10.5">or de-identify PHI at the Worker so it never reaches the model</text>
+      <text x="964" y="460" fill="#86D9A6">+  Neon HIPAA tier + BAA</text>
+      <text x="964" y="490" fill="#86D9A6">+  Clerk Enterprise + BAA</text>
+    </g>
+
+    <rect x="964" y="508" width="556" height="76" rx="10" fill="rgba(107,163,199,0.10)" stroke="#3E5070"/>
+    <text x="982" y="534" class="bodyhi" font-size="13">audit_log becomes REQUIRED</text>
+    <text x="982" y="556" class="body" font-size="12">every PHI read/write logged — actor + timestamp + context</text>
+    <text x="982" y="576" class="body" font-size="12">DPA signed per sub-processor · SCCs for cross-border transfer</text>
+
+    <text x="964" y="624" class="cap" font-size="11">Confirm the prior leaked Anthropic key is revoked;</text>
+    <text x="964" y="646" class="cap" font-size="11">rotated ANTHROPIC_API_KEY is the only active credential.</text>
+  </g>
+
+  <!-- ===== WHAT DOESN'T CHANGE ===== -->
+  <g>
+    <rect x="56" y="712" width="1488" height="134" rx="14" fill="rgba(244,185,66,0.05)" stroke="#F4B942" stroke-width="1.4"/>
+    <text x="80" y="742" class="mono" font-size="10" fill="#F4B942">WHAT DOES NOT CHANGE AT THE FLIP</text>
+    <text x="80" y="774" class="bodyhi" font-size="15">The architecture is identical on both sides — same Worker, same schema, same R2 layout, same EU residency.</text>
+    <text x="80" y="804" class="body" font-size="13.5">Only connection strings, plan tiers, and billing move. That is the whole point of building to GDPR-first, BAA-ready shapes now: the flip is a procurement event, not a re-architecture.</text>
+    <text x="80" y="832" class="cap" font-size="11">Open item: HIPAA Enterprise upgrade path across all four sub-processors — deferred until real patients.</text>
+  </g>
+</svg>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 940" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — Multi-tenant Frontend Rendering</title>
+  <desc id="d">patient-context.js dispatches each patient to either the default data-driven renderer (from /api/patient-summary and /api/patient-exams) or a bespoke renderer for off-pipeline curated patients: Patient Zero static pages, Paulo and Silvana bespoke renderers, and Leo's runtime transform. The universal landing rule orders every home page hero first, then Reports, then AI cards. The Mental section carries AI-pill badges and disclaimers as a frontend requirement.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.20em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .bodyhi { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .soft   { fill:rgba(107,163,199,0.10); stroke:#3E5070; stroke-width:1; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.8; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2.2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="940" fill="#0A1428"/>
+  <rect width="1600" height="940" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">08 · MULTI-TENANT RENDERING</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- DISPATCHER -->
+  <g>
+    <rect x="56" y="172" width="1012" height="122" rx="14" fill="rgba(244,185,66,0.05)" stroke="#F4B942" stroke-width="1.4"/>
+    <text x="78" y="200" class="mono" font-size="10" fill="#F4B942">CLIENT ROUTER · web/assets/patient-context.js</text>
+    <text x="78" y="230" class="ntitle" font-size="18">Section dispatch</text>
+    <text x="78" y="258" class="body" font-size="13">Reads the patient (clerk id) and the current section, then chooses a renderer.</text>
+    <text x="78" y="282" class="cap" font-size="11">hidePageBody() whitelists &lt;nav&gt; only — never &lt;header&gt; (Joao’s static hero must not leak)</text>
+  </g>
+
+  <!-- DATA-DRIVEN -->
+  <g>
+    <rect x="56" y="336" width="494" height="300" rx="14" class="card"/>
+    <text x="78" y="364" class="mono" font-size="10" fill="#86D9A6">PATH A · DEFAULT</text>
+    <text x="78" y="392" class="ntitle" font-size="18">Data-driven renderer</text>
+    <text x="78" y="420" class="body" font-size="13">GET /api/patient-summary</text>
+    <text x="78" y="442" class="body" font-size="13">GET /api/patient-exams</text>
+    <text x="78" y="470" class="body" font-size="13">→ pillar counts · grouped labs · imaging</text>
+    <text x="78" y="492" class="body" font-size="13">→ LLM cards from patient_dashboards</text>
+    <rect x="78" y="512" width="450" height="96" rx="10" class="soft"/>
+    <text x="96" y="538" class="bodyhi" font-size="13">The path every pipeline patient takes.</text>
+    <text x="96" y="562" class="body" font-size="12.5">Renders from structured data — no hand-curation.</text>
+    <text x="96" y="586" class="cap" font-size="10.5">cards: narrative · timeline · panel · flag-list</text>
+  </g>
+
+  <!-- BESPOKE -->
+  <g>
+    <rect x="574" y="336" width="494" height="300" rx="14" class="card"/>
+    <text x="596" y="364" class="mono" font-size="10" fill="#6BA3C7">PATH B · BESPOKE (off-pipeline curated)</text>
+    <text x="596" y="394" class="bodyhi" font-size="13.5">Patient Zero — Joao · static web/*.html</text>
+    <text x="616" y="414" class="cap" font-size="10.5">the maximal template everyone else subsets</text>
+    <text x="596" y="444" class="bodyhi" font-size="13.5">Paulo Silotto — renderPauloPhysicalExams()</text>
+    <text x="616" y="464" class="cap" font-size="10.5">2 curated MRI studies · cervical + lumbar</text>
+    <text x="596" y="494" class="bodyhi" font-size="13.5">Silvana Creste — renderSilvanaPhysicalExams()</text>
+    <text x="616" y="514" class="cap" font-size="10.5">7-yr lab history · window.SILVANA_LABS</text>
+    <text x="596" y="544" class="bodyhi" font-size="13.5">Leo Keller — leo-mode.js runtime transform</text>
+    <rect x="596" y="560" width="450" height="60" rx="10" fill="rgba(232,148,148,0.07)" stroke="rgba(232,148,148,0.4)"/>
+    <text x="612" y="584" class="body" font-size="12" fill="#E89494">Route ALL Physical sub-pages through bespoke —</text>
+    <text x="612" y="604" class="body" font-size="12" fill="#E89494">never leave a thin-data patient on the 0 / 0 / 0 grid.</text>
+  </g>
+
+  <!-- arrows dispatcher -> paths -->
+  <path class="flowg" d="M303 294 L 303 334" marker-end="url(#arrowGold)"/>
+  <path class="flow"  d="M821 294 L 821 334" marker-end="url(#arrow)"/>
+
+  <!-- ===== UNIVERSAL LANDING RULE (right) ===== -->
+  <g>
+    <rect x="1100" y="172" width="444" height="464" rx="14" class="card"/>
+    <text x="1122" y="200" class="mono" font-size="10" fill="#F4B942">UNIVERSAL LANDING RULE · /home</text>
+    <text x="1122" y="228" class="body" font-size="12.5">Same order for every patient, bespoke or not:</text>
+
+    <!-- stack -->
+    <rect x="1122" y="244" width="400" height="74" rx="10" fill="rgba(244,185,66,0.08)" stroke="#F4B942"/>
+    <text x="1138" y="268" class="mono" font-size="9" fill="#F4B942">1 · HERO (always first)</text>
+    <text x="1138" y="290" class="bodyhi" font-size="13">Health Summary · [DATE]</text>
+    <text x="1138" y="310" class="body" font-size="12">From scattered data to a clinical picture.</text>
+
+    <rect x="1122" y="328" width="400" height="50" rx="10" class="soft"/>
+    <text x="1138" y="350" class="mono" font-size="9" fill="#6BA3C7">2 · REPORTS / BROWSE</text>
+    <text x="1138" y="368" class="body" font-size="12">source documents &amp; entry cards</text>
+
+    <rect x="1122" y="388" width="400" height="50" rx="10" class="soft"/>
+    <text x="1138" y="410" class="mono" font-size="9" fill="#6BA3C7">3 · AI / SYNTHESIS CARDS</text>
+    <text x="1138" y="428" class="body" font-size="12">injected BELOW reports — never above hero</text>
+
+    <rect x="1122" y="448" width="400" height="44" rx="10" class="soft"/>
+    <text x="1138" y="470" class="mono" font-size="9" fill="#6BA3C7">4 · EVERYTHING ELSE</text>
+
+    <rect x="1122" y="506" width="400" height="50" rx="10" fill="rgba(232,148,148,0.08)" stroke="#E89494"/>
+    <text x="1138" y="528" class="body" font-size="12" fill="#E89494">AI cards never above the hero.</text>
+    <text x="1138" y="546" class="cap" font-size="10" fill="#E89494">regression seen in a Leo patch — locked down</text>
+
+    <text x="1122" y="584" class="cap" font-size="10.5">Joao: hero = first child after &lt;nav&gt;</text>
+    <text x="1122" y="606" class="cap" font-size="10.5">Paulo/Silvana: hero = first child of &lt;main&gt;</text>
+    <text x="1122" y="628" class="cap" font-size="10.5">Leo: cards inserted after the Reports grid</text>
+  </g>
+
+  <!-- ===== MENTAL CONVENTIONS (bottom strip) ===== -->
+  <g>
+    <rect x="56" y="668" width="1012" height="210" rx="14" class="card"/>
+    <text x="78" y="696" class="mono" font-size="10" fill="#6BA3C7">MENTAL SECTION — FRONTEND CONVENTIONS (therapist-validated)</text>
+    <!-- ai-pill sample -->
+    <rect x="78" y="712" width="120" height="28" rx="14" fill="rgba(167,124,214,0.18)" stroke="#A77CD6"/>
+    <text x="138" y="731" class="cap" font-size="10" fill="#C9AEEA" text-anchor="middle">AI · INFERRED</text>
+    <text x="216" y="731" class="body" font-size="13">Purple .ai-pill badge on every interpretive block + a global disclaimer in the header.</text>
+    <text x="78" y="772" class="body" font-size="13">· AI inference must be visually distinct from patient-entered data — any mixed block carries the badge.</text>
+    <text x="78" y="800" class="body" font-size="13">· ICD-10 codes are framed “(reference)”, not definitive — caveat block alongside.</text>
+    <text x="78" y="828" class="body" font-size="13">· 13-dimension / 84-item psych architecture stays collapsed by default — defer depth, don’t flatten.</text>
+    <text x="78" y="860" class="cap" font-size="10.5">bilingual EN ↔ BR-PT throughout via .lang-en / .lang-pt spans</text>
+  </g>
+
+  <!-- LEGEND -->
+  <g transform="translate(1100,668)">
+    <rect x="0" y="0" width="444" height="210" rx="14" class="card"/>
+    <text x="20" y="30" class="mono" font-size="9.5">LEGEND</text>
+    <line x1="20" y1="56" x2="56" y2="56" class="flowg" marker-end="url(#arrowGold)"/>
+    <text x="66" y="60" class="body" font-size="12.5">Default render path</text>
+    <line x1="20" y1="88" x2="56" y2="88" class="flow" marker-end="url(#arrow)"/>
+    <text x="66" y="92" class="body" font-size="12.5">Bespoke render path</text>
+    <rect x="20" y="112" width="16" height="16" rx="4" fill="rgba(167,124,214,0.18)" stroke="#A77CD6"/>
+    <text x="46" y="124" class="body" font-size="12.5">AI-inferred (.ai-pill)</text>
+    <rect x="20" y="140" width="16" height="16" rx="4" fill="rgba(232,148,148,0.08)" stroke="#E89494"/>
+    <text x="46" y="152" class="body" font-size="12.5">Hard rule / caution</text>
+    <text x="20" y="186" class="cap" font-size="10.5">4 patients today · same dispatch shape scales</text>
+  </g>
+</svg>

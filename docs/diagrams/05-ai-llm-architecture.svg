@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 820" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — AI / LLM Architecture &amp; IP Boundary</title>
+  <desc id="d">Two AI surfaces — dashboard authoring and the per-patient chatbot — are fed from one source of truth assembled by the record pipeline and the section templates. The proprietary IP layer (prompts, record assembly, templates, the Patient-Zero-as-maximal-template concept) is outlined in gold; the commodity layer (base Claude models and cloud primitives) is separated and neutral.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.22em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .bodyhi { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.08em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .soft   { fill:rgba(107,163,199,0.10); stroke:#3E5070; stroke-width:1; }
+      .gold   { fill:rgba(244,185,66,0.06); stroke:#F4B942; stroke-width:1.4; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.8; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2.2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="820" fill="#0A1428"/>
+  <rect width="1600" height="820" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">05 · AI / LLM ARCHITECTURE</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- ===== PROPRIETARY ZONE ===== -->
+  <rect x="48" y="150" width="1004" height="600" rx="18" fill="rgba(244,185,66,0.04)" stroke="#F4B942" stroke-width="1.8" stroke-dasharray="8 6"/>
+  <text x="72" y="184" class="mono" font-size="11" fill="#F4B942">PROPRIETARY IP — THE DEFENSIBLE LAYER</text>
+
+  <!-- Patient Zero concept -->
+  <g>
+    <rect x="74" y="202" width="456" height="128" rx="14" class="gold"/>
+    <text x="96" y="230" class="mono" font-size="9.5" fill="#F4B942">CORE CONCEPT</text>
+    <text x="96" y="258" class="ntitle" font-size="17">Patient Zero = maximal template</text>
+    <text x="96" y="284" class="body" font-size="12.5">Joao’s hand-curated dashboard is the “maximum”.</text>
+    <text x="96" y="306" class="body" font-size="12.5">Every other patient is a subset of the same shape.</text>
+  </g>
+
+  <!-- Section templates -->
+  <g>
+    <rect x="558" y="202" width="468" height="128" rx="14" class="card"/>
+    <text x="580" y="230" class="mono" font-size="9.5" fill="#6BA3C7">TEMPLATES</text>
+    <text x="580" y="258" class="ntitle" font-size="17">Section templates</text>
+    <text x="580" y="284" class="body" font-size="12.5">Summary · Physical · Vitals · Exams · Genetics</text>
+    <text x="580" y="306" class="body" font-size="12.5">Mental · Spiritual · AI Overview — same for everyone</text>
+  </g>
+
+  <!-- Record assembly -->
+  <g>
+    <rect x="74" y="348" width="456" height="146" rx="14" class="card"/>
+    <text x="96" y="376" class="mono" font-size="9.5" fill="#6BA3C7">SOURCE OF TRUTH</text>
+    <text x="96" y="404" class="ntitle" font-size="17">Record assembly</text>
+    <text x="96" y="430" class="body" font-size="12.5">build-patient-record.mjs strips 8 section pages</text>
+    <text x="96" y="452" class="body" font-size="12.5">→ patient-record.txt (one canonical bilingual file)</text>
+    <text x="96" y="476" class="cap" font-size="10.5">becomes the cached system prompt for chat</text>
+  </g>
+
+  <!-- Ingestion / classification prompts -->
+  <g>
+    <rect x="558" y="348" width="468" height="146" rx="14" class="card"/>
+    <text x="580" y="376" class="mono" font-size="9.5" fill="#6BA3C7">PROMPT ASSETS</text>
+    <text x="580" y="404" class="ntitle" font-size="17">Ingestion &amp; classification prompts</text>
+    <text x="580" y="430" class="body" font-size="12.5">CLASSIFIER · LAB_EXTRACTOR · CLASSIFY_AND_EXTRACT</text>
+    <text x="580" y="452" class="body" font-size="12.5">+ /Ingestion Prompts (Blood Tests · Imagery · Journal)</text>
+    <text x="580" y="476" class="cap" font-size="10.5">turn raw files into structured rows</text>
+  </g>
+
+  <!-- Surface A: dashboard authoring -->
+  <g>
+    <rect x="74" y="512" width="456" height="208" rx="14" class="gold"/>
+    <text x="96" y="540" class="mono" font-size="9.5" fill="#F4B942">AI SURFACE A · AUTHORING</text>
+    <text x="96" y="568" class="ntitle" font-size="18">Dashboard authoring</text>
+    <text x="96" y="594" class="body" font-size="12.5">Section-specific generation passes fill the</text>
+    <text x="96" y="616" class="body" font-size="12.5">templates from each patient’s structured payload.</text>
+    <text x="96" y="644" class="body" font-size="12.5">Strict JSON cards → patient_dashboards.</text>
+    <text x="96" y="672" class="cap" font-size="10.5">no invention · verbatim values · conditional skip</text>
+    <text x="96" y="700" class="cap" font-size="10.5">POST /api/patient-dashboard-build (async job)</text>
+  </g>
+
+  <!-- Surface B: chatbot -->
+  <g>
+    <rect x="558" y="512" width="468" height="208" rx="14" class="gold"/>
+    <text x="580" y="540" class="mono" font-size="9.5" fill="#F4B942">AI SURFACE B · CONVERSE</text>
+    <text x="580" y="568" class="ntitle" font-size="18">Per-patient chatbot</text>
+    <text x="580" y="594" class="body" font-size="12.5">POST /api/chat · streamed over SSE.</text>
+    <text x="580" y="616" class="body" font-size="12.5">Answers strictly from the patient record —</text>
+    <text x="580" y="638" class="body" font-size="12.5">summarise, never diagnose.</text>
+    <text x="580" y="666" class="cap" font-size="10.5">record passed as ephemeral cached block · 1h TTL</text>
+    <text x="580" y="694" class="cap" font-size="10.5">becomes per-patient as records are assembled</text>
+  </g>
+
+  <!-- ===== COMMODITY ZONE ===== -->
+  <rect x="1080" y="150" width="472" height="600" rx="18" fill="rgba(255,255,255,0.015)" stroke="#3E5070" stroke-width="1.6" stroke-dasharray="6 6"/>
+  <text x="1104" y="184" class="mono" font-size="11" fill="#6F7E9A">COMMODITY · BASE INFRASTRUCTURE (SWAPPABLE)</text>
+
+  <!-- Base LLM -->
+  <g>
+    <rect x="1104" y="202" width="424" height="246" rx="14" class="card"/>
+    <text x="1126" y="230" class="mono" font-size="9.5" fill="#6BA3C7">BASE MODEL · ANTHROPIC</text>
+    <text x="1126" y="258" class="ntitle" font-size="18">Claude (Messages API)</text>
+    <text x="1126" y="286" class="body" font-size="12.5">Opus 4.7 — chat &amp; AI insights</text>
+    <text x="1126" y="308" class="body" font-size="12.5">Sonnet 4.6 — PDF classify + extract, cards</text>
+    <text x="1126" y="330" class="body" font-size="12.5">Haiku 4.5 — non-PDF classification</text>
+    <rect x="1126" y="346" width="380" height="84" rx="10" class="soft"/>
+    <text x="1142" y="370" class="cap" font-size="10.5" fill="#94BBD3">adaptive thinking · effort: high</text>
+    <text x="1142" y="392" class="cap" font-size="10.5" fill="#94BBD3">prompt caching · ephemeral · ttl 1h</text>
+    <text x="1142" y="414" class="cap" font-size="10.5" fill="#94BBD3">@anthropic-ai/sdk · ANTHROPIC_API_KEY</text>
+  </g>
+
+  <!-- Cloud primitives -->
+  <g>
+    <rect x="1104" y="466" width="424" height="262" rx="14" class="card"/>
+    <text x="1126" y="494" class="mono" font-size="9.5" fill="#6BA3C7">CLOUD PRIMITIVES</text>
+    <text x="1126" y="522" class="ntitle" font-size="18">Generic infrastructure</text>
+    <text x="1126" y="550" class="body" font-size="12.5">Cloudflare Pages + Workers (edge runtime)</text>
+    <text x="1126" y="574" class="body" font-size="12.5">Neon Postgres + Hyperdrive</text>
+    <text x="1126" y="598" class="body" font-size="12.5">Cloudflare R2 (object storage)</text>
+    <text x="1126" y="622" class="body" font-size="12.5">Clerk (auth, eventual)</text>
+    <rect x="1126" y="642" width="380" height="62" rx="10" fill="rgba(255,255,255,0.02)" stroke="#283655"/>
+    <text x="1142" y="666" class="body" font-size="11.5">Replaceable vendors. The moat is the layer</text>
+    <text x="1142" y="686" class="body" font-size="11.5">on the left, not these primitives.</text>
+  </g>
+
+  <!-- ===== FLOWS ===== -->
+  <!-- patient zero -> templates -->
+  <path class="flowg" d="M530 266 L 556 266" marker-end="url(#arrowGold)"/>
+  <!-- templates -> surface A -->
+  <path class="flowg" d="M620 330 C 540 380, 360 440, 300 510" marker-end="url(#arrowGold)"/>
+  <text x="430" y="430" class="cap" font-size="10" fill="#F4B942">fills</text>
+  <!-- record assembly -> surface B -->
+  <path class="flowg" d="M520 452 C 600 480, 720 490, 760 510" marker-end="url(#arrowGold)"/>
+  <text x="600" y="500" class="cap" font-size="10" fill="#F4B942">feeds record</text>
+  <!-- surface A -> base LLM -->
+  <path class="flow" d="M530 600 C 900 600, 980 330, 1102 320" marker-end="url(#arrow)"/>
+  <text x="720" y="560" class="cap" font-size="10">payloads → cards</text>
+  <!-- surface B -> base LLM -->
+  <path class="flow" d="M1026 612 C 1060 612, 1075 420, 1102 360" marker-end="url(#arrow)"/>
+  <text x="1034" y="520" class="cap" font-size="10">record → answer</text>
+
+  <!-- LEGEND -->
+  <g transform="translate(72,300)" opacity="0">
+    <!-- placeholder, legend below -->
+  </g>
+  <g transform="translate(48,762)">
+    <rect x="0" y="0" width="1004" height="46" rx="10" fill="#131F37" stroke="#283655"/>
+    <rect x="20" y="14" width="16" height="16" rx="4" fill="rgba(244,185,66,0.06)" stroke="#F4B942"/>
+    <text x="46" y="27" class="body" font-size="12">Proprietary IP — prompts, assembly, templates, the Patient-Zero concept</text>
+    <rect x="640" y="14" width="16" height="16" rx="4" fill="rgba(255,255,255,0.02)" stroke="#3E5070" stroke-dasharray="3 3"/>
+    <text x="666" y="27" class="body" font-size="12">Commodity — base models &amp; swappable cloud</text>
+  </g>
+</svg>

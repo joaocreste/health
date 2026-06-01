@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — Database Schema (Entity Clusters)</title>
+  <desc id="d">The Neon Postgres data model grouped into clusters: Identity and Access, Clinical Core, Narrative and Mental, Care Events, and Pipeline. The doctor-to-patient relationship is many-to-many through patient_access; every patient-owned table references users.id via patient_id with ON DELETE CASCADE. Enums are listed in a side panel.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.18em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .tbl    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#A4B2CC; }
+      .tblhi  { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.6; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#0A1428"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">06 · DATABASE SCHEMA</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- ===== IDENTITY & ACCESS ===== -->
+  <g>
+    <rect x="56" y="176" width="404" height="300" rx="14" class="card"/>
+    <text x="78" y="204" class="mono" font-size="10" fill="#F4B942">IDENTITY &amp; ACCESS</text>
+    <!-- users hub -->
+    <rect x="78" y="218" width="360" height="44" rx="9" fill="rgba(244,185,66,0.08)" stroke="#F4B942"/>
+    <text x="96" y="246" class="tblhi" font-size="14">users  ·  hub (id = patient_id everywhere)</text>
+    <text x="96" y="294" class="tbl" font-size="13">doctor_profiles      → users (1:1)</text>
+    <text x="96" y="320" class="tbl" font-size="13">patient_profiles     → users (1:1)</text>
+    <!-- patient_access M2M -->
+    <rect x="78" y="338" width="360" height="58" rx="9" fill="rgba(107,163,199,0.10)" stroke="#6BA3C7"/>
+    <text x="96" y="362" class="tblhi" font-size="13">patient_access  (user_id, patient_id)</text>
+    <text x="96" y="384" class="cap" font-size="11" fill="#94BBD3">doctor ↔ patient · many-to-many</text>
+    <text x="96" y="428" class="tbl" font-size="13">audit_log  → actor + patient_context</text>
+    <text x="96" y="456" class="cap" font-size="10.5">required once PHI is real (see · 09)</text>
+  </g>
+
+  <!-- ===== CLINICAL CORE ===== -->
+  <g>
+    <rect x="486" y="176" width="640" height="300" rx="14" class="card"/>
+    <text x="508" y="204" class="mono" font-size="10" fill="#6BA3C7">CLINICAL CORE · structured, blob-backed</text>
+    <g class="tbl" font-size="13">
+      <text x="508" y="240">medications</text>
+      <text x="508" y="266">supplements</text>
+      <text x="508" y="292">surgeries</text>
+      <text x="508" y="318">injuries</text>
+      <text x="508" y="344">clinical_history</text>
+      <text x="508" y="370">risk_assessments</text>
+      <text x="820" y="240">lab_results</text>
+      <text x="820" y="266">vitals_daily</text>
+      <text x="820" y="292">glucose_points</text>
+      <text x="820" y="318">imaging_studies</text>
+      <text x="820" y="344">ecg_events</text>
+      <text x="820" y="370">pgx_findings</text>
+    </g>
+    <text x="508" y="416" class="cap" font-size="11">all carry patient_id · most carry source_blob_key → R2</text>
+    <text x="508" y="444" class="cap" font-size="11">timestamptz everywhere · per-patient indexes</text>
+  </g>
+
+  <!-- ===== ENUMS PANEL ===== -->
+  <g>
+    <rect x="1156" y="176" width="388" height="764" rx="14" class="card"/>
+    <text x="1178" y="204" class="mono" font-size="10" fill="#6BA3C7">ENUMS (pgEnum)</text>
+    <g class="tbl" font-size="12.5">
+      <text x="1178" y="244">user_role          admin · doctor · patient</text>
+      <text x="1178" y="282">sex                male · female · other · unknown</text>
+      <text x="1178" y="320">import_status      pending → … → completed</text>
+      <text x="1178" y="358">import_source      self_zip · self_files · admin · migration</text>
+      <text x="1178" y="396">import_file_status received → classified → parsed …</text>
+      <text x="1178" y="434">imaging_modality   MRI·CT·PET·US·XR·EEG·ECG·OTHER</text>
+      <text x="1178" y="472">imaging_source_fmt DICOM · JPEG · PNG · MIXED</text>
+      <text x="1178" y="510">encounter_type     in_person · remote · er · …</text>
+      <text x="1178" y="548">taper_direction    increase·decrease·hold·stop·restart</text>
+      <text x="1178" y="586">ecg_classification sinus · afib · high/low_hr · …</text>
+      <text x="1178" y="624">pgx_category       PK · PD · condition_risk · other</text>
+      <text x="1178" y="662">life_event_category birth·move·job·diagnosis·loss·…</text>
+    </g>
+    <line x1="1178" y1="694" x2="1522" y2="694" stroke="#283655"/>
+    <text x="1178" y="724" class="mono" font-size="9.5" fill="#6F7E9A">REFERENCE TABLE</text>
+    <text x="1178" y="752" class="tbl" font-size="13">psych_dimensions  · 13 AMPD dims (global)</text>
+    <text x="1178" y="778" class="cap" font-size="10.5">seeded, not patient-scoped</text>
+    <line x1="1178" y1="804" x2="1522" y2="804" stroke="#283655"/>
+    <text x="1178" y="834" class="mono" font-size="9.5" fill="#6F7E9A">SCALE</text>
+    <text x="1178" y="864" class="body" font-size="13">33 tables · 12 enums</text>
+    <text x="1178" y="890" class="body" font-size="13">migrations 0000 → 0008</text>
+    <text x="1178" y="916" class="cap" font-size="10.5">Drizzle ORM · db/schema.ts</text>
+  </g>
+
+  <!-- ===== NARRATIVE & MENTAL ===== -->
+  <g>
+    <rect x="56" y="506" width="404" height="434" rx="14" class="card"/>
+    <text x="78" y="534" class="mono" font-size="10" fill="#6BA3C7">NARRATIVE &amp; MENTAL</text>
+    <g class="tbl" font-size="13">
+      <text x="78" y="572">writings</text>
+      <text x="78" y="598">documents (catch-all blobs)</text>
+      <text x="78" y="624">wheel_of_life_assessments</text>
+      <text x="78" y="650">mood_entries</text>
+      <text x="78" y="676">panic_events</text>
+      <text x="78" y="702">life_events</text>
+    </g>
+    <rect x="78" y="724" width="360" height="160" rx="9" fill="rgba(107,163,199,0.08)" stroke="#3E5070"/>
+    <text x="96" y="750" class="mono" font-size="9" fill="#6BA3C7">PSYCH ARCHITECTURE</text>
+    <text x="96" y="776" class="tblhi" font-size="13">psych_dimensions  (13, global)</text>
+    <text x="96" y="802" class="tbl" font-size="13">  ↑ psych_items   (84 for P0)</text>
+    <text x="96" y="828" class="tbl" font-size="13">      ↑ psych_evidence</text>
+    <text x="96" y="854" class="cap" font-size="10.5">evidence → writings (cited quotes)</text>
+    <text x="96" y="876" class="cap" font-size="10.5">items re-derivable by an LLM pass</text>
+  </g>
+
+  <!-- ===== CARE EVENTS ===== -->
+  <g>
+    <rect x="486" y="506" width="300" height="434" rx="14" class="card"/>
+    <text x="508" y="534" class="mono" font-size="10" fill="#6BA3C7">CARE EVENTS</text>
+    <rect x="508" y="552" width="256" height="40" rx="9" fill="rgba(107,163,199,0.08)" stroke="#3E5070"/>
+    <text x="524" y="578" class="tblhi" font-size="13">encounters</text>
+    <text x="524" y="636" class="tbl" font-size="13">prescriptions</text>
+    <text x="524" y="662" class="cap" font-size="10.5">→ encounters · medications</text>
+    <text x="524" y="712" class="tbl" font-size="13">taper_history</text>
+    <text x="524" y="738" class="cap" font-size="10.5">→ medications (dose over time)</text>
+    <text x="508" y="800" class="cap" font-size="11">medications = current state;</text>
+    <text x="508" y="822" class="cap" font-size="11">prescriptions = audit trail of</text>
+    <text x="508" y="844" class="cap" font-size="11">every order event.</text>
+  </g>
+
+  <!-- ===== PIPELINE ===== -->
+  <g>
+    <rect x="816" y="506" width="310" height="434" rx="14" class="card"/>
+    <text x="838" y="534" class="mono" font-size="10" fill="#6BA3C7">PIPELINE</text>
+    <rect x="838" y="552" width="266" height="40" rx="9" fill="rgba(107,163,199,0.08)" stroke="#3E5070"/>
+    <text x="854" y="578" class="tblhi" font-size="13">imports</text>
+    <text x="854" y="636" class="tbl" font-size="13">import_files</text>
+    <text x="854" y="662" class="cap" font-size="10.5">→ imports (per-file status)</text>
+    <text x="838" y="716" class="tbl" font-size="13">patient_dashboards</text>
+    <text x="838" y="742" class="tbl" font-size="13">patient_dashboard_cards</text>
+    <text x="838" y="768" class="cap" font-size="10.5">→ patient_dashboards</text>
+    <text x="838" y="818" class="tbl" font-size="13">insight_jobs</text>
+    <text x="838" y="844" class="cap" font-size="10.5">async authoring job state</text>
+    <text x="838" y="894" class="cap" font-size="10.5">migrations 0005 / 0006 / 0008</text>
+  </g>
+
+  <!-- ===== RELATIONSHIPS ===== -->
+  <!-- patient_access M2M self-loop on users -->
+  <path class="flow" d="M438 367 C 470 360, 470 240, 440 240" marker-end="url(#arrow)"/>
+  <!-- Clinical Core -> users (representative patient_id FK) -->
+  <path class="flowg" d="M486 300 C 472 300, 468 300, 462 300" marker-end="url(#arrowGold)"/>
+  <text x="300" y="500" class="cap" font-size="11" fill="#F4B942" text-anchor="middle">every patient-owned table → users.id · patient_id · ON DELETE CASCADE</text>
+  <!-- cluster -> identity feeders -->
+  <path class="flow" d="M256 506 L 256 478" marker-end="url(#arrow)"/>
+  <path class="flow" d="M636 506 C 560 492, 470 480, 462 360" marker-end="url(#arrow)"/>
+  <path class="flow" d="M970 506 C 800 470, 520 470, 462 330" marker-end="url(#arrow)"/>
+
+  <!-- LEGEND -->
+  <g transform="translate(486,952)" opacity="0"></g>
+</svg>

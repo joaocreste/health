@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 860" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — System Architecture</title>
+  <desc id="d">High-level system map: browser client to Cloudflare Pages advanced-mode Worker (the auth/role boundary) to Neon Postgres (Frankfurt via Hyperdrive), Cloudflare R2 (EU), and the Anthropic API. Shows the two live Pages domains and the retired project that 301-redirects.</desc>
+
+  <!-- ============ DEFS: grid, markers, styles ============ -->
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.22em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .bodyhi { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.12em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .soft   { fill:rgba(107,163,199,0.10); stroke:#3E5070; stroke-width:1; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.8; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2.2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <!-- ============ CANVAS ============ -->
+  <rect width="1600" height="860" fill="#0A1428"/>
+  <rect width="1600" height="860" fill="url(#grid)"/>
+
+  <!-- ============ TITLE BLOCK ============ -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">01 · SYSTEM ARCHITECTURE</text>
+    <text x="58" y="52" class="cap" font-size="9.5" fill="#6F7E9A" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- ============ RETIRED DOMAIN (top-left) ============ -->
+  <g>
+    <rect x="64" y="150" width="312" height="104" rx="14" class="card" stroke-dasharray="4 4"/>
+    <text x="84" y="180" class="mono" font-size="10" fill="#E8C977">RETIRED PROJECT</text>
+    <text x="84" y="206" class="bodyhi" font-size="14.5">jc-advisory-health.pages.dev</text>
+    <text x="84" y="230" class="body" font-size="12.5">redirect-only build · _redirects</text>
+  </g>
+
+  <!-- ============ LIVE DOMAINS ============ -->
+  <g>
+    <rect x="470" y="118" width="470" height="96" rx="14" class="card"/>
+    <text x="492" y="146" class="mono" font-size="10" fill="#86D9A6">LIVE DOMAINS · CLOUDFLARE PAGES</text>
+    <text x="492" y="172" class="bodyhi" font-size="14.5">lumenhealth.io · www.lumenhealth.io</text>
+    <text x="492" y="194" class="body" font-size="12.5">lumenhealth.pages.dev · project “lumenhealth”</text>
+  </g>
+  <!-- 301 redirect arrow -->
+  <path class="flow" d="M376 196 C 420 196, 430 168, 468 166" marker-end="url(#arrow)"/>
+  <text x="392" y="150" class="cap" font-size="10" fill="#E8C977">301 →</text>
+
+  <!-- ============ CLIENT ============ -->
+  <g>
+    <rect x="64" y="372" width="312" height="196" rx="14" class="card"/>
+    <text x="84" y="402" class="mono" font-size="10">CLIENT TIER</text>
+    <text x="84" y="430" class="ntitle" font-size="19">Browser / SPA</text>
+    <text x="84" y="458" class="body" font-size="13">Static HTML pages + assets</text>
+    <text x="84" y="480" class="body" font-size="13">patient-context.js router</text>
+    <text x="84" y="502" class="body" font-size="13">chatbot.js · data.js</text>
+    <rect x="84" y="518" width="272" height="34" rx="8" fill="rgba(232,148,148,0.10)" stroke="rgba(232,148,148,0.45)"/>
+    <text x="98" y="540" class="body" font-size="11.5" fill="#E89494">No trust boundary here — gating is server-side</text>
+  </g>
+
+  <!-- ============ CLOUDFLARE PAGES / WORKER (edge tier) ============ -->
+  <g>
+    <rect x="470" y="248" width="478" height="468" rx="16" class="card"/>
+    <text x="492" y="280" class="mono" font-size="10" fill="#6BA3C7">EDGE / API TIER · CLOUDFLARE PAGES (ADVANCED MODE)</text>
+
+    <!-- worker inner -->
+    <rect x="492" y="300" width="434" height="396" rx="14" class="soft"/>
+    <text x="512" y="330" class="ntitle" font-size="19">web/_worker.js</text>
+    <text x="512" y="352" class="body" font-size="12.5">Single Worker · all /api/* routes</text>
+
+    <!-- AUTH GATE (gold) -->
+    <rect x="512" y="372" width="394" height="96" rx="12" fill="rgba(244,185,66,0.08)" stroke="#F4B942" stroke-width="1.6"/>
+    <text x="532" y="400" class="mono" font-size="10" fill="#F4B942">AUTH / ROLE GATE — SERVER-SIDE ONLY</text>
+    <text x="532" y="424" class="bodyhi" font-size="13">Clerk authenticateRequest() + demo X-Viewer-Clerk</text>
+    <text x="532" y="446" class="body" font-size="12.5">role ∈ admin·doctor·patient · access via patient_access</text>
+
+    <!-- route groups -->
+    <text x="512" y="498" class="mono" font-size="9.5" fill="#6F7E9A">ROUTE GROUPS</text>
+    <text x="512" y="522" class="body" font-size="12.5">· session   /api/login · /api/me</text>
+    <text x="512" y="544" class="body" font-size="12.5">· patient   /api/patient-summary · -exams · -dashboard</text>
+    <text x="512" y="566" class="body" font-size="12.5">· author    /api/patient-dashboard-build (async job)</text>
+    <text x="512" y="588" class="body" font-size="12.5">· ingest    /api/ingest    · chat  /api/chat (SSE)</text>
+    <text x="512" y="610" class="body" font-size="12.5">· admin     /api/admin/* (admin role required)</text>
+    <text x="512" y="648" class="cap" font-size="10.5" fill="#6F7E9A">node_modules bundled at build · compat 2026-04-28</text>
+    <text x="512" y="668" class="cap" font-size="10.5" fill="#6F7E9A">manual deploy — git push does NOT auto-deploy</text>
+  </g>
+
+  <!-- ============ BACKENDS ============ -->
+  <!-- Neon -->
+  <g>
+    <rect x="1044" y="258" width="492" height="138" rx="14" class="card"/>
+    <text x="1066" y="288" class="mono" font-size="10" fill="#6BA3C7">RELATIONAL · STRUCTURED DATA</text>
+    <text x="1066" y="316" class="ntitle" font-size="19">Neon Postgres</text>
+    <text x="1066" y="342" class="body" font-size="13">Region: Frankfurt (eu-central) · via Cloudflare Hyperdrive</text>
+    <text x="1066" y="366" class="body" font-size="13">@neondatabase/serverless · Drizzle ORM · 33 tables</text>
+    <text x="1066" y="388" class="cap" font-size="10.5" fill="#6F7E9A">env DATABASE_URL</text>
+  </g>
+  <!-- R2 -->
+  <g>
+    <rect x="1044" y="412" width="492" height="138" rx="14" class="card"/>
+    <text x="1066" y="442" class="mono" font-size="10" fill="#6BA3C7">OBJECT STORAGE · BLOBS</text>
+    <text x="1066" y="470" class="ntitle" font-size="19">Cloudflare R2</text>
+    <text x="1066" y="496" class="body" font-size="13">EU jurisdiction · bucket jc-health-uploads</text>
+    <text x="1066" y="520" class="body" font-size="13">PDFs · DICOM · DOCX · wearable exports · previews</text>
+    <text x="1066" y="542" class="cap" font-size="10.5" fill="#6F7E9A">binding R2_BUCKET · key patients/{id}/imports/{import}/…</text>
+  </g>
+  <!-- Anthropic -->
+  <g>
+    <rect x="1044" y="566" width="492" height="138" rx="14" class="card"/>
+    <text x="1066" y="596" class="mono" font-size="10" fill="#6BA3C7">MODEL · COMMODITY LLM</text>
+    <text x="1066" y="624" class="ntitle" font-size="19">Anthropic API</text>
+    <text x="1066" y="650" class="body" font-size="13">Opus 4.7 (chat · insights) · Sonnet 4.6 / Haiku 4.5 (ingest)</text>
+    <text x="1066" y="674" class="body" font-size="13">@anthropic-ai/sdk · cached system prompt (1h TTL)</text>
+    <text x="1066" y="696" class="cap" font-size="10.5" fill="#6F7E9A">env ANTHROPIC_API_KEY</text>
+  </g>
+
+  <!-- ============ FLOWS ============ -->
+  <!-- client -> worker (PRIMARY, gold) -->
+  <path class="flowg" d="M376 462 L 468 462" marker-end="url(#arrowGold)"/>
+  <text x="384" y="450" class="cap" font-size="10.5" fill="#F4B942">HTTPS · fetch /api/*</text>
+
+  <!-- worker -> Neon (gold primary read path) -->
+  <path class="flowg" d="M948 392 C 1000 392, 1010 340, 1042 330" marker-end="url(#arrowGold)"/>
+  <text x="958" y="372" class="cap" font-size="10.5" fill="#F4B942">SQL · Hyperdrive</text>
+
+  <!-- worker -> R2 -->
+  <path class="flow" d="M948 470 C 1000 470, 1010 482, 1042 482" marker-end="url(#arrow)"/>
+  <text x="958" y="460" class="cap" font-size="10.5">S3 API · signed URLs</text>
+
+  <!-- worker -> Anthropic -->
+  <path class="flow" d="M948 548 C 1000 548, 1010 620, 1042 632" marker-end="url(#arrow)"/>
+  <text x="958" y="556" class="cap" font-size="10.5">Messages API</text>
+
+  <!-- ============ LEGEND ============ -->
+  <g transform="translate(64,742)">
+    <rect x="0" y="0" width="884" height="84" rx="12" fill="#131F37" stroke="#283655"/>
+    <text x="20" y="26" class="mono" font-size="9.5" fill="#6F7E9A">LEGEND</text>
+    <line x1="20" y1="48" x2="56" y2="48" class="flowg" marker-end="url(#arrowGold)"/>
+    <text x="66" y="52" class="body" font-size="12">Primary request &amp; read path</text>
+    <line x1="300" y1="48" x2="336" y2="48" class="flow" marker-end="url(#arrow)"/>
+    <text x="346" y="52" class="body" font-size="12">Service connector</text>
+    <rect x="520" y="40" width="16" height="16" rx="4" fill="rgba(244,185,66,0.08)" stroke="#F4B942"/>
+    <text x="544" y="52" class="body" font-size="12">Server-side trust boundary</text>
+    <rect x="20" y="64" width="16" height="12" rx="3" fill="#131F37" stroke="#283655" stroke-dasharray="4 4"/>
+    <text x="46" y="74" class="body" font-size="12">Retired / redirect-only</text>
+  </g>
+</svg>

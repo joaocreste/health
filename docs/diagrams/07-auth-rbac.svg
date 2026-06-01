@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — Auth &amp; Role-Based Access</title>
+  <desc id="d">Authentication and authorization happen at the Worker boundary, never client-side. Today login is DB-backed demo auth via POST /api/login plus an X-Viewer-Clerk override; this migrates to Clerk. Authorization is resolved server-side: resolveInsightAccess (self, admin, or a patient_access row) and getAdminViewer (admin role). Roles are admin, doctor, patient. The legacy client-side gate in index.html is flagged as security debt to remove.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.22em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .bodyhi { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#F0F4F8; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .soft   { fill:rgba(107,163,199,0.10); stroke:#3E5070; stroke-width:1; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.8; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2.2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="900" fill="#0A1428"/>
+  <rect width="1600" height="900" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">07 · AUTH &amp; ROLE-BASED ACCESS</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">FROM DATA TO INSIGHTS</text>
+  </g>
+
+  <!-- ACTORS -->
+  <g>
+    <text x="56" y="190" class="mono" font-size="10">PRINCIPALS · ROLES</text>
+    <rect x="56" y="206" width="300" height="116" rx="14" class="card"/>
+    <text x="78" y="240" class="ntitle" font-size="17">admin</text>
+    <text x="78" y="268" class="body" font-size="12.5">Manages users, patients,</text>
+    <text x="78" y="290" class="body" font-size="12.5">and access grants.</text>
+    <rect x="56" y="338" width="300" height="116" rx="14" class="card"/>
+    <text x="78" y="372" class="ntitle" font-size="17">doctor</text>
+    <text x="78" y="400" class="body" font-size="12.5">Sees only patients linked</text>
+    <text x="78" y="422" class="body" font-size="12.5">via patient_access.</text>
+    <rect x="56" y="470" width="300" height="116" rx="14" class="card"/>
+    <text x="78" y="504" class="ntitle" font-size="17">patient</text>
+    <text x="78" y="532" class="body" font-size="12.5">Sees only their own</text>
+    <text x="78" y="554" class="body" font-size="12.5">record (self-scope).</text>
+  </g>
+
+  <!-- WORKER BOUNDARY -->
+  <rect x="420" y="166" width="600" height="566" rx="18" fill="rgba(244,185,66,0.04)" stroke="#F4B942" stroke-width="1.8"/>
+  <text x="444" y="198" class="mono" font-size="11" fill="#F4B942">WORKER BOUNDARY — SERVER-SIDE, ALWAYS TRUSTED</text>
+
+  <!-- authentication: current -->
+  <g>
+    <rect x="444" y="216" width="552" height="120" rx="12" class="card"/>
+    <text x="466" y="244" class="mono" font-size="9.5" fill="#86D9A6">AUTHENTICATION · TODAY</text>
+    <text x="466" y="272" class="ntitle" font-size="16">Demo DB auth</text>
+    <text x="466" y="298" class="body" font-size="12.5">POST /api/login → users.demo_username / demo_password</text>
+    <text x="466" y="322" class="body" font-size="12.5">demo override header X-Viewer-Clerk · ?viewer= query</text>
+  </g>
+  <!-- authentication: planned -->
+  <g>
+    <rect x="444" y="350" width="552" height="110" rx="12" class="card" stroke-dasharray="5 4"/>
+    <text x="466" y="378" class="mono" font-size="9.5" fill="#E8C977">AUTHENTICATION · PLANNED</text>
+    <text x="466" y="406" class="ntitle" font-size="16" fill="#A4B2CC">Clerk</text>
+    <text x="466" y="432" class="body" font-size="12.5">authenticateRequest() · __session cookie / Bearer token</text>
+    <text x="466" y="454" class="body" font-size="12.5">role read from publicMetadata.role → mirrors users.role</text>
+  </g>
+  <!-- migrate arrow -->
+  <path class="flowg" d="M972 336 C 1000 340, 1000 346, 980 350" marker-end="url(#arrowGold)"/>
+  <text x="612" y="352" class="cap" font-size="10" fill="#E8C977">migrate →</text>
+
+  <!-- authorization -->
+  <g>
+    <rect x="444" y="474" width="552" height="240" rx="12" class="soft"/>
+    <text x="466" y="502" class="mono" font-size="9.5" fill="#6BA3C7">AUTHORIZATION · per request</text>
+    <text x="466" y="532" class="bodyhi" font-size="14">role ∈ { admin · doctor · patient }</text>
+    <text x="466" y="566" class="body" font-size="13">resolveInsightAccess(patientId, viewer):</text>
+    <text x="486" y="590" class="body" font-size="12.5">allow if viewer.id == patientId  (self)</text>
+    <text x="486" y="612" class="body" font-size="12.5">or viewer.role == 'admin'</text>
+    <text x="486" y="634" class="body" font-size="12.5">or a row exists in patient_access</text>
+    <text x="466" y="666" class="body" font-size="13">getAdminViewer(): requires role == 'admin'</text>
+    <text x="466" y="698" class="cap" font-size="10.5">every /api/admin/* call re-checks this server-side</text>
+  </g>
+
+  <!-- CAPABILITIES -->
+  <g>
+    <text x="1080" y="190" class="mono" font-size="10">EFFECTIVE ACCESS</text>
+    <rect x="1080" y="206" width="464" height="150" rx="14" class="card"/>
+    <text x="1102" y="236" class="ntitle" font-size="16">admin</text>
+    <text x="1102" y="264" class="body" font-size="12.5">/api/admin/* — all users + credentials,</text>
+    <text x="1102" y="286" class="body" font-size="12.5">create/delete patients, grant/revoke access,</text>
+    <text x="1102" y="308" class="body" font-size="12.5">reclassify imports, seed clinical data.</text>
+    <text x="1102" y="338" class="cap" font-size="10.5">X-Viewer-Clerk: pending:admin (demo)</text>
+
+    <rect x="1080" y="374" width="464" height="150" rx="14" class="card"/>
+    <text x="1102" y="404" class="ntitle" font-size="16">doctor</text>
+    <text x="1102" y="432" class="body" font-size="12.5">Patients granted via patient_access only.</text>
+    <text x="1102" y="454" class="body" font-size="12.5">Read dashboards &amp; records of those patients.</text>
+    <text x="1102" y="476" class="body" font-size="12.5">Review / edit generated dashboards (future).</text>
+    <text x="1102" y="506" class="cap" font-size="10.5">no access to unlinked patients</text>
+
+    <rect x="1080" y="542" width="464" height="150" rx="14" class="card"/>
+    <text x="1102" y="572" class="ntitle" font-size="16">patient</text>
+    <text x="1102" y="600" class="body" font-size="12.5">Own record only — summary, exams, dashboard.</text>
+    <text x="1102" y="622" class="body" font-size="12.5">Chat over own record · self-service data wipe.</text>
+    <text x="1102" y="644" class="body" font-size="12.5">Import own files.</text>
+    <text x="1102" y="674" class="cap" font-size="10.5">/api/patient-wipe-data (self)</text>
+  </g>
+
+  <!-- SECURITY DEBT -->
+  <g>
+    <rect x="56" y="760" width="964" height="110" rx="14" fill="rgba(232,148,148,0.08)" stroke="#E89494" stroke-width="1.6"/>
+    <text x="78" y="790" class="mono" font-size="10" fill="#E89494">SECURITY DEBT — REMOVE BEFORE ANY CLINICAL USER</text>
+    <text x="78" y="818" class="bodyhi" font-size="14">Legacy index.html login is a decorative client-side gate with hard-coded passwords.</text>
+    <text x="78" y="844" class="body" font-size="12.5">Never the security boundary. Replaced by Clerk + server-side checks. Do not promote to production unchanged.</text>
+  </g>
+
+  <!-- FLOWS -->
+  <path class="flow" d="M356 264 C 390 264, 400 270, 442 276" marker-end="url(#arrow)"/>
+  <path class="flow" d="M356 396 C 390 396, 400 396, 442 396" marker-end="url(#arrow)"/>
+  <path class="flow" d="M356 528 C 390 528, 400 560, 442 580" marker-end="url(#arrow)"/>
+  <text x="360" y="250" class="cap" font-size="10">login</text>
+
+  <path class="flowg" d="M1020 280 L 1078 280" marker-end="url(#arrowGold)"/>
+  <path class="flowg" d="M1020 448 L 1078 448" marker-end="url(#arrowGold)"/>
+  <path class="flowg" d="M1020 600 C 1040 600, 1050 610, 1078 612" marker-end="url(#arrowGold)"/>
+  <text x="1024" y="266" class="cap" font-size="10" fill="#F4B942">role-scoped</text>
+
+  <!-- LEGEND -->
+  <g transform="translate(1080,760)">
+    <rect x="0" y="0" width="464" height="110" rx="14" class="card"/>
+    <text x="20" y="30" class="mono" font-size="9.5">LEGEND</text>
+    <rect x="20" y="44" width="16" height="16" rx="4" fill="rgba(244,185,66,0.04)" stroke="#F4B942"/>
+    <text x="46" y="56" class="body" font-size="12">Server-side trust boundary</text>
+    <rect x="20" y="72" width="16" height="16" rx="4" fill="rgba(232,148,148,0.08)" stroke="#E89494"/>
+    <text x="46" y="84" class="body" font-size="12">Security debt</text>
+    <rect x="260" y="44" width="16" height="16" rx="4" fill="#131F37" stroke="#283655" stroke-dasharray="4 3"/>
+    <text x="286" y="56" class="body" font-size="12">Planned (Clerk)</text>
+  </g>
+</svg>
