@@ -3,6 +3,7 @@ import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
 import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
+import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the Lumen Health portal assistant for the patient Joao Victor Creste.
 
@@ -398,8 +399,10 @@ async function handlePatientDashboardBuild(request, env) {
   try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
   const patientClerk = String(body?.patient_clerk || "").trim();
   const section = String(body?.section || "").trim();
+  const mode = String(body?.mode || "").trim();
+  const isAiInsights = mode === "ai-insights" || section === AI_INSIGHTS_SECTION;
   if (!patientClerk) return jsonError(400, "patient_clerk_required");
-  if (!DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
+  if (!isAiInsights && !DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
 
   const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
 
@@ -415,6 +418,21 @@ async function handlePatientDashboardBuild(request, env) {
     ]);
     if (patientRows.length === 0) return jsonError(404, "patient_not_found");
     const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
+
+    // Full single-pass AI-insights rebuild (whole record, Opus). Distinct from
+    // the per-section card generator below.
+    if (isAiInsights) {
+      const result = await rebuildAiInsights({
+        sql, anthropic,
+        patientId: patientRows[0].id,
+        viewerId: viewerRows[0]?.id || null,
+        version: Number.isInteger(body?.insights_version) ? body.insights_version : null,
+      });
+      return new Response(JSON.stringify({ ok: true, ...result }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    }
+
     const result = await buildOneSection({
       sql, anthropic,
       patientId: patientRows[0].id,
