@@ -1146,6 +1146,19 @@ section.report-section.light             { background: var(--surface-base); } /*
   padding: 22px 24px;
   box-shadow: var(--shadow-sm);
 }
+
+/* ── AI TEXT CARDS ── amber background + gold stroke so AI-authored
+   synthesis prose reads as visually distinct from clinical data cards.
+   Pairs with the purple .ai-pill that marks the same content. Scoped to
+   genuine AI cards (incl. Leo's injected summary); the shared .list-card
+   stays neutral on every non-AI page. */
+.ai-text-card,
+.ai-synthesis-card,
+.chart-card.ai-comments,
+#leo-ai-summary .list-card {
+  background: #FDF8EC;
+  border: 1px solid #F4DD9C;
+}
 .list-card h4 {
   font-family: var(--font-display);
   font-size: 16px;
