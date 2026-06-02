@@ -22,6 +22,7 @@
   var PATIENT_ZERO    = 'pending:joao';
   var PAULO_SILOTTO   = 'pending:paulo-silotto-df3441';
   var SILVANA_CRESTE  = 'pending:silvana-creste-18ba19';
+  var CRISTINA_CRESTI = 'pending:cristina-cresti-d7479c';
   // Leo Keller is rendered by transforming Patient Zero's static HTML
   // in place — see assets/leo-mode.js. From this script's perspective,
   // he behaves the same way Patient Zero does: skip the data-driven
@@ -1458,6 +1459,11 @@
       if (patient === SILVANA_CRESTE) {
         renderSilvanaPhysicalExams();
       setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
+        return;
+      }
+      if (patient === CRISTINA_CRESTI) {
+        renderCristinaPhysicalExams();
+        setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
         return;
       }
       fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
@@ -4399,6 +4405,115 @@
     var main = document.createElement('main');
     main.className = 'jc-silvana-exams';
     main.innerHTML = hero + imagery;
+    document.body.appendChild(main);
+
+    injectDangerZone(main);
+  }
+
+  /* ── Cristina Cresti · bespoke lab-history page ─────────────────────
+     Reads window.CRISTINA_LABS (loaded via assets/cristina-labs.js) and
+     reuses the Silvana exam scaffolding (styles + panel/marker/doc
+     helpers). First ingested data: a single thyroid-autoantibody panel,
+     so there is no historical-comparison table or studies section yet. */
+  function renderCristinaPhysicalExams() {
+    if (!window.CRISTINA_LABS) {
+      console.error('CRISTINA_LABS data not loaded — expected via assets/cristina-labs.js');
+      renderEmptyShell(patient, 'Cristina Cresti', t('Physical → Exams', 'Físico → Exames'));
+      return;
+    }
+    injectSilvanaStyles();
+    document.title = 'Lumen Health — Physical · Exams · Cristina Cresti';
+
+    var data = window.CRISTINA_LABS;
+    var nMarkers = data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
+    var doc = (data.documents && data.documents[0]) || {};
+    var examDate = doc.date || '2026-03-11';
+
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('Lab history · Cristina Cresti', 'Histórico laboratorial · Cristina Cresti') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('First ingested exam: a thyroid-autoantibody panel from ' + escapeHtml(doc.laboratory || 'the laboratory') + ', collected ' + formatDate(examDate) + '. The panel below shows each marker with its reference range and status pill. As more reports are added, per-marker history and a side-by-side comparison table appear automatically.',
+              'Primeiro exame ingerido: um painel de autoanticorpos tireoidianos do ' + escapeHtml(doc.laboratory || 'laboratório') + ', coletado em ' + formatDate(examDate) + '. O painel abaixo mostra cada marcador com seu intervalo de referência e o status. À medida que novos laudos forem adicionados, o histórico por marcador e a tabela comparativa aparecem automaticamente.') +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Patient', 'Paciente') + '</span><span>' + escapeHtml(data.patient.full_name) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Collection date', 'Data da coleta') + '</span>' +
+              '<span>' + escapeHtml(formatDate(examDate)) + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Laboratory', 'Laboratório') + '</span>' +
+              '<span>' + escapeHtml(doc.laboratory || '—') + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Requested by', 'Solicitante') + '</span>' +
+              '<span>' + escapeHtml(doc.doctor || '—') + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Markers tracked', 'Marcadores') + '</span>' +
+              '<span>' + nMarkers + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Source documents', 'Documentos') + '</span>' +
+              '<span>' + (data.documents ? data.documents.length : 0) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    var ai =
+      '<section class="silv-ai-summary">' +
+        '<header class="silv-ai-summary-head">' +
+          '<h2>' + t('AI summary · thyroid autoantibody panel', 'Resumo da IA · painel de autoanticorpos tireoidianos') + '</h2>' +
+          '<span class="ai-pill">AI</span>' +
+        '</header>' +
+        '<div class="silv-ai-summary-meta">' +
+          t('Synthesised from 1 source document · ' + formatDate(examDate),
+            'Sintetizado a partir de 1 documento · ' + formatDate(examDate)) +
+        '</div>' +
+        '<div class="silv-ai-summary-body lang-en">' +
+          '<p>The first ingested exam is a <strong>thyroid-autoantibody screen</strong>. Both markers are <strong>negative (non-reactive)</strong>: anti-microsomal / anti-TPO &lt; 0.25 UI/mL (reference &lt; 9.00) and anti-thyroglobulin &lt; 0.90 UI/mL (reference &lt; 4.00). Each result sits well below its upper reference limit, with no autoantibody signal detected.</p>' +
+          '<p>This argues <strong>against autoimmune thyroid disease</strong> (e.g. Hashimoto\'s thyroiditis), the most common cause of which is anti-TPO positivity. Note this panel measures <strong>antibodies only</strong> — it does not assess thyroid <em>function</em>. A normal antibody result does not rule out a functional abnormality. To complete the picture, correlate with <strong>TSH and free T4</strong> if not already on file. A registry / source-document birth-date discrepancy is flagged for the maintainer (see source card).</p>' +
+        '</div>' +
+        '<div class="silv-ai-summary-body lang-pt">' +
+          '<p>O primeiro exame ingerido é uma <strong>triagem de autoanticorpos tireoidianos</strong>. Ambos os marcadores estão <strong>negativos (não reagentes)</strong>: anti-microssomal / anti-TPO &lt; 0,25 UI/mL (referência &lt; 9,00) e anti-tireoglobulina &lt; 0,90 UI/mL (referência &lt; 4,00). Cada resultado está bem abaixo do limite superior de referência, sem sinal de autoanticorpos.</p>' +
+          '<p>Isso fala <strong>contra doença tireoidiana autoimune</strong> (ex.: tireoidite de Hashimoto), cuja causa mais comum é a positividade do anti-TPO. Observe que este painel avalia <strong>apenas anticorpos</strong> — não avalia a <em>função</em> tireoidiana. Um resultado de anticorpos normal não exclui alteração funcional. Para completar a avaliação, correlacione com <strong>TSH e T4 livre</strong>, se ainda não houver. Há uma divergência de data de nascimento entre o cadastro e o laudo, sinalizada ao mantenedor (ver cartão do documento).</p>' +
+        '</div>' +
+      '</section>';
+
+    var content =
+      '<section id="silv-content">' +
+        '<div class="container">' +
+          ai +
+          '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
+          '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
+          '<p class="section-desc">' +
+            t('Each panel shows the latest result with its reference bar and status pill. Sub-threshold antibody results are shown as reported by the lab ("< value").',
+              'Cada painel mostra o resultado mais recente com a barra de referência e o status. Resultados de anticorpos abaixo do limite são exibidos como reportados pelo laboratório ("< valor").') +
+          '</p>' +
+          '<div class="lab-panel-grid">' +
+            data.panels.map(silvanaPanelDetails).join('') +
+          '</div>' +
+          '<div class="section-label" style="margin-top:32px;">' + t('Source documents', 'Documentos originais') + '</div>' +
+          '<h2 class="section-title">' + t('Original lab report', 'Laudo original') + '</h2>' +
+          '<p class="section-desc">' +
+            t('The photographed source report is available below. Click to download the original.',
+              'O laudo original fotografado está disponível abaixo. Clique para baixar.') +
+          '</p>' +
+          silvanaDocsList(data.documents || []) +
+        '</div>' +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-silvana-exams jc-cristina-exams';
+    main.innerHTML = hero + content;
     document.body.appendChild(main);
 
     injectDangerZone(main);
