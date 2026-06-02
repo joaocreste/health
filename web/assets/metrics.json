@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-26",
+  "generated_at": "2026-06-02",
   "weight": {
     "series_recent": [
       {
@@ -130,57 +130,56 @@
     ]
   },
   "sleep": {
-    "n_nights": 215,
+    "n_nights": 222,
     "range": [
       "2025-10-18",
-      "2026-05-25"
+      "2026-06-02"
     ],
     "box": {
       "deep": {
-        "n": 215,
+        "n": 222,
         "min": 0.025,
-        "q1": 1.125,
-        "median": 1.542,
-        "q3": 1.933,
+        "q1": 1.123,
+        "median": 1.525,
+        "q3": 1.914,
         "max": 3.05,
-        "mean": 1.535,
+        "mean": 1.529,
         "items": [
           3.5,
           3.575
         ]
       },
       "rem": {
-        "n": 215,
+        "n": 222,
         "min": 0.108,
-        "q1": 0.9,
-        "median": 1.375,
-        "q3": 1.958,
+        "q1": 0.898,
+        "median": 1.367,
+        "q3": 1.939,
         "max": 3.475,
-        "mean": 1.457,
+        "mean": 1.446,
         "items": []
       },
       "light": {
-        "n": 215,
-        "min": 2.092,
-        "q1": 4.475,
-        "median": 5.467,
-        "q3": 6.325,
+        "n": 222,
+        "min": 1.517,
+        "q1": 4.39,
+        "median": 5.417,
+        "q3": 6.319,
         "max": 9.017,
-        "mean": 5.46,
+        "mean": 5.379,
         "items": [
           1.392,
-          1.642,
           9.3
         ]
       },
       "awake": {
-        "n": 215,
-        "min": 0.466,
-        "q1": 1.003,
-        "median": 1.336,
-        "q3": 2.017,
+        "n": 222,
+        "min": 0.283,
+        "q1": 0.977,
+        "median": 1.331,
+        "q3": 2.0,
         "max": 3.308,
-        "mean": 1.676,
+        "mean": 1.645,
         "items": [
           3.545,
           3.721,
@@ -199,23 +198,23 @@
         ]
       },
       "total": {
-        "n": 215,
+        "n": 222,
         "min": 3.267,
-        "q1": 7.0,
-        "median": 8.483,
-        "q3": 9.767,
+        "q1": 6.908,
+        "median": 8.35,
+        "q3": 9.596,
         "max": 13.342,
-        "mean": 8.452,
+        "mean": 8.354,
         "items": []
       }
     },
     "efficiency_median": 85.0,
-    "bedtime_sd_h": 2.61,
+    "bedtime_sd_h": 2.65,
     "hrv_median": 16.0,
-    "hrv_mean": 20.2,
-    "rhr_median": 66.0,
-    "rhr_mean": 67.8,
-    "hrv_below20_pct": 62,
+    "hrv_mean": 20.0,
+    "rhr_median": 67.0,
+    "rhr_mean": 68.1,
+    "hrv_below20_pct": 64,
     "hrv_above60_n": 2,
     "hrv_by_month": {
       "2025-10": 19.4,
@@ -225,7 +224,8 @@
       "2026-02": 24.6,
       "2026-03": 23.7,
       "2026-04": 15.8,
-      "2026-05": 13.8
+      "2026-05": 13.9,
+      "2026-06": 17.0
     },
     "rhr_by_month": {
       "2025-10": 64.4,
@@ -235,7 +235,8 @@
       "2026-02": 65.7,
       "2026-03": 64.9,
       "2026-04": 73.5,
-      "2026-05": 75.5
+      "2026-05": 76.5,
+      "2026-06": 66.5
     },
     "series": [
       {
@@ -1312,27 +1313,62 @@
         "d": "2026-05-25",
         "hrv": 14.0,
         "rhr": 71.0
+      },
+      {
+        "d": "2026-05-26",
+        "hrv": 17.0,
+        "rhr": 77.0
+      },
+      {
+        "d": "2026-05-27",
+        "hrv": 17.0,
+        "rhr": 77.0
+      },
+      {
+        "d": "2026-05-28",
+        "hrv": 19.0,
+        "rhr": 71.0
+      },
+      {
+        "d": "2026-05-29",
+        "hrv": 12.0,
+        "rhr": 93.0
+      },
+      {
+        "d": "2026-05-30",
+        "hrv": 9.0,
+        "rhr": 89.0
+      },
+      {
+        "d": "2026-06-01",
+        "hrv": 15.0,
+        "rhr": 71.0
+      },
+      {
+        "d": "2026-06-02",
+        "hrv": 19.0,
+        "rhr": 62.0
       }
     ]
   },
   "sleep_score": {
-    "n": 212,
-    "median": 81.0,
-    "mean": 79.3,
+    "n": 219,
+    "median": 81,
+    "mean": 79.0,
     "iqr": [
       75,
       87
     ]
   },
   "readiness": {
-    "n": 212,
-    "median": 77.0,
-    "mean": 73.4
+    "n": 219,
+    "median": 76,
+    "mean": 72.7
   },
   "spo2": {
-    "n": 209,
+    "n": 216,
     "median": 96.0,
-    "min": 90.4
+    "min": 89.4
   },
   "stress": {
     "series": [
@@ -3098,37 +3134,101 @@
       },
       {
         "d": "2026-05-25",
-        "stress": 15.0,
-        "recovery": 75.0,
+        "stress": 30.0,
+        "recovery": 180.0,
         "score": 37.7,
         "level": "limited",
         "summary": "normal"
+      },
+      {
+        "d": "2026-05-26",
+        "stress": 45.0,
+        "recovery": 120.0,
+        "score": 37.2,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-27",
+        "stress": 255.0,
+        "recovery": 15.0,
+        "score": 36.9,
+        "level": "limited",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-05-28",
+        "stress": 30.0,
+        "recovery": 15.0,
+        "score": 38.0,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-29",
+        "stress": 15.0,
+        "recovery": 0.0,
+        "score": 37.2,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-05-30",
+        "stress": 30.0,
+        "recovery": 15.0,
+        "score": 36.4,
+        "level": "limited",
+        "summary": null
+      },
+      {
+        "d": "2026-05-31",
+        "stress": 120.0,
+        "recovery": 30.0,
+        "score": null,
+        "level": null,
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-06-01",
+        "stress": 60.0,
+        "recovery": 165.0,
+        "score": 36.8,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-02",
+        "stress": 0.0,
+        "recovery": 15.0,
+        "score": 37.5,
+        "level": "limited",
+        "summary": null
       }
     ],
-    "n_stress_days": 221,
-    "n_resilience_days": 197,
+    "n_stress_days": 229,
+    "n_resilience_days": 204,
     "stress_median_min": 60.0,
-    "stress_mean_min": 87.5,
+    "stress_mean_min": 86.9,
     "stress_peak": {
       "d": "2026-04-06",
       "stress_min": 525.0
     },
-    "score_median": 47.7,
-    "score_mean": 46.0,
+    "score_median": 47.6,
+    "score_mean": 45.7,
     "level_counts": {
       "solid": 118,
       "adequate": 36,
       "strong": 3,
-      "limited": 40
+      "limited": 47
     },
     "summary_counts": {
-      "normal": 112,
+      "normal": 116,
       "restored": 49,
-      "stressful": 44
+      "stressful": 46
     },
     "range": [
       "2025-10-17",
-      "2026-05-25"
+      "2026-06-02"
     ]
   },
   "bp": {
@@ -3516,23 +3616,23 @@
     }
   },
   "activity": {
-    "n": 221,
+    "n": 229,
     "range": [
       "2025-10-17",
-      "2026-05-25"
+      "2026-06-02"
     ],
-    "steps_median": 5910,
-    "steps_mean": 6208,
+    "steps_median": 5976,
+    "steps_mean": 6226,
     "steps_iqr": [
       3820,
-      8066
+      8137
     ],
-    "days_10k": 29,
-    "days_7k": 86,
-    "days_5k": 134,
-    "days_total": 220,
-    "sed_h_mean": 8.19,
-    "active_cal_mean": 340,
+    "days_10k": 31,
+    "days_7k": 89,
+    "days_5k": 139,
+    "days_total": 228,
+    "sed_h_mean": 8.16,
+    "active_cal_mean": 343,
     "zone2_min_per_day_mean": 34.2,
     "series": [
       {
@@ -4417,17 +4517,49 @@
       },
       {
         "d": "2026-05-25",
-        "steps": 6812
+        "steps": 9548
+      },
+      {
+        "d": "2026-05-26",
+        "steps": 6791
+      },
+      {
+        "d": "2026-05-27",
+        "steps": 6915
+      },
+      {
+        "d": "2026-05-28",
+        "steps": 12202
+      },
+      {
+        "d": "2026-05-29",
+        "steps": 12141
+      },
+      {
+        "d": "2026-05-30",
+        "steps": 2157
+      },
+      {
+        "d": "2026-05-31",
+        "steps": 4110
+      },
+      {
+        "d": "2026-06-01",
+        "steps": 6077
+      },
+      {
+        "d": "2026-06-02",
+        "steps": 549
       }
     ]
   },
   "workouts": {
-    "n_total": 183,
+    "n_total": 197,
     "by_activity": {
       "walking": {
-        "n": 146,
-        "minutes": 2762,
-        "cal": 8817
+        "n": 159,
+        "minutes": 3119,
+        "cal": 9922
       },
       "cycling": {
         "n": 33,
@@ -4440,13 +4572,13 @@
         "cal": 625
       },
       "swimming": {
-        "n": 1,
-        "minutes": 60,
-        "cal": 116
+        "n": 2,
+        "minutes": 100,
+        "cal": 218
       }
     },
     "by_intensity": {
-      "moderate": 183
+      "moderate": 197
     }
   },
   "tags": {
