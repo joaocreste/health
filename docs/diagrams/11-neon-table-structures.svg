@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — Neon Table Structures (column-level)</title>
+  <desc id="d">Column-level structure of representative Neon Postgres tables, showing the shared conventions: a uuid primary key, a patient_id foreign key to users.id with ON DELETE CASCADE, timestamptz timestamps, R2 pointer columns (source_blob_key, blob_key, blob_prefix), JSONB only for shape-flexible payloads, and per-patient composite indexes. Tables shown: users (the identity hub), lab_results, imaging_studies, documents, import_files, glucose_points. See diagram 06 for the full 33-table cluster map.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.18em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .nm     { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#F0F4F8; }
+      .ty     { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#7E8DAA; }
+      .tg     { font-family:'IBM Plex Mono', monospace; letter-spacing:0.02em; fill:#6BA3C7; }
+      .gold   { fill:#F4B942; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .hdr    { fill:#1A2B49; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#0A1428"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">11 · NEON TABLE STRUCTURES</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">COLUMN-LEVEL · SEE 06 FOR THE FULL MAP</text>
+  </g>
+
+  <text x="1544" y="92" text-anchor="end" class="cap" font-size="10.5">6 representative tables of 33 · Drizzle ORM · db/schema.ts</text>
+
+  <!-- ============ ROW 1 ============ -->
+
+  <!-- users -->
+  <g transform="translate(56,150)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm gold" font-size="15">users</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5" fill="#F4B942">IDENTITY HUB</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>             <text x="210" y="74" class="ty">uuid</text>          <text x="350" y="74" class="tg gold">PK</text>
+      <text x="20" y="100" class="nm">clerk_user_id</text> <text x="210" y="100" class="ty">text</text>        <text x="350" y="100" class="tg">UNIQUE</text>
+      <text x="20" y="126" class="nm">email</text>          <text x="210" y="126" class="ty">text</text>
+      <text x="20" y="152" class="nm">role</text>           <text x="210" y="152" class="ty">user_role</text>   <text x="350" y="152" class="tg">enum</text>
+      <text x="20" y="178" class="nm">locale</text>         <text x="210" y="178" class="ty">text</text>        <text x="350" y="178" class="tg">'en'·'pt'</text>
+      <text x="20" y="204" class="nm">full_name</text>      <text x="210" y="204" class="ty">text</text>
+      <text x="20" y="230" class="nm">created_at</text>     <text x="210" y="230" class="ty">timestamptz</text>
+      <text x="20" y="256" class="nm">updated_at</text>     <text x="210" y="256" class="ty">timestamptz</text>
+    </g>
+    <line x1="20" y1="280" x2="440" y2="280" stroke="#283655"/>
+    <text x="20" y="306" class="cap" font-size="10">one row per person — patient, doctor or admin.</text>
+    <text x="20" y="328" class="cap" font-size="10" fill="#94BBD3">users.id IS the patient_id referenced everywhere.</text>
+  </g>
+
+  <!-- lab_results -->
+  <g transform="translate(570,150)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm" font-size="15">lab_results</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5">CLINICAL · blob-pointer</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>               <text x="230" y="74" class="ty">uuid</text>        <text x="360" y="74" class="tg gold">PK</text>
+      <text x="20" y="100" class="nm">patient_id</text>       <text x="230" y="100" class="ty">uuid</text>       <text x="360" y="100" class="tg gold">FK ⊗</text>
+      <text x="20" y="126" class="nm">panel · marker</text>   <text x="230" y="126" class="ty">text</text>
+      <text x="20" y="152" class="nm">value</text>            <text x="230" y="152" class="ty">real</text>
+      <text x="20" y="178" class="nm">unit</text>             <text x="230" y="178" class="ty">text</text>
+      <text x="20" y="204" class="nm">ref_low · ref_high</text><text x="230" y="204" class="ty">real</text>
+      <text x="20" y="230" class="nm">flag</text>             <text x="230" y="230" class="ty">text</text>        <text x="360" y="230" class="tg">L·H·HH</text>
+      <text x="20" y="256" class="nm">taken_at</text>         <text x="230" y="256" class="ty">date</text>
+      <text x="20" y="282" class="nm gold">source_blob_key</text><text x="230" y="282" class="ty">text</text>       <text x="360" y="282" class="tg gold">→ R2</text>
+    </g>
+    <line x1="20" y1="304" x2="440" y2="304" stroke="#283655"/>
+    <text x="20" y="328" class="cap" font-size="10">idx (patient_id, taken_at) · (patient_id, marker)</text>
+  </g>
+
+  <!-- imaging_studies -->
+  <g transform="translate(1084,150)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm" font-size="15">imaging_studies</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5">BLOB-BACKED</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>                 <text x="250" y="74" class="ty">uuid</text>                <text x="380" y="74" class="tg gold">PK</text>
+      <text x="20" y="100" class="nm">patient_id</text>         <text x="250" y="100" class="ty">uuid</text>               <text x="380" y="100" class="tg gold">FK ⊗</text>
+      <text x="20" y="126" class="nm">modality</text>           <text x="250" y="126" class="ty">enum</text>               <text x="380" y="126" class="tg">MRI·CT·…</text>
+      <text x="20" y="152" class="nm">body_part</text>          <text x="250" y="152" class="ty">text</text>
+      <text x="20" y="178" class="nm">study_date</text>         <text x="250" y="178" class="ty">date</text>
+      <text x="20" y="204" class="nm">source_format</text>      <text x="250" y="204" class="ty">enum</text>               <text x="380" y="204" class="tg">DICOM·JPEG</text>
+      <text x="20" y="230" class="nm gold">blob_prefix</text>     <text x="250" y="230" class="ty">text</text>               <text x="380" y="230" class="tg gold">→ R2</text>
+      <text x="20" y="256" class="nm gold">jpeg_preview_prefix</text><text x="250" y="256" class="ty">text</text>           <text x="380" y="256" class="tg gold">→ R2</text>
+      <text x="20" y="282" class="nm">file_count</text>         <text x="250" y="282" class="ty">integer</text>
+    </g>
+    <line x1="20" y1="304" x2="440" y2="304" stroke="#283655"/>
+    <text x="20" y="328" class="cap" font-size="10">one study = N files under a prefix · idx (patient_id, study_date)</text>
+  </g>
+
+  <!-- ============ ROW 2 ============ -->
+
+  <!-- documents -->
+  <g transform="translate(56,538)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm" font-size="15">documents</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5">CATCH-ALL BLOB</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>               <text x="230" y="74" class="ty">uuid</text>        <text x="360" y="74" class="tg gold">PK</text>
+      <text x="20" y="100" class="nm">patient_id</text>       <text x="230" y="100" class="ty">uuid</text>       <text x="360" y="100" class="tg gold">FK ⊗</text>
+      <text x="20" y="126" class="nm">kind</text>             <text x="230" y="126" class="ty">text</text>        <text x="360" y="126" class="tg">genetics·…</text>
+      <text x="20" y="152" class="nm">original_filename</text><text x="230" y="152" class="ty">text</text>
+      <text x="20" y="178" class="nm gold">blob_key</text>      <text x="230" y="178" class="ty">text</text>        <text x="360" y="178" class="tg gold">→ R2</text>
+      <text x="20" y="204" class="nm">mime_type</text>        <text x="230" y="204" class="ty">text</text>
+      <text x="20" y="230" class="nm">size_bytes</text>       <text x="230" y="230" class="ty">bigint</text>
+      <text x="20" y="256" class="nm">document_date</text>    <text x="230" y="256" class="ty">date</text>
+      <text x="20" y="282" class="nm">metadata</text>         <text x="230" y="282" class="ty">jsonb</text>       <text x="360" y="282" class="tg">flexible</text>
+    </g>
+    <line x1="20" y1="304" x2="440" y2="304" stroke="#283655"/>
+    <text x="20" y="328" class="cap" font-size="10">any file that doesn't map to a typed entity above.</text>
+  </g>
+
+  <!-- import_files -->
+  <g transform="translate(570,538)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm" font-size="15">import_files</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5">PIPELINE · provenance</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>             <text x="230" y="74" class="ty">uuid</text>        <text x="360" y="74" class="tg gold">PK</text>
+      <text x="20" y="100" class="nm">import_id</text>      <text x="230" y="100" class="ty">uuid</text>       <text x="360" y="100" class="tg gold">FK ⊗</text>
+      <text x="20" y="126" class="nm">original_path</text>  <text x="230" y="126" class="ty">text</text>
+      <text x="20" y="152" class="nm">mime_type</text>      <text x="230" y="152" class="ty">text</text>
+      <text x="20" y="178" class="nm gold">blob_key</text>   <text x="230" y="178" class="ty">text</text>        <text x="360" y="178" class="tg gold">→ R2</text>
+      <text x="20" y="204" class="nm">classified_as</text>  <text x="230" y="204" class="ty">text</text>        <text x="360" y="204" class="tg">lab_pdf·…</text>
+      <text x="20" y="230" class="nm">target_table</text>   <text x="230" y="230" class="ty">text</text>
+      <text x="20" y="256" class="nm">target_ids</text>     <text x="230" y="256" class="ty">jsonb</text>       <text x="360" y="256" class="tg">uuid[]</text>
+      <text x="20" y="282" class="nm">status</text>         <text x="230" y="282" class="ty">enum</text>        <text x="360" y="282" class="tg">received→…</text>
+    </g>
+    <line x1="20" y1="304" x2="440" y2="304" stroke="#283655"/>
+    <text x="20" y="328" class="cap" font-size="10">links every byte → the rows it produced · idx (import_id)</text>
+  </g>
+
+  <!-- glucose_points -->
+  <g transform="translate(1084,538)">
+    <rect width="460" height="356" rx="12" class="card"/>
+    <rect width="460" height="40" rx="12" class="hdr"/>
+    <rect y="28" width="460" height="12" class="hdr"/>
+    <text x="20" y="26" class="nm" font-size="15">glucose_points</text>
+    <text x="440" y="26" text-anchor="end" class="cap" font-size="9.5">TIME-SERIES</text>
+    <g font-size="12.5">
+      <text x="20" y="74" class="nm">id</text>          <text x="250" y="74" class="ty">bigint</text>      <text x="380" y="74" class="tg gold">PK ident.</text>
+      <text x="20" y="100" class="nm">patient_id</text>  <text x="250" y="100" class="ty">uuid</text>       <text x="380" y="100" class="tg gold">FK ⊗</text>
+      <text x="20" y="126" class="nm">ts</text>          <text x="250" y="126" class="ty">timestamptz</text>
+      <text x="20" y="152" class="nm">mg_dl</text>       <text x="250" y="152" class="ty">real</text>
+      <text x="20" y="178" class="nm">source</text>      <text x="250" y="178" class="ty">text</text>       <text x="380" y="178" class="tg">libre·dexcom</text>
+    </g>
+    <line x1="20" y1="200" x2="440" y2="200" stroke="#283655"/>
+    <text x="20" y="224" class="cap" font-size="10">UNIQUE (patient_id, ts) · idx (patient_id, ts)</text>
+    <text x="20" y="246" class="cap" font-size="10" fill="#94BBD3">discrete points — minute-resolution charts &amp; “glucose</text>
+    <text x="20" y="266" class="cap" font-size="10" fill="#94BBD3">yesterday at 3pm?” queries.</text>
+    <line x1="20" y1="288" x2="440" y2="288" stroke="#283655"/>
+    <text x="20" y="312" class="cap" font-size="10">cf. vitals_daily — daily wearable aggregates,</text>
+    <text x="20" y="330" class="cap" font-size="10">UNIQUE (patient_id, day, source).</text>
+  </g>
+
+  <!-- ===== CONVENTIONS STRIP ===== -->
+  <g>
+    <rect x="56" y="918" width="1488" height="58" rx="12" class="card"/>
+    <text x="78" y="942" class="mono" font-size="9.5" fill="#F4B942">SHARED CONVENTIONS</text>
+    <g class="cap" font-size="10.5" fill="#94BBD3">
+      <text x="78"   y="962">uuid PK (defaultRandom)</text>
+      <text x="320"  y="962">patient_id → users.id · ON DELETE CASCADE (⊗ = GDPR erasure)</text>
+      <text x="820"  y="962">timestamptz everywhere</text>
+      <text x="1090" y="962">JSONB only for shape-flexible payloads</text>
+    </g>
+    <text x="1378" y="942" text-anchor="end" class="cap" font-size="9.5">→ R2 = pointer columns: source_blob_key · blob_key · blob_prefix</text>
+  </g>
+</svg>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet" font-family="'IBM Plex Sans', system-ui, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Lumen Health — File Storage Model</title>
+  <desc id="d">How heterogeneous files (PDF, WhatsApp JPEG, DICOM imaging, CSV exports) are stored. Every uploaded file's raw bytes go verbatim to Cloudflare R2 object storage; an LLM/parser extracts structured facts into strongly-typed Neon Postgres tables, and each Postgres row keeps a pointer column (source_blob_key / blob_key / blob_prefix) back to the R2 object. This is a hybrid object-plus-relational model, not an unstructured or document/NoSQL database. JSONB is used only as narrow flexible pockets inside relational rows.</desc>
+
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0 H0 V64" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#6BA3C7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 1 L9 5 L0 9" fill="none" stroke="#F4B942" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .mono   { font-family:'IBM Plex Mono', monospace; letter-spacing:0.18em; fill:#6F7E9A; }
+      .ntitle { font-family:'Raleway', sans-serif; font-weight:400; fill:#F0F4F8; }
+      .tbl    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#A4B2CC; }
+      .tblhi  { font-family:'IBM Plex Mono', monospace; letter-spacing:0.01em; fill:#F0F4F8; }
+      .body   { font-family:'IBM Plex Sans', system-ui, sans-serif; fill:#A4B2CC; }
+      .cap    { font-family:'IBM Plex Mono', monospace; letter-spacing:0.06em; fill:#6F7E9A; }
+      .card   { fill:#131F37; stroke:#283655; stroke-width:1; }
+      .flow   { fill:none; stroke:#6BA3C7; stroke-width:1.6; stroke-linecap:round; }
+      .flowg  { fill:none; stroke:#F4B942; stroke-width:2; stroke-linecap:round; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#0A1428"/>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- TITLE -->
+  <g transform="translate(48,52)">
+    <g transform="translate(22,18) scale(0.62)">
+      <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="#244E6E" fill-opacity="0.7" stroke="#6BA3C7" stroke-width="0.7" stroke-linejoin="round"/>
+      <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" stroke="#F4B942" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <text x="58" y="14" class="ntitle" font-size="27" font-weight="300" letter-spacing="0.04em">Lumen Health</text>
+    <text x="58" y="36" class="mono" font-size="11">10 · FILE STORAGE MODEL</text>
+    <text x="58" y="52" class="cap" font-size="9.5" letter-spacing="0.28em">RAW BYTES → STRUCTURED FACTS</text>
+  </g>
+
+  <!-- ===== SOURCES ===== -->
+  <g>
+    <rect x="56" y="150" width="300" height="540" rx="14" class="card"/>
+    <text x="78" y="178" class="mono" font-size="10" fill="#F4B942">SOURCES · heterogeneous files</text>
+
+    <!-- PDF -->
+    <g>
+      <rect x="76" y="200" width="260" height="104" rx="10" fill="rgba(244,185,66,0.05)" stroke="#3E5070"/>
+      <text x="96" y="228" class="tblhi" font-size="14">PDF</text>
+      <text x="96" y="252" class="cap" font-size="10.5">lab report · prescription scan</text>
+      <text x="96" y="274" class="tbl" font-size="11">resultado841179.pdf</text>
+      <text x="96" y="294" class="cap" font-size="9.5" fill="#6BA3C7">text-bearing · multi-page</text>
+    </g>
+    <!-- JPEG -->
+    <g>
+      <rect x="76" y="316" width="260" height="104" rx="10" fill="rgba(244,185,66,0.05)" stroke="#3E5070"/>
+      <text x="96" y="344" class="tblhi" font-size="14">JPEG / PNG</text>
+      <text x="96" y="368" class="cap" font-size="10.5">WhatsApp photo of a result</text>
+      <text x="96" y="390" class="tbl" font-size="11">IMG-20260525.jpg</text>
+      <text x="96" y="410" class="cap" font-size="9.5" fill="#6BA3C7">pixels · OCR / vision pass</text>
+    </g>
+    <!-- DICOM -->
+    <g>
+      <rect x="76" y="432" width="260" height="104" rx="10" fill="rgba(244,185,66,0.05)" stroke="#3E5070"/>
+      <text x="96" y="460" class="tblhi" font-size="14">DICOM</text>
+      <text x="96" y="484" class="cap" font-size="10.5">MRI / CT — hundreds of slices</text>
+      <text x="96" y="506" class="tbl" font-size="11">study/*.dcm  (+ manifest)</text>
+      <text x="96" y="526" class="cap" font-size="9.5" fill="#6BA3C7">large binary series</text>
+    </g>
+    <!-- CSV -->
+    <g>
+      <rect x="76" y="548" width="260" height="104" rx="10" fill="rgba(244,185,66,0.05)" stroke="#3E5070"/>
+      <text x="96" y="576" class="tblhi" font-size="14">CSV / JSON</text>
+      <text x="96" y="600" class="cap" font-size="10.5">wearable · meds · glucose export</text>
+      <text x="96" y="622" class="tbl" font-size="11">oura_daily.csv</text>
+      <text x="96" y="642" class="cap" font-size="9.5" fill="#6BA3C7">tabular · already structured</text>
+    </g>
+    <text x="78" y="676" class="cap" font-size="10">one import portal · any of the above</text>
+  </g>
+
+  <!-- fan-out arrows: sources -> R2 (verbatim) and -> parse -->
+  <path class="flowg" d="M356 300 C 420 300, 430 262, 502 262" marker-end="url(#arrowGold)"/>
+  <text x="372" y="288" class="cap" font-size="9.5" fill="#F4B942">raw bytes, verbatim</text>
+  <path class="flow" d="M356 540 C 420 540, 430 552, 502 552" marker-end="url(#arrow)"/>
+  <text x="372" y="572" class="cap" font-size="9.5" fill="#6BA3C7">LLM / parser extracts</text>
+
+  <!-- ===== R2 (object storage) ===== -->
+  <g>
+    <rect x="510" y="170" width="372" height="208" rx="14" class="card" stroke="#F4B942"/>
+    <text x="532" y="200" class="mono" font-size="10" fill="#F4B942">CLOUDFLARE R2 · object storage (EU)</text>
+    <text x="532" y="232" class="body" font-size="14" fill="#F0F4F8">The only place unstructured bytes live.</text>
+    <text x="532" y="262" class="tbl" font-size="12">bucket  jc-health-uploads</text>
+    <text x="532" y="288" class="tbl" font-size="12">key     patients/{id}/labs/…pdf</text>
+    <text x="532" y="312" class="cap" font-size="10.5">patient-partitioned · immutable · binary</text>
+    <text x="532" y="340" class="cap" font-size="10.5" fill="#94BBD3">blobs never enter Postgres — only the key does</text>
+    <text x="532" y="362" class="cap" font-size="10">DICOM kept canonical → JPEG previews generated alongside</text>
+  </g>
+
+  <!-- ===== NEON (relational) ===== -->
+  <g>
+    <rect x="510" y="410" width="372" height="280" rx="14" class="card"/>
+    <text x="532" y="440" class="mono" font-size="10" fill="#6BA3C7">NEON POSTGRES · relational (Frankfurt)</text>
+    <text x="532" y="472" class="body" font-size="14" fill="#F0F4F8">Strongly-typed extracted facts.</text>
+    <text x="532" y="502" class="cap" font-size="10.5">CSV rows → typed columns directly</text>
+    <text x="532" y="524" class="cap" font-size="10.5">PDF / JPEG / DICOM → facts pulled by the model</text>
+    <rect x="532" y="544" width="328" height="60" rx="9" fill="rgba(244,185,66,0.08)" stroke="#F4B942"/>
+    <text x="550" y="568" class="tblhi" font-size="12.5">…  source_blob_key  text</text>
+    <text x="550" y="590" class="cap" font-size="10" fill="#F4B942">pointer column → the R2 object above</text>
+    <text x="532" y="630" class="cap" font-size="10.5">queryable · chartable · full-text searchable</text>
+    <text x="532" y="652" class="cap" font-size="10.5">patient_id → users.id · ON DELETE CASCADE</text>
+    <text x="532" y="674" class="cap" font-size="10">deleting a patient drops rows AND their R2 objects</text>
+  </g>
+
+  <!-- pointer arrow Neon row -> R2 object -->
+  <path class="flowg" d="M696 544 C 696 470, 696 430, 696 380" marker-end="url(#arrowGold)"/>
+  <text x="708" y="464" class="cap" font-size="9.5" fill="#F4B942">resolves to</text>
+
+  <!-- ===== ANSWER PANEL ===== -->
+  <g>
+    <rect x="922" y="150" width="622" height="540" rx="14" class="card"/>
+    <text x="946" y="180" class="mono" font-size="10" fill="#6BA3C7">SO — IS THIS A NoSQL / UNSTRUCTURED DATABASE?</text>
+    <text x="946" y="224" class="ntitle" font-size="30" font-weight="300">No — it's a <tspan fill="#F4B942">hybrid</tspan>.</text>
+    <text x="946" y="252" class="body" font-size="13">Object storage for blobs + a relational core. Three tiers:</text>
+
+    <!-- tier 1 -->
+    <g>
+      <rect x="946" y="276" width="574" height="108" rx="10" fill="rgba(244,185,66,0.06)" stroke="#3E5070"/>
+      <text x="966" y="302" class="tblhi" font-size="14">1 · R2 — object storage</text>
+      <text x="966" y="328" class="body" font-size="12.5">The unstructured layer. Raw files exactly as uploaded.</text>
+      <text x="966" y="352" class="body" font-size="12.5">A bucket of bytes addressed by key — not a database.</text>
+      <text x="966" y="374" class="cap" font-size="10">PDF · JPEG · DICOM · CSV · DOCX live here, nowhere else.</text>
+    </g>
+    <!-- tier 2 -->
+    <g>
+      <rect x="946" y="396" width="574" height="108" rx="10" fill="rgba(107,163,199,0.07)" stroke="#3E5070"/>
+      <text x="966" y="422" class="tblhi" font-size="14">2 · Postgres — relational, strongly typed</text>
+      <text x="966" y="448" class="body" font-size="12.5">Everything we query, chart or search: 33 typed tables,</text>
+      <text x="966" y="472" class="body" font-size="12.5">enums, foreign keys, indexes. The source of truth.</text>
+      <text x="966" y="494" class="cap" font-size="10">lab_results · vitals_daily · imaging_studies · medications · …</text>
+    </g>
+    <!-- tier 3 -->
+    <g>
+      <rect x="946" y="516" width="574" height="108" rx="10" fill="rgba(107,163,199,0.04)" stroke="#3E5070"/>
+      <text x="966" y="542" class="tblhi" font-size="14">3 · JSONB — narrow flexible pockets</text>
+      <text x="966" y="568" class="body" font-size="12.5">A handful of columns inside relational rows, for genuinely</text>
+      <text x="966" y="592" class="body" font-size="12.5">shape-flexible payloads. Not a document store.</text>
+      <text x="966" y="614" class="cap" font-size="10">wheel scores · panic symptoms · import errors · audit metadata</text>
+    </g>
+    <text x="946" y="656" class="cap" font-size="10.5" fill="#94BBD3">schema.ts: “Blobs live in R2; Postgres stores the R2 key, not the bytes.”</text>
+    <text x="946" y="678" class="cap" font-size="10.5">“JSONB is used sparingly: only for genuinely shape-flexible payloads.”</text>
+  </g>
+
+  <!-- ===== MAPPING TABLE ===== -->
+  <g>
+    <rect x="56" y="716" width="1488" height="254" rx="14" class="card"/>
+    <text x="78" y="744" class="mono" font-size="10" fill="#6BA3C7">FILE → STORAGE MAP</text>
+
+    <!-- header row -->
+    <g class="cap" font-size="10.5" fill="#6F7E9A">
+      <text x="78"   y="778">FILE TYPE</text>
+      <text x="360"  y="778">LANDS IN R2 AS</text>
+      <text x="780"  y="778">EXTRACTED INTO (Neon)</text>
+      <text x="1240" y="778">POINTER COLUMN</text>
+    </g>
+    <line x1="78" y1="790" x2="1522" y2="790" stroke="#283655"/>
+
+    <g font-size="12.5">
+      <!-- PDF -->
+      <text x="78"   y="820" class="tblhi">PDF — lab report</text>
+      <text x="360"  y="820" class="tbl">patients/{id}/labs/…pdf</text>
+      <text x="780"  y="820" class="tbl">lab_results  (one row per marker)</text>
+      <text x="1240" y="820" class="tbl" fill="#F4B942">source_blob_key</text>
+      <!-- JPEG -->
+      <text x="78"   y="852" class="tblhi">JPEG — WhatsApp photo</text>
+      <text x="360"  y="852" class="tbl">patients/{id}/img/…jpg</text>
+      <text x="780"  y="852" class="tbl">imaging_studies  /  documents</text>
+      <text x="1240" y="852" class="tbl" fill="#F4B942">blob_prefix · blob_key</text>
+      <!-- DICOM -->
+      <text x="78"   y="884" class="tblhi">DICOM — MRI / CT series</text>
+      <text x="360"  y="884" class="tbl">patients/{id}/img/{study}/*.dcm  (+ previews)</text>
+      <text x="780"  y="884" class="tbl">imaging_studies  (1 study = N files)</text>
+      <text x="1240" y="884" class="tbl" fill="#F4B942">blob_prefix · jpeg_preview_prefix</text>
+      <!-- CSV -->
+      <text x="78"   y="916" class="tblhi">CSV — wearable / meds export</text>
+      <text x="360"  y="916" class="tbl">patients/{id}/raw/…csv</text>
+      <text x="780"  y="916" class="tbl">vitals_daily · glucose_points · medications · ecg_events</text>
+      <text x="1240" y="916" class="tbl" fill="#F4B942">blob_key · source_blob_key</text>
+    </g>
+    <line x1="78" y1="934" x2="1522" y2="934" stroke="#283655"/>
+    <text x="78" y="956" class="cap" font-size="10.5" fill="#94BBD3">Every uploaded file is tracked row-by-row in <tspan class="tbl" fill="#A4B2CC">import_files</tspan> — original_path · mime_type · blob_key · classified_as · target_table · target_ids — full provenance from byte to row.</text>
+  </g>
+</svg>
