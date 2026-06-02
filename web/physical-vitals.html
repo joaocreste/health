@@ -104,6 +104,43 @@
   .ai-synthesis-bottom strong { color: #0D1B2A; }
   /* Make AI pill align nicely with the section-title h2 */
   .section-title .ai-pill { font-size: 10px; vertical-align: middle; margin-left: 8px; }
+
+  /* ── InBody body-composition card ───────────────────────────────── */
+  /* Range-bar panels reuse the global .lab-test / .lab-bar styles.    */
+  #inbody .inbody-bars-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 1.5rem; }
+  @media (max-width: 880px) { #inbody .inbody-bars-pair { grid-template-columns: 1fr; } }
+  #inbody .chart-card .lab-test:first-child { padding-top: 4px; }
+  #inbody .inbody-panel-body { padding: 4px 18px 14px; }
+
+  /* Segmental silhouettes */
+  #inbody .inbody-seg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; padding: 14px 4px 4px; }
+  @media (max-width: 700px) { #inbody .inbody-seg-grid { grid-template-columns: 1fr; } }
+  #inbody .inbody-seg { display: flex; flex-direction: column; align-items: center; }
+  #inbody .inbody-seg-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: var(--blue-700, #244E6E); margin: 0 0 10px; text-align: center; }
+  #inbody .inbody-fig-wrap { position: relative; width: 100%; max-width: 280px; aspect-ratio: 220 / 380; margin: 0 auto; }
+  #inbody .inbody-fig { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #inbody .inbody-fig-label { position: absolute; min-width: 66px; padding: 4px 8px; background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 6px; font-family: "IBM Plex Mono", monospace; line-height: 1.35; text-align: center; box-shadow: 0 1px 3px rgba(13,27,42,0.06); }
+  #inbody .inbody-fig-val { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; font-weight: 600; color: #0D1B2A; }
+  #inbody .inbody-fig-pct { font-size: 10px; color: #7A8FA6; margin: 1px 0 3px; }
+  #inbody .inbody-fig-status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: "IBM Plex Sans", sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+  #inbody .inbody-fig-status-normal { background: #E6F4EA; color: #2D5F3F; border: 1px solid #85B595; }
+  #inbody .inbody-fig-status-flag   { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }
+  #inbody .inbody-fig-label-left-arm  { top: 22%; left: -4px; }
+  #inbody .inbody-fig-label-right-arm { top: 22%; right: -4px; }
+  #inbody .inbody-fig-label-trunk     { top: 44%; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.92); }
+  #inbody .inbody-fig-label-left-leg  { top: 73%; left: -4px; }
+  #inbody .inbody-fig-label-right-leg { top: 73%; right: -4px; }
+
+  /* Weight-management target cards */
+  #inbody .inbody-mgmt { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 760px) { #inbody .inbody-mgmt { grid-template-columns: repeat(2, 1fr); } }
+  #inbody .inbody-mgmt-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; }
+  #inbody .inbody-mgmt-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 6px; }
+  #inbody .inbody-mgmt-value { font-family: "IBM Plex Sans", sans-serif; font-size: 22px; font-weight: 600; color: #0D1B2A; }
+  #inbody .inbody-mgmt-value small { font-size: 12px; font-weight: 400; color: #7A8FA6; margin-left: 2px; }
+  #inbody .inbody-mgmt-value.inbody-neg { color: #C73E3E; }
+  #inbody .inbody-mgmt-value.inbody-pos { color: #3D9460; }
+  #inbody .inbody-mgmt-note { font-family: "IBM Plex Sans", sans-serif; font-size: 11.5px; color: #6E7B8A; margin-top: 6px; }
 </style>
 </head>
 <body class="has-side-nav">
@@ -247,6 +284,77 @@
       period: weight 81.7 → 81.4 kg, body fat 24.5% → 24.2%, muscle mass 58.6 → 58.6 kg. Since
       1 January 2026 weight is +1.4 kg, body fat −0.9 pp, muscle +1.7 kg — directionally fine but
       modest. Quetiapine-driven appetite remains a known headwind.
+    </div>
+  </div>
+</section>
+
+<!-- 03b BODY COMPOSITION — INBODY -->
+<section class="report-section" id="inbody">
+  <div class="container">
+    <div class="section-label">03 · Body composition</div>
+    <h2 class="section-title"><span class="lang-en">Body composition — InBody</span><span class="lang-pt">Composição corporal — InBody</span></h2>
+    <p class="section-desc"><span class="lang-en">Single multi-frequency bio-impedance panel taken at Lapinha on 1 July 2025 (InBody, 5/50/250 kHz, segmental). Height 1.74 m, age 32. Fitness score 65 / 100. This predates the dense Withings window below by three months — useful as a segmental and reference-range snapshot the Withings scale doesn't capture.</span><span class="lang-pt">Painel único de bioimpedância multifrequência feito na Lapinha em 1º de julho de 2025 (InBody, 5/50/250 kHz, segmentar). Altura 1,74 m, 32 anos. Pontuação de fitness 65 / 100. Antecede em três meses a janela densa da Withings abaixo — útil como retrato segmentar e de faixa de referência que a balança Withings não captura.</span></p>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label">Body weight</div>
+        <div class="metric-value">78.0<small>kg</small></div>
+        <div class="metric-note">Ref 56.6–76.6 · <span class="pill pill-flag">Above</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Body fat</div>
+        <div class="metric-value">29.9<small>%</small></div>
+        <div class="metric-note">Ref 10–20% · <span class="pill pill-flag">Above</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Skeletal muscle</div>
+        <div class="metric-value">30.8<small>kg</small></div>
+        <div class="metric-note">Ref 28.4–34.8 · <span class="pill pill-ok">In range</span></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">BMI</div>
+        <div class="metric-value">25.8</div>
+        <div class="metric-note">Ref 18.5–25 · <span class="pill pill-watch">Overweight</span></div>
+      </div>
+    </div>
+
+    <!-- Range-bar panels (composition · muscle-fat · obesity) -->
+    <div id="inbodyBars"></div>
+
+    <!-- Segmental lean + fat silhouettes -->
+    <div class="chart-card mt-3">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Segmental analysis</span><span class="lang-pt">Análise segmentar</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Lean mass and fat per limb · five anatomical regions · % vs. InBody ideal</span><span class="lang-pt">Massa magra e gordura por membro · cinco regiões · % vs. ideal InBody</span></div>
+      </div>
+      <div id="inbodySegmental"></div>
+    </div>
+
+    <!-- Weight-management targets from the printout -->
+    <div class="inbody-mgmt mt-3">
+      <div class="inbody-mgmt-card">
+        <div class="inbody-mgmt-label"><span class="lang-en">Weight control</span><span class="lang-pt">Controle de peso</span></div>
+        <div class="inbody-mgmt-value inbody-neg">−11.3<small>kg</small></div>
+      </div>
+      <div class="inbody-mgmt-card">
+        <div class="inbody-mgmt-label"><span class="lang-en">Fat control</span><span class="lang-pt">Controle de gordura</span></div>
+        <div class="inbody-mgmt-value inbody-neg">−13.3<small>kg</small></div>
+      </div>
+      <div class="inbody-mgmt-card">
+        <div class="inbody-mgmt-label"><span class="lang-en">Muscle control</span><span class="lang-pt">Controle muscular</span></div>
+        <div class="inbody-mgmt-value inbody-pos">+2.0<small>kg</small></div>
+      </div>
+      <div class="inbody-mgmt-card">
+        <div class="inbody-mgmt-label">BMR</div>
+        <div class="inbody-mgmt-value">1550<small>kcal</small></div>
+        <div class="inbody-mgmt-note">Ref 1659–1945 · <span class="pill pill-watch">Below</span></div>
+      </div>
+    </div>
+
+    <div class="alert alert-watch mt-3">
+      <strong><span class="lang-en">Reading.</span><span class="lang-pt">Leitura.</span></strong>
+      <span class="lang-en">At this 1 Jul 2025 read the profile is overweight with central adiposity: weight 78.0 kg (above the 56.6–76.6 range), body fat 29.9% (target &lt;20%), BMI 25.8 and waist-hip ratio 1.02 (well above the 0.80–0.90 band). Skeletal muscle mass sits within range at 30.8 kg, but the segmental breakdown shows both legs below the InBody ideal (~89%) while every region carries excess fat — a mild lower-body lean deficit on top of generalised fat excess. The device's own targets are −13.3 kg of fat and +2.0 kg of muscle. BMR 1550 kcal is just under the reference floor. By the dense Withings window (Oct 2025 onward) weight had risen to ~81 kg, so treat this as the leaner baseline.</span>
+      <span class="lang-pt">Nesta medição de 1º jul 2025 o perfil é de sobrepeso com adiposidade central: peso 78,0 kg (acima da faixa 56,6–76,6), gordura corporal 29,9% (alvo &lt;20%), IMC 25,8 e relação cintura-quadril 1,02 (bem acima da faixa 0,80–0,90). A massa muscular esquelética está dentro da faixa em 30,8 kg, mas a leitura segmentar mostra ambas as pernas abaixo do ideal InBody (~89%) enquanto todas as regiões carregam excesso de gordura — leve déficit de massa magra inferior somado a excesso de gordura generalizado. As metas do próprio aparelho são −13,3 kg de gordura e +2,0 kg de músculo. A TMB de 1550 kcal está logo abaixo do piso de referência. Já na janela densa da Withings (a partir de out 2025) o peso subira para ~81 kg, então trate este painel como a linha de base mais magra.</span>
     </div>
   </div>
 </section>
@@ -1714,6 +1822,171 @@ if (document.readyState === 'loading') {
     tbody.innerHTML = rows.join('');
   }
 }
+
+/* 9 — InBody body-composition panel (single read, 1 Jul 2025).
+   Range bars reuse the global .lab-test/.lab-bar styles; segmental
+   analysis is two SVG silhouettes with overlaid per-limb badges. */
+(function renderInBody() {
+  const barsMount = document.getElementById('inbodyBars');
+  const segMount  = document.getElementById('inbodySegmental');
+  if (!barsMount && !segMount) return;
+
+  // — Quantitative markers (value, unit, normal-range low/high) —
+  const COMPOSITION = [
+    { en: 'Total Body Water', pt: 'Água Corporal Total', v: 40.0, u: 'L',  lo: 37.4, hi: 45.8 },
+    { en: 'Protein',          pt: 'Proteína',            v: 10.8, u: 'kg', lo: 10.1, hi: 12.3 },
+    { en: 'Minerals',         pt: 'Minerais',            v: 3.76, u: 'kg', lo: 3.46, hi: 4.23 },
+    { en: 'Body Fat Mass',    pt: 'Massa de Gordura',    v: 23.4, u: 'kg', lo: 8.0,  hi: 16.0 },
+    { en: 'Weight',           pt: 'Peso',                v: 78.0, u: 'kg', lo: 56.6, hi: 76.6 },
+  ];
+  const MUSCLE_FAT = [
+    { en: 'Weight',               pt: 'Peso',                       v: 78.0, u: 'kg', lo: 56.6, hi: 76.6 },
+    { en: 'Skeletal Muscle Mass', pt: 'Massa Muscular Esquelética', v: 30.8, u: 'kg', lo: 28.4, hi: 34.8 },
+    { en: 'Body Fat Mass',        pt: 'Massa de Gordura',           v: 23.4, u: 'kg', lo: 8.0,  hi: 16.0 },
+  ];
+  const OBESITY = [
+    { en: 'BMI',                 pt: 'IMC', v: 25.8, u: 'kg/m²', lo: 18.5, hi: 25.0 },
+    { en: 'Body Fat Percentage', pt: 'PGC', v: 29.9, u: '%',     lo: 10.0, hi: 20.0 },
+    { en: 'Waist-Hip Ratio',     pt: 'RCQ', v: 1.02, u: '',      lo: 0.80, hi: 0.90 },
+  ];
+
+  // — Segmental (kg, % vs. InBody ideal, status) —
+  const LEAN = [
+    { limb: 'left-arm',  en: 'Left arm',  pt: 'Braço esq.',  kg: 3.08, pct: 93.1, status: 'normal' },
+    { limb: 'right-arm', en: 'Right arm', pt: 'Braço dir.',  kg: 3.20, pct: 96.7, status: 'normal' },
+    { limb: 'trunk',     en: 'Trunk',     pt: 'Tronco',      kg: 25.7, pct: 97.2, status: 'normal' },
+    { limb: 'left-leg',  en: 'Left leg',  pt: 'Perna esq.',  kg: 8.23, pct: 89.3, status: 'below'  },
+    { limb: 'right-leg', en: 'Right leg', pt: 'Perna dir.',  kg: 8.27, pct: 89.8, status: 'below'  },
+  ];
+  const FAT = [
+    { limb: 'left-arm',  en: 'Left arm',  pt: 'Braço esq.',  kg: 1.50, pct: 31.4, status: 'above' },
+    { limb: 'right-arm', en: 'Right arm', pt: 'Braço dir.',  kg: 1.40, pct: 29.7, status: 'above' },
+    { limb: 'trunk',     en: 'Trunk',     pt: 'Tronco',      kg: 13.0, pct: 32.3, status: 'above' },
+    { limb: 'left-leg',  en: 'Left leg',  pt: 'Perna esq.',  kg: 3.10, pct: 26.0, status: 'above' },
+    { limb: 'right-leg', en: 'Right leg', pt: 'Perna dir.',  kg: 3.10, pct: 25.9, status: 'above' },
+  ];
+
+  const fmt = (n) => {
+    const a = Math.abs(n);
+    const s = a >= 100 ? n.toFixed(1) : n.toFixed(2);
+    return s.replace(/\.?0+$/, '');
+  };
+  const langSpan = (en, pt) =>
+    `<span class="lang-en">${en}</span><span class="lang-pt">${pt}</span>`;
+
+  // One range-bar row, mirroring the global renderLabTest markup.
+  function barRow(m) {
+    const status = (m.v < m.lo || m.v > m.hi) ? 'flag' : 'normal';
+    const pillCls = status === 'flag' ? 'pill-flag' : 'pill-ok';
+    const pillTxt = status === 'flag'
+      ? langSpan(m.v > m.hi ? 'High' : 'Low', m.v > m.hi ? 'Alto' : 'Baixo')
+      : langSpan('Normal', 'Normal');
+    const markerCls = status === 'flag' ? 'lab-bar-marker-flag' : 'lab-bar-marker-normal';
+    let pct = 10 + ((m.v - m.lo) / (m.hi - m.lo)) * 80;
+    if (pct < 0) pct = 0; if (pct > 100) pct = 100;
+    const unit = m.u ? ` <span class="lab-val-unit">${m.u}</span>` : '';
+    return (
+      `<div class="lab-test lab-test-${status}">` +
+        '<div class="lab-test-head">' +
+          `<div class="lab-test-name">${langSpan(m.en, m.pt)}</div>` +
+          '<div class="lab-test-meta">' +
+            `<span class="lab-test-val"><span class="lab-val-num">${fmt(m.v)}</span>${unit}</span>` +
+            `<span class="pill ${pillCls}">${pillTxt}</span>` +
+          '</div>' +
+        '</div>' +
+        '<div class="lab-bar-wrap">' +
+          '<div class="lab-bar">' +
+            '<div class="lab-bar-bg"></div>' +
+            '<div class="lab-bar-range"></div>' +
+            '<div class="lab-bar-tick lab-bar-tick-min"></div>' +
+            '<div class="lab-bar-tick lab-bar-tick-max"></div>' +
+            `<div class="lab-bar-marker ${markerCls}" style="left:${pct.toFixed(2)}%;"><div class="lab-bar-dot"></div></div>` +
+          '</div>' +
+          `<div class="lab-bar-labels"><span>${langSpan('min ' + fmt(m.lo), 'mín ' + fmt(m.lo))}</span><span>${langSpan('max ' + fmt(m.hi), 'máx ' + fmt(m.hi))}</span></div>` +
+        '</div>' +
+        '<div class="lab-test-foot">' +
+          `<div class="lab-test-ref">${langSpan('Reference:', 'Referência:')} ${fmt(m.lo)} – ${fmt(m.hi)}${m.u ? ' ' + m.u : ''}</div>` +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function panel(titleEn, titlePt, metaEn, metaPt, rows) {
+    return (
+      '<div class="chart-card">' +
+        '<div class="chart-card-head">' +
+          `<div class="chart-card-title">${langSpan(titleEn, titlePt)}</div>` +
+          `<div class="chart-card-meta">${langSpan(metaEn, metaPt)}</div>` +
+        '</div>' +
+        `<div class="inbody-panel-body">${rows.map(barRow).join('')}</div>` +
+      '</div>'
+    );
+  }
+
+  if (barsMount) {
+    barsMount.innerHTML =
+      '<div class="chart-card mt-3">' +
+        '<div class="chart-card-head">' +
+          `<div class="chart-card-title">${langSpan('Body composition analysis', 'Análise da composição corporal')}</div>` +
+          `<div class="chart-card-meta">${langSpan('Water, protein, mineral, fat and total weight vs. the InBody reference range', 'Água, proteína, mineral, gordura e peso total vs. faixa de referência InBody')}</div>` +
+        '</div>' +
+        `<div class="inbody-panel-body">${COMPOSITION.map(barRow).join('')}</div>` +
+      '</div>' +
+      '<div class="inbody-bars-pair">' +
+        panel('Muscle-Fat analysis', 'Análise músculo-gordura',
+              'Weight, skeletal muscle mass and body-fat mass', 'Peso, massa muscular esquelética e massa de gordura',
+              MUSCLE_FAT) +
+        panel('Obesity diagnosis', 'Diagnóstico de obesidade',
+              'BMI, body-fat % and waist-hip ratio', 'IMC, PGC e relação cintura-quadril',
+              OBESITY) +
+      '</div>';
+  }
+
+  // — Segmental SVG (androgynous figure) + overlaid badges —
+  function silhouette() {
+    return (
+      '<svg class="inbody-fig" viewBox="0 0 220 380" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+        '<g fill="#E8F0F7" stroke="#7A95B5" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">' +
+          '<circle cx="110" cy="34" r="20"/>' +
+          '<path d="M101 54 Q110 60 119 54 Q121 64 118 68 Q110 70 102 68 Q99 64 101 54 Z"/>' +
+          '<path d="M70 70 Q 64 96 68 130 Q 72 162 74 180 Q 70 200 68 220 L 152 220 Q 150 200 146 180 Q 148 162 152 130 Q 156 96 150 70 Q 110 76 70 70 Z"/>' +
+          '<path d="M70 70 Q 48 78 42 102 Q 36 142 38 190 Q 42 212 52 214 Q 60 208 64 192 Q 68 158 70 130 Q 70 100 70 70 Z"/>' +
+          '<path d="M150 70 Q 172 78 178 102 Q 184 142 182 190 Q 178 212 168 214 Q 160 208 156 192 Q 152 158 150 130 Q 150 100 150 70 Z"/>' +
+          '<path d="M68 220 Q 66 270 70 320 Q 74 350 78 360 Q 90 364 100 358 Q 102 320 104 270 Q 106 240 108 220 Q 88 222 68 220 Z"/>' +
+          '<path d="M112 220 Q 114 240 116 270 Q 118 320 120 358 Q 130 364 142 360 Q 146 350 150 320 Q 154 270 152 220 Q 132 222 112 220 Z"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+  function badge(r) {
+    const cls = r.status === 'normal' ? 'inbody-fig-status-normal' : 'inbody-fig-status-flag';
+    const lbl = r.status === 'normal' ? langSpan('Normal', 'Normal')
+              : r.status === 'below'  ? langSpan('Below', 'Abaixo')
+              :                         langSpan('Above', 'Acima');
+    return (
+      `<div class="inbody-fig-label inbody-fig-label-${r.limb}">` +
+        `<div class="inbody-fig-val">${fmt(r.kg)} kg</div>` +
+        `<div class="inbody-fig-pct">${fmt(r.pct)}%</div>` +
+        `<span class="inbody-fig-status ${cls}">${lbl}</span>` +
+      '</div>'
+    );
+  }
+  function figure(titleEn, titlePt, rows) {
+    return (
+      '<div class="inbody-seg">' +
+        `<h3 class="inbody-seg-title">${langSpan(titleEn, titlePt)}</h3>` +
+        `<div class="inbody-fig-wrap">${silhouette()}${rows.map(badge).join('')}</div>` +
+      '</div>'
+    );
+  }
+  if (segMount) {
+    segMount.innerHTML =
+      '<div class="inbody-seg-grid">' +
+        figure('Lean mass by limb', 'Massa magra por membro', LEAN) +
+        figure('Fat mass by limb', 'Gordura por membro', FAT) +
+      '</div>';
+  }
+})();
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
