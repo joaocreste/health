@@ -106,6 +106,10 @@
   .section-title .ai-pill { font-size: 10px; vertical-align: middle; margin-left: 8px; }
 
   /* ── InBody body-composition card ───────────────────────────────── */
+  /* Nested inside the shared "03 · Body composition" section, directly */
+  /* after the Withings chart — separated by a hairline divider.        */
+  #inbody { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid #E5E2DC; }
+  #inbody > .section-title { margin-top: 0; }
   /* Range-bar panels reuse the global .lab-test / .lab-bar styles.    */
   #inbody .inbody-bars-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 1.5rem; }
   @media (max-width: 880px) { #inbody .inbody-bars-pair { grid-template-columns: 1fr; } }
@@ -285,13 +289,9 @@
       1 January 2026 weight is +1.4 kg, body fat −0.9 pp, muscle +1.7 kg — directionally fine but
       modest. Quetiapine-driven appetite remains a known headwind.
     </div>
-  </div>
-</section>
 
-<!-- 03b BODY COMPOSITION — INBODY -->
-<section class="report-section" id="inbody">
-  <div class="container">
-    <div class="section-label">03 · Body composition</div>
+    <!-- 03b · same section · InBody panel, right after the Withings chart -->
+    <div id="inbody">
     <h2 class="section-title"><span class="lang-en">Body composition — InBody</span><span class="lang-pt">Composição corporal — InBody</span></h2>
     <p class="section-desc"><span class="lang-en">Single multi-frequency bio-impedance panel taken at Lapinha on 1 July 2025 (InBody, 5/50/250 kHz, segmental). Height 1.74 m, age 32. Fitness score 65 / 100. This predates the dense Withings window below by three months — useful as a segmental and reference-range snapshot the Withings scale doesn't capture.</span><span class="lang-pt">Painel único de bioimpedância multifrequência feito na Lapinha em 1º de julho de 2025 (InBody, 5/50/250 kHz, segmentar). Altura 1,74 m, 32 anos. Pontuação de fitness 65 / 100. Antecede em três meses a janela densa da Withings abaixo — útil como retrato segmentar e de faixa de referência que a balança Withings não captura.</span></p>
 
@@ -356,6 +356,7 @@
       <span class="lang-en">At this 1 Jul 2025 read the profile is overweight with central adiposity: weight 78.0 kg (above the 56.6–76.6 range), body fat 29.9% (target &lt;20%), BMI 25.8 and waist-hip ratio 1.02 (well above the 0.80–0.90 band). Skeletal muscle mass sits within range at 30.8 kg, but the segmental breakdown shows both legs below the InBody ideal (~89%) while every region carries excess fat — a mild lower-body lean deficit on top of generalised fat excess. The device's own targets are −13.3 kg of fat and +2.0 kg of muscle. BMR 1550 kcal is just under the reference floor. By the dense Withings window (Oct 2025 onward) weight had risen to ~81 kg, so treat this as the leaner baseline.</span>
       <span class="lang-pt">Nesta medição de 1º jul 2025 o perfil é de sobrepeso com adiposidade central: peso 78,0 kg (acima da faixa 56,6–76,6), gordura corporal 29,9% (alvo &lt;20%), IMC 25,8 e relação cintura-quadril 1,02 (bem acima da faixa 0,80–0,90). A massa muscular esquelética está dentro da faixa em 30,8 kg, mas a leitura segmentar mostra ambas as pernas abaixo do ideal InBody (~89%) enquanto todas as regiões carregam excesso de gordura — leve déficit de massa magra inferior somado a excesso de gordura generalizado. As metas do próprio aparelho são −13,3 kg de gordura e +2,0 kg de músculo. A TMB de 1550 kcal está logo abaixo do piso de referência. Já na janela densa da Withings (a partir de out 2025) o peso subira para ~81 kg, então trate este painel como a linha de base mais magra.</span>
     </div>
+    </div><!-- /#inbody -->
   </div>
 </section>
 
