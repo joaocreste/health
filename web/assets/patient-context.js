@@ -1482,6 +1482,15 @@
       return;
     }
 
+    // Cristina's only physical data is the bespoke thyroid-antibody panel,
+    // so the Physical overview short-circuits to the exams page — otherwise
+    // the DB-driven "0 lab markers" metric grid hides the actual content.
+    if (patient === CRISTINA_CRESTI && section === 'physical') {
+      renderCristinaPhysicalExams();
+      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
+      return;
+    }
+
     // Silvana's data is hand-curated. Routes:
     //   Physical (overview)  → 2-card landing (Sinais Vitais + Exames)
     //   Physical → Vitals    → bespoke InBody body-composition view
