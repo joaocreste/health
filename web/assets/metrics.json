@@ -4622,13 +4622,20 @@
     "most_recent_valium": "2025-11-05"
   },
   "ecgs": {
-    "n_total": 63,
+    "n_total": 64,
     "by_class": {
-      "Sinus Rhythm": 42,
+      "Sinus Rhythm": 43,
       "High Heart Rate": 18,
       "Poor Recording": 3
     },
     "records": [
+      {
+        "date": "2026-06-01",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-06-01.csv"
+      },
       {
         "date": "2026-05-25",
         "class": "Sinus Rhythm",
@@ -5071,7 +5078,7 @@
         "file": "ecg_2023-10-05.csv"
       }
     ],
-    "recent_30_n": 10,
+    "recent_30_n": 11,
     "recent_30_high": 6
   },
   "medications": [
