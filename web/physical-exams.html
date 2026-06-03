@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=51">
+<link rel="stylesheet" href="assets/styles.css?v=52">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
@@ -364,14 +364,14 @@
       64-row multi-detector helical CT with iterative reconstruction software for radiation-dose
       reduction. Non-ionic iodinated IV contrast (350 mg/ml). Pre-medication: metoprolol 50 mg
       PO + isosorbide 3.75 mg SL. Performed at Albert Einstein Medicina Diagnóstica, São Paulo.
-      2,206 frames across 19 acquired series — scrub the slider, scroll, drag, or arrow-key
-      to navigate.
+      2,206 frames across 19 acquired series. Pick a series from the selector, then scrub the
+      slider, scroll, drag, or arrow-key to navigate.
     </span><span class="lang-pt">
       TC helicoidal multislice de 64 fileiras de detectores com software de reconstrução iterativa para redução
       de dose. Contraste iodado endovenoso não iônico (350 mg/ml). Pré-medicação: metoprolol 50 mg
       VO + isossorbida 3,75 mg SL. Realizado no Albert Einstein Medicina Diagnóstica, São Paulo.
-      2.206 imagens em 19 séries adquiridas — arraste o controle, role, arraste ou use as setas
-      para navegar.
+      2.206 imagens em 19 séries adquiridas. Escolha uma série no seletor e arraste o controle,
+      role, arraste ou use as setas para navegar.
     </span></p>
 
     <div class="report-export-row">
@@ -380,15 +380,16 @@
     <div class="ct-grid ct-grid-single">
       <div class="ct-viewer"
            data-prefix="scans/tc-heart/"
-           data-manifest="scans/tc-heart-manifest.json">
+           data-manifest="scans/tc-heart-manifest.json?v=2">
         <div class="ct-viewer-head">
-          <div class="ct-viewer-title">Multi-acquisition viewer</div>
-          <div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">2206</span></div>
+          <div class="ct-viewer-title"><span class="lang-en">Series viewer</span><span class="lang-pt">Visualizador por série</span></div>
+          <div class="ct-viewer-meta"><span class="lang-en">Image</span><span class="lang-pt">Imagem</span> <span class="ct-idx">1</span> / <span class="ct-total">1</span></div>
         </div>
+        <div class="ct-controls"></div>
         <div class="ct-stage">
           <img class="ct-img" alt="Coronary CT image" loading="eager">
         </div>
-        <input class="ct-slider" type="range" min="0" max="2205" value="1100" aria-label="Coronary CT image">
+        <input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="Coronary CT series image">
       </div>
     </div>
 
@@ -5412,7 +5413,7 @@
   <div>Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</div>
 </footer>
 
-<script src="assets/app.js?v=28"></script>
+<script src="assets/app.js?v=29"></script>
 <script src="assets/silvana-labs.js?v=2"></script>
 <script src="assets/cristina-labs.js?v=1"></script>
 <script src="assets/leo-mode.js?v=14"></script>

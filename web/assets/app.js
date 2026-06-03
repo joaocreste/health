@@ -215,10 +215,15 @@
       });
     }
 
-    let max;
-    let urlFn;
+    let max = 0;
+    let urlFn = () => '';
+    let eventsBound = false;
+    const controls = viewer.querySelector('.ct-controls');
+    const curLang = () => (document.documentElement.lang === 'pt' ? 'pt' : 'en');
 
     function bindEvents() {
+      if (eventsBound) return;
+      eventsBound = true;
       slider.addEventListener('input', (e) => setSlice(parseInt(e.target.value, 10)));
 
       const stage = viewer.querySelector('.ct-stage');
@@ -241,6 +246,7 @@
       stage.addEventListener('pointerup',     () => { dragging = false; });
       stage.addEventListener('pointercancel', () => { dragging = false; });
 
+      // Arrow keys step by one (native range), Page/Home/End jump.
       slider.addEventListener('keydown', (e) => {
         const cur = parseInt(slider.value, 10);
         if (e.key === 'PageUp')   { e.preventDefault(); setSlice(cur + 10); }
@@ -253,7 +259,7 @@
     function setSlice(i) {
       i = Math.max(0, Math.min(max, i));
       slider.value = i;
-      idxEl.textContent = i + 1; // human-friendly 1-based index
+      if (idxEl) idxEl.textContent = i + 1; // human-friendly 1-based index
       img.src = urlFn(i);
       for (let d = 1; d <= PRELOAD; d++) {
         [i + d, i - d].forEach((n) => {
@@ -265,27 +271,120 @@
       }
     }
 
-    function init(maxVal, makeUrl) {
-      max = maxVal;
-      urlFn = makeUrl;
+    // Point the scrubber at an ordered list of slice filenames. Re-callable:
+    // switching series/plane just re-configures the same DOM + event handlers.
+    function configure(slices) {
+      cache.clear();
+      max = Math.max(0, slices.length - 1);
+      urlFn = (i) => `${prefix}${slices[i]}`;
       slider.max = String(max);
-      if (totalEl) totalEl.textContent = max + 1;
-      bindEvents();
-      const start = parseInt(slider.value, 10);
-      setSlice(Number.isFinite(start) ? start : Math.floor(max / 2));
+      const single = slices.length <= 1;        // hide scrubber + counter for one-image "ways"
+      viewer.classList.toggle('ct-single', single);
+      if (totalEl) totalEl.textContent = slices.length;
+      setSlice(single ? 0 : Math.floor(max / 2));
+    }
+
+    // New manifest shape: { ways:[{key,labelEn,labelPt,values:[...]}], stacks:[{select,slices}], defaultSelect }
+    function buildWays(manifest) {
+      const ways = manifest.ways || [];
+      const sel = Object.assign({}, manifest.defaultSelect || {});
+      ways.forEach((w) => { if (sel[w.key] === undefined && w.values[0]) sel[w.key] = w.values[0].key; });
+
+      const resolveStack = (s) =>
+        (manifest.stacks || []).find((st) =>
+          Object.keys(st.select).every((k) => st.select[k] === s[k]));
+
+      const apply = () => {
+        const st = resolveStack(sel);
+        if (st) configure(st.slices);
+      };
+
+      // Disable any value whose combination with the current other selections has no stack.
+      const refreshDisabled = () => {
+        ways.forEach((w) => {
+          w.values.forEach((v) => {
+            const probe = Object.assign({}, sel, { [w.key]: v.key });
+            const ok = !!resolveStack(probe);
+            const el = w._control.querySelector(`[data-value="${CSS.escape(v.key)}"]`);
+            if (el) el.disabled = !ok;
+          });
+        });
+      };
+
+      ways.forEach((w) => {
+        const row = document.createElement('div');
+        row.className = 'ct-control-row';
+
+        const lab = document.createElement('span');
+        lab.className = 'ct-control-label';
+        lab.dataset.en = w.labelEn; lab.dataset.pt = w.labelPt;
+        lab.textContent = curLang() === 'pt' ? w.labelPt : w.labelEn;
+        row.appendChild(lab);
+
+        // > 5 values → dropdown, otherwise segmented buttons.
+        if (w.values.length > 5) {
+          const seln = document.createElement('select');
+          seln.className = 'ct-control-select';
+          w.values.forEach((v) => {
+            const o = document.createElement('option');
+            o.value = v.key;
+            o.dataset.value = v.key;
+            o.dataset.en = v.labelEn; o.dataset.pt = v.labelPt;
+            o.textContent = curLang() === 'pt' ? v.labelPt : v.labelEn;
+            if (sel[w.key] === v.key) o.selected = true;
+            seln.appendChild(o);
+          });
+          seln.addEventListener('change', () => { sel[w.key] = seln.value; refreshDisabled(); apply(); });
+          w._control = seln;
+          row.appendChild(seln);
+        } else {
+          const grp = document.createElement('div');
+          grp.className = 'ct-seg';
+          w.values.forEach((v) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'ct-seg-btn';
+            b.dataset.value = v.key;
+            b.dataset.en = v.labelEn; b.dataset.pt = v.labelPt;
+            b.textContent = curLang() === 'pt' ? v.labelPt : v.labelEn;
+            b.setAttribute('aria-pressed', String(sel[w.key] === v.key));
+            b.addEventListener('click', () => {
+              if (b.disabled) return;
+              sel[w.key] = v.key;
+              grp.querySelectorAll('.ct-seg-btn').forEach((x) =>
+                x.setAttribute('aria-pressed', String(x.dataset.value === v.key)));
+              refreshDisabled(); apply();
+            });
+            grp.appendChild(b);
+          });
+          w._control = grp;
+          row.appendChild(grp);
+        }
+        if (controls) controls.appendChild(row);
+      });
+
+      refreshDisabled();
+      apply();
     }
 
     if (manifestUrl) {
       fetch(manifestUrl)
         .then((r) => r.json())
-        .then((files) => {
-          init(files.length - 1, (i) => `${prefix}${files[i]}`);
+        .then((manifest) => {
+          bindEvents();
+          if (Array.isArray(manifest)) {
+            configure(manifest);                       // legacy: flat array of filenames
+          } else {
+            buildWays(manifest);                       // ways/stacks manifest
+          }
         })
         .catch((err) => {
           console.error('Failed to load manifest', manifestUrl, err);
         });
     } else {
-      init(parseInt(viewer.dataset.max, 10), (i) => `${prefix}${i}-0.png`);
+      bindEvents();
+      const n = parseInt(viewer.dataset.max, 10);      // legacy `${i}-0.png` pattern
+      configure(Array.from({ length: n + 1 }, (_, i) => `${i}-0.png`));
     }
   });
 

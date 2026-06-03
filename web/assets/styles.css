@@ -2265,6 +2265,74 @@ body.add-data-open { overflow: hidden; }
 }
 .ct-slider:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--blue-200); }
 
+/* ── Viewer controls (manifest "ways": series / plane / region …) ── */
+.ct-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ct-controls:empty { display: none; }
+.ct-control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ct-control-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex: 0 0 auto;
+}
+.ct-control-select {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue-800);
+  background: var(--blue-50);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 7px 30px 7px 12px;
+  cursor: pointer;
+  min-width: 220px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A6B82' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.ct-control-select:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 1px; }
+.ct-control-select option:disabled { color: var(--text-muted); }
+/* Segmented buttons (≤ 5 values) */
+.ct-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.ct-seg-btn {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue-700);
+  background: var(--blue-50);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.ct-seg-btn[aria-pressed="true"] { background: var(--blue-500); color: #fff; border-color: var(--blue-500); }
+.ct-seg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ct-seg-btn:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 1px; }
+/* Single-image "ways" (count === 1): hide scrubber + counter. */
+.ct-viewer.ct-single .ct-slider { display: none; }
+.ct-viewer.ct-single .ct-viewer-meta { visibility: hidden; }
+/* Fullscreen: keep the controls legible on the dark overlay. */
+.ct-viewer.is-fullscreen .ct-controls { background: rgba(255,255,255,0.06); border-bottom-color: rgba(255,255,255,0.12); }
+.ct-viewer.is-fullscreen .ct-control-label { color: rgba(255,255,255,0.66); }
+
 /* ── CT/MRI viewer fullscreen toggle ── */
 .ct-fs-btn {
   background: transparent;
