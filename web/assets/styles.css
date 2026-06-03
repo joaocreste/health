@@ -2329,6 +2329,36 @@ body.add-data-open { overflow: hidden; }
 /* Single-image "ways" (count === 1): hide scrubber + counter. */
 .ct-viewer.ct-single .ct-slider { display: none; }
 .ct-viewer.ct-single .ct-viewer-meta { visibility: hidden; }
+
+/* Turntable "ways" (render: turntable) — rotatable pre-rendered frame ring.
+   Same scrubber; swap the counter label 2D→3D and add a drag-to-rotate cue. */
+.ct-lbl-3d { display: none; }
+.ct-viewer.ct-turntable .ct-lbl-2d { display: none; }
+.ct-viewer.ct-turntable .ct-lbl-3d { display: inline; }
+.ct-rot { color: var(--text-primary); font-weight: 500; }
+.ct-viewer.ct-turntable .ct-stage .ct-img { cursor: grab; }
+.ct-viewer.ct-turntable .ct-stage .ct-img:active { cursor: grabbing; }
+.ct-3d-hint { display: none; }
+.ct-viewer.ct-turntable .ct-3d-hint {
+  display: inline-block;
+  margin-left: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue-700);
+  background: var(--blue-50);
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+.ct-viewer.is-fullscreen.ct-turntable .ct-3d-hint {
+  color: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
+}
 /* Fullscreen: keep the controls legible on the dark overlay. */
 .ct-viewer.is-fullscreen .ct-controls { background: rgba(255,255,255,0.06); border-bottom-color: rgba(255,255,255,0.12); }
 .ct-viewer.is-fullscreen .ct-control-label { color: rgba(255,255,255,0.66); }

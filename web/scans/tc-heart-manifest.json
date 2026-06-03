@@ -2151,7 +2151,8 @@
         "image_s0008_i0089.jpg",
         "image_s0008_i0090.jpg",
         "image_s0008_i0091.jpg"
-      ]
+      ],
+      "render": "turntable"
     },
     {
       "select": {
@@ -2250,7 +2251,8 @@
         "image_s0009_i0089.jpg",
         "image_s0009_i0090.jpg",
         "image_s0009_i0091.jpg"
-      ]
+      ],
+      "render": "turntable"
     },
     {
       "select": {
@@ -2349,7 +2351,8 @@
         "image_s0010_i0089.jpg",
         "image_s0010_i0090.jpg",
         "image_s0010_i0091.jpg"
-      ]
+      ],
+      "render": "turntable"
     },
     {
       "select": {
@@ -2370,7 +2373,8 @@
         "image_s0016_i0011.jpg",
         "image_s0016_i0012.jpg",
         "image_s0016_i0013.jpg"
-      ]
+      ],
+      "render": "turntable"
     },
     {
       "select": {

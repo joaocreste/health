@@ -132,6 +132,7 @@
     const slider      = viewer.querySelector('.ct-slider');
     const idxEl       = viewer.querySelector('.ct-idx');
     const totalEl     = viewer.querySelector('.ct-total');
+    const rotEl       = viewer.querySelector('.ct-rot');
     const PRELOAD     = 6;
     const cache       = new Map();
 
@@ -256,10 +257,13 @@
       });
     }
 
+    let turntableDeg = null; // degrees-per-frame when the current asset is a turntable, else null
+
     function setSlice(i) {
       i = Math.max(0, Math.min(max, i));
       slider.value = i;
       if (idxEl) idxEl.textContent = i + 1; // human-friendly 1-based index
+      if (rotEl) rotEl.textContent = turntableDeg ? ` · ${Math.round(i * turntableDeg)}°` : '';
       img.src = urlFn(i);
       for (let d = 1; d <= PRELOAD; d++) {
         [i + d, i - d].forEach((n) => {
@@ -271,17 +275,25 @@
       }
     }
 
-    // Point the scrubber at an ordered list of slice filenames. Re-callable:
+    // Point the scrubber at an ordered list of frame filenames. Re-callable:
     // switching series/plane just re-configures the same DOM + event handlers.
-    function configure(slices) {
+    // opts.render: "slices" (default) | "turntable" (rotatable frame ring — same
+    // scrubber, drag-to-rotate affordance, optional degree readout). "mesh"/"volume"
+    // are recognized but need an asset with frames; with none they no-op (no WebGL
+    // engine is shipped on this interim path).
+    function configure(slices, opts) {
+      opts = opts || {};
       cache.clear();
       max = Math.max(0, slices.length - 1);
       urlFn = (i) => `${prefix}${slices[i]}`;
       slider.max = String(max);
       const single = slices.length <= 1;        // hide scrubber + counter for one-image "ways"
+      const turntable = opts.render === 'turntable' && !single;
+      turntableDeg = turntable && opts.degreesPerFrame ? opts.degreesPerFrame : null;
       viewer.classList.toggle('ct-single', single);
+      viewer.classList.toggle('ct-turntable', turntable);
       if (totalEl) totalEl.textContent = slices.length;
-      setSlice(single ? 0 : Math.floor(max / 2));
+      setSlice(turntable ? 0 : (single ? 0 : Math.floor(max / 2)));
     }
 
     // New manifest shape: { ways:[{key,labelEn,labelPt,values:[...]}], stacks:[{select,slices}], defaultSelect }
@@ -296,7 +308,18 @@
 
       const apply = () => {
         const st = resolveStack(sel);
-        if (st) configure(st.slices);
+        if (!st) return;
+        // Frame ring: a slice stack, or a turntable's pre-rendered frames.
+        const frames = st.slices || (st.turntable && st.turntable.frames) || [];
+        if (!frames.length) {
+          // mesh/volume with no frame fallback — no WebGL engine on this interim path.
+          console.warn('No renderable frames for selection', st.select, '(render:', st.render + ')');
+          return;
+        }
+        configure(frames, {
+          render: st.render,
+          degreesPerFrame: st.degreesPerFrame || (st.turntable && st.turntable.degreesPerFrame),
+        });
       };
 
       // Disable any value whose combination with the current other selections has no stack.
