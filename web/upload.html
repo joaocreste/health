@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Health — Upload data</title>
+<meta name="description" content="Upload files and folders to your Lumen Health record.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=51">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  .up-main { max-width: 980px; margin: 0 auto; padding: 32px 24px 64px; }
+  .up-head { margin-bottom: 24px; }
+  .up-card { background: var(--surface-pure, #fff); border: 1px solid var(--border-default, #d4dbe1); border-radius: 12px; padding: 22px 24px; margin-bottom: 24px; }
+  .up-drop { border: 2px dashed var(--border-default, #c6d0d8); border-radius: 12px; padding: 36px 24px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; background: var(--surface-base, #f8fafc); }
+  .up-drop.dragover { border-color: var(--green-500, #3D9460); background: var(--green-50, #EEF8F1); }
+  .up-drop svg { color: var(--accent-petrol, #244E6E); }
+  .up-drop-label { font-family: var(--font-display, sans-serif); font-weight: 700; font-size: 16px; color: var(--text-primary, #0D1B2A); margin-top: 12px; }
+  .up-drop-actions { margin-top: 12px; display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .up-link { background: none; border: none; color: var(--accent-petrol, #244E6E); font-family: var(--font-body, sans-serif); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: underline; padding: 2px 4px; }
+  .up-hint { margin-top: 10px; font-size: 12px; color: var(--text-muted, #7A8FA6); }
+  .up-list { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .up-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border-default, #e2e8ee); border-radius: 8px; background: var(--surface-raised, #fcfdfe); }
+  .up-row-icon { flex: none; color: var(--accent-petrol, #244E6E); }
+  .up-row-main { flex: 1 1 auto; min-width: 0; }
+  .up-row-name { font-family: var(--font-body, sans-serif); font-weight: 500; font-size: 14px; color: var(--text-primary, #0D1B2A); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .up-row-meta { font-family: var(--font-mono, monospace); font-size: 11px; color: var(--text-muted, #7A8FA6); margin-top: 2px; }
+  .up-row-prog { height: 6px; border-radius: 999px; background: var(--surface-cool, #EEF3F6); overflow: hidden; margin-top: 6px; display: none; }
+  .up-row.uploading .up-row-prog, .up-row.done .up-row-prog { display: block; }
+  .up-row-prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-petrol-light, #4D7BA0), var(--accent-petrol, #244E6E)); transition: width .25s ease; }
+  .up-row.done .up-row-prog-fill { background: var(--green-500, #3D9460); }
+  .up-row.failed .up-row-prog-fill { background: var(--red-500, #c0392b); }
+  .up-row-state { flex: none; font-family: var(--font-mono, monospace); font-size: 11px; color: var(--text-muted, #7A8FA6); }
+  .up-row-x { flex: none; background: none; border: none; color: var(--text-muted, #7A8FA6); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; }
+  .up-row-x:hover { color: var(--red-700, #8a2b2b); }
+  .up-foot { margin-top: 18px; display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
+  .up-go { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-family: var(--font-display, sans-serif); font-size: 14px; font-weight: 700; color: #fff; background: var(--green-500, #3D9460); border: 1px solid var(--green-500, #3D9460); border-radius: 8px; cursor: pointer; transition: background .15s; }
+  .up-go:hover { background: var(--green-700, #245F3C); border-color: var(--green-700, #245F3C); }
+  .up-go:disabled { opacity: .5; cursor: not-allowed; }
+  .up-clear { background: none; border: none; color: var(--text-muted, #7A8FA6); font-size: 13px; cursor: pointer; }
+  .up-toast { display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+  .up-toast.ok { display: block; background: var(--green-50, #EEF8F1); border: 1px solid var(--green-200, #B0DEBE); color: var(--green-700, #245F3C); }
+  .up-toast.err { display: block; background: var(--red-50, #FDF1F1); border: 1px solid var(--red-200, #F4B3B3); color: var(--red-700, #8a2b2b); }
+  .up-table-empty { color: var(--text-muted, #7A8FA6); font-size: 14px; padding: 12px 0; }
+  .up-docref { font-family: var(--font-mono, monospace); font-size: 12px; letter-spacing: .04em; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html" id="up-brand">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>Lumen Health<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html" id="up-back-link"><span class="lang-en">← Back to summary</span><span class="lang-pt">← Voltar ao resumo</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</nav>
+
+<main class="up-main">
+  <div class="up-head">
+    <div class="section-label"><span class="lang-en">Upload data</span><span class="lang-pt">Enviar dados</span></div>
+    <h1 class="section-title"><span class="lang-en">Send files to Client Services</span><span class="lang-pt">Envie arquivos para o Atendimento</span></h1>
+    <p class="section-desc">
+      <span class="lang-en">Upload any documents, scans, lab PDFs, images or full folders. Your files are stored securely and reviewed by our team before being added to your record — nothing is changed automatically.</span>
+      <span class="lang-pt">Envie documentos, exames, PDFs de laboratório, imagens ou pastas inteiras. Seus arquivos são armazenados com segurança e revisados pela nossa equipe antes de serem adicionados ao seu registro — nada é alterado automaticamente.</span>
+    </p>
+  </div>
+
+  <!-- Upload card -->
+  <section class="up-card">
+    <div class="up-drop" id="up-drop" tabindex="0" role="button" aria-label="Drop files or folders here">
+      <input type="file" multiple style="display:none" id="up-input-files">
+      <input type="file" webkitdirectory directory multiple style="display:none" id="up-input-dir">
+      <svg viewBox="0 0 64 64" width="52" height="52" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M32 44V18"/><polyline points="22,28 32,18 42,28"/><path d="M14 44v6a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2v-6"/>
+      </svg>
+      <div class="up-drop-label">
+        <span class="lang-en">Drop files <em>or folders</em> here</span>
+        <span class="lang-pt">Arraste arquivos <em>ou pastas</em> aqui</span>
+      </div>
+      <div class="up-drop-actions">
+        <button type="button" class="up-link" id="up-pick-files"><span class="lang-en">Choose files</span><span class="lang-pt">Escolher arquivos</span></button>
+        <span style="color:var(--text-muted,#7A8FA6)">·</span>
+        <button type="button" class="up-link" id="up-pick-dir"><span class="lang-en">Choose folder</span><span class="lang-pt">Escolher pasta</span></button>
+      </div>
+      <div class="up-hint">
+        <span class="lang-en">Any file type — PDFs, images, DICOM, ZIP, Word, CSV. Folder structure is preserved.</span>
+        <span class="lang-pt">Qualquer tipo de arquivo — PDFs, imagens, DICOM, ZIP, Word, CSV. A estrutura de pastas é preservada.</span>
+      </div>
+    </div>
+
+    <ul class="up-list" id="up-list"></ul>
+    <div class="up-toast" id="up-toast"></div>
+
+    <div class="up-foot">
+      <button type="button" class="up-clear" id="up-clear"><span class="lang-en">Clear</span><span class="lang-pt">Limpar</span></button>
+      <button type="button" class="up-go" id="up-go" disabled>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="lang-en">Upload to Client Services</span><span class="lang-pt">Enviar para o Atendimento</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Submitted uploads -->
+  <section class="up-card">
+    <div class="section-label"><span class="lang-en">Your uploads</span><span class="lang-pt">Seus envios</span></div>
+    <h2 class="section-title" style="font-size:20px;margin:4px 0 14px;"><span class="lang-en">Submitted documents</span><span class="lang-pt">Documentos enviados</span></h2>
+    <table class="data-table" id="up-table">
+      <thead><tr>
+        <th><span class="lang-en">Document name</span><span class="lang-pt">Nome do documento</span></th>
+        <th><span class="lang-en">Document ID</span><span class="lang-pt">ID do documento</span></th>
+        <th><span class="lang-en">Date &amp; time</span><span class="lang-pt">Data e hora</span></th>
+        <th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th>
+      </tr></thead>
+      <tbody id="up-tbody"></tbody>
+    </table>
+    <div class="up-table-empty" id="up-table-empty" style="display:none;">
+      <span class="lang-en">No uploads yet.</span><span class="lang-pt">Nenhum envio ainda.</span>
+    </div>
+  </section>
+</main>
+
+<script src="assets/app.js?v=28"></script>
+<script src="assets/upload-page.js?v=1"></script>
+</body>
+</html>

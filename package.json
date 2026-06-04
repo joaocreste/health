@@ -15,6 +15,7 @@
     "@anthropic-ai/sdk": "^0.88.0",
     "@clerk/backend": "^1.21.4",
     "@neondatabase/serverless": "^0.10.4",
+    "aws4fetch": "^1.0.20",
     "drizzle-orm": "^0.36.4"
   },
   "devDependencies": {

@@ -60,6 +60,11 @@ export const lifeEventCategory = pgEnum("life_event_category", [
   "birth", "move", "marriage", "divorce", "job",
   "education", "hospitalization", "diagnosis", "loss", "crisis", "other",
 ]);
+// Patient-upload review lifecycle. Distinct from import_status — an upload is
+// raw blobs awaiting an admin's manual ingestion decision, NOT a parse pipeline.
+export const uploadStatus = pgEnum("upload_status", [
+  "pending_review", "ingested", "data_error",
+]);
 
 /* ───── 1. Identity & access ──────────────────────── */
 
@@ -360,6 +365,43 @@ export const importFiles = pgTable("import_files", {
   errorMessage: text("error_message"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("import_files_import_idx").on(t.importId)]);
+
+/* ───── 5b. Patient uploads (raw blobs + admin review queue) ───────────────
+   Deliberately separate from imports/import_files. An `upload` is a single
+   reviewable unit the patient pushed straight to R2 (a lone file OR a whole
+   folder); it carries NO parse state and triggers NO ingestion. An admin
+   downloads it, ingests manually on the terminal, then sets `status`. One
+   `uploads` row → one or many `upload_objects` (one per physical R2 object).
+   R2 key scheme: uploads/{patient_id}/{upload_id}/{relative_path}. */
+export const uploads = pgTable("uploads", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  docRef: text("doc_ref").notNull().unique(),       // short human-readable display ID (8-char base32)
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  uploaderUserId: uuid("uploader_user_id").references(() => users.id, { onDelete: "set null" }),
+  originalName: text("original_name").notNull(),     // file name or top-level folder name
+  kind: text("kind").notNull(),                      // 'file' | 'folder'
+  r2Prefix: text("r2_prefix").notNull(),             // R2 key (single file) or key prefix (folder)
+  fileCount: integer("file_count").default(0).notNull(),
+  totalBytes: bigint("total_bytes", { mode: "number" }).default(0).notNull(),
+  contentType: text("content_type"),                 // single files only
+  status: uploadStatus("status").default("pending_review").notNull(),
+  errorNote: text("error_note"),                     // admin's reason when status='data_error'
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+}, (t) => [
+  index("uploads_patient_created_idx").on(t.patientId, t.createdAt),
+  index("uploads_status_idx").on(t.status),
+]);
+
+export const uploadObjects = pgTable("upload_objects", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  uploadId: uuid("upload_id").notNull().references(() => uploads.id, { onDelete: "cascade" }),
+  r2Key: text("r2_key").notNull(),
+  relativePath: text("relative_path").notNull(),     // preserves folder structure
+  bytes: bigint("bytes", { mode: "number" }),
+  contentType: text("content_type"),
+}, (t) => [index("upload_objects_upload_idx").on(t.uploadId)]);
 
 /* ───── 6. Audit ──────────────────────────────────── */
 

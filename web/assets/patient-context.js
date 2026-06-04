@@ -1245,14 +1245,16 @@
     s.id = 'jc-bottom-dock-styles';
     s.textContent = [
       '.jc-bottom-dock { max-width: 1080px; margin: 32px auto; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }',
-      '.jc-bottom-dock .jc-bottom-ai { flex: 1 1 520px; min-width: 0; }',
-      '.jc-bottom-dock .jc-bottom-danger { flex: 0 1 340px; min-width: 0; }',
-      '.jc-bottom-dock .jc-bottom-ai:empty, .jc-bottom-dock .jc-bottom-danger:empty { display: none; }',
+      '.jc-bottom-dock .jc-bottom-upload { flex: 0 1 300px; min-width: 0; }',
+      '.jc-bottom-dock .jc-bottom-ai { flex: 1 1 460px; min-width: 0; }',
+      '.jc-bottom-dock .jc-bottom-danger { flex: 0 1 300px; min-width: 0; }',
+      '.jc-bottom-dock .jc-bottom-upload:empty, .jc-bottom-dock .jc-bottom-ai:empty, .jc-bottom-dock .jc-bottom-danger:empty { display: none; }',
       // neutralise each child\'s own centring/width so the columns control layout
+      '.jc-bottom-dock .uc-wrap { max-width: none; margin: 0; padding: 0; }',
       '.jc-bottom-dock .iu-wrap { max-width: none; margin: 0 0 16px; padding: 0; }',
       '.jc-bottom-dock .ai-ins-block { max-width: none; margin: 0; padding: 0; border-top: none; }',
       '.jc-bottom-dock .jc-danger-zone { max-width: none; margin: 0; padding: 0; }',
-      '@media (max-width: 880px) { .jc-bottom-dock { gap: 18px; } .jc-bottom-dock .jc-bottom-ai, .jc-bottom-dock .jc-bottom-danger { flex: 1 1 100%; } }',
+      '@media (max-width: 880px) { .jc-bottom-dock { gap: 18px; } .jc-bottom-dock .jc-bottom-upload, .jc-bottom-dock .jc-bottom-ai, .jc-bottom-dock .jc-bottom-danger { flex: 1 1 100%; } }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -1263,7 +1265,7 @@
     if (dock) return dock;
     dock = document.createElement('div');
     dock.className = 'jc-bottom-dock';
-    dock.innerHTML = '<div class="jc-bottom-ai" data-bottom-ai></div><div class="jc-bottom-danger" data-bottom-danger></div>';
+    dock.innerHTML = '<div class="jc-bottom-upload" data-bottom-upload></div><div class="jc-bottom-ai" data-bottom-ai></div><div class="jc-bottom-danger" data-bottom-danger></div>';
     // Pin to the visual bottom: before a VISIBLE footer (static pages) or at the
     // end of <body> (dynamic pages hide the original footer and append content).
     var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
@@ -1274,10 +1276,11 @@
   }
 
   function reflowBottomDock() {
+    var upload = document.querySelector('.uc-wrap[data-upload-card]');
     var iu = document.querySelector('.iu-wrap[data-insights-update]');
     var ai = document.querySelector('section[data-ai-insights]');
     var danger = document.querySelector('.jc-danger-zone');
-    if (!iu && !ai && !danger) return;
+    if (!upload && !iu && !ai && !danger) return;
     var dock = ensureBottomDock();
     // Re-pin the dock to the visual bottom on every reflow. The dock can be
     // created early (insights-update mounts on DOMContentLoaded) while the page's
@@ -1289,8 +1292,10 @@
     } else if (document.body.lastElementChild !== dock) {
       document.body.appendChild(dock);
     }
+    var uploadCol = dock.querySelector('[data-bottom-upload]');
     var aiCol = dock.querySelector('[data-bottom-ai]');
     var dangerCol = dock.querySelector('[data-bottom-danger]');
+    if (upload && uploadCol && upload.parentNode !== uploadCol) uploadCol.appendChild(upload);
     if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
     if (iu && iu.parentNode !== aiCol) aiCol.appendChild(iu);
     if (iu && aiCol.firstChild !== iu) aiCol.insertBefore(iu, aiCol.firstChild); // button above the AI cards

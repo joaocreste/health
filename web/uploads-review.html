@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Health — Uploads to Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=51">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  body.admin-page { background: #F9F7F4; color: #0D1B2A; }
+  .admin-topbar { background: #0D1B2A; color: #FFFFFF; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+  .admin-brand { display: inline-flex; align-items: center; gap: 10px; color: #FFFFFF; text-decoration: none; font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.04em; }
+  .admin-brand img { width: 22px; height: 22px; }
+  .admin-brand small { display: block; font-family: 'IBM Plex Sans', sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-top: 2px; }
+  .admin-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 12px; }
+  .admin-viewer { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 0.04em; text-transform: uppercase; }
+  .admin-link { color: rgba(255,255,255,0.85); text-decoration: none; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 6px 12px; transition: background 0.15s; }
+  .admin-link:hover { background: rgba(255,255,255,0.08); }
+  .admin-main { max-width: 1180px; margin: 0 auto; padding: 40px 24px 96px; }
+  .admin-heading { font-family: 'Raleway', sans-serif; font-weight: 300; font-size: 28px; margin: 0 0 4px; }
+  .admin-sub { color: #7A8FA6; font-size: 14px; margin: 0 0 28px; }
+  .admin-section { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 16px 20px; }
+  .ur-row-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #7A8FA6; margin-top: 3px; }
+  .ur-docref { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .04em; }
+  .ur-dl { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--border-default,#d4dbe1); border-radius: 6px; padding: 4px 10px; font-size: 12px; color: var(--accent-petrol,#244E6E); cursor: pointer; text-decoration: none; }
+  .ur-dl:hover { background: var(--surface-cool,#EEF3F6); }
+  .ur-status-sel { padding: 5px 8px; border-radius: 6px; border: 1px solid #d4dbe1; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; cursor: pointer; }
+  .ur-status-sel.status-pending_review { background: var(--amber-50,#FDF8EC); color: var(--amber-700,#785818); border-color: var(--amber-200,#F4DD9C); }
+  .ur-status-sel.status-ingested { background: var(--green-50,#EEF8F1); color: var(--green-700,#245F3C); border-color: var(--green-200,#B0DEBE); }
+  .ur-status-sel.status-data_error { background: var(--red-50,#FDF1F1); color: var(--red-700,#8a2b2b); border-color: var(--red-200,#F4B3B3); }
+  .ur-note { margin-top: 8px; display: none; }
+  .ur-note.open { display: block; }
+  .ur-note input { width: 100%; padding: 6px 8px; border: 1px solid #d4dbe1; border-radius: 6px; font-size: 12px; font-family: 'IBM Plex Sans', sans-serif; }
+  .ur-note-save { margin-top: 6px; padding: 4px 10px; font-size: 12px; border: 1px solid #d4dbe1; border-radius: 6px; background: #fff; cursor: pointer; }
+  .ur-manifest { display: none; margin-top: 10px; padding: 10px 12px; background: var(--surface-base,#f8fafc); border: 1px solid #e2e8ee; border-radius: 8px; }
+  .ur-manifest.open { display: block; }
+  .ur-manifest ul { list-style: none; margin: 0 0 8px; padding: 0; max-height: 220px; overflow: auto; }
+  .ur-manifest li { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: 12px; border-bottom: 1px solid #eef2f5; }
+  .ur-manifest a { color: var(--accent-petrol,#244E6E); }
+  .ur-cmd { width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 8px; border: 1px solid #d4dbe1; border-radius: 6px; background: #fff; }
+  .ur-cmd-copy { margin-top: 6px; padding: 4px 10px; font-size: 12px; border: 1px solid #d4dbe1; border-radius: 6px; background: #fff; cursor: pointer; }
+  .ur-empty { color: #7A8FA6; font-size: 14px; padding: 20px 0; }
+  .lang-btn { background: none; border: none; cursor: pointer; padding: 2px; opacity: .5; }
+  .lang-btn[aria-pressed="true"] { opacity: 1; }
+  .lang-btn svg { width: 22px; height: 15px; border-radius: 2px; display: block; }
+</style>
+</head>
+<body class="admin-page">
+
+<header class="admin-topbar">
+  <a href="patients.html" class="admin-brand">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>Lumen Health<small>Admin console</small></span>
+  </a>
+  <div class="admin-actions">
+    <span class="admin-viewer" id="admin-viewer">…</span>
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    <a href="admin.html" class="admin-link"><span class="lang-en">← Admin console</span><span class="lang-pt">← Console admin</span></a>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</header>
+
+<main class="admin-main">
+  <h1 class="admin-heading"><span class="lang-en">Uploads to Review</span><span class="lang-pt">Envios para Revisão</span></h1>
+  <p class="admin-sub">
+    <span class="lang-en">Patient-submitted files and folders. Download, ingest on the terminal, then mark each one ingested or flag a data error.</span>
+    <span class="lang-pt">Arquivos e pastas enviados por pacientes. Baixe, processe no terminal e marque cada um como processado ou sinalize um erro nos dados.</span>
+  </p>
+
+  <section class="admin-section">
+    <table class="data-table" id="ur-table">
+      <thead><tr>
+        <th><span class="lang-en">Patient ID</span><span class="lang-pt">ID do paciente</span></th>
+        <th><span class="lang-en">Patient name</span><span class="lang-pt">Nome do paciente</span></th>
+        <th><span class="lang-en">Document / Folder</span><span class="lang-pt">Documento / Pasta</span></th>
+        <th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th>
+      </tr></thead>
+      <tbody id="ur-tbody"></tbody>
+    </table>
+    <div class="ur-empty" id="ur-empty" style="display:none;">
+      <span class="lang-en">No uploads yet.</span><span class="lang-pt">Nenhum envio ainda.</span>
+    </div>
+  </section>
+</main>
+
+<script src="assets/app.js?v=28"></script>
+<script src="assets/uploads-review.js?v=1"></script>
+</body>
+</html>

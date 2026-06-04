@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { AwsClient } from "aws4fetch";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
@@ -708,6 +709,7 @@ async function handlePatientWipeData(request, env) {
 
   try {
     const sql = neon(env.DATABASE_URL);
+    await ensureUploadsTables(sql); // wipe issues DELETE FROM uploads below
     const [patientRows, viewerRows] = await Promise.all([
       sql`SELECT id, full_name FROM users
             WHERE clerk_user_id = ${patientClerk} AND role = 'patient' AND archived_at IS NULL
@@ -771,10 +773,12 @@ async function handlePatientWipeData(request, env) {
 
     let r2Errors = 0;
     if (env.R2_BUCKET) {
-      for (const row of prefixQuery) {
+      // Imaging prefixes + the patient's entire upload-portal namespace.
+      const prefixes = prefixQuery.map((r) => r.blob_prefix).concat([`uploads/${patientId}/`]);
+      for (const prefix of prefixes) {
         let cursor;
         do {
-          const listed = await env.R2_BUCKET.list({ prefix: row.blob_prefix, cursor });
+          const listed = await env.R2_BUCKET.list({ prefix, cursor });
           (listed.objects || []).forEach((obj) => keys.add(obj.key));
           cursor = listed.truncated ? listed.cursor : undefined;
         } while (cursor);
@@ -813,6 +817,7 @@ async function handlePatientWipeData(request, env) {
     await sql`DELETE FROM life_events              WHERE patient_id = ${patientId}`;
     await sql`DELETE FROM patient_dashboards       WHERE patient_id = ${patientId}`;
     await sql`DELETE FROM imports                  WHERE patient_id = ${patientId}`;
+    await sql`DELETE FROM uploads                  WHERE patient_id = ${patientId}`; // upload_objects cascades
 
     return new Response(JSON.stringify({
       ok: true,
@@ -822,6 +827,297 @@ async function handlePatientWipeData(request, env) {
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Wipe failed: ${e.message}`);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * Patient upload portal + admin review queue.
+ *
+ * Upload != Ingest. These endpoints store RAW blobs in R2 and metadata in Neon,
+ * then expose a review queue. They never parse, classify, or write clinical rows;
+ * ingestion stays manual/terminal-driven. Files go DIRECT to R2 via presigned
+ * PUT URLs (the 100MB Worker body cap can't carry 2GB folders) — no file byte
+ * ever passes through an /api route.
+ *
+ * R2 key scheme: uploads/{patient_id}/{upload_id}/{relative_path}
+ * patient_id + upload_id are assigned server-side; the client never chooses them.
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+// Idempotent DDL applied on first use — same pattern as ensureInsightJobsTable,
+// because the live DB is only reachable through the deployed Worker's secret.
+// Mirrors db/migrations/0009_uploads.sql exactly.
+let _uploadsReady = null;
+function ensureUploadsTables(sql) {
+  if (_uploadsReady) return _uploadsReady;
+  _uploadsReady = (async () => {
+    await sql`DO $$ BEGIN
+      CREATE TYPE "upload_status" AS ENUM ('pending_review','ingested','data_error');
+    EXCEPTION WHEN duplicate_object THEN null; END $$`;
+    await sql`CREATE TABLE IF NOT EXISTS uploads (
+      id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      doc_ref          text NOT NULL UNIQUE,
+      patient_id       uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      uploader_user_id uuid REFERENCES users(id) ON DELETE SET NULL,
+      original_name    text NOT NULL,
+      kind             text NOT NULL,
+      r2_prefix        text NOT NULL,
+      file_count       integer NOT NULL DEFAULT 0,
+      total_bytes      bigint NOT NULL DEFAULT 0,
+      content_type     text,
+      status           upload_status NOT NULL DEFAULT 'pending_review',
+      error_note       text,
+      created_at       timestamptz NOT NULL DEFAULT now(),
+      reviewed_at      timestamptz,
+      reviewed_by      uuid REFERENCES users(id) ON DELETE SET NULL
+    )`;
+    await sql`CREATE TABLE IF NOT EXISTS upload_objects (
+      id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      upload_id     uuid NOT NULL REFERENCES uploads(id) ON DELETE CASCADE,
+      r2_key        text NOT NULL,
+      relative_path text NOT NULL,
+      bytes         bigint,
+      content_type  text
+    )`;
+    await sql`CREATE INDEX IF NOT EXISTS uploads_patient_created_idx ON uploads (patient_id, created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS uploads_status_idx ON uploads (status)`;
+    await sql`CREATE INDEX IF NOT EXISTS upload_objects_upload_idx ON upload_objects (upload_id)`;
+  })().catch((e) => { _uploadsReady = null; throw e; });
+  return _uploadsReady;
+}
+
+// R2 S3-API client (distinct from the env.R2_BUCKET Workers binding, which can't
+// mint presigned URLs). Requires the R2 S3 token secrets — see §7 of the spec.
+function r2S3Client(env) {
+  if (!env.R2_ACCESS_KEY_ID || !env.R2_SECRET_ACCESS_KEY || !env.R2_ACCOUNT_ID || !env.R2_BUCKET_NAME) {
+    return null;
+  }
+  return new AwsClient({
+    accessKeyId: env.R2_ACCESS_KEY_ID,
+    secretAccessKey: env.R2_SECRET_ACCESS_KEY,
+    service: "s3",
+    region: "auto",
+  });
+}
+
+function r2ObjectUrl(env, key) {
+  const encoded = String(key).split("/").map(encodeURIComponent).join("/");
+  return new URL(`https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${env.R2_BUCKET_NAME}/${encoded}`);
+}
+
+// Presigned PUT — sign METHOD ONLY via query (signQuery). We deliberately do NOT
+// sign Content-Type: the browser sets it on the PUT, and a signed Content-Type
+// that doesn't match the sent header is the #1 cause of presign failures.
+async function presignPut(client, env, key, expires = 3600) {
+  const u = r2ObjectUrl(env, key);
+  u.searchParams.set("X-Amz-Expires", String(expires));
+  const signed = await client.sign(u, { method: "PUT", aws: { signQuery: true } });
+  return signed.url;
+}
+
+// Presigned GET — forces a download with the original filename via a SIGNED
+// response-content-disposition query param.
+async function presignGet(client, env, key, downloadName, expires = 3600) {
+  const u = r2ObjectUrl(env, key);
+  u.searchParams.set("X-Amz-Expires", String(expires));
+  if (downloadName) {
+    u.searchParams.set("response-content-disposition",
+      `attachment; filename="${String(downloadName).replace(/["\\\r\n]/g, "_")}"`);
+  }
+  const signed = await client.sign(u, { method: "GET", aws: { signQuery: true } });
+  return signed.url;
+}
+
+// 8-char Crockford base32 (no I/L/O/U) display ID. Collisions are vanishingly
+// unlikely; the doc_ref UNIQUE constraint + a regenerate-on-conflict loop in the
+// caller make it safe regardless.
+const DOC_REF_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+function genDocRef() {
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
+  let out = "";
+  for (let i = 0; i < 8; i++) out += DOC_REF_ALPHABET[bytes[i] & 31];
+  return out;
+}
+
+function sanitizeRelPath(p) {
+  return String(p || "")
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "")
+    .replace(/^\/+/, "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter((s) => s && s !== "." && s !== "..")
+    .join("/");
+}
+
+/* POST /api/uploads/presign — auth: patient (self/access/admin).
+   Body: { patient, items: [{ group_id, kind, name, files: [{ relative_path, size, content_type }] }] }
+   Returns presigned PUT URLs per file. NO DB writes here (avoids orphans) — the
+   rows are written at /complete. upload_id is minted only to namespace R2 keys. */
+async function handleUploadsPresign(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const client = r2S3Client(env);
+  if (!client) return jsonError(500, "r2_s3_not_configured");
+
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient || body?.patient_clerk || "").trim();
+  const items = Array.isArray(body?.items) ? body.items : null;
+  if (!patientClerk) return jsonError(400, "patient_required");
+  if (!items || items.length === 0) return jsonError(400, "items_required");
+  if (items.length > 200) return jsonError(400, "too_many_items");
+
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+          AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (pr.length === 0) return jsonError(404, "patient_not_found");
+    const patientId = pr[0].id;
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return jsonError(access.status, access.reason);
+
+    const out = [];
+    for (const item of items) {
+      const kind = item?.kind === "folder" ? "folder" : "file";
+      const name = String(item?.name || "").trim().slice(0, 300) || "upload";
+      const files = Array.isArray(item?.files) ? item.files : [];
+      if (files.length === 0 || files.length > 5000) return jsonError(400, "item_file_count_invalid");
+      const uploadId = crypto.randomUUID();
+      const prefix = `uploads/${patientId}/${uploadId}`;
+      const signedFiles = [];
+      for (const f of files) {
+        const rel = sanitizeRelPath(f?.relative_path || f?.name || name) || name;
+        const key = `${prefix}/${rel}`;
+        signedFiles.push({
+          relative_path: rel,
+          r2_key: key,
+          content_type: f?.content_type || null,
+          put_url: await presignPut(client, env, key),
+        });
+      }
+      out.push({
+        group_id: item?.group_id ?? null,
+        upload_id: uploadId,
+        kind,
+        original_name: name,
+        r2_prefix: kind === "folder" ? `${prefix}/` : signedFiles[0].r2_key,
+        files: signedFiles,
+      });
+    }
+    return new Response(JSON.stringify({ ok: true, patient_id: patientId, items: out }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return jsonError(500, `Presign failed: ${e.message}`);
+  }
+}
+
+/* POST /api/uploads/complete — auth: patient (self/access/admin).
+   Body: { patient, items: [{ upload_id, kind, original_name, r2_prefix,
+            files: [{ relative_path, r2_key, bytes, content_type, ok }] }] }
+   Writes uploads (status pending_review) + upload_objects for the files that
+   actually PUT (ok !== false). Re-derives patient_id server-side and rejects any
+   key not under uploads/{patient_id}/ — a patient can only write their own rows. */
+async function handleUploadsComplete(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient || body?.patient_clerk || "").trim();
+  const items = Array.isArray(body?.items) ? body.items : null;
+  if (!patientClerk) return jsonError(400, "patient_required");
+  if (!items || items.length === 0) return jsonError(400, "items_required");
+
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  try {
+    const sql = neon(env.DATABASE_URL);
+    await ensureUploadsTables(sql);
+    const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+          AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (pr.length === 0) return jsonError(404, "patient_not_found");
+    const patientId = pr[0].id;
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return jsonError(access.status, access.reason);
+
+    const keyPrefix = `uploads/${patientId}/`;
+    const created = [];
+    for (const item of items) {
+      const kind = item?.kind === "folder" ? "folder" : "file";
+      const name = String(item?.original_name || item?.name || "").trim().slice(0, 300) || "upload";
+      const r2Prefix = String(item?.r2_prefix || "");
+      if (!r2Prefix.startsWith(keyPrefix)) return jsonError(403, "key_outside_patient_namespace");
+      const okFiles = (Array.isArray(item?.files) ? item.files : []).filter((f) => f && f.ok !== false);
+      if (okFiles.length === 0) continue; // whole item failed to upload — skip, no row
+      for (const f of okFiles) {
+        if (!String(f.r2_key || "").startsWith(keyPrefix)) return jsonError(403, "key_outside_patient_namespace");
+      }
+      const totalBytes = okFiles.reduce((a, f) => a + (Number(f.bytes) || 0), 0);
+      const contentType = kind === "file" ? (okFiles[0].content_type || null) : null;
+
+      // Insert the uploads row with a fresh, unique doc_ref (retry on the rare
+      // UNIQUE collision). uploads.id is server-generated; r2_prefix is the
+      // validated path the client actually PUT to.
+      let row = null;
+      for (let attempt = 0; attempt < 6 && !row; attempt++) {
+        const docRef = genDocRef();
+        try {
+          const ins = await sql`
+            INSERT INTO uploads (doc_ref, patient_id, uploader_user_id, original_name, kind,
+                                 r2_prefix, file_count, total_bytes, content_type, status)
+            VALUES (${docRef}, ${patientId}, ${access.viewerId}, ${name}, ${kind},
+                    ${r2Prefix}, ${okFiles.length}, ${totalBytes}, ${contentType}, 'pending_review')
+            RETURNING id, doc_ref, original_name, kind, file_count, total_bytes, status, created_at`;
+          row = ins[0];
+        } catch (e) {
+          if (!/unique|duplicate/i.test(e.message || "")) throw e;
+        }
+      }
+      if (!row) return jsonError(500, "doc_ref_generation_failed");
+
+      const objQueries = okFiles.map((f) => sql`
+        INSERT INTO upload_objects (upload_id, r2_key, relative_path, bytes, content_type)
+        VALUES (${row.id}, ${f.r2_key}, ${sanitizeRelPath(f.relative_path || name) || name},
+                ${Number(f.bytes) || null}, ${f.content_type || null})`);
+      await runChunked(sql, objQueries);
+
+      await sql`
+        INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
+        VALUES (${access.viewerId}, 'upload_created', 'uploads', ${row.id}, ${patientId},
+                ${JSON.stringify({ doc_ref: row.doc_ref, kind, file_count: okFiles.length, total_bytes: totalBytes })}::jsonb)`;
+      created.push(row);
+    }
+    return new Response(JSON.stringify({ ok: true, created }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return jsonError(500, `Complete failed: ${e.message}`);
+  }
+}
+
+/* GET /api/uploads?patient=clerk — auth: patient (self/access/admin).
+   The patient-visible table. Scoped to the resolved patient_id; never leaks
+   another patient's rows (access is checked against the viewer). */
+async function handleUploadsList(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const patientClerk = String(url.searchParams.get("patient") || "").trim();
+  if (!patientClerk) return jsonError(400, "patient_required");
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || url.searchParams.get("viewer") || "";
+  try {
+    const sql = neon(env.DATABASE_URL);
+    await ensureUploadsTables(sql);
+    const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+          AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (pr.length === 0) return jsonError(404, "patient_not_found");
+    const patientId = pr[0].id;
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return jsonError(access.status, access.reason);
+    const rows = await sql`
+      SELECT id, doc_ref, original_name, kind, file_count, total_bytes, content_type,
+             status, error_note, created_at, reviewed_at
+      FROM uploads WHERE patient_id = ${patientId}
+      ORDER BY created_at DESC`;
+    return new Response(JSON.stringify({ uploads: rows }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return jsonError(500, `Uploads list failed: ${e.message}`);
   }
 }
 
@@ -1440,10 +1736,12 @@ async function handleAdmin(request, env) {
       // 2. Expand every prefix to its concrete object list and union into the key set.
       let r2Errors = 0;
       if (env.R2_BUCKET) {
-        for (const row of prefixQuery) {
+        // Imaging prefixes + the patient's entire upload-portal namespace.
+        const prefixes = prefixQuery.map((r) => r.blob_prefix).concat([`uploads/${patientId}/`]);
+        for (const prefix of prefixes) {
           let cursor;
           do {
-            const listed = await env.R2_BUCKET.list({ prefix: row.blob_prefix, cursor });
+            const listed = await env.R2_BUCKET.list({ prefix, cursor });
             (listed.objects || []).forEach((obj) => keys.add(obj.key));
             cursor = listed.truncated ? listed.cursor : undefined;
           } while (cursor);
@@ -1614,6 +1912,102 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // GET /api/admin/uploads — the review queue: every upload joined to patient identity.
+  if (path === "/api/admin/uploads" && request.method === "GET") {
+    try {
+      await ensureUploadsTables(sql);
+      const rows = await sql`
+        SELECT up.id, up.doc_ref, up.original_name, up.kind, up.file_count, up.total_bytes,
+               up.content_type, up.status, up.error_note, up.created_at, up.reviewed_at,
+               up.patient_id, p.clerk_user_id AS patient_clerk, p.full_name AS patient_name,
+               r.full_name AS reviewer_name, uploader.full_name AS uploader_name
+        FROM uploads up
+        JOIN users p ON p.id = up.patient_id
+        LEFT JOIN users r ON r.id = up.reviewed_by
+        LEFT JOIN users uploader ON uploader.id = up.uploader_user_id
+        ORDER BY (up.status = 'pending_review') DESC, up.created_at DESC`;
+      return new Response(JSON.stringify({ uploads: rows }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `Uploads query failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/uploads/status — { upload_id, status, error_note? }
+  if (path === "/api/admin/uploads/status" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const uploadId = String(body?.upload_id || "").trim();
+    const status = String(body?.status || "").trim();
+    const errorNote = body?.error_note != null ? String(body.error_note).trim().slice(0, 1000) : null;
+    if (!uploadId) return jsonError(400, "upload_id_required");
+    if (!["pending_review", "ingested", "data_error"].includes(status)) return jsonError(400, "status_invalid");
+    try {
+      await ensureUploadsTables(sql);
+      const noteToStore = status === "data_error" ? errorNote : null;
+      const upd = await sql`
+        UPDATE uploads
+        SET status = ${status}::upload_status,
+            error_note = ${noteToStore},
+            reviewed_by = ${admin.id},
+            reviewed_at = now()
+        WHERE id = ${uploadId}
+        RETURNING id, doc_ref, patient_id, status, error_note, reviewed_at`;
+      if (upd.length === 0) return jsonError(404, "upload_not_found");
+      const row = upd[0];
+      await sql`
+        INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
+        VALUES (${admin.id}, 'upload_status_changed', 'uploads', ${row.id}, ${row.patient_id},
+                ${JSON.stringify({ doc_ref: row.doc_ref, status, error_note: noteToStore })}::jsonb)`;
+      return new Response(JSON.stringify({ ok: true, upload: row }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `Status update failed: ${e.message}`);
+    }
+  }
+
+  // GET /api/admin/uploads/:id/download — presigned GET URL(s).
+  // Single file -> one URL. Folder -> per-file manifest + the R2 prefix (the
+  // admin bulk-downloads the prefix on the terminal; in-Worker zipping of multi-GB
+  // folders is infeasible). The UI also builds a copy-paste rclone/wrangler command.
+  const dlMatch = path.match(/^\/api\/admin\/uploads\/([0-9a-f-]{36})\/download$/i);
+  if (dlMatch && request.method === "GET") {
+    const client = r2S3Client(env);
+    if (!client) return jsonError(500, "r2_s3_not_configured");
+    try {
+      await ensureUploadsTables(sql);
+      const uploadId = dlMatch[1];
+      const upRows = await sql`SELECT id, doc_ref, original_name, kind, r2_prefix FROM uploads WHERE id = ${uploadId} LIMIT 1`;
+      if (upRows.length === 0) return jsonError(404, "upload_not_found");
+      const up = upRows[0];
+      const objs = await sql`SELECT r2_key, relative_path, bytes, content_type
+                             FROM upload_objects WHERE upload_id = ${uploadId} ORDER BY relative_path`;
+      if (up.kind === "file" && objs.length <= 1) {
+        const obj = objs[0] || { r2_key: up.r2_prefix, relative_path: up.original_name };
+        const url = await presignGet(client, env, obj.r2_key, up.original_name);
+        return new Response(JSON.stringify({ kind: "file", doc_ref: up.doc_ref, url }), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+        });
+      }
+      const files = [];
+      for (const o of objs) {
+        files.push({
+          relative_path: o.relative_path,
+          bytes: o.bytes,
+          url: await presignGet(client, env, o.r2_key, o.relative_path.split("/").pop()),
+        });
+      }
+      return new Response(JSON.stringify({
+        kind: "folder", doc_ref: up.doc_ref, r2_prefix: up.r2_prefix,
+        bucket: env.R2_BUCKET_NAME, files,
+      }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    } catch (e) {
+      return jsonError(500, `Download presign failed: ${e.message}`);
+    }
+  }
+
   return jsonError(404, "unknown_admin_route");
 }
 
@@ -1646,6 +2040,15 @@ export default {
     }
     if (url.pathname === "/api/patient-wipe-data") {
       return handlePatientWipeData(request, env);
+    }
+    if (url.pathname === "/api/uploads/presign") {
+      return handleUploadsPresign(request, env);
+    }
+    if (url.pathname === "/api/uploads/complete") {
+      return handleUploadsComplete(request, env);
+    }
+    if (url.pathname === "/api/uploads") {
+      return handleUploadsList(request, env);
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
