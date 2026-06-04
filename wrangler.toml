@@ -16,3 +16,6 @@ pages_build_output_dir = "web"
 [[r2_buckets]]
 binding = "R2_BUCKET"
 bucket_name = "jc-health-uploads"
+jurisdiction = "eu"   # PHI lives in the EU R2 jurisdiction (GDPR-first); without
+                      # this, wrangler looks in the default jurisdiction and the
+                      # bucket is reported "not found".
