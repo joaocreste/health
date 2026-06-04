@@ -38,6 +38,10 @@ function jsonError(status, message) {
 }
 
 async function handleChat(request, env) {
+  // Chatbot deactivated across the webapp (UI widget removed from every page and
+  // this endpoint disabled). Kept intact below for easy re-enable: delete this
+  // guard and re-add <script src="assets/chatbot.js"> to the pages.
+  return jsonError(410, "chat_disabled");
   if (!env.ANTHROPIC_API_KEY) {
     return jsonError(500, "Server is not configured (missing API key).");
   }
