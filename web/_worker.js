@@ -901,7 +901,12 @@ function r2S3Client(env) {
 
 function r2ObjectUrl(env, key) {
   const encoded = String(key).split("/").map(encodeURIComponent).join("/");
-  return new URL(`https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${env.R2_BUCKET_NAME}/${encoded}`);
+  // The bucket lives in the EU jurisdiction (GDPR-first), so the S3-API host is
+  // {account}.eu.r2.cloudflarestorage.com — NOT the default {account}.r2...
+  // host. A presign against the wrong host produces SignatureDoesNotMatch / 404.
+  // Override with R2_S3_HOST if a bucket is ever moved out of the EU jurisdiction.
+  const host = env.R2_S3_HOST || `${env.R2_ACCOUNT_ID}.eu.r2.cloudflarestorage.com`;
+  return new URL(`https://${host}/${env.R2_BUCKET_NAME}/${encoded}`);
 }
 
 // Presigned PUT — sign METHOD ONLY via query (signQuery). We deliberately do NOT
