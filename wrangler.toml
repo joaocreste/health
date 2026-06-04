@@ -1,10 +1,18 @@
 # Lumen Health · Cloudflare Pages config
 #
-# R2 binding intentionally NOT declared here — bindings have to be set via the
-# Cloudflare dashboard (Pages > lumenhealth > Settings > Functions > R2 bucket
-# bindings). Once set there, the binding survives deploys without needing to
-# live in this file. Reference: variable name "R2_BUCKET", bucket name
-# "jc-health-uploads".
+# R2 binding MUST be declared here. `wrangler pages deploy` (v4.x) treats this
+# file as the source of truth for bindings and CLEARS any dashboard-set binding
+# that isn't listed — so a dashboard-only binding gets wiped on the next deploy
+# (this happened once: it silently broke imaging/ingest/wipe). Keep it in config.
 name = "lumenhealth"
 compatibility_date = "2026-04-28"
 pages_build_output_dir = "web"
+
+# Workers R2 binding (env.R2_BUCKET) — used by imaging, /api/ingest, data-wipe,
+# and the new upload portal's R2 cleanup. Distinct from the R2 *S3-API* token
+# secrets (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_ACCOUNT_ID /
+# R2_BUCKET_NAME) used by aws4fetch to mint presigned URLs — those are secrets,
+# set via the dashboard or `wrangler pages secret put`, NOT here.
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "jc-health-uploads"
