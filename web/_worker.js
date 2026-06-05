@@ -965,8 +965,16 @@ function sanitizeRelPath(p) {
 async function handleUploadsPresign(request, env) {
   if (request.method !== "POST") return jsonError(405, "method_not_allowed");
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  // Two upload transports:
+  //  - "s3":    presigned PUT straight to R2 (needs the R2 S3-API token secrets;
+  //             no per-file size ceiling beyond ~5GB; zero Worker bandwidth).
+  //  - "proxy": PUT each file through the Worker via the env.R2_BUCKET binding
+  //             (works with NO S3 token and NO bucket CORS; per-file cap = the
+  //             Worker request-body limit, ~100MB on the free plan).
+  // Prefer s3 when configured; fall back to the binding so uploads work today.
   const client = r2S3Client(env);
-  if (!client) return jsonError(500, "r2_s3_not_configured");
+  const mode = client ? "s3" : "proxy";
+  if (!client && !env.R2_BUCKET) return jsonError(500, "r2_not_configured");
 
   let body;
   try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
@@ -998,11 +1006,14 @@ async function handleUploadsPresign(request, env) {
       for (const f of files) {
         const rel = sanitizeRelPath(f?.relative_path || f?.name || name) || name;
         const key = `${prefix}/${rel}`;
+        const put_url = client
+          ? await presignPut(client, env, key)
+          : `/api/uploads/put?patient=${encodeURIComponent(patientClerk)}&key=${encodeURIComponent(key)}`;
         signedFiles.push({
           relative_path: rel,
           r2_key: key,
           content_type: f?.content_type || null,
-          put_url: await presignPut(client, env, key),
+          put_url,
         });
       }
       out.push({
@@ -1014,9 +1025,42 @@ async function handleUploadsPresign(request, env) {
         files: signedFiles,
       });
     }
-    return new Response(JSON.stringify({ ok: true, patient_id: patientId, items: out }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ ok: true, mode, patient_id: patientId, items: out }), { headers: JSON_HEADERS });
   } catch (e) {
     return jsonError(500, `Presign failed: ${e.message}`);
+  }
+}
+
+/* PUT /api/uploads/put?patient=<clerk>&key=<r2-key> — auth: patient (self/access/admin).
+   The "proxy" upload transport: the browser PUTs raw file bytes here and the
+   Worker writes them to R2 via the env.R2_BUCKET binding. Used when the R2 S3-API
+   token isn't configured (so no presigned URLs / no bucket CORS needed). The key
+   is validated to the caller's own uploads/{patient_id}/ namespace — a viewer can
+   only write within a patient they have access to. Per-file size is bounded by the
+   Worker request-body limit (~100MB free plan). */
+async function handleUploadsPut(request, env) {
+  if (request.method !== "PUT") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+  const url = new URL(request.url);
+  const patientClerk = String(url.searchParams.get("patient") || "").trim();
+  const key = String(url.searchParams.get("key") || "");
+  if (!patientClerk || !key) return jsonError(400, "patient_and_key_required");
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+          AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (pr.length === 0) return jsonError(404, "patient_not_found");
+    const patientId = pr[0].id;
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return jsonError(access.status, access.reason);
+    if (!key.startsWith(`uploads/${patientId}/`)) return jsonError(403, "key_outside_patient_namespace");
+    const ct = request.headers.get("content-type") || "";
+    await env.R2_BUCKET.put(key, request.body, ct ? { httpMetadata: { contentType: ct } } : undefined);
+    return new Response(JSON.stringify({ ok: true }), { headers: JSON_HEADERS });
+  } catch (e) {
+    return jsonError(500, `Upload failed: ${e.message}`);
   }
 }
 
@@ -1983,8 +2027,15 @@ async function handleAdmin(request, env) {
   // folders is infeasible). The UI also builds a copy-paste rclone/wrangler command.
   const dlMatch = path.match(/^\/api\/admin\/uploads\/([0-9a-f-]{36})\/download$/i);
   if (dlMatch && request.method === "GET") {
-    const client = r2S3Client(env);
-    if (!client) return jsonError(500, "r2_s3_not_configured");
+    const client = r2S3Client(env);                       // s3 path if the token is set
+    if (!client && !env.R2_BUCKET) return jsonError(500, "r2_not_configured");
+    // proxy download URL streams the object back through the Worker (binding).
+    // viewer= is in the URL so a plain window.open / <a> click still authenticates
+    // (getAdminViewer accepts ?viewer=); no header needed for the GET.
+    const proxyUrl = (key) =>
+      `/api/admin/uploads/object?key=${encodeURIComponent(key)}&viewer=${encodeURIComponent(admin.clerk_user_id)}`;
+    const urlFor = async (key, downloadName) =>
+      client ? await presignGet(client, env, key, downloadName) : proxyUrl(key);
     try {
       await ensureUploadsTables(sql);
       const uploadId = dlMatch[1];
@@ -1995,7 +2046,7 @@ async function handleAdmin(request, env) {
                              FROM upload_objects WHERE upload_id = ${uploadId} ORDER BY relative_path`;
       if (up.kind === "file" && objs.length <= 1) {
         const obj = objs[0] || { r2_key: up.r2_prefix, relative_path: up.original_name };
-        const url = await presignGet(client, env, obj.r2_key, up.original_name);
+        const url = await urlFor(obj.r2_key, up.original_name);
         return new Response(JSON.stringify({ kind: "file", doc_ref: up.doc_ref, url }), {
           headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
         });
@@ -2005,16 +2056,33 @@ async function handleAdmin(request, env) {
         files.push({
           relative_path: o.relative_path,
           bytes: o.bytes,
-          url: await presignGet(client, env, o.r2_key, o.relative_path.split("/").pop()),
+          url: await urlFor(o.r2_key, o.relative_path.split("/").pop()),
         });
       }
       return new Response(JSON.stringify({
         kind: "folder", doc_ref: up.doc_ref, r2_prefix: up.r2_prefix,
-        bucket: env.R2_BUCKET_NAME, files,
+        bucket: env.R2_BUCKET_NAME || "jc-health-uploads", files,
       }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
     } catch (e) {
-      return jsonError(500, `Download presign failed: ${e.message}`);
+      return jsonError(500, `Download failed: ${e.message}`);
     }
+  }
+
+  // GET /api/admin/uploads/object?key=<r2-key>&viewer=<adminClerk> — stream one
+  // R2 object back to the admin via the binding (proxy-mode download; no S3 token).
+  if (path === "/api/admin/uploads/object" && request.method === "GET") {
+    if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+    const key = String(url.searchParams.get("key") || "");
+    if (!key.startsWith("uploads/")) return jsonError(400, "bad_key");
+    const obj = await env.R2_BUCKET.get(key);
+    if (!obj) return jsonError(404, "object_not_found");
+    const filename = (key.split("/").pop() || "download").replace(/["\\\r\n]/g, "_");
+    const headers = new Headers();
+    headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+    headers.set("Cache-Control", "no-store");
+    if (obj.httpMetadata && obj.httpMetadata.contentType) headers.set("Content-Type", obj.httpMetadata.contentType);
+    else headers.set("Content-Type", "application/octet-stream");
+    return new Response(obj.body, { headers });
   }
 
   return jsonError(404, "unknown_admin_route");
@@ -2052,6 +2120,9 @@ export default {
     }
     if (url.pathname === "/api/uploads/presign") {
       return handleUploadsPresign(request, env);
+    }
+    if (url.pathname === "/api/uploads/put") {
+      return handleUploadsPut(request, env);
     }
     if (url.pathname === "/api/uploads/complete") {
       return handleUploadsComplete(request, env);

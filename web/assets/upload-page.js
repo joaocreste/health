@@ -164,11 +164,12 @@
   function clearToast() { toastEl.className = 'up-toast'; toastEl.innerHTML = ''; }
 
   /* ── direct-to-R2 PUT with progress ── */
-  function putFile(url, file, onProgress) {
+  function putFile(url, file, onProgress, extraHeaders) {
     return new Promise(function (resolve) {
       var xhr = new XMLHttpRequest();
       xhr.open('PUT', url, true);
       if (file.type) xhr.setRequestHeader('Content-Type', file.type); // not signed — see worker presignPut
+      if (extraHeaders) Object.keys(extraHeaders).forEach(function (k) { xhr.setRequestHeader(k, extraHeaders[k]); });
       if (xhr.upload) xhr.upload.onprogress = function (e) { if (e.lengthComputable) onProgress(e.loaded); };
       xhr.onload = function () { resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status }); };
       xhr.onerror = function () { resolve({ ok: false, status: 0 }); };
@@ -177,7 +178,10 @@
   }
 
   // Upload an item's files with bounded concurrency, aggregating loaded bytes.
-  function uploadItemFiles(item, signedFiles) {
+  // In "proxy" transport the PUT goes to our own Worker, which authenticates via
+  // the X-Viewer-Clerk header; in "s3" the presigned URL carries its own auth.
+  function uploadItemFiles(item, signedFiles, mode) {
+    var extraHeaders = (mode === 'proxy') ? { 'X-Viewer-Clerk': viewerClerk() } : null;
     var byPath = {};
     signedFiles.forEach(function (sf) { byPath[sf.relative_path] = sf; });
     var perLoaded = {};
@@ -196,7 +200,7 @@
               perLoaded[job.idx] = loaded;
               item.loaded = Object.keys(perLoaded).reduce(function (a, k) { return a + perLoaded[k]; }, 0);
               renderStaged();
-            }).then(function (res) {
+            }, extraHeaders).then(function (res) {
               perLoaded[job.idx] = job.f.file.size || 0;
               item.loaded = Object.keys(perLoaded).reduce(function (a, k) { return a + perLoaded[k]; }, 0);
               results[job.idx] = {
@@ -241,10 +245,12 @@
     try {
       presign = await api('/api/uploads/presign', { method: 'POST', body: JSON.stringify({ patient: pc, items: manifest }) });
     } catch (e) {
-      var msg = /r2_s3_not_configured/.test(e.message) ? 'Uploads are not configured on the server yet. Please contact support.' : ('Could not start upload: ' + e.message);
-      var msgPt = /r2_s3_not_configured/.test(e.message) ? 'Os envios ainda não estão configurados no servidor. Contate o suporte.' : ('Não foi possível iniciar o envio: ' + e.message);
+      var notConf = /r2_(s3_)?not_configured/.test(e.message);
+      var msg = notConf ? 'Uploads are not configured on the server yet. Please contact support.' : ('Could not start upload: ' + e.message);
+      var msgPt = notConf ? 'Os envios ainda não estão configurados no servidor. Contate o suporte.' : ('Não foi possível iniciar o envio: ' + e.message);
       showToast('err', msg, msgPt); renderStaged(); return;
     }
+    var mode = presign.mode || 's3';
     var presignByGroup = {};
     (presign.items || []).forEach(function (p) { presignByGroup[p.group_id] = p; });
 
@@ -255,7 +261,7 @@
       var p = presignByGroup[it.id];
       if (!p) { it.status = 'failed'; it.error = lang() === 'pt' ? 'sem URL' : 'no URL'; renderStaged(); continue; }
       it.status = 'uploading'; it.loaded = 0; renderStaged();
-      var fileResults = await uploadItemFiles(it, p.files);
+      var fileResults = await uploadItemFiles(it, p.files, mode);
       var okResults = fileResults.filter(function (r) { return r && r.ok; });
       it.status = okResults.length === it.files.length ? 'done' : (okResults.length > 0 ? 'done' : 'failed');
       if (it.status === 'failed') it.error = lang() === 'pt' ? 'envio falhou' : 'upload failed';
