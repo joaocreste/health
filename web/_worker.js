@@ -2021,6 +2021,41 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/uploads/delete — { upload_id }
+  // Hard-deletes one upload everywhere: its R2 objects (via the binding), the
+  // uploads row (cascades upload_objects), and so it also disappears from the
+  // patient's upload table (GET /api/uploads no longer returns it).
+  if (path === "/api/admin/uploads/delete" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const uploadId = String(body?.upload_id || "").trim();
+    if (!uploadId) return jsonError(400, "upload_id_required");
+    try {
+      await ensureUploadsTables(sql);
+      const upRows = await sql`SELECT id, doc_ref, patient_id FROM uploads WHERE id = ${uploadId} LIMIT 1`;
+      if (upRows.length === 0) return jsonError(404, "upload_not_found");
+      const up = upRows[0];
+      const objs = await sql`SELECT r2_key FROM upload_objects WHERE upload_id = ${uploadId}`;
+      let r2Errors = 0;
+      if (env.R2_BUCKET && objs.length) {
+        const keys = objs.map((o) => o.r2_key).filter(Boolean);
+        for (let i = 0; i < keys.length; i += 1000) {
+          try { await env.R2_BUCKET.delete(keys.slice(i, i + 1000)); } catch { r2Errors++; }
+        }
+      }
+      await sql`DELETE FROM uploads WHERE id = ${uploadId}`; // cascades upload_objects
+      await sql`
+        INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
+        VALUES (${admin.id}, 'upload_deleted', 'uploads', ${uploadId}, ${up.patient_id},
+                ${JSON.stringify({ doc_ref: up.doc_ref, objects: objs.length, r2_errors: r2Errors })}::jsonb)`;
+      return new Response(JSON.stringify({
+        ok: true, deleted: { id: uploadId, doc_ref: up.doc_ref, r2_objects: objs.length, r2_delete_errors: r2Errors },
+      }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    } catch (e) {
+      return jsonError(500, `Delete failed: ${e.message}`);
+    }
+  }
+
   // GET /api/admin/uploads/:id/download — presigned GET URL(s).
   // Single file -> one URL. Folder -> per-file manifest + the R2 prefix (the
   // admin bulk-downloads the prefix on the terminal; in-Worker zipping of multi-GB

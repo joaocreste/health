@@ -91,6 +91,9 @@
           '<div class="ur-manifest" data-manifest-for="' + esc(u.id) + '"></div>' +
         '</td>' +
         '<td>' + sel + noteBox + '</td>' +
+        '<td><button type="button" class="ur-del" data-del="' + esc(u.id) + '" data-name="' + esc(u.original_name) + '" data-ref="' + esc(u.doc_ref) + '">' +
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+          '<span class="lang-en">Delete</span><span class="lang-pt">Excluir</span></button></td>' +
       '</tr>';
     }).join('');
 
@@ -107,6 +110,30 @@
     tbody.querySelectorAll('[data-dl]').forEach(function (b) {
       b.addEventListener('click', function () { onDownload(b.getAttribute('data-dl'), b.getAttribute('data-kind')); });
     });
+    tbody.querySelectorAll('[data-del]').forEach(function (b) {
+      b.addEventListener('click', function () { onDelete(b); });
+    });
+  }
+
+  function onDelete(btn) {
+    var id = btn.getAttribute('data-del');
+    var name = btn.getAttribute('data-name') || '';
+    var ref = btn.getAttribute('data-ref') || '';
+    var msg = lang() === 'pt'
+      ? 'Excluir definitivamente este envio?\n\n' + name + ' (' + ref + ')\n\nIsto remove os arquivos do armazenamento e da conta do paciente. Não pode ser desfeito.'
+      : 'Permanently delete this upload?\n\n' + name + ' (' + ref + ')\n\nThis removes the files from storage and from the patient’s account. This cannot be undone.';
+    if (!window.confirm(msg)) return;
+    btn.disabled = true;
+    api('/api/admin/uploads/delete', { method: 'POST', body: JSON.stringify({ upload_id: id }) })
+      .then(function () {
+        var row = document.querySelector('tr[data-row="' + id + '"]');
+        if (row) row.remove();
+        if (!document.querySelectorAll('#ur-tbody tr').length) load(); // show empty state
+      })
+      .catch(function (e) {
+        btn.disabled = false;
+        alert((lang() === 'pt' ? 'Falha ao excluir: ' : 'Delete failed: ') + e.message);
+      });
   }
 
   function onStatusChange(sel) {
@@ -163,7 +190,7 @@
       .then(function (data) { render(data.uploads || []); })
       .catch(function (e) {
         var tbody = document.getElementById('ur-tbody');
-        tbody.innerHTML = '<tr><td colspan="4" style="color:#8a2b2b;">' + esc(e.message) + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#8a2b2b;">' + esc(e.message) + '</td></tr>';
       });
   }
 

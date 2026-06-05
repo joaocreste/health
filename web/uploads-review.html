@@ -43,6 +43,9 @@
   .ur-cmd { width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 8px; border: 1px solid #d4dbe1; border-radius: 6px; background: #fff; }
   .ur-cmd-copy { margin-top: 6px; padding: 4px 10px; font-size: 12px; border: 1px solid #d4dbe1; border-radius: 6px; background: #fff; cursor: pointer; }
   .ur-empty { color: #7A8FA6; font-size: 14px; padding: 20px 0; }
+  .ur-del { display: inline-flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #E5B5AB; color: #7A2E22; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .ur-del:hover { background: #7A2E22; color: #fff; border-color: #7A2E22; }
+  .ur-del:disabled { opacity: .5; cursor: not-allowed; }
   .lang-btn { background: none; border: none; cursor: pointer; padding: 2px; opacity: .5; }
   .lang-btn[aria-pressed="true"] { opacity: 1; }
   .lang-btn svg { width: 22px; height: 15px; border-radius: 2px; display: block; }
@@ -78,6 +81,7 @@
         <th><span class="lang-en">Patient name</span><span class="lang-pt">Nome do paciente</span></th>
         <th><span class="lang-en">Document / Folder</span><span class="lang-pt">Documento / Pasta</span></th>
         <th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th>
+        <th></th>
       </tr></thead>
       <tbody id="ur-tbody"></tbody>
     </table>
@@ -88,6 +92,6 @@
 </main>
 
 <script src="assets/app.js?v=28"></script>
-<script src="assets/uploads-review.js?v=1"></script>
+<script src="assets/uploads-review.js?v=2"></script>
 </body>
 </html>
