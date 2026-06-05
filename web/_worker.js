@@ -53,6 +53,29 @@ async function notifySlack(env, text) {
   } catch (e) { /* notifications are best-effort */ }
 }
 
+// Send a transactional email via Resend (https://resend.com). No-op (never
+// throws) when RESEND_API_KEY isn't set. `from` must be on a domain verified in
+// Resend (lumenhealth.io); `to` is the Client Services inbox. Both overridable
+// via env so nothing here is hardcoded beyond sane defaults.
+async function notifyEmail(env, subject, text) {
+  if (!env.RESEND_API_KEY) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: env.NOTIFY_EMAIL_FROM || "Lumen Health <notifications@lumenhealth.io>",
+        to: (env.NOTIFY_EMAIL_TO || "clientservices@lumenhealth.io").split(",").map((s) => s.trim()),
+        subject,
+        text,
+      }),
+    });
+  } catch (e) { /* notifications are best-effort */ }
+}
+
 async function handleChat(request, env) {
   // Chatbot deactivated across the webapp (UI widget removed from every page and
   // this endpoint disabled). Kept intact below for easy re-enable: delete this
@@ -1154,10 +1177,15 @@ async function handleUploadsComplete(request, env) {
     }
     if (stmts.length) await runChunked(sql, stmts, 500); // 500 statements/transaction = 1 subrequest each
 
-    // Notify #client-services that a patient uploaded data (best-effort).
+    // Notify Client Services that a patient uploaded data (best-effort: Slack + email).
     if (created.length) {
       const who = pr[0].full_name || patientClerk;
+      const refs = created.map((c) => c.doc_ref).join(", ");
       await notifySlack(env, `:inbox_tray: Patient *${who}* just uploaded new data`);
+      await notifyEmail(env, `New upload — ${who}`,
+        `Patient ${who} just uploaded new data to Lumen Health.\n\n` +
+        `${created.length} item(s): ${refs}\n\n` +
+        `Review queue: https://lumenhealth.io/uploads-review.html`);
     }
     return new Response(JSON.stringify({ ok: true, created }), { headers: JSON_HEADERS });
   } catch (e) {
