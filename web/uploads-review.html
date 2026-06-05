@@ -46,6 +46,18 @@
   .ur-del { display: inline-flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #E5B5AB; color: #7A2E22; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; white-space: nowrap; }
   .ur-del:hover { background: #7A2E22; color: #fff; border-color: #7A2E22; }
   .ur-del:disabled { opacity: .5; cursor: not-allowed; }
+  .ur-bulkbar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 14px; background: #0D1B2A; color: #fff; border-radius: 8px; font-size: 13px; flex-wrap: wrap; }
+  .ur-bulkbar.disabled { opacity: .5; pointer-events: none; }
+  .ur-bulk-count { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #F4B942; min-width: 78px; }
+  .ur-bulk-label { color: #cdd9e3; }
+  #ur-bulk-status { padding: 5px 8px; border-radius: 6px; border: 1px solid #44535f; background: #fff; color: #0D1B2A; font-size: 13px; cursor: pointer; }
+  .ur-bulk-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid #B8954A; background: #B8954A; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; }
+  .ur-bulk-btn:hover { background: #A07F3D; }
+  .ur-bulk-btn:disabled { opacity: .45; cursor: not-allowed; }
+  .ur-bulk-sep { flex: 1; }
+  .ur-bulk-del { padding: 6px 14px; border-radius: 6px; border: 1px solid #E5B5AB; background: #7A2E22; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; }
+  .ur-bulk-del:hover { background: #8f3528; }
+  .ur-check { width: 16px; height: 16px; cursor: pointer; vertical-align: middle; }
   .lang-btn { background: none; border: none; cursor: pointer; padding: 2px; opacity: .5; }
   .lang-btn[aria-pressed="true"] { opacity: 1; }
   .lang-btn svg { width: 22px; height: 15px; border-radius: 2px; display: block; }
@@ -75,8 +87,17 @@
   </p>
 
   <section class="admin-section">
+    <div class="ur-bulkbar disabled" id="ur-bulkbar">
+      <span class="ur-bulk-count" id="ur-bulk-count"></span>
+      <span class="ur-bulk-label"><span class="lang-en">Action: change status to</span><span class="lang-pt">Ação: alterar status para</span></span>
+      <select id="ur-bulk-status"><option value="">—</option></select>
+      <button type="button" id="ur-bulk-apply" class="ur-bulk-btn"><span class="lang-en">Apply</span><span class="lang-pt">Aplicar</span></button>
+      <span class="ur-bulk-sep"></span>
+      <button type="button" id="ur-bulk-delete" class="ur-bulk-del"><span class="lang-en">Delete selected</span><span class="lang-pt">Excluir selecionados</span></button>
+    </div>
     <table class="data-table" id="ur-table">
       <thead><tr>
+        <th style="width:30px"><input type="checkbox" id="ur-check-all" class="ur-check" aria-label="Select all"></th>
         <th><span class="lang-en">Patient ID</span><span class="lang-pt">ID do paciente</span></th>
         <th><span class="lang-en">Patient name</span><span class="lang-pt">Nome do paciente</span></th>
         <th><span class="lang-en">Document / Folder</span><span class="lang-pt">Documento / Pasta</span></th>
@@ -92,6 +113,6 @@
 </main>
 
 <script src="assets/app.js?v=28"></script>
-<script src="assets/uploads-review.js?v=2"></script>
+<script src="assets/uploads-review.js?v=3"></script>
 </body>
 </html>

@@ -80,6 +80,7 @@
           '<span class="lang-en">Save note</span><span class="lang-pt">Salvar motivo</span></button>' +
         '</div>';
       return '<tr data-row="' + esc(u.id) + '">' +
+        '<td><input type="checkbox" class="ur-check ur-row-check" data-check="' + esc(u.id) + '" aria-label="Select"></td>' +
         '<td class="ur-docref">' + esc(u.patient_clerk) + '</td>' +
         '<td>' + esc(u.patient_name || '') + '</td>' +
         '<td>' +
@@ -113,6 +114,64 @@
     tbody.querySelectorAll('[data-del]').forEach(function (b) {
       b.addEventListener('click', function () { onDelete(b); });
     });
+    tbody.querySelectorAll('.ur-row-check').forEach(function (cb) {
+      cb.addEventListener('change', updateBulkState);
+    });
+    var all = document.getElementById('ur-check-all');
+    if (all) all.checked = false;
+    updateBulkState();
+  }
+
+  /* ── bulk selection + actions ── */
+  function selectedIds() {
+    return Array.prototype.slice.call(document.querySelectorAll('.ur-row-check:checked'))
+      .map(function (cb) { return cb.getAttribute('data-check'); });
+  }
+  function updateBulkState() {
+    var ids = selectedIds();
+    var n = ids.length;
+    var bar = document.getElementById('ur-bulkbar');
+    var count = document.getElementById('ur-bulk-count');
+    var applyBtn = document.getElementById('ur-bulk-apply');
+    var delBtn = document.getElementById('ur-bulk-delete');
+    var statusSel = document.getElementById('ur-bulk-status');
+    if (count) count.textContent = n + (lang() === 'pt' ? (n === 1 ? ' selecionado' : ' selecionados') : ' selected');
+    if (bar) { if (n === 0) bar.classList.add('disabled'); else bar.classList.remove('disabled'); }
+    if (applyBtn) applyBtn.disabled = (n === 0 || !statusSel || !statusSel.value);
+    if (delBtn) delBtn.disabled = (n === 0);
+  }
+
+  async function bulkApply() {
+    var ids = selectedIds();
+    var status = (document.getElementById('ur-bulk-status') || {}).value;
+    if (!ids.length || !status) return;
+    var applyBtn = document.getElementById('ur-bulk-apply');
+    applyBtn.disabled = true;
+    var errors = 0;
+    for (var i = 0; i < ids.length; i++) {
+      try { await api('/api/admin/uploads/status', { method: 'POST', body: JSON.stringify({ upload_id: ids[i], status: status }) }); }
+      catch (e) { errors++; }
+    }
+    if (errors) alert((lang() === 'pt' ? 'Alguns não puderam ser atualizados: ' : 'Some could not be updated: ') + errors);
+    load();
+  }
+
+  async function bulkDelete() {
+    var ids = selectedIds();
+    if (!ids.length) return;
+    var msg = lang() === 'pt'
+      ? ('Excluir definitivamente ' + ids.length + ' envio(s)?\n\nIsto remove os arquivos do armazenamento e das contas dos pacientes. Não pode ser desfeito.')
+      : ('Permanently delete ' + ids.length + ' upload(s)?\n\nThis removes the files from storage and from the patients’ accounts. This cannot be undone.');
+    if (!window.confirm(msg)) return;
+    var delBtn = document.getElementById('ur-bulk-delete');
+    delBtn.disabled = true;
+    var errors = 0;
+    for (var i = 0; i < ids.length; i++) {
+      try { await api('/api/admin/uploads/delete', { method: 'POST', body: JSON.stringify({ upload_id: ids[i] }) }); }
+      catch (e) { errors++; }
+    }
+    if (errors) alert((lang() === 'pt' ? 'Alguns não puderam ser excluídos: ' : 'Some could not be deleted: ') + errors);
+    load();
   }
 
   function onDelete(btn) {
@@ -190,13 +249,33 @@
       .then(function (data) { render(data.uploads || []); })
       .catch(function (e) {
         var tbody = document.getElementById('ur-tbody');
-        tbody.innerHTML = '<tr><td colspan="5" style="color:#8a2b2b;">' + esc(e.message) + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="color:#8a2b2b;">' + esc(e.message) + '</td></tr>';
       });
   }
 
   function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
   ready(function () {
     document.getElementById('admin-viewer').textContent = viewerName || viewerClerk;
+    // Populate the bulk "change status to" dropdown (keep the leading "—").
+    var bs = document.getElementById('ur-bulk-status');
+    if (bs) {
+      STATUS_OPTS.forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o.v; opt.textContent = (lang() === 'pt' ? o.pt : o.en);
+        bs.appendChild(opt);
+      });
+      bs.addEventListener('change', updateBulkState);
+    }
+    var all = document.getElementById('ur-check-all');
+    if (all) all.addEventListener('change', function () {
+      var checked = this.checked;
+      document.querySelectorAll('.ur-row-check').forEach(function (cb) { cb.checked = checked; });
+      updateBulkState();
+    });
+    var applyBtn = document.getElementById('ur-bulk-apply');
+    if (applyBtn) applyBtn.addEventListener('click', bulkApply);
+    var delBtn = document.getElementById('ur-bulk-delete');
+    if (delBtn) delBtn.addEventListener('click', bulkDelete);
     load();
   });
 })();
