@@ -38,6 +38,21 @@ function jsonError(status, message) {
   });
 }
 
+// Fire a simple Slack message via an Incoming Webhook. No-op (and never throws)
+// when SLACK_WEBHOOK_URL isn't set, so it can ship before the webhook exists and
+// a Slack outage can never break an upload. The webhook is bound to its channel
+// at creation time (#client-services), so no channel needs to be specified here.
+async function notifySlack(env, text) {
+  if (!env.SLACK_WEBHOOK_URL) return;
+  try {
+    await fetch(env.SLACK_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+  } catch (e) { /* notifications are best-effort */ }
+}
+
 async function handleChat(request, env) {
   // Chatbot deactivated across the webapp (UI widget removed from every page and
   // this endpoint disabled). Kept intact below for easy re-enable: delete this
@@ -1086,7 +1101,7 @@ async function handleUploadsComplete(request, env) {
   try {
     const sql = neon(env.DATABASE_URL);
     await ensureUploadsTables(sql);
-    const pr = await sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk}
+    const pr = await sql`SELECT id, full_name FROM users WHERE clerk_user_id = ${patientClerk}
           AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
     if (pr.length === 0) return jsonError(404, "patient_not_found");
     const patientId = pr[0].id;
@@ -1138,6 +1153,12 @@ async function handleUploadsComplete(request, env) {
       });
     }
     if (stmts.length) await runChunked(sql, stmts, 500); // 500 statements/transaction = 1 subrequest each
+
+    // Notify #client-services that a patient uploaded data (best-effort).
+    if (created.length) {
+      const who = pr[0].full_name || patientClerk;
+      await notifySlack(env, `:inbox_tray: Patient *${who}* just uploaded new data`);
+    }
     return new Response(JSON.stringify({ ok: true, created }), { headers: JSON_HEADERS });
   } catch (e) {
     return jsonError(500, `Complete failed: ${e.message}`);
