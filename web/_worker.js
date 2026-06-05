@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { AwsClient } from "aws4fetch";
+import { makeZip } from "client-zip";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
@@ -1094,6 +1095,13 @@ async function handleUploadsComplete(request, env) {
 
     const keyPrefix = `uploads/${patientId}/`;
     const created = [];
+    // Collect EVERY write (uploads + upload_objects + audit) into one statement
+    // list and run it in chunked transactions — each chunk is a single Neon
+    // round-trip (one Worker subrequest). A per-file INSERT here used to blow the
+    // 50-subrequest cap on folder uploads. IDs are pre-generated so the inserts
+    // need no RETURNING round-trips; doc_ref collisions are astronomically
+    // unlikely (a clash just fails the tx and the client can retry complete).
+    const stmts = [];
     for (const item of items) {
       const kind = item?.kind === "folder" ? "folder" : "file";
       const name = String(item?.original_name || item?.name || "").trim().slice(0, 300) || "upload";
@@ -1106,39 +1114,30 @@ async function handleUploadsComplete(request, env) {
       }
       const totalBytes = okFiles.reduce((a, f) => a + (Number(f.bytes) || 0), 0);
       const contentType = kind === "file" ? (okFiles[0].content_type || null) : null;
+      const uploadId = crypto.randomUUID();
+      const docRef = genDocRef();
 
-      // Insert the uploads row with a fresh, unique doc_ref (retry on the rare
-      // UNIQUE collision). uploads.id is server-generated; r2_prefix is the
-      // validated path the client actually PUT to.
-      let row = null;
-      for (let attempt = 0; attempt < 6 && !row; attempt++) {
-        const docRef = genDocRef();
-        try {
-          const ins = await sql`
-            INSERT INTO uploads (doc_ref, patient_id, uploader_user_id, original_name, kind,
-                                 r2_prefix, file_count, total_bytes, content_type, status)
-            VALUES (${docRef}, ${patientId}, ${access.viewerId}, ${name}, ${kind},
-                    ${r2Prefix}, ${okFiles.length}, ${totalBytes}, ${contentType}, 'pending_review')
-            RETURNING id, doc_ref, original_name, kind, file_count, total_bytes, status, created_at`;
-          row = ins[0];
-        } catch (e) {
-          if (!/unique|duplicate/i.test(e.message || "")) throw e;
-        }
+      stmts.push(sql`
+        INSERT INTO uploads (id, doc_ref, patient_id, uploader_user_id, original_name, kind,
+                             r2_prefix, file_count, total_bytes, content_type, status)
+        VALUES (${uploadId}, ${docRef}, ${patientId}, ${access.viewerId}, ${name}, ${kind},
+                ${r2Prefix}, ${okFiles.length}, ${totalBytes}, ${contentType}, 'pending_review')`);
+      for (const f of okFiles) {
+        stmts.push(sql`
+          INSERT INTO upload_objects (upload_id, r2_key, relative_path, bytes, content_type)
+          VALUES (${uploadId}, ${f.r2_key}, ${sanitizeRelPath(f.relative_path || name) || name},
+                  ${Number(f.bytes) || null}, ${f.content_type || null})`);
       }
-      if (!row) return jsonError(500, "doc_ref_generation_failed");
-
-      const objQueries = okFiles.map((f) => sql`
-        INSERT INTO upload_objects (upload_id, r2_key, relative_path, bytes, content_type)
-        VALUES (${row.id}, ${f.r2_key}, ${sanitizeRelPath(f.relative_path || name) || name},
-                ${Number(f.bytes) || null}, ${f.content_type || null})`);
-      await runChunked(sql, objQueries);
-
-      await sql`
+      stmts.push(sql`
         INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
-        VALUES (${access.viewerId}, 'upload_created', 'uploads', ${row.id}, ${patientId},
-                ${JSON.stringify({ doc_ref: row.doc_ref, kind, file_count: okFiles.length, total_bytes: totalBytes })}::jsonb)`;
-      created.push(row);
+        VALUES (${access.viewerId}, 'upload_created', 'uploads', ${uploadId}, ${patientId},
+                ${JSON.stringify({ doc_ref: docRef, kind, file_count: okFiles.length, total_bytes: totalBytes })}::jsonb)`);
+      created.push({
+        id: uploadId, doc_ref: docRef, original_name: name, kind,
+        file_count: okFiles.length, total_bytes: totalBytes, status: "pending_review",
+      });
     }
+    if (stmts.length) await runChunked(sql, stmts, 500); // 500 statements/transaction = 1 subrequest each
     return new Response(JSON.stringify({ ok: true, created }), { headers: JSON_HEADERS });
   } catch (e) {
     return jsonError(500, `Complete failed: ${e.message}`);
@@ -2053,6 +2052,48 @@ async function handleAdmin(request, env) {
       }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
     } catch (e) {
       return jsonError(500, `Delete failed: ${e.message}`);
+    }
+  }
+
+  // GET /api/admin/uploads/:id/download.zip — stream the whole upload as a single
+  // ZIP, built on the fly via the R2 binding (client-zip, STORE/streamed so memory
+  // stays low). One click downloads a folder at once. viewer= in the URL lets a
+  // plain window.open authenticate (getAdminViewer accepts ?viewer=).
+  const zipMatch = path.match(/^\/api\/admin\/uploads\/([0-9a-f-]{36})\/download\.zip$/i);
+  if (zipMatch && request.method === "GET") {
+    if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+    try {
+      await ensureUploadsTables(sql);
+      const uploadId = zipMatch[1];
+      const upRows = await sql`SELECT id, doc_ref, original_name FROM uploads WHERE id = ${uploadId} LIMIT 1`;
+      if (upRows.length === 0) return jsonError(404, "upload_not_found");
+      const up = upRows[0];
+      const objs = await sql`SELECT r2_key, relative_path, bytes FROM upload_objects WHERE upload_id = ${uploadId} ORDER BY relative_path`;
+      if (objs.length === 0) return jsonError(404, "no_objects");
+      const bucket = env.R2_BUCKET;
+      const base = String(up.original_name || up.doc_ref || "folder").replace(/[\/\\]+/g, "_");
+      async function* entries() {
+        for (const o of objs) {
+          const obj = await bucket.get(o.r2_key);
+          if (!obj) continue;
+          yield {
+            name: o.relative_path || (o.r2_key.split("/").pop() || "file"),
+            input: obj.body,
+            size: typeof obj.size === "number" ? obj.size : (o.bytes || undefined),
+            lastModified: obj.uploaded || undefined,
+          };
+        }
+      }
+      const zipName = `${base}.zip`.replace(/["\\\r\n]/g, "_");
+      return new Response(makeZip(entries()), {
+        headers: {
+          "Content-Type": "application/zip",
+          "Content-Disposition": `attachment; filename="${zipName}"`,
+          "Cache-Control": "no-store",
+        },
+      });
+    } catch (e) {
+      return jsonError(500, `Zip failed: ${e.message}`);
     }
   }
 

@@ -16,6 +16,7 @@
     "@clerk/backend": "^1.21.4",
     "@neondatabase/serverless": "^0.10.4",
     "aws4fetch": "^1.0.20",
+    "client-zip": "^2.5.0",
     "drizzle-orm": "^0.36.4"
   },
   "devDependencies": {

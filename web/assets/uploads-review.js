@@ -215,6 +215,12 @@
   }
 
   function onDownload(id, kind) {
+    // Folders download as a single streamed ZIP (built server-side via the R2
+    // binding) — one click, the whole folder at once.
+    if (kind === 'folder') {
+      window.open('/api/admin/uploads/' + encodeURIComponent(id) + '/download.zip?viewer=' + encodeURIComponent(viewerClerk), '_blank');
+      return;
+    }
     api('/api/admin/uploads/' + encodeURIComponent(id) + '/download')
       .then(function (data) {
         if (data.kind === 'file' && data.url) { window.open(data.url, '_blank'); return; }
