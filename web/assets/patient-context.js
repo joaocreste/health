@@ -1564,6 +1564,34 @@
       return;
     }
 
+    // Generic DB patient, Physical landing: when the physical record is labs-only
+    // (no imaging/vitals/meds/etc.), land directly on the grouped exam panels
+    // instead of the 0-everywhere metric grid — so every blood panel is right
+    // there with no extra click into the Exams sub-tab. Mirrors the Paulo/Cristina
+    // short-circuit and the "bespoke over empty grid" rule. Falls back to the
+    // metric overview when the patient also has non-lab physical data to summarize.
+    if (section === 'physical') {
+      fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (summary) {
+          var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
+          var nonLab = (b.imaging_studies || 0) + (b.medications || 0) + (b.supplements || 0) +
+                       (b.encounters || 0) + (b.prescriptions || 0) + (b.vitals_days || 0) +
+                       (b.ecg_events || 0) + (b.pgx_findings || 0) + (b.surgeries || 0) +
+                       (b.injuries || 0) + (b.clinical_history || 0);
+          if ((b.lab_results || 0) > 0 && nonLab === 0) {
+            fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+              .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+              .then(function (e) { renderExams(e); decorateWithDashboard('physical'); decorateExamsWithAiOutliers(); })
+              .catch(function () { renderPhysical(summary); decorateWithDashboard('physical'); });
+          } else {
+            renderPhysical(summary); decorateWithDashboard('physical');
+          }
+        })
+        .catch(function () { renderEmptyShell(patient, null, t('Physical', 'Físico')); });
+      return;
+    }
+
     // Other section pages — show a small "not built yet" shell rather than the
     // home overview, so the user knows where they are.
     var labels = {
