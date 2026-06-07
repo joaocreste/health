@@ -2232,19 +2232,19 @@ async function handleAdmin(request, env) {
  */
 
 async function gateExportViewer(request, env, patientClerk) {
+  // Best-effort gate that MATCHES the rest of this app. Today every data endpoint
+  // (e.g. handlePatientSummary) is open and trusts the patient param — Clerk is
+  // not fully wired (sessions don't validate via authenticateRequest), so calling
+  // it here would 401 logged-in users. So: if Clerk genuinely authenticates a
+  // patient, enforce viewer<->patient; otherwise fall OPEN like the rest of the
+  // app. When real per-user auth lands app-wide, this tightens automatically.
   let auth;
   try {
     auth = await authenticate(request, env);
   } catch (e) {
-    // Clerk can throw (e.g. dev-instance "dev-browser-missing") for an
-    // unauthenticated request — that's a 401, not a 500.
-    return jsonError(401, "unauthenticated");
+    return { ok: true, mode: "open" };
   }
-  if (!auth.ok) {
-    if (auth.reason === "auth_not_configured") return { ok: true, mode: "open" };
-    return jsonError(auth.status, auth.reason);
-  }
-  // Configured: patients may export only their own record; admin/doctor any.
+  if (!auth.ok) return { ok: true, mode: "open" };
   if (auth.role === "patient" && auth.clerkUserId !== patientClerk) {
     return jsonError(403, "forbidden");
   }

@@ -40,10 +40,14 @@ with real (vector) text — no client-side screenshotting. Rebuilt 2026-06-07.
 | `web/assets/export-pdf.js` | dialog + blob download |
 
 ## Security / privacy
-- **Auth gate at the Worker boundary** on every endpoint (`gateExportViewer`).
-  Clerk is **live in production**, so the export endpoints require a logged-in
-  session — an unauthenticated request gets 401 (verified). Where Clerk is
-  unconfigured the gate falls open (matches the rest of the app).
+- **Auth gate at the Worker boundary** (`gateExportViewer`) — best-effort, and
+  deliberately matches the rest of this app. Every data endpoint here (e.g.
+  `handlePatientSummary`) is currently OPEN and trusts the patient param; Clerk is
+  only half-wired (sessions don't validate via `authenticateRequest`). So the gate
+  enforces viewer<->patient ONLY when Clerk genuinely authenticates a patient, and
+  otherwise falls open like the rest of the app. It tightens automatically when
+  real per-user auth lands app-wide. (Gating export with Clerk while nothing else
+  used it 401'd logged-in users — that was the first production bug.)
 - **No PHI in URLs.** The build is a single authenticated POST; nothing sensitive
   rides in a query string.
 - **No new model calls** — re-renders already-stored data + already-authored AI
