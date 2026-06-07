@@ -6,6 +6,8 @@ import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
 import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
 import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
+import { buildManifest, validateSections } from "../lib/export-manifest.js";
+import { buildReportPdf, reportFilename } from "../lib/export-render.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the Lumen Health portal assistant for the patient Joao Victor Creste.
 
@@ -2213,6 +2215,147 @@ async function handleAdmin(request, env) {
   return jsonError(404, "unknown_admin_route");
 }
 
+/* ───── PDF export ────────────────────────────────────────────────────────
+ *
+ * Architecture: data-driven manifest (GET /api/export-manifest) + a fully
+ * SERVER-SIDE report build (POST /api/export-pdf). The Worker uses Cloudflare
+ * Browser Rendering (lib/export-render.js) to open the patient's real pages in
+ * headless Chrome, strip all app chrome, lay them out on A4 with normal margins,
+ * and emit a true vector PDF (crisp text) merged behind the dark cover — then
+ * streams it as a download. No client-side capture, no PHI in any URL.
+ *
+ * Auth posture: Clerk is dormant in the current POC (authenticate() returns
+ * auth_not_configured) and the rest of _worker.js serves patient data trusting
+ * ?clerk=. gateExportViewer() mirrors that: open while auth is unconfigured, and
+ * the moment CLERK_SECRET_KEY is set it enforces viewer<->patient access with NO
+ * code change.
+ */
+
+async function gateExportViewer(request, env, patientClerk) {
+  const auth = await authenticate(request, env);
+  if (!auth.ok) {
+    if (auth.reason === "auth_not_configured") return { ok: true, mode: "open" };
+    return jsonError(auth.status, auth.reason);
+  }
+  // Configured: patients may export only their own record; admin/doctor any.
+  if (auth.role === "patient" && auth.clerkUserId !== patientClerk) {
+    return jsonError(403, "forbidden");
+  }
+  return { ok: true, mode: "auth", auth };
+}
+
+async function resolveExportPatient(sql, clerk) {
+  const rows = await sql`
+    SELECT u.id, u.clerk_user_id, u.full_name, u.locale,
+           pp.date_of_birth, pp.sex
+    FROM users u
+    LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+    WHERE u.clerk_user_id = ${clerk} AND u.role = 'patient' AND u.archived_at IS NULL
+    LIMIT 1`;
+  return rows[0] || null;
+}
+
+async function exportCounts(sql, pid) {
+  const r = (await sql`
+    SELECT
+      (SELECT count(*)::int FROM lab_results WHERE patient_id=${pid}) AS lab_results,
+      (SELECT count(*)::int FROM lab_results WHERE patient_id=${pid}
+         AND (lower(coalesce(panel,'')) LIKE '%urin%' OR lower(coalesce(marker,'')) LIKE '%urin%')) AS urinalysis,
+      (SELECT count(*)::int FROM imaging_studies WHERE patient_id=${pid}) AS imaging_studies,
+      (SELECT count(*)::int FROM documents WHERE patient_id=${pid}
+         AND (lower(coalesce(kind,'')) LIKE '%microbiota%' OR lower(coalesce(title,'')) LIKE '%microbiota%'
+              OR lower(coalesce(title,'')) LIKE '%gut%')) AS microbiota,
+      (SELECT count(DISTINCT day)::int FROM vitals_daily WHERE patient_id=${pid}) AS vitals_days,
+      (SELECT count(*)::int FROM ecg_events WHERE patient_id=${pid}) AS ecg_events,
+      (SELECT count(*)::int FROM glucose_points WHERE patient_id=${pid}) AS glucose_points,
+      (SELECT count(*)::int FROM documents WHERE patient_id=${pid}
+         AND (lower(coalesce(kind,'')) LIKE '%inbody%' OR lower(coalesce(title,'')) LIKE '%inbody%'
+              OR lower(coalesce(title,'')) LIKE '%body composition%')) AS body_composition,
+      (SELECT count(*)::int FROM pgx_findings WHERE patient_id=${pid}) AS pgx_findings,
+      (SELECT count(*)::int FROM mood_entries WHERE patient_id=${pid}) AS mood_entries,
+      (SELECT count(*)::int FROM panic_events WHERE patient_id=${pid}) AS panic_events,
+      (SELECT count(*)::int FROM life_events WHERE patient_id=${pid}) AS life_events,
+      (SELECT count(*)::int FROM clinical_history WHERE patient_id=${pid}) AS clinical_history,
+      (SELECT count(*)::int FROM psych_items WHERE patient_id=${pid}) AS psych_items,
+      (SELECT count(*)::int FROM writings WHERE patient_id=${pid}) AS writings,
+      (SELECT count(*)::int FROM documents WHERE patient_id=${pid}) AS documents,
+      (SELECT count(*)::int FROM wheel_of_life_assessments WHERE patient_id=${pid}) AS wheel_of_life,
+      (SELECT count(*)::int FROM risk_assessments WHERE patient_id=${pid}) AS risk_assessments
+  `)[0] || {};
+  return {
+    labResults: r.lab_results, urinalysis: r.urinalysis, imagingStudies: r.imaging_studies,
+    microbiota: r.microbiota, vitalsDays: r.vitals_days, ecgEvents: r.ecg_events,
+    glucosePoints: r.glucose_points, bodyComposition: r.body_composition, pgxFindings: r.pgx_findings,
+    moodEntries: r.mood_entries, panicEvents: r.panic_events, lifeEvents: r.life_events,
+    clinicalHistory: r.clinical_history, psychItems: r.psych_items, writings: r.writings,
+    documents: r.documents, wheelOfLife: r.wheel_of_life, riskAssessments: r.risk_assessments,
+    spiritual: r.wheel_of_life,
+  };
+}
+
+async function handleExportManifest(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const patient = url.searchParams.get("patient") || url.searchParams.get("clerk");
+  if (!patient) return jsonError(400, "patient_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const p = await resolveExportPatient(sql, patient);
+    if (!p) return jsonError(404, "patient_not_found");
+    const gate = await gateExportViewer(request, env, patient);
+    if (gate instanceof Response) return gate;
+    const counts = await exportCounts(sql, p.id);
+    return new Response(JSON.stringify(buildManifest(counts)), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    return jsonError(500, `manifest_failed: ${e.message}`);
+  }
+}
+
+async function handleExportPdf(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  if (!env.BROWSER) return jsonError(501, "browser_rendering_not_enabled");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "bad_json"); }
+  const patient = body.patientId || body.patient || body.clerk;
+  const language = body.language === "pt" ? "pt" : "en";
+  if (!patient) return jsonError(400, "patient_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const p = await resolveExportPatient(sql, patient);
+    if (!p) return jsonError(404, "patient_not_found");
+    const gate = await gateExportViewer(request, env, patient);
+    if (gate instanceof Response) return gate;
+    const counts = await exportCounts(sql, p.id);
+    const { ok, sections } = validateSections(body.sections, counts);
+    if (!ok) return jsonError(400, "no_valid_sections");
+
+    const pdf = await buildReportPdf(env, {
+      patientClerk: patient,
+      patientName: p.full_name,
+      sections,
+      language,
+      origin: new URL(request.url).origin,
+    });
+
+    // RFC 5987 filename* carries accented patient names; filename= is the ASCII
+    // fallback for older clients.
+    const filename = reportFilename(p.full_name, new Date());
+    const ascii = filename.replace(/[^\x20-\x7E]/g, "_");
+    return new Response(pdf, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (e) {
+    return jsonError(500, `export_failed: ${e.message}`);
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -2263,6 +2406,12 @@ export default {
     }
     if (url.pathname === "/api/ingest") {
       return handleIngest(request, env);
+    }
+    if (url.pathname === "/api/export-manifest") {
+      return handleExportManifest(request, env);
+    }
+    if (url.pathname === "/api/export-pdf") {
+      return handleExportPdf(request, env);
     }
     return env.ASSETS.fetch(request);
   },

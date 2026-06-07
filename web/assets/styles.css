@@ -1876,6 +1876,31 @@ body.add-data-open { overflow: hidden; }
   color: var(--text-muted, #6B7C8A);
   letter-spacing: 0.04em;
 }
+/* Determinate progress bar (export-pdf.js drives an honest percentage). */
+.export-progress-bar {
+  width: 100%;
+  max-width: 360px;
+  height: 6px;
+  background: #E6ECF1;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.export-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3E7CA3, #5B9CC8);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+/* Nested manifest tree rows + empty/loading state. */
+.export-cat-nested { border-bottom: 0; padding: 2px 0; }
+.export-empty {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted, #6B7C8A);
+  padding: 18px 4px;
+  text-align: center;
+}
 
 /* ── PDF STAGING (in-viewport container that html2pdf rasterises;
  *    sits beneath the modal which covers it via z-index:9999) ── */

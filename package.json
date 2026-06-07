@@ -17,9 +17,11 @@
     "@neondatabase/serverless": "^0.10.4",
     "aws4fetch": "^1.0.20",
     "client-zip": "^2.5.0",
-    "drizzle-orm": "^0.36.4"
+    "drizzle-orm": "^0.36.4",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
+    "@cloudflare/puppeteer": "^1.1.0",
     "drizzle-kit": "^0.30.1"
   }
 }

@@ -1,5 +1,9 @@
 /* Lumen Health — Export to PDF
  *
+ * DEPRECATED (2026-06-07): superseded by assets/export-pdf.js (manifest-driven,
+ * server-rendered cover via /print, no-truncation capture). No page loads this
+ * file anymore. Kept for reference; safe to delete once export-pdf.js is proven.
+ *
  * Wires up the topnav "Export" button. Opens a modal with a checkbox tree of
  * exportable categories; on Continue, loads each selected source page in a
  * hidden iframe, waits for charts/fonts to render, snapshots <canvas> elements

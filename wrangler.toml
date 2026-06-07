@@ -8,6 +8,17 @@ name = "lumenhealth"
 compatibility_date = "2026-04-28"
 pages_build_output_dir = "web"
 
+# nodejs_compat is required by @cloudflare/puppeteer (PDF export). Safe for the
+# rest of the worker (adds Node APIs, removes nothing).
+compatibility_flags = ["nodejs_compat"]
+
+# Browser Rendering (env.BROWSER) — headless Chrome for the server-side PDF export
+# (lib/export-render.js). Requires Browser Rendering enabled on the account
+# (included on Workers Paid). Like R2 above, declare it here so a deploy doesn't
+# wipe it. `npm i` must have @cloudflare/puppeteer installed before deploy.
+[browser]
+binding = "BROWSER"
+
 # Workers R2 binding (env.R2_BUCKET) — used by imaging, /api/ingest, data-wipe,
 # and the new upload portal's R2 cleanup. Distinct from the R2 *S3-API* token
 # secrets (R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_ACCOUNT_ID /
