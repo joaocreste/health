@@ -710,9 +710,44 @@
     });
   }
 
+  // Regroup the API's DB-grouped panels into the curated standard panels from
+  // window.LAB_TAXONOMY (lab-taxonomy.js): each marker gets a bilingual
+  // marker_html and is bucketed into its standard panel, panels render in the
+  // taxonomy's order, markers in their declared order. This is what makes a
+  // DB-driven patient's Exams page read like Patient Zero's curated one. If the
+  // taxonomy asset isn't loaded, returns the panels untouched (graceful
+  // fallback to the raw DB panel/marker names).
+  function regroupByTaxonomy(panels) {
+    var TAX = (typeof window !== 'undefined') && window.LAB_TAXONOMY;
+    if (!TAX || !TAX.MARKERS || !TAX.PANELS) return panels;
+    var order = {}; // marker key -> declaration index, for stable in-panel ordering
+    Object.keys(TAX.MARKERS).forEach(function (k, i) { order[k] = i; });
+    var byPanel = {};
+    panels.forEach(function (pn) {
+      (pn.markers || []).forEach(function (m) {
+        var meta = TAX.MARKERS[m.marker];
+        var pkey = meta ? meta.panel : 'other';
+        if (meta) m.marker_html = t(escapeHtml(meta.en), escapeHtml(meta.pt));
+        (byPanel[pkey] = byPanel[pkey] || []).push(m);
+      });
+    });
+    var out = [];
+    TAX.PANELS.forEach(function (pdef) {
+      var ms = byPanel[pdef.key];
+      if (!ms || !ms.length) return;
+      ms.sort(function (a, b) {
+        var ai = order[a.marker], bi = order[b.marker];
+        if (ai == null) ai = 9999; if (bi == null) bi = 9999;
+        return ai - bi;
+      });
+      out.push({ panel: pdef.en, panel_html: t(escapeHtml(pdef.en), escapeHtml(pdef.pt)), markers: ms });
+    });
+    return out;
+  }
+
   function renderExams(exams) {
     var p = exams.patient || {};
-    var panels = exams.panels || [];
+    var panels = regroupByTaxonomy(exams.panels || []);
     var docs = exams.lab_documents || [];
     var imaging = exams.imaging || [];
 
@@ -728,7 +763,7 @@
           return (
             '<details class="lab-panel" open>' +
               '<summary class="lab-panel-head">' +
-                '<span class="lab-panel-title">' + escapeHtml(pn.panel) + '</span>' +
+                '<span class="lab-panel-title">' + (pn.panel_html || escapeHtml(pn.panel)) + '</span>' +
                 '<span class="lab-panel-sub"></span>' +
                 '<span class="lab-panel-count">' + countHtml + '</span>' +
               '</summary>' +
@@ -841,13 +876,13 @@
         var unit = m.unit ? ' <small class="lab-cmp-unit">(' + escapeHtml(m.unit) + ')</small>' : '';
         return (
           '<tr>' +
-            '<th class="lab-cmp-marker">' + escapeHtml(m.marker) + unit + '</th>' +
+            '<th class="lab-cmp-marker">' + (m.marker_html || escapeHtml(m.marker)) + unit + '</th>' +
             cells +
           '</tr>'
         );
       }).join('');
       return (
-        '<tr class="lab-cmp-section"><th colspan="' + (samples.length + 1) + '">' + escapeHtml(pn.panel) + '</th></tr>' +
+        '<tr class="lab-cmp-section"><th colspan="' + (samples.length + 1) + '">' + (pn.panel_html || escapeHtml(pn.panel)) + '</th></tr>' +
         rows
       );
     }).join('');
