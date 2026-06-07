@@ -2232,7 +2232,14 @@ async function handleAdmin(request, env) {
  */
 
 async function gateExportViewer(request, env, patientClerk) {
-  const auth = await authenticate(request, env);
+  let auth;
+  try {
+    auth = await authenticate(request, env);
+  } catch (e) {
+    // Clerk can throw (e.g. dev-instance "dev-browser-missing") for an
+    // unauthenticated request — that's a 401, not a 500.
+    return jsonError(401, "unauthenticated");
+  }
   if (!auth.ok) {
     if (auth.reason === "auth_not_configured") return { ok: true, mode: "open" };
     return jsonError(auth.status, auth.reason);

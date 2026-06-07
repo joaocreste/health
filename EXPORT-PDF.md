@@ -41,9 +41,9 @@ with real (vector) text — no client-side screenshotting. Rebuilt 2026-06-07.
 
 ## Security / privacy
 - **Auth gate at the Worker boundary** on every endpoint (`gateExportViewer`).
-  Clerk is **dormant** in the current POC, so the gate is **open** today — it
-  enforces viewer<->patient access automatically the moment `CLERK_SECRET_KEY`
-  is set, with no code change.
+  Clerk is **live in production**, so the export endpoints require a logged-in
+  session — an unauthenticated request gets 401 (verified). Where Clerk is
+  unconfigured the gate falls open (matches the rest of the app).
 - **No PHI in URLs.** The build is a single authenticated POST; nothing sensitive
   rides in a query string.
 - **No new model calls** — re-renders already-stored data + already-authored AI
