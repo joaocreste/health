@@ -65,7 +65,16 @@
           '</div>' +
         '</footer>' +
         '<div class="export-modal-progress" hidden>' +
-          '<div class="export-spinner" aria-hidden="true"></div>' +
+          '<div class="export-donut-wrap">' +
+            '<svg class="export-donut" viewBox="0 0 100 100" width="104" height="104" aria-hidden="true">' +
+              '<circle cx="50" cy="50" r="42" fill="none" stroke="#E6ECF1" stroke-width="9"/>' +
+              '<circle class="export-donut-arc" cx="50" cy="50" r="42" fill="none" stroke="#3E7CA3" ' +
+                'stroke-width="9" stroke-linecap="round" stroke-dasharray="263.894" stroke-dashoffset="263.894" ' +
+                'transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .3s ease"/>' +
+              '<text class="export-donut-label" x="50" y="50" text-anchor="middle" dominant-baseline="central" ' +
+                'font-family="\'IBM Plex Mono\', monospace" font-size="19" fill="#1A2129">0%</text>' +
+            '</svg>' +
+          '</div>' +
           '<div class="export-progress-text"></div>' +
         '</div>' +
       '</div>';
@@ -166,14 +175,61 @@
     var err = root.querySelector('.export-modal-error');
     err.textContent = msg; err.hidden = false;
   }
-  function showProgress(text) {
+  function showProgress() {
     var root = document.getElementById('exportModal');
     root.querySelector('.export-modal-body').hidden = true;
     root.querySelector('.export-modal-foot').hidden = true;
     root.querySelector('.export-modal-error').hidden = true;
-    var p = root.querySelector('.export-modal-progress');
-    p.hidden = false;
-    p.querySelector('.export-progress-text').textContent = text;
+    root.querySelector('.export-modal-progress').hidden = false;
+  }
+
+  /* ── Donut progress ─────────────────────────────────────────────────
+   * The report is built in one server request (no per-step reporting), so this
+   * is a time ESTIMATE scaled to the number of sections: it eases toward a cap
+   * (~92%) and only snaps to 100% when the PDF actually arrives — it never shows
+   * "done" before it is. */
+  var DONUT_C = 263.894; // 2*pi*42
+  var anim = { raf: 0, done: false, pct: 0 };
+
+  function setDonut(pct) {
+    var root = document.getElementById('exportModal');
+    var arc = root.querySelector('.export-donut-arc');
+    var label = root.querySelector('.export-donut-label');
+    var txt = root.querySelector('.export-progress-text');
+    if (arc) arc.setAttribute('stroke-dashoffset', String(DONUT_C * (1 - pct / 100)));
+    if (label) label.textContent = Math.round(pct) + '%';
+    if (txt) txt.textContent = progressLabel(pct);
+  }
+  function progressLabel(pct) {
+    var d = pct >= 100 ? { en: 'Done', pt: 'Concluído' }
+      : pct < 12 ? { en: 'Preparing…', pt: 'Preparando…' }
+      : pct < 82 ? { en: 'Rendering sections…', pt: 'Renderizando seções…' }
+      : { en: 'Finalising…', pt: 'Finalizando…' };
+    return d[lang()] || d.en;
+  }
+  function startEstimate(nSections) {
+    var cap = 92;
+    var dur = (4 + 6 * Math.max(1, nSections)) * 1000; // rough ETA in ms
+    var t0 = performance.now();
+    anim.done = false; anim.pct = 0; setDonut(0);
+    (function tick(now) {
+      if (anim.done) return;
+      var t = Math.min(1, (now - t0) / dur);
+      var eased = 1 - Math.pow(1 - t, 3);          // easeOutCubic
+      var pct = Math.min(cap, eased * cap);
+      if (pct > anim.pct) { anim.pct = pct; setDonut(pct); }
+      anim.raf = requestAnimationFrame(tick);
+    })(t0);
+  }
+  function finishEstimate(cb) {
+    anim.done = true;
+    if (anim.raf) cancelAnimationFrame(anim.raf);
+    setDonut(100);
+    setTimeout(cb, 400);
+  }
+  function stopEstimate() {
+    anim.done = true;
+    if (anim.raf) cancelAnimationFrame(anim.raf);
   }
   function backToSelector() {
     var root = document.getElementById('exportModal');
@@ -187,7 +243,8 @@
     var root = document.getElementById('exportModal');
     var sections = readSelection(root);
     if (!sections.length) { showError(T('none')); return; }
-    showProgress(T('building'));
+    showProgress();
+    startEstimate(sections.length);
     try {
       var resp = await fetch('/api/export-pdf', {
         method: 'POST',
@@ -200,10 +257,13 @@
         throw new Error(msg);
       }
       var blob = await resp.blob();
-      downloadBlob(blob, filenameFrom(resp));
-      closeModal();
+      finishEstimate(function () {
+        downloadBlob(blob, filenameFrom(resp));
+        closeModal();
+      });
     } catch (e) {
       console.error('[export-pdf] failed', e);
+      stopEstimate();
       backToSelector();
       showError(T('failed') + (e && e.message ? ' — ' + e.message : ''));
     }
