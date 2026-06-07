@@ -1,0 +1,101 @@
+{
+  "patient": "Maria Regina Coury",
+  "patientSlug": "maria-regina-coury",
+  "study": "Cardiac CT — coronary calcium score + CT angiography",
+  "studyPt": "TC cardíaca — escore de cálcio + angio-TC coronária",
+  "studySlug": "coronary-ct-2025-01-21",
+  "date": "2025-01-21",
+  "modality": "CT",
+  "facility": null,
+  "reportingDoctor": null,
+  "requestingDoctor": null,
+  "ways": [
+    {
+      "key": "series",
+      "labelEn": "Series",
+      "labelPt": "Série",
+      "values": [
+        {
+          "key": "2",
+          "labelEn": "Calcium score",
+          "labelPt": "Escore de cálcio"
+        },
+        {
+          "key": "500",
+          "labelEn": "Coronary CTA (key images)",
+          "labelPt": "Angio-TC coronária (imagens)"
+        }
+      ]
+    }
+  ],
+  "defaultSelect": {
+    "series": "2"
+  },
+  "stacks": [
+    {
+      "select": {
+        "series": "2"
+      },
+      "count": 44,
+      "slices": [
+        "s002_0001.jpg",
+        "s002_0002.jpg",
+        "s002_0003.jpg",
+        "s002_0004.jpg",
+        "s002_0005.jpg",
+        "s002_0006.jpg",
+        "s002_0007.jpg",
+        "s002_0008.jpg",
+        "s002_0009.jpg",
+        "s002_0010.jpg",
+        "s002_0011.jpg",
+        "s002_0012.jpg",
+        "s002_0013.jpg",
+        "s002_0014.jpg",
+        "s002_0015.jpg",
+        "s002_0016.jpg",
+        "s002_0017.jpg",
+        "s002_0018.jpg",
+        "s002_0019.jpg",
+        "s002_0020.jpg",
+        "s002_0021.jpg",
+        "s002_0022.jpg",
+        "s002_0023.jpg",
+        "s002_0024.jpg",
+        "s002_0025.jpg",
+        "s002_0026.jpg",
+        "s002_0027.jpg",
+        "s002_0028.jpg",
+        "s002_0029.jpg",
+        "s002_0030.jpg",
+        "s002_0031.jpg",
+        "s002_0032.jpg",
+        "s002_0033.jpg",
+        "s002_0034.jpg",
+        "s002_0035.jpg",
+        "s002_0036.jpg",
+        "s002_0037.jpg",
+        "s002_0038.jpg",
+        "s002_0039.jpg",
+        "s002_0040.jpg",
+        "s002_0041.jpg",
+        "s002_0042.jpg",
+        "s002_0043.jpg",
+        "s002_0044.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "500"
+      },
+      "count": 4,
+      "slices": [
+        "s500_0001.jpg",
+        "s500_0002.jpg",
+        "s500_0003.jpg",
+        "s500_0004.jpg"
+      ]
+    }
+  ],
+  "notes": "Coronary-CTA folder held only 4 secondary-capture key images; full angiographic volume not in this export."
+}

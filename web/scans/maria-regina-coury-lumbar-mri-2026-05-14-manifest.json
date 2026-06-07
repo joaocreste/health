@@ -1,0 +1,318 @@
+{
+  "patient": "Maria Regina Coury",
+  "patientSlug": "maria-regina-coury",
+  "study": "Lumbar spine MRI",
+  "studyPt": "RM da coluna lombar",
+  "studySlug": "lumbar-mri-2026-05-14",
+  "date": "2026-05-14",
+  "modality": "MRI",
+  "facility": null,
+  "reportingDoctor": null,
+  "requestingDoctor": null,
+  "ways": [
+    {
+      "key": "series",
+      "labelEn": "Series",
+      "labelPt": "Série",
+      "values": [
+        {
+          "key": "0001",
+          "labelEn": "Coronal T2",
+          "labelPt": "Coronal T2"
+        },
+        {
+          "key": "0002",
+          "labelEn": "Coronal T2 (fat-sat)",
+          "labelPt": "Coronal T2 (sat. gordura)"
+        },
+        {
+          "key": "0003",
+          "labelEn": "Sagittal T2",
+          "labelPt": "Sagital T2"
+        },
+        {
+          "key": "0004",
+          "labelEn": "Sagittal T1",
+          "labelPt": "Sagital T1"
+        },
+        {
+          "key": "0005",
+          "labelEn": "Sagittal STIR",
+          "labelPt": "Sagital STIR"
+        },
+        {
+          "key": "0006",
+          "labelEn": "Axial T2 (a)",
+          "labelPt": "Axial T2 (a)"
+        },
+        {
+          "key": "0007",
+          "labelEn": "Axial T2 (b)",
+          "labelPt": "Axial T2 (b)"
+        },
+        {
+          "key": "0008",
+          "labelEn": "Axial T1",
+          "labelPt": "Axial T1"
+        },
+        {
+          "key": "0009",
+          "labelEn": "Key images",
+          "labelPt": "Imagens-chave"
+        }
+      ]
+    }
+  ],
+  "defaultSelect": {
+    "series": "0003"
+  },
+  "stacks": [
+    {
+      "select": {
+        "series": "0001"
+      },
+      "count": 16,
+      "slices": [
+        "image_s0001_i0001.jpg",
+        "image_s0001_i0002.jpg",
+        "image_s0001_i0003.jpg",
+        "image_s0001_i0004.jpg",
+        "image_s0001_i0005.jpg",
+        "image_s0001_i0006.jpg",
+        "image_s0001_i0007.jpg",
+        "image_s0001_i0008.jpg",
+        "image_s0001_i0009.jpg",
+        "image_s0001_i0010.jpg",
+        "image_s0001_i0011.jpg",
+        "image_s0001_i0012.jpg",
+        "image_s0001_i0013.jpg",
+        "image_s0001_i0014.jpg",
+        "image_s0001_i0015.jpg",
+        "image_s0001_i0016.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0002"
+      },
+      "count": 16,
+      "slices": [
+        "image_s0002_i0001.jpg",
+        "image_s0002_i0002.jpg",
+        "image_s0002_i0003.jpg",
+        "image_s0002_i0004.jpg",
+        "image_s0002_i0005.jpg",
+        "image_s0002_i0006.jpg",
+        "image_s0002_i0007.jpg",
+        "image_s0002_i0008.jpg",
+        "image_s0002_i0009.jpg",
+        "image_s0002_i0010.jpg",
+        "image_s0002_i0011.jpg",
+        "image_s0002_i0012.jpg",
+        "image_s0002_i0013.jpg",
+        "image_s0002_i0014.jpg",
+        "image_s0002_i0015.jpg",
+        "image_s0002_i0016.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0003"
+      },
+      "count": 16,
+      "slices": [
+        "image_s0003_i0001.jpg",
+        "image_s0003_i0002.jpg",
+        "image_s0003_i0003.jpg",
+        "image_s0003_i0004.jpg",
+        "image_s0003_i0005.jpg",
+        "image_s0003_i0006.jpg",
+        "image_s0003_i0007.jpg",
+        "image_s0003_i0008.jpg",
+        "image_s0003_i0009.jpg",
+        "image_s0003_i0010.jpg",
+        "image_s0003_i0011.jpg",
+        "image_s0003_i0012.jpg",
+        "image_s0003_i0013.jpg",
+        "image_s0003_i0014.jpg",
+        "image_s0003_i0015.jpg",
+        "image_s0003_i0016.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0004"
+      },
+      "count": 16,
+      "slices": [
+        "image_s0004_i0001.jpg",
+        "image_s0004_i0002.jpg",
+        "image_s0004_i0003.jpg",
+        "image_s0004_i0004.jpg",
+        "image_s0004_i0005.jpg",
+        "image_s0004_i0006.jpg",
+        "image_s0004_i0007.jpg",
+        "image_s0004_i0008.jpg",
+        "image_s0004_i0009.jpg",
+        "image_s0004_i0010.jpg",
+        "image_s0004_i0011.jpg",
+        "image_s0004_i0012.jpg",
+        "image_s0004_i0013.jpg",
+        "image_s0004_i0014.jpg",
+        "image_s0004_i0015.jpg",
+        "image_s0004_i0016.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0005"
+      },
+      "count": 16,
+      "slices": [
+        "image_s0005_i0001.jpg",
+        "image_s0005_i0002.jpg",
+        "image_s0005_i0003.jpg",
+        "image_s0005_i0004.jpg",
+        "image_s0005_i0005.jpg",
+        "image_s0005_i0006.jpg",
+        "image_s0005_i0007.jpg",
+        "image_s0005_i0008.jpg",
+        "image_s0005_i0009.jpg",
+        "image_s0005_i0010.jpg",
+        "image_s0005_i0011.jpg",
+        "image_s0005_i0012.jpg",
+        "image_s0005_i0013.jpg",
+        "image_s0005_i0014.jpg",
+        "image_s0005_i0015.jpg",
+        "image_s0005_i0016.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0006"
+      },
+      "count": 24,
+      "slices": [
+        "image_s0006_i0001.jpg",
+        "image_s0006_i0002.jpg",
+        "image_s0006_i0003.jpg",
+        "image_s0006_i0004.jpg",
+        "image_s0006_i0005.jpg",
+        "image_s0006_i0006.jpg",
+        "image_s0006_i0007.jpg",
+        "image_s0006_i0008.jpg",
+        "image_s0006_i0009.jpg",
+        "image_s0006_i0010.jpg",
+        "image_s0006_i0011.jpg",
+        "image_s0006_i0012.jpg",
+        "image_s0006_i0013.jpg",
+        "image_s0006_i0014.jpg",
+        "image_s0006_i0015.jpg",
+        "image_s0006_i0016.jpg",
+        "image_s0006_i0017.jpg",
+        "image_s0006_i0018.jpg",
+        "image_s0006_i0019.jpg",
+        "image_s0006_i0020.jpg",
+        "image_s0006_i0021.jpg",
+        "image_s0006_i0022.jpg",
+        "image_s0006_i0023.jpg",
+        "image_s0006_i0024.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0007"
+      },
+      "count": 26,
+      "slices": [
+        "image_s0007_i0001.jpg",
+        "image_s0007_i0002.jpg",
+        "image_s0007_i0003.jpg",
+        "image_s0007_i0004.jpg",
+        "image_s0007_i0005.jpg",
+        "image_s0007_i0006.jpg",
+        "image_s0007_i0007.jpg",
+        "image_s0007_i0008.jpg",
+        "image_s0007_i0009.jpg",
+        "image_s0007_i0010.jpg",
+        "image_s0007_i0011.jpg",
+        "image_s0007_i0012.jpg",
+        "image_s0007_i0013.jpg",
+        "image_s0007_i0014.jpg",
+        "image_s0007_i0015.jpg",
+        "image_s0007_i0016.jpg",
+        "image_s0007_i0017.jpg",
+        "image_s0007_i0018.jpg",
+        "image_s0007_i0019.jpg",
+        "image_s0007_i0020.jpg",
+        "image_s0007_i0021.jpg",
+        "image_s0007_i0022.jpg",
+        "image_s0007_i0023.jpg",
+        "image_s0007_i0024.jpg",
+        "image_s0007_i0025.jpg",
+        "image_s0007_i0026.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0008"
+      },
+      "count": 30,
+      "slices": [
+        "image_s0008_i0001.jpg",
+        "image_s0008_i0002.jpg",
+        "image_s0008_i0003.jpg",
+        "image_s0008_i0004.jpg",
+        "image_s0008_i0005.jpg",
+        "image_s0008_i0006.jpg",
+        "image_s0008_i0007.jpg",
+        "image_s0008_i0008.jpg",
+        "image_s0008_i0009.jpg",
+        "image_s0008_i0010.jpg",
+        "image_s0008_i0011.jpg",
+        "image_s0008_i0012.jpg",
+        "image_s0008_i0013.jpg",
+        "image_s0008_i0014.jpg",
+        "image_s0008_i0015.jpg",
+        "image_s0008_i0016.jpg",
+        "image_s0008_i0017.jpg",
+        "image_s0008_i0018.jpg",
+        "image_s0008_i0019.jpg",
+        "image_s0008_i0020.jpg",
+        "image_s0008_i0021.jpg",
+        "image_s0008_i0022.jpg",
+        "image_s0008_i0023.jpg",
+        "image_s0008_i0024.jpg",
+        "image_s0008_i0025.jpg",
+        "image_s0008_i0026.jpg",
+        "image_s0008_i0027.jpg",
+        "image_s0008_i0028.jpg",
+        "image_s0008_i0029.jpg",
+        "image_s0008_i0030.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "0009"
+      },
+      "count": 8,
+      "slices": [
+        "image_s0009_i0001.jpg",
+        "image_s0009_i0002.jpg",
+        "image_s0009_i0003.jpg",
+        "image_s0009_i0004.jpg",
+        "image_s0009_i0005.jpg",
+        "image_s0009_i0006.jpg",
+        "image_s0009_i0007.jpg",
+        "image_s0009_i0008.jpg"
+      ]
+    }
+  ],
+  "report": {
+    "match": {},
+    "pdf": "report.pdf",
+    "textEn": null,
+    "textPt": null,
+    "aiSummary": null
+  }
+}

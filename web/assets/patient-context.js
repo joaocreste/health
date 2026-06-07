@@ -772,19 +772,64 @@
           );
         }).join('') + '</div>';
 
+    // Bilingual study label from modality + body part.
+    function imagingTitle(s) {
+      if (s.modality === 'US' && s.body_part === 'heart') return t('Echocardiogram', 'Ecocardiograma');
+      if (s.modality === 'CT' && s.body_part === 'heart') return t('Cardiac CT', 'TC cardíaca');
+      var mod = { MRI: ['MRI', 'RM'], CT: ['CT', 'TC'], US: ['Ultrasound', 'US'], PET: ['PET', 'PET'],
+                  XR: ['X-ray', 'RX'], EEG: ['EEG', 'EEG'], ECG: ['ECG', 'ECG'] }[s.modality] ||
+                [s.modality || 'Imaging', s.modality || 'Imagem'];
+      var body = { lumbar_spine: ['Lumbar spine', 'Coluna lombar'], thigh: ['Thigh / femur', 'Coxa / fêmur'],
+                   cervical_spine: ['Cervical spine', 'Coluna cervical'], heart: ['Heart', 'Coração'],
+                   head: ['Head', 'Cabeça'] }[s.body_part] || (s.body_part ? [s.body_part, s.body_part] : ['', '']);
+      var en = (body[0] ? body[0] + ' ' : '') + mod[0];
+      var pt = (body[1] ? body[1] + ' — ' : '') + mod[1];
+      return t(escapeHtml(en), escapeHtml(pt));
+    }
+
+    // One imaging study: bilingual title + (interactive .ct-viewer if it has a
+    // manifest with images) + report button. The .ct-viewer is wired by app.js's
+    // generic ways/stacks engine via window.JCInitCtViewers() after injection.
+    function renderImagingStudy(s) {
+      var meta = escapeHtml(formatDate(s.study_date)) +
+                 (s.file_count ? ' · ' + s.file_count + ' ' + t('images', 'imagens') : '');
+      var reportBtn = s.report_blob_key
+        ? '<div class="report-export-row"><a class="export-btn-primary" href="' + escapeHtml(s.report_blob_key) +
+            '" target="_blank" rel="noopener">' + t('Report (PDF)', 'Laudo (PDF)') + '</a></div>'
+        : '';
+      var body;
+      if (s.manifest_blob_key && s.file_count > 0) {
+        var prefix = s.manifest_blob_key.replace(/-manifest\.json$/, '/');
+        body =
+          '<div class="ct-grid ct-grid-single">' +
+            '<div class="ct-viewer" data-prefix="' + escapeHtml(prefix) + '" data-manifest="' + escapeHtml(s.manifest_blob_key) + '?v=1">' +
+              '<div class="ct-viewer-head">' +
+                '<div class="ct-viewer-title">' + t('Series viewer', 'Visualizador por série') + '</div>' +
+                '<div class="ct-viewer-meta">' +
+                  '<span class="ct-lbl ct-lbl-2d">' + t('Image', 'Imagem') + '</span>' +
+                  '<span class="ct-lbl ct-lbl-3d">' + t('View', 'Vista') + '</span> ' +
+                  '<span class="ct-idx">1</span> / <span class="ct-total">1</span><span class="ct-rot"></span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="ct-controls"></div>' +
+              '<div class="ct-stage"><img class="ct-img" alt="" loading="eager"></div>' +
+              '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="slice">' +
+            '</div>' +
+          '</div>';
+      } else {
+        body = '<div class="ov-section-note">' +
+          t('Report only — no image series in this study.', 'Apenas laudo — sem série de imagens neste exame.') + '</div>';
+      }
+      return '<div class="img-study">' +
+        '<h3 class="img-study-title">' + imagingTitle(s) + ' <span class="ov-count-inline">' + meta + '</span></h3>' +
+        reportBtn + body +
+      '</div>';
+    }
+
     var imagingHtml = imaging.length === 0 ? '' :
       '<section class="ov-section">' +
         '<h2>' + t('Imaging studies', 'Estudos de imagem') + ' <span class="ov-count-inline">' + imaging.length + '</span></h2>' +
-        '<ul class="ov-list">' + imaging.map(function (s) {
-          var filesLabel = s.file_count ? ' · ' + s.file_count + ' ' + t('files', 'arquivos') : '';
-          return '<li>' +
-            '<span class="ov-list-title">' + escapeHtml(s.modality || '?') +
-              (s.body_part ? ' · ' + escapeHtml(s.body_part) : '') + '</span>' +
-            '<span class="ov-list-meta">' + escapeHtml(formatDate(s.study_date)) +
-              filesLabel +
-              ' · ' + escapeHtml(s.source_format || '—') +
-            '</span></li>';
-        }).join('') + '</ul>' +
+        imaging.map(renderImagingStudy).join('') +
       '</section>';
 
     var docsHtml = docs.length === 0 ? '' :
@@ -820,6 +865,8 @@
         docsHtml +
       '</div>';
     document.body.appendChild(view);
+    // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
+    if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
   }
 
   function renderHistoricalComparison(panels) {
@@ -1122,6 +1169,9 @@
       '.ov-section-note { font-size: 12px; color: #7A8FA6; margin: -6px 0 12px; }',
       '.ov-section-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin: 8px 0 16px; }',
       '.ov-panels-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.01em; color: #0D1B2A; margin: 0 0 16px; }',
+      '.img-study { margin: 0 0 28px; }',
+      '.img-study + .img-study { border-top: 1px solid #E5E2DC; padding-top: 20px; }',
+      '.img-study-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 16px; color: #0D1B2A; margin: 0 0 12px; }',
       '.ov-list { list-style: none; padding: 0; margin: 0; }',
       '.ov-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #EFEBE3; font-size: 13px; }',
       '.ov-list li:first-child { border-top: none; }',

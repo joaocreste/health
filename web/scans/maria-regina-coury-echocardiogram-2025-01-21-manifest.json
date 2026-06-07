@@ -1,0 +1,22 @@
+{
+  "patient": "Maria Regina Coury",
+  "patientSlug": "maria-regina-coury",
+  "study": "Transthoracic echocardiogram",
+  "studyPt": "Ecocardiograma transtorácico",
+  "studySlug": "echocardiogram-2025-01-21",
+  "date": "2025-01-21",
+  "modality": "ultrasound",
+  "facility": null,
+  "reportingDoctor": null,
+  "requestingDoctor": null,
+  "ways": [],
+  "stacks": [],
+  "report": {
+    "match": {},
+    "pdf": "report.pdf",
+    "textEn": null,
+    "textPt": null,
+    "aiSummary": null
+  },
+  "notes": "Report-only study (no image series in this export)."
+}

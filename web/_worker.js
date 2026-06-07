@@ -336,7 +336,8 @@ async function handlePatientExams(request, env) {
       `,
       sql`
         SELECT id, modality, body_part, study_date, source_format,
-               file_count, notes, blob_prefix, report_blob_key
+               file_count, notes, blob_prefix, report_blob_key,
+               manifest_blob_key, jpeg_preview_prefix
         FROM imaging_studies
         WHERE patient_id = ${pid}
         ORDER BY study_date DESC
