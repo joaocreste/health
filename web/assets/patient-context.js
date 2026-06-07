@@ -799,12 +799,21 @@
 
     var comparisonHtml = renderHistoricalComparison(panels);
 
+    // Title before the panels begin, so the section is always clearly labelled.
+    var totalMarkers = panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
+    var panelsTitle = panels.length === 0 ? '' :
+      '<h2 class="ov-panels-title">' + t('Blood &amp; urine panel', 'Painel de sangue e urina') +
+        ' <span class="ov-count-inline">' + totalMarkers + ' ' +
+        t(totalMarkers === 1 ? 'marker' : 'markers', totalMarkers === 1 ? 'marcador' : 'marcadores') +
+      '</span></h2>';
+
     var view = document.createElement('main');
     view.className = 'jc-overview jc-exams';
     view.innerHTML =
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
         '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+        panelsTitle +
         panelsHtml +
         comparisonHtml +
         imagingHtml +
@@ -1112,6 +1121,7 @@
       '.ov-count-inline { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #7A8FA6; font-weight: 400; margin-left: 8px; letter-spacing: 0.04em; }',
       '.ov-section-note { font-size: 12px; color: #7A8FA6; margin: -6px 0 12px; }',
       '.ov-section-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin: 8px 0 16px; }',
+      '.ov-panels-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 20px; letter-spacing: 0.01em; color: #0D1B2A; margin: 0 0 16px; }',
       '.ov-list { list-style: none; padding: 0; margin: 0; }',
       '.ov-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #EFEBE3; font-size: 13px; }',
       '.ov-list li:first-child { border-top: none; }',
