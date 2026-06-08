@@ -143,9 +143,15 @@ export const medications = pgTable("medications", {
   id: uuid("id").defaultRandom().primaryKey(),
   patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  dose: text("dose"),
+  dose: text("dose"),                          // raw per-unit strength as written ("500 mg/tablet")
+  frequency: text("frequency"),                // raw schedule ("2x/day", "1x/day", "weekly", "PRN")
+  // Computed TOTAL taken per day (strength × units/dose × doses/day). Kept ALONGSIDE
+  // the raw dose/frequency — additive, never a replacement, so the value stays auditable.
+  // Null for PRN / weekly / non-daily / needs-review (no honest fixed daily total).
+  dailyDoseAmount: real("daily_dose_amount"),  // numeric daily total
+  dailyDoseUnit: text("daily_dose_unit"),      // its unit ('mg' | 'mcg' | 'g' | 'IU' | 'units' | 'puffs' | ...)
   drugClass: text("drug_class"),
-  status: text("status"), // 'active' | 'discontinued' | 'paused' — free-text for ingest flexibility
+  status: text("status"), // 'active' | 'discontinued' | 'paused' | 'needs-review' — free-text for ingest flexibility
   note: text("note"),
   startedAt: date("started_at"),
   endedAt: date("ended_at"),
@@ -234,7 +240,7 @@ export const vitalsDaily = pgTable("vitals_daily", {
   id: uuid("id").defaultRandom().primaryKey(),
   patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   day: date("day").notNull(),
-  source: text("source").notNull(), // 'oura' | 'withings' | 'apple_health' | 'manual'
+  source: text("source").notNull(), // device: 'oura' | 'apple_health' | 'withings_cuff' | 'withings_scale' | 'manual'; derived: 'aggregate' | 'resolved' (source-of-truth, see lib/vitals-resolve.js)
   steps: integer("steps"),
   caloriesActive: integer("calories_active"),
   caloriesPassive: integer("calories_passive"),

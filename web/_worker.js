@@ -217,7 +217,7 @@ async function handlePatientSummary(request, env) {
     const pid = patient.id;
 
     // Single multi-pillar count query — saves round trips.
-    const [pillars, recentDocs, recentLabs, pendingFiles] = await Promise.all([
+    const [pillars, recentDocs, recentLabs, pendingFiles, medications, supplements] = await Promise.all([
       sql`
         SELECT
           -- Physical
@@ -268,6 +268,19 @@ async function handlePatientSummary(request, env) {
         ORDER BY if_.created_at DESC
         LIMIT 20
       `,
+      sql`
+        SELECT name, dose, frequency, daily_dose_amount, daily_dose_unit,
+               drug_class, status, note, started_at, ended_at
+        FROM medications
+        WHERE patient_id = ${pid}
+        ORDER BY (status = 'active') DESC, name ASC
+      `,
+      sql`
+        SELECT name, dose, started_at, ended_at
+        FROM supplements
+        WHERE patient_id = ${pid}
+        ORDER BY name ASC
+      `,
     ]);
 
     const c = pillars[0] || {};
@@ -291,6 +304,8 @@ async function handlePatientSummary(request, env) {
       recent_documents: recentDocs,
       recent_labs: recentLabs,
       pending_files: pendingFiles,
+      medications,
+      supplements,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Summary failed: ${e.message}`);

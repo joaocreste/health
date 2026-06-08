@@ -242,6 +242,96 @@
   // the layout is identical for every patient regardless of how much data has
   // been ingested. The user gets to data by clicking "Add or edit data" in the
   // top nav (or by opening one of the three pillar cards).
+  // ── Medications + Supplements tables ─────────────────────────────
+  // Renders two .exam-table cards (reusing the Exams page styling) from the
+  // medications/supplements arrays on /api/patient-summary. Returns '' when the
+  // patient has neither (graceful sparsity — never an empty grid). Used on both
+  // the Summary page (below the pillar cards) and the Physical landing (below
+  // the Vitals/Exams/Genetics hub).
+  function medsTablesInner(summary) {
+    var meds = (summary && summary.medications) || [];
+    var supps = (summary && summary.supplements) || [];
+    if (!meds.length && !supps.length) return '';
+    var html = '';
+    if (meds.length) {
+      var rows = meds.map(function (m) {
+        var hasDaily = (m.daily_dose_amount != null && isFinite(Number(m.daily_dose_amount)));
+        var amt = hasDaily
+          ? fmtLabNum(Number(m.daily_dose_amount)) + ' ' + escapeHtml(m.daily_dose_unit || '') + '/day'
+          : '—';
+        var pill = '';
+        if (m.status && m.status !== 'active') {
+          var cls = (m.status === 'needs-review') ? 'high' : 'norm';
+          pill = ' <span class="lab-flag ' + cls + '">' + escapeHtml(m.status) + '</span>';
+        }
+        return '<tr>' +
+          '<td class="exam-marker">' + escapeHtml(m.name || '') + pill + '</td>' +
+          '<td class="exam-ref">' + escapeHtml(m.dose || '—') + '</td>' +
+          '<td class="exam-value">' + amt + '</td>' +
+          '<td class="exam-ref">' + escapeHtml(m.frequency || '—') + '</td>' +
+          '<td class="exam-ref">' + escapeHtml(m.drug_class || '—') + '</td>' +
+        '</tr>';
+      }).join('');
+      html += '<section class="exam-panel">' +
+        '<div class="exam-panel-head">' +
+          '<h2><span class="lang-en">Medications</span><span class="lang-pt">Medicações</span></h2>' +
+          '<span class="exam-panel-count">' + meds.length + '</span>' +
+        '</div>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th><span class="lang-en">Medication</span><span class="lang-pt">Medicação</span></th>' +
+          '<th><span class="lang-en">Strength</span><span class="lang-pt">Concentração</span></th>' +
+          '<th><span class="lang-en">Daily dose</span><span class="lang-pt">Dose diária</span></th>' +
+          '<th><span class="lang-en">Frequency</span><span class="lang-pt">Frequência</span></th>' +
+          '<th><span class="lang-en">Class</span><span class="lang-pt">Classe</span></th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '</section>';
+    }
+    if (supps.length) {
+      var srows = supps.map(function (s) {
+        return '<tr>' +
+          '<td class="exam-marker">' + escapeHtml(s.name || '') + '</td>' +
+          '<td class="exam-value">' + escapeHtml(s.dose || '—') + '</td>' +
+        '</tr>';
+      }).join('');
+      html += '<section class="exam-panel">' +
+        '<div class="exam-panel-head">' +
+          '<h2><span class="lang-en">Supplements</span><span class="lang-pt">Suplementos</span></h2>' +
+          '<span class="exam-panel-count">' + supps.length + '</span>' +
+        '</div>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th><span class="lang-en">Supplement</span><span class="lang-pt">Suplemento</span></th>' +
+          '<th><span class="lang-en">Daily dose</span><span class="lang-pt">Dose diária</span></th>' +
+        '</tr></thead><tbody>' + srows + '</tbody></table>' +
+      '</section>';
+    }
+    html += '<p class="ov-section-note">' +
+      '<span class="lang-en">Daily dose = strength × units per dose × doses per day. Informational — not a prescription.</span>' +
+      '<span class="lang-pt">Dose diária = concentração × unidades por tomada × tomadas por dia. Informativo — não é uma prescrição.</span>' +
+    '</p>';
+    return html;
+  }
+
+  // Summary page: wrap in a report-section so it matches the pillar-card block above it.
+  function medsSectionHome(summary) {
+    var inner = medsTablesInner(summary);
+    if (!inner) return '';
+    return '<section class="report-section meds-section"><div class="container">' +
+      '<div class="section-label"><span class="lang-en">02 · Treatment</span><span class="lang-pt">02 · Tratamento</span></div>' +
+      '<h2 class="section-title"><span class="lang-en">Medications &amp; Supplements</span><span class="lang-pt">Medicações e Suplementos</span></h2>' +
+      inner +
+    '</div></section>';
+  }
+
+  // Physical landing: inline block placed inside .ov-shell, below the hub cards.
+  function medsSectionInline(summary) {
+    var inner = medsTablesInner(summary);
+    if (!inner) return '';
+    return '<div class="meds-section-inline" style="margin-top:28px;">' +
+      '<h2 class="ov-panels-title"><span class="lang-en">Medications &amp; Supplements</span><span class="lang-pt">Medicações e Suplementos</span></h2>' +
+      inner +
+    '</div>';
+  }
+
   function renderHome(summary) {
     var p = (summary && summary.patient) || {};
     var name = p.full_name || 'this patient';
@@ -353,7 +443,7 @@
 
     var overview = document.createElement('main');
     overview.className = 'jc-home';
-    overview.innerHTML = hero + reports;
+    overview.innerHTML = hero + reports + medsSectionHome(summary);
     document.body.appendChild(overview);
   }
 
@@ -1243,6 +1333,7 @@
         '<p class="ov-profile">' + (p.full_name ? escapeHtml(p.full_name) : '') + '</p>' +
         lead +
         '<div class="entry-grid entry-grid-overview">' + cards + '</div>' +
+        medsSectionInline(summary) +
       '</div>';
     document.body.appendChild(view);
   }
