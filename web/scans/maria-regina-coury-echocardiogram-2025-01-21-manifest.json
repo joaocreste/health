@@ -18,5 +18,9 @@
     "textPt": "Parâmetros Estruturais:\nReferência\nAorta (diâmetro da raiz): 29 20 a 37mm\nÁtrio Esquerdo: 34 20 a 40mm\nDiâmetro Ventricular Direito: 22 07 a 26mm\nDiâmetro Diastólico Final do VE: 45 35 a 56mm\nDiâmetro Sistólico Final do VE: 29 25 a 40mm\nEspessura Diatólica do Septo: 11 07 a 11mm\nEspessura Diastólica da PPVE: 11 07 a 11mm\nRelações e Funções Ventriculares:\nReferência\nRelação Átrio Esquerdo/Aorta: 1,2 1,0+- 0,5\nFração de Ejeção: 64 >58%\nMassa Ventricular Esquerda: 179 94 a 276g\nRelação Massa/Superficíe Corporal: 87\nPercent Encurt Cavidade: 35\nVolume Diastólico Final: 90 73 a 156ml\nVolume Sistólico: 58 54 a 99ml\nVolume Sistólico Final: 32 18 a 57ml\nHOSPITAL UNIMED PIRACICABA\nDepartamento de Imagenologia\nNome............: S DE Idade / Nasc..: 66 Anos / 28/04/1958 Sexo: F Convênio....: UNIMED PRE PAGAMENTO\nMédico Req...: CARLOS AUGUSTO FERREIRA SALLES Prontuário...: 559931\nPedido...........: 1452578 Data Pedido: 21/01/2025 02:05:00 Atendimento: 3746069 - 21/01/2025 02:05:00\nSetor Solicit...: PA CARDIOLOGICO Impressão...: 21/01/2025 07:47:43\nWALTER ALONSO CHECOLI\nCRM: 49748",
     "aiSummary": null
   },
-  "notes": "Report-only study (no image series in this export)."
+  "notes": "Report-only study (no image series in this export).",
+  "aiFinding": {
+    "en": "An echocardiogram is an ultrasound of the heart that checks the chamber sizes, the heart muscle, the valves, and how well the heart pumps. On this study the measurements fell within their normal reference ranges, including a normal pumping function (ejection fraction). Nothing here flags a specific problem. Worth discussing with your doctor in the context of how you feel.",
+    "pt": "O ecocardiograma é um ultrassom do coração que avalia o tamanho das câmaras, o músculo cardíaco, as válvulas e a força de bombeamento. Neste exame as medidas ficaram dentro das faixas normais de referência, incluindo função de bombeamento normal (fração de ejeção). Nada aqui aponta um problema específico. Vale conversar com seu médico considerando como você se sente."
+  }
 }

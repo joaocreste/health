@@ -827,7 +827,7 @@
     }
 
     var imagingHtml = imaging.length === 0 ? '' :
-      '<section class="ov-section">' +
+      '<section class="ov-section" id="imaging">' +
         '<h2>' + t('Imaging studies', 'Estudos de imagem') + ' <span class="ov-count-inline">' + imaging.length + '</span></h2>' +
         imaging.map(renderImagingStudy).join('') +
       '</section>';
@@ -858,6 +858,7 @@
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
         '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+        '<section class="ov-ai-summary" id="exams-ai-summary"></section>' +
         '<h2 class="ov-panels-title" id="blood-urine">' + panelsTitleInner + '</h2>' +
         panelsHtml +
         comparisonHtml +
@@ -911,12 +912,16 @@
                : t('This value is outside its reference range — worth a mention to your doctor.',
                    'Este valor está fora da faixa de referência — vale comentar com seu médico.');
     }
-    function examsSummaryHtml(off, imgFindings) {
-      if (!off.length && !imgFindings.length) {
-        return amberCardHtml(t('AI Summary', 'Resumo por IA'),
-          t('Everything reviewed in this exam set was within range.',
-            'Tudo o que foi revisado neste conjunto de exames estava dentro da faixa de referência.'));
-      }
+    // Possible reasons drawn ONLY from the patient's own record. Maria's record has
+    // no meds/supplements/genetics/conditions to correlate against, so per the
+    // sparse-record rule the card says so plainly rather than inventing a cause.
+    function labReasonsHtml() {
+      return '<p class="ov-ai-reasons">' +
+        t('Possible reasons: your current records show no medications, supplements, genetics, or related conditions that would explain this. Worth discussing with your doctor.',
+          'Possíveis causas: seus registros atuais não mostram medicamentos, suplementos, genética ou condições relacionadas que expliquem isto. Vale conversar com seu médico.') +
+        '</p>';
+    }
+    function examsSummaryHtml(off, imgCount) {
       var bits = [];
       if (off.length) {
         var items = off.map(function (o) {
@@ -926,16 +931,29 @@
         bits.push('<p>' + t('Lab values outside their reference range:', 'Valores laboratoriais fora da faixa de referência:') +
           '</p><ul class="ov-ai-list">' + items + '</ul>' +
           '<p><a href="#blood-urine">' + t('See blood &amp; urine panel', 'Ver painel de sangue e urina') + '</a></p>');
+      } else {
+        bits.push('<p>' + t('All blood &amp; urine values reviewed were within range.',
+          'Todos os valores de sangue e urina revisados estavam dentro da faixa de referência.') + '</p>');
       }
-      if (imgFindings.length) {
-        bits.push('<p>' + t('Imaging studies with a key finding:', 'Exames de imagem com achado relevante:') + ' ' +
-          imgFindings.join(' · ') + '</p>');
+      if (imgCount) {
+        bits.push('<p>' + imgCount + ' ' +
+          t('imaging studies on record — each with its report and a plain explanation below.',
+            'exames de imagem no registro — cada um com seu laudo e uma explicação simples abaixo.') +
+          ' <a href="#imaging">' + t('See imaging', 'Ver imagens') + '</a></p>');
       }
       return amberCardHtml(t('AI Summary', 'Resumo por IA'), bits.join(''));
     }
     function fillExamsAi(pnls, imgs) {
-      // Inline grouped amber card per blood panel that has out-of-range values.
-      var gridPanels = document.querySelectorAll('.lab-panel-grid > .lab-panel');
+      // 1.2.1 consolidated AI Summary at the top of Exams.
+      var summaryEl = document.getElementById('exams-ai-summary');
+      if (summaryEl) summaryEl.innerHTML = examsSummaryHtml(offFromPanels(pnls), (imgs || []).length);
+
+      // Per blood panel with out-of-range values: one grouped amber card —
+      // what each marker means + possible reasons grounded in the patient's record.
+      // Scope to OUR rendered view — Patient Zero's hidden static page also has a
+      // .lab-panel-grid, and an unscoped index would inject into those hidden panels.
+      var examMain = document.querySelector('main.jc-exams');
+      var gridPanels = examMain ? examMain.querySelectorAll('.lab-panel-grid > .lab-panel') : [];
       (pnls || []).forEach(function (pn, i) {
         var offM = (pn.markers || []).filter(function (m) { return dirOf(m); });
         if (!offM.length) return;
@@ -949,7 +967,7 @@
         var card = document.createElement('div');
         card.className = 'ov-ai-card';
         card.innerHTML = amberCardHtml(t('What this can mean', 'O que isto pode significar'),
-          '<ul class="ov-ai-list">' + lis + '</ul>');
+          '<ul class="ov-ai-list">' + lis + '</ul>' + labReasonsHtml());
         var bodyEl = el.querySelector('.lab-panel-body') || el;
         bodyEl.appendChild(card);
       });
@@ -1179,16 +1197,34 @@
     var labsN = b.lab_results || 0, imgN = b.imaging_studies || 0;
     var examsStatus = '<span class="pill pill-info">' + labsN + ' ' + t('lab markers', 'marcadores') + '</span>' +
                       (imgN ? ' <span class="pill pill-info">' + imgN + ' ' + t('imaging', 'imagem') + '</span>' : '');
-    var cards =
-      card(ICON_VITALS, 'physical-vitals.html', 'Vitals', 'Vitais',
-        statusPill((b.vitals_days || 0) + (b.ecg_events || 0), 'records', 'registros'),
-        'Daily vitals, sleep, cardiovascular', 'Sinais vitais diários, sono, cardiovascular') +
-      card(ICON_EXAMS, 'physical-exams.html', 'Exams', 'Exames',
-        examsStatus,
-        'Blood &amp; urine + imaging (MRI, CT, echo)', 'Sangue e urina + imagem (RM, TC, eco)') +
-      card(ICON_GEN, 'physical-genetics.html', 'Genetics', 'Genética',
-        statusPill(b.pgx_findings || 0, 'findings', 'achados'),
-        'Pharmacogenomics', 'Farmacogenômica');
+    // Route only into sub-sections that have data (omit empty — no count grid).
+    var hasVitals = (b.vitals_days || 0) + (b.ecg_events || 0) > 0;
+    var hasExams = (b.lab_results || 0) + (b.imaging_studies || 0) > 0;
+    var hasGen = (b.pgx_findings || 0) > 0;
+    var cards = '';
+    if (hasVitals) cards += card(ICON_VITALS, 'physical-vitals.html', 'Vitals', 'Vitais',
+      statusPill((b.vitals_days || 0) + (b.ecg_events || 0), 'records', 'registros'),
+      'Daily vitals, sleep, cardiovascular', 'Sinais vitais diários, sono, cardiovascular');
+    if (hasExams) cards += card(ICON_EXAMS, 'physical-exams.html', 'Exams', 'Exames',
+      examsStatus, 'Blood &amp; urine + imaging (MRI, CT, echo)', 'Sangue e urina + imagem (RM, TC, eco)');
+    if (hasGen) cards += card(ICON_GEN, 'physical-genetics.html', 'Genetics', 'Genética',
+      statusPill(b.pgx_findings || 0, 'findings', 'achados'), 'Pharmacogenomics', 'Farmacogenômica');
+
+    // Overview leads with the AI Summary (the full consolidated review lives on Exams).
+    var leadBits = imgN
+      ? labsN + ' ' + t('lab markers across the panels and', 'marcadores nos painéis e') + ' ' + imgN + ' ' +
+        t('imaging studies, each with its report and a plain explanation.', 'exames de imagem, cada um com seu laudo e uma explicação simples.')
+      : labsN + ' ' + t('lab markers across the panels.', 'marcadores nos painéis.');
+    var lead = '<section class="ov-ai-summary"><div class="ov-ai-inner">' +
+      '<div class="ov-ai-head">' + aiPill() + ' <span class="ov-ai-label">' + t('AI Summary', 'Resumo por IA') + '</span></div>' +
+      '<div class="ov-ai-body"><p>' +
+        t('Your exams have been reviewed — ', 'Seus exames foram revisados — ') + leadBits +
+        ' <a href="physical-exams.html">' + t('Open Exams', 'Abrir Exames') + '</a></p></div>' +
+      '<div class="ov-ai-disc">' +
+        t('AI-generated summary from your data — not a diagnosis. Discuss with your doctor.',
+          'Resumo gerado por IA a partir dos seus dados — não é um diagnóstico. Converse com seu médico.') +
+      '</div></div></section>';
+
     var view = document.createElement('main');
     view.className = 'jc-overview jc-section';
     view.innerHTML =
@@ -1196,6 +1232,7 @@
         '<div class="ov-section-eyebrow">' + t('Physical', 'Físico') + '</div>' +
         '<h1 class="ov-title">' + t('Physical Health Overview', 'Visão Geral da Saúde Física') + '</h1>' +
         '<p class="ov-profile">' + (p.full_name ? escapeHtml(p.full_name) : '') + '</p>' +
+        lead +
         '<div class="entry-grid entry-grid-overview">' + cards + '</div>' +
       '</div>';
     document.body.appendChild(view);
@@ -1321,6 +1358,7 @@
       '.ov-ai-body p { margin: 0 0 8px; }',
       '.ov-ai-body a { color: #B8954A; }',
       '.ov-ai-list { margin: 4px 0 8px 18px; }',
+      '.ov-ai-reasons { margin: 8px 0 0; font-size: 12.5px; color: #1E2D3D; }',
       '.ov-ai-disc { margin-top: 10px; font-size: 11px; color: #7A8FA6; }',
       '.img-report { margin: 18px 0 4px; }',
       '.img-report-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0 0 8px; }',
