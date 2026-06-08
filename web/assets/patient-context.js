@@ -923,6 +923,18 @@
     }
     function examsSummaryHtml(off, imgCount) {
       var bits = [];
+      // Plain-language intro — explanation, not just numbers.
+      if (off.length) {
+        bits.push('<p>' + t(
+          'This is a plain-language summary of your exams. Most of your blood and urine values are within their normal ranges; the ' + off.length + ' that fall outside are listed below and explained where they appear — values that are out of range like these are most often mild and common rather than a sign of a serious problem. Your imaging studies are summarized in their own cards further down. This is a summary, not a diagnosis — worth going over the highlights with your doctor.',
+          'Este é um resumo em linguagem simples dos seus exames. A maioria dos seus valores de sangue e urina está dentro das faixas normais; os ' + off.length + ' que estão fora são listados abaixo e explicados onde aparecem — valores alterados como estes costumam ser leves e comuns, e não sinal de um problema grave. Seus exames de imagem são resumidos nos cartões mais abaixo. Este é um resumo, não um diagnóstico — vale revisar os destaques com seu médico.'
+        ) + '</p>');
+      } else {
+        bits.push('<p>' + t(
+          'This is a plain-language summary of your exams. All of your blood and urine values that were reviewed are within their normal reference ranges. Your imaging studies are summarized in their own cards further down. This is a summary, not a diagnosis — worth going over with your doctor.',
+          'Este é um resumo em linguagem simples dos seus exames. Todos os seus valores de sangue e urina revisados estão dentro das faixas normais de referência. Seus exames de imagem são resumidos nos cartões mais abaixo. Este é um resumo, não um diagnóstico — vale conversar com seu médico.'
+        ) + '</p>');
+      }
       if (off.length) {
         var items = off.map(function (o) {
           return '<li>' + o.marker + ' — <strong>' + o.v + (o.unit ? ' ' + escapeHtml(o.unit) : '') + '</strong> (' +
@@ -931,9 +943,6 @@
         bits.push('<p>' + t('Lab values outside their reference range:', 'Valores laboratoriais fora da faixa de referência:') +
           '</p><ul class="ov-ai-list">' + items + '</ul>' +
           '<p><a href="#blood-urine">' + t('See blood &amp; urine panel', 'Ver painel de sangue e urina') + '</a></p>');
-      } else {
-        bits.push('<p>' + t('All blood &amp; urine values reviewed were within range.',
-          'Todos os valores de sangue e urina revisados estavam dentro da faixa de referência.') + '</p>');
       }
       if (imgCount) {
         bits.push('<p>' + imgCount + ' ' +
