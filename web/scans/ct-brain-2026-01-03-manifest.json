@@ -1,0 +1,27 @@
+{
+  "patient": "Joao Victor Creste Dias de Souza",
+  "patientSlug": "joao-creste",
+  "study": "Brain CT (non-contrast) — emergency, post-trauma",
+  "studySlug": "ct-brain-2026-01-03",
+  "date": "2026-01-03",
+  "modality": "CT",
+  "bodyPart": "brain",
+  "facility": "Hôpital Bichat–Claude Bernard, AP-HP Nord (Université de Paris) · Emergency dept",
+  "reportingDoctor": "Dr. Ahmed Tibaoui",
+  "requestingDoctor": "BCH C.MED — Urgences",
+  "examNumber": "30099223397",
+  "scanner": "GE Revolution Apex · DLP 1122.39 mGy·cm; CTDI 41.68 mGy",
+  "imagesAvailable": false,
+  "report": {
+    "pdf": "ct-brain-2026-01-03-report.pdf",
+    "reportingDoctor": "Dr. Ahmed Tibaoui",
+    "validatedAt": "2026-01-03T23:11:07",
+    "textFr": "Scanner cérébral. Indication: Chute. Traumatisme crânien. Technique: Sans injection. Résultats et conclusion: Hématome sous-dural frontal droit de 1,5 mm d'épaisseur maximale. Hémorragie méningée frontale droite minime associée à des contusions hémorragiques infracentimétriques. Le système ventriculaire est de taille et de morphologie normale. Les structures médianes sont en place. Les citernes de la base sont libres. Fracture frontale droite étendue au toit de l'orbite droit. Fracture disjonction maxillo-zygomatique droite étendue à la paroi latérale du sinus maxillaire droit. Hémosinus droit. Emphysème orbitaire droit. Compte-rendu validé le 03/01/2026 23:11:07 par Dr Ahmed Tibaoui.",
+    "textEn": "Brain CT (non-contrast). Indication: fall, head trauma. Findings: right frontal subdural haematoma, 1.5 mm maximum thickness; minimal right frontal subarachnoid (meningeal) haemorrhage with associated sub-centimetre haemorrhagic contusions. Ventricular system normal in size and morphology. Midline structures in place (no shift). Basal cisterns free. Extensive right frontal fracture extending to the roof of the right orbit. Right maxillo-zygomatic disjunction fracture extending to the lateral wall of the right maxillary sinus. Right hemosinus. Right orbital emphysema.",
+    "textPt": "TC de crânio (sem contraste). Indicação: queda, traumatismo cranioencefálico. Achados: hematoma subdural frontal direito, espessura máxima de 1,5 mm; hemorragia subaracnóidea (meníngea) frontal direita mínima associada a contusões hemorrágicas infracentimétricas. Sistema ventricular de tamanho e morfologia normais. Estruturas medianas centradas (sem desvio). Cisternas da base livres. Fratura frontal direita estendendo-se ao teto da órbita direita. Fratura com disjunção máxilo-zigomática direita estendendo-se à parede lateral do seio maxilar direito. Hemossinus à direita. Enfisema orbitário direito."
+  },
+  "aiFinding": {
+    "en": "This emergency brain CT, taken the night of the fall, shows bleeding inside the head that is small and was not pushing the brain out of position: a thin (1.5 mm) right frontal subdural collection and a small amount of surface (subarachnoid) bleeding with tiny brain bruises (contusions). Reassuringly, the ventricles, the midline and the basal cisterns were all normal — there was no mass effect or shift. Alongside the bleeding there were fractures of the right forehead / eye-socket (orbital roof) and the right cheekbone (maxillo-zygomatic), with blood in the right sinus (hemosinus) and a little air in the right eye socket (orbital emphysema). Injuries like these are typically managed with close observation and a short-interval follow-up scan to confirm the bleed is stable or resolving, plus neurosurgery and maxillofacial review for the fractures. This is a plain-language summary of the radiologist's report — not a new diagnosis; the acute care team at Hôpital Bichat managed this directly.",
+    "pt": "Esta TC de crânio de urgência, feita na noite da queda, mostra sangramentos dentro da cabeça que são pequenos e não estavam deslocando o cérebro: uma fina coleção subdural frontal direita (1,5 mm) e uma pequena quantidade de sangramento de superfície (subaracnóideo) com minúsculas contusões cerebrais. De forma tranquilizadora, os ventrículos, a linha média e as cisternas da base estavam normais — sem efeito de massa ou desvio. Junto ao sangramento havia fraturas da região frontal/órbita direita (teto da órbita) e do osso da face direito (máxilo-zigomático), com sangue no seio maxilar direito (hemossinus) e um pouco de ar na órbita direita (enfisema orbitário). Lesões como estas costumam ser conduzidas com observação atenta e uma TC de controle em curto intervalo para confirmar que o sangramento está estável ou regredindo, além de avaliação da neurocirurgia e da cirurgia maxilofacial para as fraturas. Este é um resumo em linguagem simples do laudo do radiologista — não um novo diagnóstico; a equipe de emergência do Hôpital Bichat conduziu o caso diretamente."
+  }
+}
