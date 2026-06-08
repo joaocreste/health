@@ -1149,36 +1149,49 @@
     );
   }
 
+  // Physical Health Overview = the canonical hub: three options (Vitals, Exams,
+  // Genetics). It does NOT show the data itself — Exams holds blood + imaging one
+  // click away. Each card carries a live count (or "no data yet"); empty options
+  // stay visible as the structural frame and open to a clean empty state.
   function renderPhysical(summary) {
+    var p = summary.patient || {};
     var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
-    var labs = summary.recent_labs || [];
-    var docs = (summary.recent_documents || []).filter(function (d) {
-      return ['lab_pdf', 'imaging_image', 'dicom_series', 'ecg_pdf', 'doctor_report', 'medication_csv', 'genetics_report'].indexOf(d.kind) !== -1;
-    });
-    var metrics = [
-      { label: t('Lab markers',     'Marcadores laboratoriais'), value: b.lab_results     || 0, href: 'physical-exams.html' },
-      { label: t('Imaging studies', 'Estudos de imagem'),        value: b.imaging_studies || 0, href: 'physical-exams.html' },
-      { label: t('Vitals days',     'Dias de vitais'),           value: b.vitals_days     || 0, href: 'physical-vitals.html' },
-      { label: t('ECG events',      'Eventos de ECG'),           value: b.ecg_events      || 0, href: 'physical-vitals.html' },
-      { label: t('Genetics (PGx)',  'Genética (PGx)'),           value: b.pgx_findings    || 0, href: 'physical-genetics.html' },
-      { label: t('Medications',     'Medicamentos'),             value: b.medications     || 0 },
-      { label: t('Supplements',     'Suplementos'),              value: b.supplements     || 0 },
-      { label: t('Encounters',      'Consultas'),                value: b.encounters      || 0 },
-      { label: t('Surgeries',       'Cirurgias'),                value: b.surgeries       || 0 },
-      { label: t('Injuries',        'Lesões'),                   value: b.injuries        || 0 },
-    ];
-    var extra =
-      (labs.length === 0 ? '' :
-        recentSection(t('Recent lab results', 'Resultados recentes'), labs.length, renderLabList(labs.slice(0, 8)))) +
-      (docs.length === 0 ? '' :
-        recentSection(t('Recent documents',   'Documentos recentes'), docs.length, renderDocList(docs.slice(0, 8))));
-    renderSectionView({
-      summary: summary, title: 'Physical',
-      eyebrow: t('Physical', 'Físico'),
-      metrics: metrics, extra: extra,
-      emptyHint: t('Nothing physical ingested yet. Drop lab PDFs, ECGs, imaging or vitals exports from Add data.',
-                   'Nada físico ingerido ainda. Envie PDFs de exames, ECGs, imagens ou exports de vitais em "Adicionar dados".'),
-    });
+    function statusPill(n, en, pt) {
+      return n > 0
+        ? '<span class="pill pill-info">' + n + ' ' + t(en, pt) + '</span>'
+        : '<span class="pill">' + t('No data yet', 'Sem dados ainda') + '</span>';
+    }
+    function card(href, en, pt, statusHtml, descEn, descPt) {
+      return '<a class="entry-card entry-card-overview" href="' + href + '">' +
+        '<div class="entry-title"><span class="lang-en">' + en + '</span><span class="lang-pt">' + pt + '</span></div>' +
+        '<div class="entry-status">' + statusHtml + '</div>' +
+        '<ul class="entry-bullets"><li><span class="lang-en">' + descEn + '</span><span class="lang-pt">' + descPt + '</span></li></ul>' +
+        '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
+      '</a>';
+    }
+    var labsN = b.lab_results || 0, imgN = b.imaging_studies || 0;
+    var examsStatus = '<span class="pill pill-info">' + labsN + ' ' + t('lab markers', 'marcadores') + '</span>' +
+                      (imgN ? ' <span class="pill pill-info">' + imgN + ' ' + t('imaging', 'imagem') + '</span>' : '');
+    var cards =
+      card('physical-vitals.html', 'Vitals', 'Vitais',
+        statusPill((b.vitals_days || 0) + (b.ecg_events || 0), 'records', 'registros'),
+        'Daily vitals, sleep, cardiovascular', 'Sinais vitais diários, sono, cardiovascular') +
+      card('physical-exams.html', 'Exams', 'Exames',
+        examsStatus,
+        'Blood &amp; urine + imaging (MRI, CT, echo)', 'Sangue e urina + imagem (RM, TC, eco)') +
+      card('physical-genetics.html', 'Genetics', 'Genética',
+        statusPill(b.pgx_findings || 0, 'findings', 'achados'),
+        'Pharmacogenomics', 'Farmacogenômica');
+    var view = document.createElement('main');
+    view.className = 'jc-overview jc-section';
+    view.innerHTML =
+      '<div class="ov-shell">' +
+        '<div class="ov-section-eyebrow">' + t('Physical', 'Físico') + '</div>' +
+        '<h1 class="ov-title">' + t('Physical Health Overview', 'Visão Geral da Saúde Física') + '</h1>' +
+        '<p class="ov-profile">' + (p.full_name ? escapeHtml(p.full_name) : '') + '</p>' +
+        '<div class="entry-grid entry-grid-overview">' + cards + '</div>' +
+      '</div>';
+    document.body.appendChild(view);
   }
 
   function renderVitals(summary) {
@@ -1751,34 +1764,6 @@
     }
     if (patient === SILVANA_CRESTE && section === 'physical-genetics') {
       renderEmptyShell(patient, 'Silvana Creste', t('Physical → Genetics', 'Físico → Genética'));
-      return;
-    }
-
-    // Generic DB patient, Physical landing: when the physical record is labs-only
-    // (no imaging/vitals/meds/etc.), land directly on the grouped exam panels
-    // instead of the 0-everywhere metric grid — so every blood panel is right
-    // there with no extra click into the Exams sub-tab. Mirrors the Paulo/Cristina
-    // short-circuit and the "bespoke over empty grid" rule. Falls back to the
-    // metric overview when the patient also has non-lab physical data to summarize.
-    if (section === 'physical') {
-      fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (summary) {
-          var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
-          var nonLab = (b.imaging_studies || 0) + (b.medications || 0) + (b.supplements || 0) +
-                       (b.encounters || 0) + (b.prescriptions || 0) + (b.vitals_days || 0) +
-                       (b.ecg_events || 0) + (b.pgx_findings || 0) + (b.surgeries || 0) +
-                       (b.injuries || 0) + (b.clinical_history || 0);
-          if ((b.lab_results || 0) > 0 && nonLab === 0) {
-            fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-              .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-              .then(function (e) { renderExams(e); decorateWithDashboard('physical'); decorateExamsWithAiOutliers(); })
-              .catch(function () { renderPhysical(summary); decorateWithDashboard('physical'); });
-          } else {
-            renderPhysical(summary); decorateWithDashboard('physical');
-          }
-        })
-        .catch(function () { renderEmptyShell(patient, null, t('Physical', 'Físico')); });
       return;
     }
 
