@@ -88,6 +88,209 @@
     return ' <span class="lab-flag ' + cls + '">' + escapeHtml(flag) + '</span>';
   }
 
+  /* ── Medication intelligence ───────────────────────────────────────
+     Two patient-friendly, de-identified knowledge bases, both keyed off
+     the patient's OWN medication + supplement list (so they activate from
+     real data and stay silent for patients who lack the relevant drugs):
+
+       1. MED_INTERACTIONS — cross-specialty interaction hints. The premise
+          is the silo problem: the cardiologist, endocrinologist and
+          psychiatrist each prescribe without seeing the full list, so an
+          interaction can hide in plain sight. Surfaced on the Summary card
+          and on any off-panel whose flagged markers implicate one of the
+          paired drugs.
+       2. MARKER_MED_EFFECTS — "this medication can move this marker". Lets an
+          out-of-range value read as an expected drug effect rather than a
+          new disease. Surfaced inline on each off marker.
+
+     Strings are authored literal HTML (trusted, no user input) and rendered
+     through t() at display time. Not a diagnosis — every card keeps its
+     "discuss with your doctor" disclaimer. */
+  var DRUG_DEFS = [
+    { id: 'clopidogrel',  rx: /clopidogrel|plavix|iscover/i,                                   oral: true },
+    { id: 'fluoxetine',   rx: /fluoxetin|verotina|prozac|daforin/i,                            oral: true },
+    { id: 'diltiazem',    rx: /diltiazem|balcor|cardizem|incoril/i,                            oral: true },
+    { id: 'losartan',     rx: /losartan|losartana|corus|cozaar|aradois/i,                      oral: true },
+    { id: 'valacyclovir', rx: /valacyclovir|valaciclovir|valtrex/i,                            oral: true },
+    { id: 'dobesilate',   rx: /dobesilate|dobesilato|dobeven|doxium/i,                         oral: true },
+    { id: 'tirzepatide',  rx: /tirzepatid[ae]|mounjaro|zepbound/i,                             oral: false },
+    { id: 'omega3',       rx: /omega[\s-]?3|fish[\s-]?oil|óleo de peixe|\bepa\b|\bdha\b/i },
+    { id: 'flaxseed',     rx: /flaxseed|linseed|linha[çc]a/i },
+    { id: 'vitamind',     rx: /vitamin\s*d\b|vitamina\s*d\b|colecalciferol|cholecalciferol|\bd3\b/i },
+    { id: 'b12',          rx: /\bb12\b|cobalamin|mecobalamin|cobalamina/i },
+    { id: 'magnesium',    rx: /magnesium|magn[ée]sio/i },
+  ];
+
+  // Build a Set of drug ids present in the patient's meds + supplements.
+  function detectDrugs(meds, supps) {
+    var names = []
+      .concat((meds  || []).map(function (m) { return String(m.name || ''); }))
+      .concat((supps || []).map(function (s) { return String(s.name || ''); }));
+    var set = {}; // plain object as a Set (older-engine safe)
+    DRUG_DEFS.forEach(function (d) {
+      if (names.some(function (n) { return d.rx.test(n); })) set[d.id] = true;
+    });
+    return set;
+  }
+  function has(set, id) { return !!set[id]; }
+  var ORAL_IDS = DRUG_DEFS.filter(function (d) { return d.oral; }).map(function (d) { return d.id; });
+
+  // Each interaction: explicit participant ids + a bilingual hint. The
+  // tirzepatide rule is special (it interacts with *any* oral medicine via
+  // delayed gastric emptying), so it carries an `anyOral` flag.
+  var MED_INTERACTIONS = [
+    { id: 'clopidogrel+fluoxetine', need: ['clopidogrel', 'fluoxetine'], text: {
+      en: '<strong>Clopidogrel + fluoxetine.</strong> Fluoxetine can blunt the liver step (CYP2C19) that switches clopidogrel on, which may weaken its clot-prevention. These usually come from different doctors — worth making sure the cardiologist and whoever prescribed the fluoxetine both know.',
+      pt: '<strong>Clopidogrel + fluoxetina.</strong> A fluoxetina pode reduzir a etapa hepática (CYP2C19) que ativa o clopidogrel, podendo enfraquecer sua proteção antiplaquetária. Costumam vir de médicos diferentes — vale garantir que o cardiologista e quem prescreveu a fluoxetina saibam.' } },
+    { id: 'clopidogrel+omega3', need: ['clopidogrel', 'omega3'], text: {
+      en: '<strong>Clopidogrel + fish-oil omega-3.</strong> Both reduce clotting; together they can add to a tendency to bruise or bleed.',
+      pt: '<strong>Clopidogrel + ômega-3 (óleo de peixe).</strong> Ambos reduzem a coagulação; juntos podem aumentar a tendência a hematomas ou sangramento.' } },
+    { id: 'diltiazem+fluoxetine', need: ['diltiazem', 'fluoxetine'], text: {
+      en: '<strong>Diltiazem + fluoxetine.</strong> Fluoxetine can raise diltiazem blood levels (shared liver enzymes), which may amplify its slowing of the heart rate and lowering of blood pressure.',
+      pt: '<strong>Diltiazem + fluoxetina.</strong> A fluoxetina pode elevar os níveis de diltiazem (enzimas hepáticas em comum), podendo acentuar a redução da frequência cardíaca e da pressão.' } },
+    { id: 'diltiazem+losartan', need: ['diltiazem', 'losartan'], text: {
+      en: '<strong>Diltiazem + losartan.</strong> Both lower blood pressure — together, watch for dizziness or readings that run low.',
+      pt: '<strong>Diltiazem + losartana.</strong> Ambos baixam a pressão — juntos, atenção a tonturas ou pressão muito baixa.' } },
+    { id: 'tirzepatide+oral', anyOral: true, text: {
+      en: '<strong>Tirzepatide (Mounjaro) + tablets taken by mouth.</strong> It slows stomach emptying, which can change how much and how fast oral medicines are absorbed — so a pill\'s effect, and any marker it moves, can shift.',
+      pt: '<strong>Tirzepatida (Mounjaro) + comprimidos via oral.</strong> Ela retarda o esvaziamento do estômago, podendo mudar quanto e com que rapidez os remédios orais são absorvidos — então o efeito de um comprimido, e qualquer marcador que ele altere, pode variar.' } },
+  ];
+  function interactionDrugs(it, set) {
+    if (it.anyOral) return ['tirzepatide'].concat(ORAL_IDS.filter(function (x) { return has(set, x); }));
+    return it.need.slice();
+  }
+  function interactionApplies(it, set) {
+    if (it.anyOral) return has(set, 'tirzepatide') && ORAL_IDS.some(function (x) { return has(set, x); });
+    return it.need.every(function (x) { return has(set, x); });
+  }
+  // Active interactions for this patient. `restrict` (a drug-id Set) keeps
+  // only interactions that touch one of those drugs — used to scope a panel
+  // card to the drugs its own flagged markers implicate.
+  function interactionsFor(set, restrict) {
+    return MED_INTERACTIONS.filter(function (it) {
+      if (!interactionApplies(it, set)) return false;
+      if (restrict) {
+        var ds = interactionDrugs(it, set);
+        if (!ds.some(function (x) { return restrict[x]; })) return false;
+      }
+      return true;
+    }).map(function (it) { return it.text; });
+  }
+
+  // marker (lowercased canonical) → list of { need, dir, text }. `need` is the
+  // drug id(s) that trigger the note (OR semantics); `dir` limits it to a
+  // high/low deviation. Returns { text, drugs } so the caller knows which of
+  // the patient's drugs were implicated (to scope panel-level interactions).
+  var MARKER_MED_EFFECTS = {
+    'egfr': [
+      { need: 'losartan', dir: 'low', text: {
+        en: 'Losartan (a blood-pressure ARB) eases the pressure inside the kidney\'s filters, so it can nudge eGFR down (and creatinine up) without meaning kidney damage — an expected drug effect to read in context.',
+        pt: 'A losartana (ARB para pressão) reduz a pressão dentro dos filtros renais, podendo abaixar a TFG (e elevar a creatinina) sem significar lesão renal — efeito esperado do remédio, a interpretar no contexto.' } },
+      { need: 'valacyclovir', dir: 'low', text: {
+        en: 'Valacyclovir is cleared by the kidneys and, especially with low fluid intake, can transiently affect kidney-filtration numbers.',
+        pt: 'O valaciclovir é eliminado pelos rins e, sobretudo com pouca ingestão de líquidos, pode afetar temporariamente os números de filtração renal.' } },
+    ],
+    'creatinine': [
+      { need: 'losartan', dir: 'high', text: {
+        en: 'Losartan can raise creatinine slightly by easing pressure in the kidney\'s filters — often an expected effect rather than new kidney injury.',
+        pt: 'A losartana pode elevar levemente a creatinina ao reduzir a pressão nos filtros renais — em geral efeito esperado, não lesão renal nova.' } },
+      { need: 'valacyclovir', dir: 'high', text: {
+        en: 'Valacyclovir is kidney-cleared and can transiently raise creatinine, more so if under-hydrated.',
+        pt: 'O valaciclovir é eliminado pelos rins e pode elevar a creatinina temporariamente, mais ainda se houver pouca hidratação.' } },
+    ],
+    'potassium': [
+      { need: 'losartan', dir: 'high', text: {
+        en: 'ARBs like losartan tend to nudge potassium up — usually mild, but worth keeping on the radar.',
+        pt: 'ARBs como a losartana tendem a elevar um pouco o potássio — geralmente leve, mas vale acompanhar.' } },
+    ],
+    'uric acid': [
+      { need: 'losartan', dir: 'low', text: {
+        en: 'Losartan mildly increases uric-acid excretion, which can lower its level.',
+        pt: 'A losartana aumenta levemente a excreção de ácido úrico, podendo reduzir seu nível.' } },
+    ],
+    'sodium': [
+      { need: 'fluoxetine', dir: 'low', text: {
+        en: 'SSRIs like fluoxetine can lower sodium (a mild SIADH effect), usually slightly.',
+        pt: 'ISRSs como a fluoxetina podem reduzir o sódio (efeito leve de SIADH), em geral discretamente.' } },
+    ],
+    'fasting glucose': [
+      { need: 'tirzepatide', dir: 'low', text: {
+        en: 'Tirzepatide (Mounjaro) lowers blood glucose by design — a low or improved reading is an expected treatment effect.',
+        pt: 'A tirzepatida (Mounjaro) reduz a glicose por desígnio — um valor baixo ou melhorado é efeito esperado do tratamento.' } },
+    ],
+    'hba1c': [
+      { need: 'tirzepatide', dir: 'low', text: {
+        en: 'Tirzepatide (Mounjaro) lowers HbA1c by design — a low or improved value reflects the treatment working.',
+        pt: 'A tirzepatida (Mounjaro) reduz a HbA1c por desígnio — um valor baixo ou melhorado reflete o tratamento funcionando.' } },
+    ],
+    'triglycerides': [
+      { need: 'omega3', dir: 'low', text: {
+        en: 'Fish-oil omega-3 lowers triglycerides — a low value can simply reflect the supplement.',
+        pt: 'O ômega-3 (óleo de peixe) reduz os triglicérides — um valor baixo pode apenas refletir o suplemento.' } },
+      { need: 'tirzepatide', dir: 'low', text: {
+        en: 'Tirzepatide also tends to lower triglycerides as weight and glucose improve.',
+        pt: 'A tirzepatida também tende a reduzir os triglicérides à medida que peso e glicose melhoram.' } },
+    ],
+    'ldl-c': [
+      { need: 'omega3', dir: 'high', text: {
+        en: 'High-dose fish-oil omega-3 can nudge LDL up a little even as it lowers triglycerides.',
+        pt: 'O ômega-3 em dose alta pode elevar um pouco o LDL mesmo reduzindo os triglicérides.' } },
+    ],
+    'alt': [
+      { need: ['diltiazem', 'fluoxetine'], dir: 'high', text: {
+        en: 'Diltiazem and fluoxetine can each occasionally raise liver enzymes — usually mild and reversible.',
+        pt: 'Diltiazem e fluoxetina podem, ocasionalmente, elevar enzimas hepáticas — em geral leve e reversível.' } },
+    ],
+    'ast': [
+      { need: ['diltiazem', 'fluoxetine'], dir: 'high', text: {
+        en: 'Diltiazem and fluoxetine can each occasionally raise liver enzymes — usually mild and reversible.',
+        pt: 'Diltiazem e fluoxetina podem, ocasionalmente, elevar enzimas hepáticas — em geral leve e reversível.' } },
+    ],
+    'platelets': [
+      { need: ['clopidogrel', 'fluoxetine'], dir: 'low', text: {
+        en: 'Clopidogrel and fluoxetine can each lower the platelet count or how well platelets work — relevant if you bruise or bleed easily.',
+        pt: 'Clopidogrel e fluoxetina podem reduzir a contagem ou a função das plaquetas — relevante se você tem hematomas ou sangramentos fáceis.' } },
+    ],
+    'aptt': [
+      { need: ['clopidogrel', 'omega3'], dir: 'high', text: {
+        en: 'A mildly long aPTT is most often a sampling or lab effect. Separately, your clopidogrel and fish-oil omega-3 raise bleeding tendency through platelet effects (not through this test) — useful context for whoever tracks your clotting.',
+        pt: 'Um TTPA pouco alongado costuma ser efeito de coleta ou laboratório. À parte, seu clopidogrel e o ômega-3 aumentam a tendência a sangramento por efeito nas plaquetas (não por este exame) — contexto útil para quem acompanha sua coagulação.' } },
+    ],
+    'vitamin d (25-oh)': [
+      { need: 'vitamind', dir: 'high', text: {
+        en: 'A high-normal or high vitamin D reflects your vitamin D3 supplement — worth confirming the dose is still right.',
+        pt: 'Uma vitamina D no limite alto ou alta reflete seu suplemento de vitamina D3 — vale confirmar se a dose ainda está adequada.' } },
+    ],
+    'vitamin b12': [
+      { need: 'b12', dir: 'high', text: {
+        en: 'A high B12 simply reflects your B12 supplement.',
+        pt: 'Uma B12 alta reflete apenas seu suplemento de B12.' } },
+    ],
+    'calcium': [
+      { need: 'vitamind', dir: 'high', text: {
+        en: 'Vitamin D3 supplementation increases calcium absorption and can mildly raise blood calcium.',
+        pt: 'O suplemento de vitamina D3 aumenta a absorção de cálcio e pode elevar levemente o cálcio no sangue.' } },
+    ],
+    'magnesium': [
+      { need: 'magnesium', dir: 'high', text: {
+        en: 'A high magnesium reflects your magnesium supplement.',
+        pt: 'Um magnésio alto reflete seu suplemento de magnésio.' } },
+    ],
+  };
+  // Returns [{ text:{en,pt}, drugs:[ids] }] — drug-driven explanations for one
+  // off marker. drugs lists which of the patient's drugs were implicated.
+  function medEffectsFor(markerKey, dir, set) {
+    var defs = MARKER_MED_EFFECTS[markerKey] || [];
+    var out = [];
+    defs.forEach(function (d) {
+      if (d.dir && d.dir !== dir) return;
+      var needs = Array.isArray(d.need) ? d.need : [d.need];
+      var hit = needs.filter(function (x) { return has(set, x); });
+      if (hit.length) out.push({ text: d.text, drugs: hit });
+    });
+    return out;
+  }
+
   function injectChangeButton() {
     var signOut = document.querySelector('.signout-btn');
     if (!signOut) return;
@@ -840,6 +1043,9 @@
     var panels = regroupByTaxonomy(exams.panels || []);
     var docs = exams.lab_documents || [];
     var imaging = exams.imaging || [];
+    // Drugs present in this patient's record drive the AI cards' interaction
+    // and "meds that move this marker" hints. Empty for patients with no meds.
+    var drugSet = detectDrugs(exams.medications, exams.supplements);
 
     var panelsHtml = panels.length === 0
       ? '<div class="ov-empty">' +
@@ -980,7 +1186,7 @@
       (pnls || []).forEach(function (pn) {
         (pn.markers || []).forEach(function (m) {
           var dir = dirOf(m);
-          if (dir) off.push({ marker: m.marker_html || escapeHtml(m.marker), v: m.latest_value, unit: m.unit || '', dir: dir });
+          if (dir) off.push({ marker: m.marker_html || escapeHtml(m.marker), key: String(m.marker || '').toLowerCase(), v: m.latest_value, unit: m.unit || '', dir: dir });
         });
       });
       return off;
@@ -1002,14 +1208,18 @@
                : t('This value is outside its reference range — worth a mention to your doctor.',
                    'Este valor está fora da faixa de referência — vale comentar com seu médico.');
     }
-    // Possible reasons drawn ONLY from the patient's own record. Maria's record has
-    // no meds/supplements/genetics/conditions to correlate against, so per the
-    // sparse-record rule the card says so plainly rather than inventing a cause.
+    // Possible reasons drawn ONLY from the patient's own record. When the
+    // patient has meds/supplements, the per-marker notes above already name the
+    // specific drug links, so this footer just points there; otherwise it keeps
+    // the sparse-record line (no meds to correlate against, so say so plainly).
+    function anyDrug() { return Object.keys(drugSet).length > 0; }
     function labReasonsHtml() {
-      return '<p class="ov-ai-reasons">' +
-        t('Possible reasons: your current records show no medications, supplements, genetics, or related conditions that would explain this. Worth discussing with your doctor.',
-          'Possíveis causas: seus registros atuais não mostram medicamentos, suplementos, genética ou condições relacionadas que expliquem isto. Vale conversar com seu médico.') +
-        '</p>';
+      var body = anyDrug()
+        ? t('Possible reasons: some of these can be expected effects of your current medications or supplements — see the medication notes above. Worth confirming with your doctor.',
+            'Possíveis causas: alguns destes podem ser efeitos esperados dos seus medicamentos ou suplementos atuais — veja as notas de medicação acima. Vale confirmar com seu médico.')
+        : t('Possible reasons: your current records show no medications, supplements, genetics, or related conditions that would explain this. Worth discussing with your doctor.',
+            'Possíveis causas: seus registros atuais não mostram medicamentos, suplementos, genética ou condições relacionadas que expliquem isto. Vale conversar com seu médico.');
+      return '<p class="ov-ai-reasons">' + body + '</p>';
     }
     function examsSummaryHtml(off, imgCount) {
       var bits = [];
@@ -1027,12 +1237,29 @@
       }
       if (off.length) {
         var items = off.map(function (o) {
+          var fx = medEffectsFor(o.key, o.dir, drugSet);
+          var fxHtml = fx.length
+            ? ' <span class="ov-ai-med">' + t('Medication note: ', 'Nota de medicação: ') +
+                fx.map(function (e) { return t(e.text.en, e.text.pt); }).join(' ') + '</span>'
+            : '';
           return '<li>' + o.marker + ' — <strong>' + o.v + (o.unit ? ' ' + escapeHtml(o.unit) : '') + '</strong> (' +
-            (o.dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ')</li>';
+            (o.dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ')' + fxHtml + '</li>';
         }).join('');
         bits.push('<p>' + t('Lab values outside their reference range:', 'Valores laboratoriais fora da faixa de referência:') +
           '</p><ul class="ov-ai-list">' + items + '</ul>' +
           '<p><a href="#blood-urine">' + t('See blood &amp; urine panel', 'Ver painel de sangue e urina') + '</a></p>');
+      }
+      // Cross-specialty interaction check — the silo problem made explicit:
+      // each prescriber sees only their own slice, so a pairing can hide.
+      var inter = interactionsFor(drugSet);
+      if (inter.length) {
+        bits.push('<p class="ov-ai-interact-lead"><strong>' +
+          t('Cross-specialty check — possible medication interactions',
+            'Checagem entre especialidades — possíveis interações medicamentosas') + '</strong></p>' +
+          '<p>' + t('These surface because different specialists may each prescribe without seeing your full list. Not necessarily a problem — worth confirming with your doctor or pharmacist:',
+            'Aparecem porque especialistas diferentes podem prescrever sem ver sua lista completa. Não necessariamente um problema — vale confirmar com seu médico ou farmacêutico:') +
+          '</p><ul class="ov-ai-list ov-ai-interact">' +
+          inter.map(function (x) { return '<li>' + t(x.en, x.pt) + '</li>'; }).join('') + '</ul>');
       }
       if (imgCount) {
         bits.push('<p>' + imgCount + ' ' +
@@ -1058,15 +1285,30 @@
         if (!offM.length) return;
         var el = gridPanels[i];
         if (!el || el.querySelector('.ov-ai-card')) return;
+        var implicated = {}; // drug ids this panel's flagged markers point at
         var lis = offM.map(function (m) {
           var dir = dirOf(m);
+          var fx = medEffectsFor(String(m.marker || '').toLowerCase(), dir, drugSet);
+          var fxHtml = fx.map(function (e) {
+            e.drugs.forEach(function (id) { implicated[id] = true; });
+            return ' <span class="ov-ai-med">' + t('Medication note: ', 'Nota de medicação: ') + t(e.text.en, e.text.pt) + '</span>';
+          }).join('');
           return '<li><strong>' + (m.marker_html || escapeHtml(m.marker)) + '</strong> (' +
-            (dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ') — ' + labExpl(m) + '</li>';
+            (dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ') — ' + labExpl(m) + fxHtml + '</li>';
         }).join('');
+        // Interactions scoped to the drugs THIS panel's off markers implicate,
+        // so the cross-specialty hint lands where it's relevant.
+        var panelInter = Object.keys(implicated).length ? interactionsFor(drugSet, implicated) : [];
+        var interHtml = panelInter.length
+          ? '<p class="ov-ai-interact-lead"><strong>' +
+              t('Interactions to flag across your specialists', 'Interações a sinalizar entre seus especialistas') + '</strong></p>' +
+              '<ul class="ov-ai-list ov-ai-interact">' +
+              panelInter.map(function (x) { return '<li>' + t(x.en, x.pt) + '</li>'; }).join('') + '</ul>'
+          : '';
         var card = document.createElement('div');
         card.className = 'ov-ai-card';
         card.innerHTML = amberCardHtml(t('What this can mean', 'O que isto pode significar'),
-          '<ul class="ov-ai-list">' + lis + '</ul>' + labReasonsHtml());
+          '<ul class="ov-ai-list">' + lis + '</ul>' + interHtml + labReasonsHtml());
         var bodyEl = el.querySelector('.lab-panel-body') || el;
         bodyEl.appendChild(card);
       });
@@ -1459,6 +1701,10 @@
       '.ov-ai-body a { color: #B8954A; }',
       '.ov-ai-list { margin: 4px 0 8px 18px; }',
       '.ov-ai-reasons { margin: 8px 0 0; font-size: 12.5px; color: #1E2D3D; }',
+      '.ov-ai-med { display: block; margin-top: 3px; font-size: 12px; color: #6B5418; }',
+      '.ov-ai-med::before { content: "\\1F48A\\00A0"; }',
+      '.ov-ai-interact-lead { margin: 12px 0 4px; padding-top: 10px; border-top: 1px dashed #E6CF8E; font-size: 13px; color: #0D1B2A; }',
+      '.ov-ai-interact li { margin-bottom: 5px; }',
       '.ov-ai-disc { margin-top: 10px; font-size: 11px; color: #7A8FA6; }',
       '.img-report { margin: 18px 0 4px; }',
       '.img-report-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0 0 8px; }',

@@ -335,7 +335,7 @@ async function handlePatientExams(request, env) {
     const patient = patientRows[0];
     const pid = patient.id;
 
-    const [labs, labDocs, imaging] = await Promise.all([
+    const [labs, labDocs, imaging, medications, supplements] = await Promise.all([
       sql`
         SELECT panel, marker, value, value_text, unit, ref_low, ref_high, flag,
                taken_at, laboratory, requesting_doctor, source_blob_key
@@ -356,6 +356,21 @@ async function handlePatientExams(request, env) {
         FROM imaging_studies
         WHERE patient_id = ${pid}
         ORDER BY study_date DESC
+      `,
+      // Meds + supplements travel with the exams payload so the AI cards can flag
+      // cross-specialty interactions and drug-driven marker shifts inline.
+      sql`
+        SELECT name, dose, frequency, daily_dose_amount, daily_dose_unit,
+               drug_class, status, note, started_at, ended_at
+        FROM medications
+        WHERE patient_id = ${pid}
+        ORDER BY (status = 'active') DESC, name ASC
+      `,
+      sql`
+        SELECT name, dose, started_at, ended_at
+        FROM supplements
+        WHERE patient_id = ${pid}
+        ORDER BY name ASC
       `,
     ]);
 
@@ -395,6 +410,8 @@ async function handlePatientExams(request, env) {
       panels: groupedPanels,
       lab_documents: labDocs,
       imaging,
+      medications,
+      supplements,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Exams query failed: ${e.message}`);
