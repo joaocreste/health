@@ -169,7 +169,11 @@ const ei = html.indexOf(endA);
 if (si < 0 || ei < 0 || ei <= si) throw new Error("detail-section anchors not found");
 const before = html.slice(0, si);
 const after = html.slice(ei);
-const newHtml = before + out + "\n" + after;
+// The replaced span ran from the first detail panel up to (not including) the
+// historical-comparison block, which in the source includes the </div> that
+// CLOSES .lab-panel-grid. Re-emit it so the historical table stays OUTSIDE the
+// grid (full-width, below all sample cards) rather than trapped in a grid cell.
+const newHtml = before + out + "</div>\n\n" + after;
 
 console.log("── build-joao-detailed-panels ──");
 console.log("panels generated :", PANELS.length);
