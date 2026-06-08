@@ -820,7 +820,7 @@
         body = '<div class="ov-section-note">' +
           t('Report only — no image series in this study.', 'Apenas laudo — sem série de imagens neste exame.') + '</div>';
       }
-      return '<div class="img-study">' +
+      return '<div class="img-study" data-manifest="' + escapeHtml(s.manifest_blob_key || '') + '">' +
         '<h3 class="img-study-title">' + imagingTitle(s) + ' <span class="ov-count-inline">' + meta + '</span></h3>' +
         reportBtn + body +
       '</div>';
@@ -858,7 +858,6 @@
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
         '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
-        '<section class="ov-ai-summary" id="exams-ai-summary"></section>' +
         '<h2 class="ov-panels-title" id="blood-urine">' + panelsTitleInner + '</h2>' +
         panelsHtml +
         comparisonHtml +
@@ -935,9 +934,6 @@
       return amberCardHtml(t('AI Summary', 'Resumo por IA'), bits.join(''));
     }
     function fillExamsAi(pnls, imgs) {
-      var summaryEl = document.getElementById('exams-ai-summary');
-      var off = offFromPanels(pnls);
-
       // Inline grouped amber card per blood panel that has out-of-range values.
       var gridPanels = document.querySelectorAll('.lab-panel-grid > .lab-panel');
       (pnls || []).forEach(function (pn, i) {
@@ -958,29 +954,36 @@
         bodyEl.appendChild(card);
       });
 
+      // Per imagery study: doctor's report TEXT below the viewer, then the AI card
+      // (Joao's structure: viewer -> radiologist's report -> impression).
       var withMan = (imgs || []).filter(function (s) { return s.manifest_blob_key; });
       Promise.all(withMan.map(function (s) {
-        return fetch(s.manifest_blob_key).then(function (r) { return r.ok ? r.json() : null; })
+        return fetch(s.manifest_blob_key + '?v=2').then(function (r) { return r.ok ? r.json() : null; })
           .catch(function () { return null; }).then(function (m) { return { s: s, m: m }; });
       })).then(function (res) {
-        var imgFindings = [];
         res.forEach(function (rr) {
-          if (!rr.m || !rr.m.aiFinding) return;
-          var title = rr.m.studyPt ? t(escapeHtml(rr.m.study || ''), escapeHtml(rr.m.studyPt))
-                                   : escapeHtml(rr.s.modality || '');
-          imgFindings.push(title);
-          var sel = (window.CSS && CSS.escape) ? CSS.escape(rr.s.manifest_blob_key) : rr.s.manifest_blob_key;
-          var v = document.querySelector('.ct-viewer[data-manifest^="' + sel + '"]');
-          var host = v && v.closest ? v.closest('.img-study') : null;
-          if (host && !host.querySelector('.ov-ai-card')) {
+          if (!rr.m) return;
+          var host = document.querySelector('.img-study[data-manifest="' + rr.s.manifest_blob_key + '"]');
+          if (!host) return;
+          var rep = rr.m.report && (Array.isArray(rr.m.report) ? rr.m.report[0] : rr.m.report);
+          if (rep && rep.textPt && !host.querySelector('.img-report')) {
+            var doc = rr.m.reportingDoctor
+              ? '<p class="img-report-doc">' + t('Reported by', 'Laudo por') + ': ' + escapeHtml(rr.m.reportingDoctor) + '</p>'
+              : '';
+            var rd = document.createElement('div');
+            rd.className = 'img-report';
+            rd.innerHTML = '<h4 class="img-report-h">' + t('Radiologist\'s report', 'Laudo do radiologista') + '</h4>' +
+              '<div class="list-card"><p class="img-report-text">' + escapeHtml(rep.textPt) + '</p>' + doc + '</div>';
+            host.appendChild(rd);
+          }
+          if (rr.m.aiFinding && !host.querySelector('.ov-ai-card')) {
             var card = document.createElement('div');
             card.className = 'ov-ai-card';
-            card.innerHTML = amberCardHtml(t('Imaging finding', 'Achado de imagem'),
+            card.innerHTML = amberCardHtml(t('What this can mean', 'O que isto pode significar'),
               t(escapeHtml(rr.m.aiFinding.en), escapeHtml(rr.m.aiFinding.pt)));
             host.appendChild(card);
           }
         });
-        if (summaryEl) summaryEl.innerHTML = examsSummaryHtml(off, imgFindings);
       });
     }
 
@@ -1161,8 +1164,12 @@
         ? '<span class="pill pill-info">' + n + ' ' + t(en, pt) + '</span>'
         : '<span class="pill">' + t('No data yet', 'Sem dados ainda') + '</span>';
     }
-    function card(href, en, pt, statusHtml, descEn, descPt) {
-      return '<a class="entry-card entry-card-overview" href="' + href + '">' +
+    var SVG = 'viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"';
+    var ICON_VITALS = '<svg class="entry-icon" ' + SVG + '><circle cx="32" cy="32" r="22" fill="rgba(36,78,110,0.10)" stroke="#244E6E" stroke-width="1.5"/><polyline points="14,32 22,32 26,22 30,42 34,28 38,36 42,32 50,32" stroke="#B8860B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var ICON_EXAMS = '<svg class="entry-icon" ' + SVG + '><line x1="20" y1="8" x2="44" y2="8" stroke="#244E6E" stroke-width="2" stroke-linecap="round"/><path d="M22 8 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 8 Z" fill="rgba(36,78,110,0.10)" stroke="#244E6E" stroke-width="1.5" stroke-linejoin="round"/><path d="M22 34 L22 46 C22 52 26 56 32 56 C38 56 42 52 42 46 L42 34 Z" fill="rgba(184,134,11,0.55)"/></svg>';
+    var ICON_GEN = '<svg class="entry-icon" ' + SVG + '><path d="M24 10 C44 22 24 42 44 54" stroke="#244E6E" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M44 10 C24 22 44 42 24 54" stroke="#B8860B" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="27" y1="18" x2="41" y2="18" stroke="#7A8FA6" stroke-width="1.5"/><line x1="29" y1="32" x2="39" y2="32" stroke="#7A8FA6" stroke-width="1.5"/><line x1="27" y1="46" x2="41" y2="46" stroke="#7A8FA6" stroke-width="1.5"/></svg>';
+    function card(icon, href, en, pt, statusHtml, descEn, descPt) {
+      return '<a class="entry-card entry-card-overview" href="' + href + '">' + icon +
         '<div class="entry-title"><span class="lang-en">' + en + '</span><span class="lang-pt">' + pt + '</span></div>' +
         '<div class="entry-status">' + statusHtml + '</div>' +
         '<ul class="entry-bullets"><li><span class="lang-en">' + descEn + '</span><span class="lang-pt">' + descPt + '</span></li></ul>' +
@@ -1173,13 +1180,13 @@
     var examsStatus = '<span class="pill pill-info">' + labsN + ' ' + t('lab markers', 'marcadores') + '</span>' +
                       (imgN ? ' <span class="pill pill-info">' + imgN + ' ' + t('imaging', 'imagem') + '</span>' : '');
     var cards =
-      card('physical-vitals.html', 'Vitals', 'Vitais',
+      card(ICON_VITALS, 'physical-vitals.html', 'Vitals', 'Vitais',
         statusPill((b.vitals_days || 0) + (b.ecg_events || 0), 'records', 'registros'),
         'Daily vitals, sleep, cardiovascular', 'Sinais vitais diários, sono, cardiovascular') +
-      card('physical-exams.html', 'Exams', 'Exames',
+      card(ICON_EXAMS, 'physical-exams.html', 'Exams', 'Exames',
         examsStatus,
         'Blood &amp; urine + imaging (MRI, CT, echo)', 'Sangue e urina + imagem (RM, TC, eco)') +
-      card('physical-genetics.html', 'Genetics', 'Genética',
+      card(ICON_GEN, 'physical-genetics.html', 'Genetics', 'Genética',
         statusPill(b.pgx_findings || 0, 'findings', 'achados'),
         'Pharmacogenomics', 'Farmacogenômica');
     var view = document.createElement('main');
@@ -1315,6 +1322,10 @@
       '.ov-ai-body a { color: #B8954A; }',
       '.ov-ai-list { margin: 4px 0 8px 18px; }',
       '.ov-ai-disc { margin-top: 10px; font-size: 11px; color: #7A8FA6; }',
+      '.img-report { margin: 18px 0 4px; }',
+      '.img-report-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0 0 8px; }',
+      '.img-report-text { font-size: 13px; line-height: 1.55; color: #1E2D3D; white-space: pre-line; margin: 0; }',
+      '.img-report-doc { font-size: 11px; color: #7A8FA6; margin: 8px 0 0; }',
       '.ov-list { list-style: none; padding: 0; margin: 0; }',
       '.ov-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #EFEBE3; font-size: 13px; }',
       '.ov-list li:first-child { border-top: none; }',

@@ -7,7 +7,7 @@
   "date": "2026-05-14",
   "modality": "MRI",
   "facility": null,
-  "reportingDoctor": null,
+  "reportingDoctor": "Dr(a). Marcos Felippe de Paula Correa",
   "requestingDoctor": null,
   "ways": [
     {
@@ -440,7 +440,7 @@
     "match": {},
     "pdf": "report.pdf",
     "textEn": null,
-    "textPt": null,
+    "textPt": "Técnica:\nSequências ponderadas em T1 e T2, em aquisições multiplanares.\nAnálise:\nRotura completa dos tendões isquiotibiais na origem na tuberosidade isquiática, que apresenta edema\nósseo. Alterações degenerativas dos cotos tendíneos que apresentam-se heterogêneos e com\ncontornos irregulares, com retração medindo cerca de 2,3 cm do componente semimembranoso e 4,8\ncm do componente conjunto. Associa-se hematoma (volume estimado em 7 ml) na área de\ndescontinuidade tendínea e nos planos adiposos adjacentes. O processo inflamatório houve\nparcialmente o trajeto do nervo ciático adjacente, que permanece de continuidade e sinal preservado de\nseus fascículos.\nTendinopatia e peritendinite dos glúteos médio, sem roturas, associado edema peritrocantérico.\nAlterações degenerativas da articulação coxofemoral caracterizado por afilamento do revestimento\ncondral e osteófitos marginais. Afilamento / indefinição degenerativa do ligamento redondo.\nNão há sinais de fraturas ou de lesões ósseas focais com características agressivas.\nAlterações degenerativas da sínfise púbica com osteófitos marginais, espessamentos\ncapsuloligamentar e edema subcondral.\nDemais estruturas musculotendíneas e ósseas com morfologia dentro da normalidade.\nNão se identificam alterações no trajeto dos feixes neurovasculares. Artroplastia do joelho esquerdo.\nAchados adicionais: Tendinopatia com roturas parciais na origem dos isquiotibiais à direita. Alterações\ndegenerativas da articulação coxofemoral direita. Pequena distensão da bursa trocantérica direita.\nDerrame articular com espessamento sinovial no joelho direito.",
     "aiSummary": null
   },
   "aiFinding": {

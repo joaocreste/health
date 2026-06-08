@@ -7,7 +7,7 @@
   "date": "2026-05-14",
   "modality": "MRI",
   "facility": null,
-  "reportingDoctor": null,
+  "reportingDoctor": "Dr(a). Marcos Felippe de Paula Correa",
   "requestingDoctor": null,
   "ways": [
     {
@@ -312,7 +312,7 @@
     "match": {},
     "pdf": "report.pdf",
     "textEn": null,
-    "textPt": null,
+    "textPt": "Técnica:\nSequências ponderadas em T1 e T2, em aquisições multiplanares.\nAnálise:\nCorpos vertebrais alinhados, com altura e sinal da medular óssea conservados, apresentando\nosteófitos marginais. Herniações intrassomáticas (Schmorl) e alteração de sinal degenerativa do tipo\nModic I (edema) esparsos pelos platôs vertebrais, mais proeminente na margem lateral esquerda dos\nplatôs vertebrais L4-L5.\nAusência de fraturas ou de lesões ósseas focais com características agressivas.\nDiscopatia degenerativa multissegmentar.\nNível D12-L1: abaulamento discal imprimindo o saco dural.\nNível L1-L2: abaulamento discal com compressão dural. Hipertrofia das interapofisárias.\nNível L2-L3: abaulamento discal com compressão dural e insinuação às bases foraminais. Hipertrofia\ndas interapofisárias.\nNível L3-L4: abaulamento discal com compressão dural e insinuação às bases foraminais, mais\nacentuada à direita. Hipertrofia das interapofisárias.\nNível L4-L5: fissura do ânulo fibroso e abaulamento discal determinando compressão dural e\napresentando complexo disco-osteofitário foraminal / extraforaminal esquerdo tocando a raiz\nemergente L4. Há também, discreta insinuação disco-osteofitária base foraminal direita. Hipertrofia das\ninterapofisárias e espessamento ligamentos amarelos, mais acentuados à esquerda. Tênue edema\nósseo facetário à direita.\nNível L5-S1: artrose das interapofisárias.\nCanal vertebral e demais forames intervertebrais com dimensões preservadas.\nCone medular com forma e sinal normais na transição toracolombar.\nRaízes da cauda equina de distribuição anatômica no interior do saco dural. Cistos perirradiculares\n(Tarlov) nos níveis de S2-S3 com discreta remodelação óssea associada.\nAlterações degenerativas das sacroilíacas com osteófitos marginais.\nHipotrofia e lipossubstituição parcial da musculatura paravertebral posterior.",
     "aiSummary": null
   },
   "aiFinding": {
