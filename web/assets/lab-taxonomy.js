@@ -30,8 +30,11 @@
     { key: 'minerals',    en: 'Minerals & Electrolytes',                 pt: 'Minerais e eletrólitos' },
     { key: 'iron',        en: 'Iron Studies',                            pt: 'Metabolismo do ferro' },
     { key: 'thyroid',     en: 'Thyroid',                                 pt: 'Tireoide' },
+    { key: 'hormonal',    en: 'Hormonal & Endocrine',                    pt: 'Hormônios e endócrino' },
     { key: 'vitamins',    en: 'Vitamins & Metabolic Markers',            pt: 'Vitaminas e marcadores metabólicos' },
+    { key: 'inflammation', en: 'Inflammation & Immune Markers',          pt: 'Inflamação e marcadores imunes' },
     { key: 'serology',    en: 'Serology',                                pt: 'Sorologia' },
+    { key: 'tumor',       en: 'Tumor Markers',                           pt: 'Marcadores tumorais' },
     { key: 'urine',       en: 'Urinalysis (EAS) & Uroculture',           pt: 'Sumário de urina (EAS) e urocultura' },
     { key: 'other',       en: 'Other markers',                           pt: 'Outros marcadores' },
   ];
@@ -107,20 +110,47 @@
     // ── Thyroid ──
     'TSH':                       { en: 'TSH', pt: 'TSH (hormônio tireoestimulante)', panel: 'thyroid' },
     'Free T4':                   { en: 'Free T4', pt: 'T4 livre', panel: 'thyroid' },
+    'Free T3':                   { en: 'Free T3', pt: 'T3 livre', panel: 'thyroid' },
+    'Total T4':                  { en: 'Total T4 (thyroxine)', pt: 'T4 total (tiroxina)', panel: 'thyroid' },
+    'Total T3':                  { en: 'Total T3 (triiodothyronine)', pt: 'T3 total (triiodotironina)', panel: 'thyroid' },
     'Anti-TPO':                  { en: 'Anti-TPO antibodies', pt: 'Anti-TPO (antiperoxidase)', panel: 'thyroid' },
     'Anti-thyroglobulin antibodies': { en: 'Anti-Thyroglobulin antibodies', pt: 'Anti-tireoglobulina', panel: 'thyroid' },
+    // ── Hormonal & endocrine ──
+    'Testosterone (total)':      { en: 'Testosterone (total)', pt: 'Testosterona total', panel: 'hormonal' },
+    'Testosterone (free)':       { en: 'Testosterone (free)', pt: 'Testosterona livre', panel: 'hormonal' },
+    'SHBG':                      { en: 'SHBG', pt: 'SHBG (globulina ligadora de hormônios sexuais)', panel: 'hormonal' },
+    'Estradiol':                 { en: 'Estradiol', pt: 'Estradiol', panel: 'hormonal' },
+    'Progesterone':              { en: 'Progesterone', pt: 'Progesterona', panel: 'hormonal' },
+    'FSH':                       { en: 'FSH (follicle-stimulating hormone)', pt: 'FSH (hormônio folículo-estimulante)', panel: 'hormonal' },
+    'LH':                        { en: 'LH (luteinizing hormone)', pt: 'LH (hormônio luteinizante)', panel: 'hormonal' },
+    'Prolactin':                 { en: 'Prolactin', pt: 'Prolactina', panel: 'hormonal' },
+    'DHEA-S':                    { en: 'DHEA-S', pt: 'DHEA-S (sulfato de dehidroepiandrosterona)', panel: 'hormonal' },
+    'Cortisol':                  { en: 'Cortisol', pt: 'Cortisol', panel: 'hormonal' },
+    'PTH':                       { en: 'PTH (parathyroid hormone)', pt: 'PTH (paratormônio)', panel: 'hormonal' },
+    'IGF-1':                     { en: 'IGF-1', pt: 'IGF-1 (fator de crescimento insulínico)', panel: 'hormonal' },
     // ── Vitamins ──
     'Vitamin D (25-OH)':         { en: 'Vitamin D (25-OH)', pt: 'Vitamina D (25-OH)', panel: 'vitamins' },
     'Vitamin B12':               { en: 'Vitamin B12', pt: 'Vitamina B12', panel: 'vitamins' },
     'Folate':                    { en: 'Folate', pt: 'Ácido fólico', panel: 'vitamins' },
+    'Homocysteine':              { en: 'Homocysteine', pt: 'Homocisteína', panel: 'vitamins' },
+    // ── Inflammation & immune ──
+    'CRP':                       { en: 'C-Reactive Protein (CRP)', pt: 'Proteína C-reativa (PCR)', panel: 'inflammation' },
+    'hs-CRP':                    { en: 'hs-CRP (high-sensitivity)', pt: 'PCR ultrassensível', panel: 'inflammation' },
+    'ESR':                       { en: 'ESR (erythrocyte sedimentation rate)', pt: 'VHS (velocidade de hemossedimentação)', panel: 'inflammation' },
     // ── Serology ──
     'Hepatitis B surface antigen (HBsAg)': { en: 'Hepatitis B surface antigen (HBsAg)', pt: 'HBsAg (antígeno de superfície da hepatite B)', panel: 'serology' },
     'Anti-HBc Total (IgM+IgG)':  { en: 'Anti-HBc Total (IgM+IgG)', pt: 'Anti-HBc total (IgM+IgG)', panel: 'serology' },
     'Hepatitis C antibody (Anti-HCV)': { en: 'Hepatitis C antibody (Anti-HCV)', pt: 'Anti-HCV (hepatite C)', panel: 'serology' },
+    // ── Tumor markers ──
+    'PSA total':                 { en: 'PSA (total)', pt: 'PSA total (antígeno prostático específico)', panel: 'tumor' },
+    'PSA free':                  { en: 'PSA (free)', pt: 'PSA livre', panel: 'tumor' },
+    'CEA':                       { en: 'CEA (carcinoembryonic antigen)', pt: 'CEA (antígeno carcinoembrionário)', panel: 'tumor' },
+    'AFP':                       { en: 'AFP (alpha-fetoprotein)', pt: 'AFP (alfafetoproteína)', panel: 'tumor' },
     // ── Urinalysis (canonical keys carry "(urine)") ──
     'Specific gravity (urine)':  { en: 'Specific Gravity', pt: 'Densidade', panel: 'urine' },
     'pH (urine)':                { en: 'pH', pt: 'pH', panel: 'urine' },
     'Color (urine)':             { en: 'Color', pt: 'Cor', panel: 'urine' },
+    'Appearance (urine)':        { en: 'Appearance', pt: 'Aspecto', panel: 'urine' },
     'Protein (urine)':           { en: 'Protein', pt: 'Proteínas', panel: 'urine' },
     'Glucose (urine)':           { en: 'Glucose', pt: 'Glicose', panel: 'urine' },
     'Ketones (urine)':           { en: 'Ketones', pt: 'Corpos cetônicos', panel: 'urine' },
@@ -155,6 +185,7 @@
       if (/gravity|densidade/.test(low)) return 'Specific gravity (urine)';
       if (/^urine ph$|^ph(\s|$|\s*\(urine)/.test(low) || low === 'ph') return 'pH (urine)';
       if (/colou?r|cor\b/.test(low)) return 'Color (urine)';
+      if (/appearance|aspecto/.test(low)) return 'Appearance (urine)';
       if (/protein|proteína/.test(low)) return 'Protein (urine)';
       if (/glucose|glicose/.test(low)) return 'Glucose (urine)';
       if (/keton|cetônic|cetona/.test(low)) return 'Ketones (urine)';
