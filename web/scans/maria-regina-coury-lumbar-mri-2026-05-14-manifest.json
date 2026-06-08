@@ -314,5 +314,9 @@
     "textEn": null,
     "textPt": null,
     "aiSummary": null
+  },
+  "aiFinding": {
+    "en": "This scan notes small fluid-filled nerve-root cysts (Tarlov cysts) at the S2-S3 level, mild wear (degenerative changes) of the sacroiliac joints, and some thinning of the deep muscles along the spine. These are common findings that usually develop slowly and are frequently seen with age; on their own they don't point to anything urgent. Worth reviewing with your doctor in the context of any back or leg symptoms.",
+    "pt": "Este exame observa pequenos cistos de raiz nervosa cheios de líquido (cistos de Tarlov) no nível S2-S3, desgaste leve (alterações degenerativas) das articulações sacroilíacas e certa redução da musculatura profunda ao longo da coluna. São achados comuns, geralmente de evolução lenta e frequentes com a idade; isoladamente não indicam urgência. Vale conversar com seu médico considerando eventuais sintomas nas costas ou pernas."
   }
 }

@@ -846,11 +846,11 @@
 
     // Title before the panels begin, so the section is always clearly labelled.
     var totalMarkers = panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
-    var panelsTitle = panels.length === 0 ? '' :
-      '<h2 class="ov-panels-title">' + t('Blood &amp; urine panel', 'Painel de sangue e urina') +
+    var panelsTitleInner = panels.length === 0 ? '' :
+      t('Blood &amp; urine panel', 'Painel de sangue e urina') +
         ' <span class="ov-count-inline">' + totalMarkers + ' ' +
         t(totalMarkers === 1 ? 'marker' : 'markers', totalMarkers === 1 ? 'marcador' : 'marcadores') +
-      '</span></h2>';
+      '</span>';
 
     var view = document.createElement('main');
     view.className = 'jc-overview jc-exams';
@@ -858,7 +858,8 @@
       '<div class="ov-shell">' +
         renderPatientHeader(p) +
         '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
-        panelsTitle +
+        '<section class="ov-ai-summary" id="exams-ai-summary"></section>' +
+        '<h2 class="ov-panels-title" id="blood-urine">' + panelsTitleInner + '</h2>' +
         panelsHtml +
         comparisonHtml +
         imagingHtml +
@@ -867,6 +868,125 @@
     document.body.appendChild(view);
     // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
     if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+
+    function amberCardHtml(label, bodyHtml) {
+      return '<div class="ov-ai-inner">' +
+        '<div class="ov-ai-head">' + aiPill() + ' <span class="ov-ai-label">' + label + '</span></div>' +
+        '<div class="ov-ai-body">' + bodyHtml + '</div>' +
+        '<div class="ov-ai-disc">' +
+          t('AI-generated explanation from your data — not a diagnosis. Discuss with your doctor.',
+            'Explicação gerada por IA a partir dos seus dados — não é um diagnóstico. Converse com seu médico.') +
+        '</div></div>';
+    }
+    function dirOf(m) {
+      var v = m.latest_value;
+      if (typeof v !== 'number' || !isFinite(v)) return null;
+      if (m.flag === 'H' || m.flag === 'HH' || (m.ref_high != null && v > m.ref_high)) return 'high';
+      if (m.flag === 'L' || m.flag === 'LL' || (m.ref_low != null && v < m.ref_low)) return 'low';
+      return null;
+    }
+    function offFromPanels(pnls) {
+      var off = [];
+      (pnls || []).forEach(function (pn) {
+        (pn.markers || []).forEach(function (m) {
+          var dir = dirOf(m);
+          if (dir) off.push({ marker: m.marker_html || escapeHtml(m.marker), v: m.latest_value, unit: m.unit || '', dir: dir });
+        });
+      });
+      return off;
+    }
+    // De-identified, patient-friendly explanations keyed by canonical analyte.
+    // Generic + reusable across patients; neutral fallback keeps the invariant.
+    var LAB_EXPL = {
+      'eosinophils': { en: 'A low eosinophil count is common and usually temporary — it can follow stress, infection, or steroid use and is generally not a concern on its own.', pt: 'Uma contagem baixa de eosinófilos é comum e geralmente temporária — pode ocorrer após estresse, infecção ou uso de corticoide e, isoladamente, costuma não ser preocupante.' },
+      'eosinophils (abs)': { en: 'A low eosinophil count is common and usually temporary — often related to stress or steroids and generally not a concern on its own.', pt: 'Contagem baixa de eosinófilos é comum e geralmente temporária — muitas vezes ligada a estresse ou corticoides e, isoladamente, sem maior significado.' },
+      'basophils (abs)': { en: 'A low basophil count is common and usually not clinically significant on its own.', pt: 'Contagem baixa de basófilos é comum e geralmente sem significado clínico isolado.' },
+      'aptt': { en: 'A slightly long aPTT (a clotting time) is often a lab or sampling effect, or a mild variation; a single mildly high value is usually just rechecked.', pt: 'Um TTPA (tempo de coagulação) levemente alongado costuma ser efeito de coleta/laboratório ou variação leve; um único valor pouco alterado geralmente é apenas repetido.' },
+      'egfr': { en: 'An eGFR a little below 90 suggests mildly reduced kidney filtration, which is common with age — the trend over time matters more than a single value.', pt: 'Uma TFG um pouco abaixo de 90 sugere filtração renal levemente reduzida, comum com a idade — a tendência ao longo do tempo importa mais que um único valor.' },
+      'alt': { en: 'A low ALT (a liver enzyme) is generally benign and not a sign of liver disease.', pt: 'Um ALT (enzima do fígado) baixo costuma ser benigno e não indica doença hepática.' },
+    };
+    function labExpl(m) {
+      var k = String(m.marker || '').toLowerCase().replace(/\s*\(abs\)/, ' (abs)');
+      var e = LAB_EXPL[k] || LAB_EXPL[k.replace(/\s*\(abs\)$/, '')];
+      return e ? t(escapeHtml(e.en), escapeHtml(e.pt))
+               : t('This value is outside its reference range — worth a mention to your doctor.',
+                   'Este valor está fora da faixa de referência — vale comentar com seu médico.');
+    }
+    function examsSummaryHtml(off, imgFindings) {
+      if (!off.length && !imgFindings.length) {
+        return amberCardHtml(t('AI Summary', 'Resumo por IA'),
+          t('Everything reviewed in this exam set was within range.',
+            'Tudo o que foi revisado neste conjunto de exames estava dentro da faixa de referência.'));
+      }
+      var bits = [];
+      if (off.length) {
+        var items = off.map(function (o) {
+          return '<li>' + o.marker + ' — <strong>' + o.v + (o.unit ? ' ' + escapeHtml(o.unit) : '') + '</strong> (' +
+            (o.dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ')</li>';
+        }).join('');
+        bits.push('<p>' + t('Lab values outside their reference range:', 'Valores laboratoriais fora da faixa de referência:') +
+          '</p><ul class="ov-ai-list">' + items + '</ul>' +
+          '<p><a href="#blood-urine">' + t('See blood &amp; urine panel', 'Ver painel de sangue e urina') + '</a></p>');
+      }
+      if (imgFindings.length) {
+        bits.push('<p>' + t('Imaging studies with a key finding:', 'Exames de imagem com achado relevante:') + ' ' +
+          imgFindings.join(' · ') + '</p>');
+      }
+      return amberCardHtml(t('AI Summary', 'Resumo por IA'), bits.join(''));
+    }
+    function fillExamsAi(pnls, imgs) {
+      var summaryEl = document.getElementById('exams-ai-summary');
+      var off = offFromPanels(pnls);
+
+      // Inline grouped amber card per blood panel that has out-of-range values.
+      var gridPanels = document.querySelectorAll('.lab-panel-grid > .lab-panel');
+      (pnls || []).forEach(function (pn, i) {
+        var offM = (pn.markers || []).filter(function (m) { return dirOf(m); });
+        if (!offM.length) return;
+        var el = gridPanels[i];
+        if (!el || el.querySelector('.ov-ai-card')) return;
+        var lis = offM.map(function (m) {
+          var dir = dirOf(m);
+          return '<li><strong>' + (m.marker_html || escapeHtml(m.marker)) + '</strong> (' +
+            (dir === 'high' ? t('high', 'alto') : t('low', 'baixo')) + ') — ' + labExpl(m) + '</li>';
+        }).join('');
+        var card = document.createElement('div');
+        card.className = 'ov-ai-card';
+        card.innerHTML = amberCardHtml(t('What this can mean', 'O que isto pode significar'),
+          '<ul class="ov-ai-list">' + lis + '</ul>');
+        var bodyEl = el.querySelector('.lab-panel-body') || el;
+        bodyEl.appendChild(card);
+      });
+
+      var withMan = (imgs || []).filter(function (s) { return s.manifest_blob_key; });
+      Promise.all(withMan.map(function (s) {
+        return fetch(s.manifest_blob_key).then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; }).then(function (m) { return { s: s, m: m }; });
+      })).then(function (res) {
+        var imgFindings = [];
+        res.forEach(function (rr) {
+          if (!rr.m || !rr.m.aiFinding) return;
+          var title = rr.m.studyPt ? t(escapeHtml(rr.m.study || ''), escapeHtml(rr.m.studyPt))
+                                   : escapeHtml(rr.s.modality || '');
+          imgFindings.push(title);
+          var sel = (window.CSS && CSS.escape) ? CSS.escape(rr.s.manifest_blob_key) : rr.s.manifest_blob_key;
+          var v = document.querySelector('.ct-viewer[data-manifest^="' + sel + '"]');
+          var host = v && v.closest ? v.closest('.img-study') : null;
+          if (host && !host.querySelector('.ov-ai-card')) {
+            var card = document.createElement('div');
+            card.className = 'ov-ai-card';
+            card.innerHTML = amberCardHtml(t('Imaging finding', 'Achado de imagem'),
+              t(escapeHtml(rr.m.aiFinding.en), escapeHtml(rr.m.aiFinding.pt)));
+            host.appendChild(card);
+          }
+        });
+        if (summaryEl) summaryEl.innerHTML = examsSummaryHtml(off, imgFindings);
+      });
+    }
+
+    // Amber-card invariant: consolidated AI Summary at top + per-panel lab cards
+    // + per-imagery finding cards. Called after all defs so LAB_EXPL is assigned.
+    fillExamsAi(panels, imaging);
   }
 
   function renderHistoricalComparison(panels) {
@@ -1172,6 +1292,16 @@
       '.img-study { margin: 0 0 28px; }',
       '.img-study + .img-study { border-top: 1px solid #E5E2DC; padding-top: 20px; }',
       '.img-study-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 16px; color: #0D1B2A; margin: 0 0 12px; }',
+      '.ov-ai-summary { margin: 0 0 22px; }',
+      '.ov-ai-card { margin: 14px 0 4px; }',
+      '.ov-ai-inner { background: #FDF8EC; border: 1px solid #F4DD9C; border-radius: 10px; padding: 16px 18px; }',
+      '.ov-ai-head { margin-bottom: 8px; }',
+      '.ov-ai-label { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: #0D1B2A; }',
+      '.ov-ai-body { font-size: 13.5px; line-height: 1.5; color: #1E2D3D; }',
+      '.ov-ai-body p { margin: 0 0 8px; }',
+      '.ov-ai-body a { color: #B8954A; }',
+      '.ov-ai-list { margin: 4px 0 8px 18px; }',
+      '.ov-ai-disc { margin-top: 10px; font-size: 11px; color: #7A8FA6; }',
       '.ov-list { list-style: none; padding: 0; margin: 0; }',
       '.ov-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid #EFEBE3; font-size: 13px; }',
       '.ov-list li:first-child { border-top: none; }',
