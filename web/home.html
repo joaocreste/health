@@ -205,33 +205,24 @@
     <h2 class="section-title"><span class="lang-en">Recent injury &amp; surgical history</span><span class="lang-pt">Histórico recente de lesões e cirurgias</span></h2>
     <p class="section-desc"><span class="lang-en">Events over the last 14 years that materially affect today's clinical picture.</span><span class="lang-pt">Eventos dos últimos 14 anos que impactam materialmente o quadro clínico atual.</span></p>
 
+    <!-- Rows below are DB-driven: patient-context.js fills these tbodies from
+         /api/patient-summary (patient_procedures). Each table+heading hides when
+         empty; the whole #injury section hides when the patient has no rows. -->
+    <div id="proc-injuries-wrap">
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:0 0 1rem;"><span class="lang-en">Injuries</span><span class="lang-pt">Lesões</span></h3>
     <table class="data-table mb-3">
       <thead><tr><th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th><th><span class="lang-en">Injury</span><span class="lang-pt">Lesão</span></th><th><span class="lang-en">Location</span><span class="lang-pt">Local</span></th><th><span class="lang-en">Notes</span><span class="lang-pt">Observações</span></th></tr></thead>
-      <tbody>
-        <tr><td>Sep 2014</td><td class="strong">Knife wound — partial laceration RCN</td><td>Hôpital Privé d'Antony, France</td><td>Microsurgeon called; movements recovered within 3 weeks.</td></tr>
-        <tr><td>Jul 2015</td><td class="strong">Piriformis syndrome</td><td>Ospedale San Bassiano, Italy</td><td>5 days IM muscle relaxant + anti-inflammatory.</td></tr>
-        <tr><td>Mar 2020</td><td class="strong">Bladder / urinary tract inflammation</td><td>Hospital Albert Einstein, São Paulo</td><td>Interstitial cystitis / BPS — stress-triggered; no recent recurrence.</td></tr>
-        <tr><td>Aug 2022</td><td class="strong">3 lower-back + 3 cervical protrusions</td><td>Vila Nova Star, São Paulo</td><td>2 days hospitalised; muscle relaxants + morphine + physio.</td></tr>
-        <tr><td>Nov 2025</td><td class="strong">Loss of consciousness — fell down stairs</td><td>Berlin International Airport</td><td><span class="pill pill-flag">Concussion</span> · internal bleeding right hip.</td></tr>
-        <tr><td>Jan 2026</td><td class="strong">Loss of consciousness — fell off bike</td><td>25 Av. Montaigne, Paris (potential hypoglycemia)</td><td><span class="pill pill-flag">Concussion</span> · trauma, oedema; 3 days hospitalised; forehead scar — plastic surgery Jul 2026.</td></tr>
-        <tr><td>Mar 2026</td><td class="strong">Cervical protrusion crisis (pain 12/10)</td><td>London, UK</td><td>Diprospan injection (betamethasone + disodium phosphate).</td></tr>
-        <tr><td>29 Apr 2026</td><td class="strong">Intentional benzodiazepine overdose</td><td>London, UK · hospitalised</td><td><span class="pill pill-flag">Suicide risk</span> · ~200 mg diazepam on top of daily regimen; self-rescue via 999. See section 03.</td></tr>
-      </tbody>
+      <tbody id="proc-injuries-body"></tbody>
     </table>
+    </div>
 
+    <div id="proc-surgeries-wrap">
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;"><span class="lang-en">Surgeries</span><span class="lang-pt">Cirurgias</span></h3>
     <table class="data-table">
       <thead><tr><th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th><th><span class="lang-en">Procedure</span><span class="lang-pt">Procedimento</span></th><th><span class="lang-en">Hospital</span><span class="lang-pt">Hospital</span></th><th><span class="lang-en">Notes</span><span class="lang-pt">Observações</span></th></tr></thead>
-      <tbody>
-        <tr><td>Mar 2012</td><td class="strong">Excision subcutaneous lipoma, frontal</td><td>Private clinic, Brazil</td><td>Complicated into fibrosis over 12 months.</td></tr>
-        <tr><td>Feb 2013</td><td class="strong">2nd excision — frontal lipoma</td><td>Private hospital, Brazil</td><td>New fibrosis; decided not to re-operate.</td></tr>
-        <tr><td>Sep 2014</td><td class="strong">Wound debridement + repair RCN digit 2</td><td>Hôpital Privé d'Antony, France</td><td>10% laceration; artery and tendon sheath intact.</td></tr>
-        <tr><td>Mar 2022</td><td class="strong">Septoplasty, turbinectomy, sinusotomy, ethmoidectomy</td><td>Hospital Albert Einstein, São Paulo</td><td>Chronic sinusopathy, septal deviation, turbinate hypertrophy.</td></tr>
-        <tr><td>Mar 2023</td><td class="strong">Biopsy — forehead fibrosis</td><td>Hospital Albert Einstein, São Paulo</td><td>No malignant material; decided not to operate.</td></tr>
-        <tr><td>Nov 2024</td><td class="strong">Cholecystectomy (laparoscopic)</td><td>Vila Nova Star, São Paulo</td><td>Chronic calculous cholecystitis / microlithiasis; no malignancy.</td></tr>
-      </tbody>
+      <tbody id="proc-surgeries-body"></tbody>
     </table>
+    </div>
 
     <div class="alert alert-flag mt-4">
       <span class="lang-en"><strong>Red-flagged events (Nov 2025, Jan 2026, 29 Apr 2026).</strong> The Jan 2026 bike accident is now thought to be a potential hypoglycemic episode (loss of consciousness, facial impact). Open items from the 29 April overdose: home benzodiazepine stock review, post-discharge safety plan, and psychiatric review before any further taper change. Plastic surgery for forehead scar scheduled July 2026.</span><span class="lang-pt"><strong>Eventos sinalizados (nov 2025, jan 2026, 29 abr 2026).</strong> O acidente de bicicleta de jan 2026 é hoje considerado possível episódio hipoglicêmico (perda de consciência, impacto facial). Itens em aberto desde a sobredose de 29 de abril: revisão do estoque domiciliar de benzodiazepínico, plano de segurança pós-alta e avaliação psiquiátrica antes de qualquer nova alteração no desmame. Cirurgia plástica para a cicatriz na testa agendada para julho de 2026.</span>
@@ -292,7 +283,7 @@
 <script src="assets/app.js?v=28"></script>
 <script src="assets/silvana-labs.js?v=2"></script>
 <script src="assets/leo-mode.js?v=14"></script>
-<script src="assets/patient-context.js?v=51"></script>
+<script src="assets/patient-context.js?v=52"></script>
 <script src="assets/insights-update.js?v=3"></script>
 <script src="assets/upload-card.js?v=1"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>

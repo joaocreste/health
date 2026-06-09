@@ -190,6 +190,21 @@ export const injuries = pgTable("injuries", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("injuries_patient_idx").on(t.patientId)]);
 
+// Unified injuries / surgeries / procedures history (migration 0011). Supersedes
+// the legacy `surgeries` + `injuries` tables: one typed row per event, with a
+// `date_raw` slot so partial/unknown dates survive for display.
+export const patientProcedures = pgTable("patient_procedures", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  eventDate: date("event_date"),        // ISO date; null when unknown
+  dateRaw: text("date_raw"),            // original string as provided
+  type: text("type").notNull(),         // Injury | Surgery | Procedure | Diagnostic | Hospitalization | Other
+  location: text("location"),
+  description: text("description").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("patient_procedures_patient_date_idx").on(t.patientId, t.eventDate)]);
+
 export const clinicalHistory = pgTable("clinical_history", {
   id: uuid("id").defaultRandom().primaryKey(),
   patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),

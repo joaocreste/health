@@ -2050,6 +2050,72 @@
     }
   }
 
+  /* ── Injury & surgical history (DB-driven) ─────────────────────────────
+     The #injury section on the static home page ships with empty tbodies.
+     This fills them from /api/patient-summary (patient_procedures), groups
+     by type (Injury vs everything-else), formats the date the way the page
+     used to, and re-derives the flag pills (Concussion / Suicide risk) from
+     the notes prefix. Each table+heading hides when its group is empty, and
+     the whole section hides when the patient has no rows — so Leo, who
+     inherits this HTML but has no procedures, shows nothing here.          */
+  var PROC_FLAGS = ['Concussion', 'Suicide risk'];
+  function formatProcDate(row) {
+    var iso = row.event_date;
+    if (!iso) return escapeHtml(row.date_raw || '—');
+    var m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return escapeHtml(row.date_raw || iso);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var mon = months[parseInt(m[2], 10) - 1] || m[2];
+    var day = parseInt(m[3], 10);
+    // CSV uses day=01 as a month-only placeholder; show "Mon YYYY" for those,
+    // "D Mon YYYY" for a real day (e.g. the 29 Apr overdose).
+    return day === 1 ? (mon + ' ' + m[1]) : (day + ' ' + mon + ' ' + m[1]);
+  }
+  function renderProcNotes(notes) {
+    var n = (notes == null) ? '' : String(notes);
+    for (var i = 0; i < PROC_FLAGS.length; i++) {
+      var kw = PROC_FLAGS[i];
+      var re = new RegExp('^' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*·\\s*([\\s\\S]*)$', 'i');
+      var hit = n.match(re);
+      if (hit) return '<span class="pill pill-flag">' + escapeHtml(kw) + '</span> · ' + escapeHtml(hit[1]);
+    }
+    return escapeHtml(n);
+  }
+  function procRow(row) {
+    return '<tr><td>' + formatProcDate(row) + '</td>' +
+      '<td class="strong">' + escapeHtml(row.description || '') + '</td>' +
+      '<td>' + escapeHtml(row.location || '') + '</td>' +
+      '<td>' + renderProcNotes(row.notes) + '</td></tr>';
+  }
+  function decorateProceduresFromDb(clerk) {
+    var section = document.getElementById('injury');
+    if (!section) return;
+    var injBody = document.getElementById('proc-injuries-body');
+    var surBody = document.getElementById('proc-surgeries-body');
+    var injWrap = document.getElementById('proc-injuries-wrap');
+    var surWrap = document.getElementById('proc-surgeries-wrap');
+    fetch('/api/patient-summary?clerk=' + encodeURIComponent(clerk), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (s) {
+        var rows = (s && s.procedures) || [];
+        // Injuries table = type 'Injury'; surgeries table = everything else
+        // (Surgery + any Procedure/Diagnostic/Hospitalization), so nothing is
+        // silently dropped for future patients.
+        var injuries = rows.filter(function (r) { return (r.type || '').toLowerCase() === 'injury'; });
+        var surgeries = rows.filter(function (r) { return (r.type || '').toLowerCase() !== 'injury'; });
+        if (rows.length === 0) { section.style.display = 'none'; return; }
+        if (injBody) injBody.innerHTML = injuries.map(procRow).join('');
+        if (surBody) surBody.innerHTML = surgeries.map(procRow).join('');
+        if (injWrap) injWrap.style.display = injuries.length ? '' : 'none';
+        if (surWrap) surWrap.style.display = surgeries.length ? '' : 'none';
+      })
+      .catch(function () {
+        // No data / fetch failure → hide the section rather than show empty
+        // tables or stale content.
+        section.style.display = 'none';
+      });
+  }
+
   ready(function () {
     injectChangeButton();
     // Patient Zero's home is a static page that ends in <footer> — we can
@@ -2059,6 +2125,7 @@
       if (section0 === 'home') {
         injectStyles();
         injectDangerZone();
+        decorateProceduresFromDb(patient); // fill #injury tables from the DB
       } else if (section0 === 'physical-exams') {
         // Static lab cards on Joao's hardcoded page — read the
         // historical comparison table at the bottom and graft the same
