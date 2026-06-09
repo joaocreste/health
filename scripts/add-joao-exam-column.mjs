@@ -110,8 +110,8 @@ html = html.replace(
   "the most recent panel — the 8 June 2026 Hospital Sírio-Libanês full panel (Dr. Marco Antonio de Carvalho). The 20 May 2026 Thriva fingerstick (35 markers, partial scope) is now the second column; the detailed view above reflects the 8 June 2026 panel."
 );
 html = html.replace(
-  /a coluna mais à esquerda \(em negrito\) é o painel mais recente — o teste capilar Thriva autoaplicado de 20 de maio de 2026 \(35 marcadores, escopo parcial\)\. A visualização detalhada acima continua refletindo o painel completo de 25 de abril de 2026\./,
-  "a coluna mais à esquerda (em negrito) é o painel mais recente — o painel completo do Hospital Sírio-Libanês de 8 de junho de 2026 (Dr. Marco Antonio de Carvalho). O teste capilar Thriva de 20 de maio de 2026 (35 marcadores, escopo parcial) passa a ser a segunda coluna; a visualização detalhada acima reflete o painel de 8 de junho de 2026."
+  /A coluna mais à esquerda \(em negrito\) é o painel mais recente — o teste capilar Thriva autoaplicado de 20 de maio de 2026 \(35 marcadores, escopo parcial\)\. A visualização detalhada acima continua refletindo o painel completo de 25 de abril de 2026\./,
+  "A coluna mais à esquerda (em negrito) é o painel mais recente — o painel completo do Hospital Sírio-Libanês de 8 de junho de 2026 (Dr. Marco Antonio de Carvalho). O teste capilar Thriva de 20 de maio de 2026 (35 marcadores, escopo parcial) passa a ser a segunda coluna; a visualização detalhada acima reflete o painel de 8 de junho de 2026."
 );
 
 // ── 4. each marker row: prepend new latest cell, demote old first cell ──
