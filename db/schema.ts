@@ -205,6 +205,38 @@ export const patientProcedures = pgTable("patient_procedures", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("patient_procedures_patient_date_idx").on(t.patientId, t.eventDate)]);
 
+// Clinical ECG studies (migration 0012) — distinct from per-event `ecg_events`
+// (Apple Watch single beats). One row per full study; blobs (original chart,
+// report PDF, generated Lumen SVG) live in R2, referenced by *_key columns.
+export const ecgStudies = pgTable("ecg_studies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  studyDate: date("study_date").notNull(),
+  recordedAt: timestamp("recorded_at", { withTimezone: true }),
+  modality: text("modality").notNull().default("12-lead"),
+  leadLayout: text("lead_layout"),
+  sourceFormat: text("source_format").notNull(), // vector_pdf | dicom_waveform | raster_pdf | image
+  fidelity: text("fidelity"),
+  orderingDoctor: text("ordering_doctor"),
+  validatingDoctor: text("validating_doctor"),
+  clinic: text("clinic"),
+  heartRate: integer("heart_rate"),
+  prMs: integer("pr_ms"),
+  qrsMs: integer("qrs_ms"),
+  qtMs: integer("qt_ms"),
+  qtcMs: integer("qtc_ms"),
+  axisP: integer("axis_p"),
+  axisQrs: integer("axis_qrs"),
+  axisT: integer("axis_t"),
+  interpretation: text("interpretation"),
+  reportText: text("report_text"),
+  sourceSha: text("source_sha"),
+  originalKey: text("original_key"),
+  reportKey: text("report_key"),
+  svgKey: text("svg_key"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("ecg_studies_patient_date_idx").on(t.patientId, t.studyDate)]);
+
 export const clinicalHistory = pgTable("clinical_history", {
   id: uuid("id").defaultRandom().primaryKey(),
   patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),

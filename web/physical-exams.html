@@ -711,6 +711,18 @@
   </div>
 
 </section>
+
+<!-- 1.h CARDIAC ELECTROPHYSIOLOGY — ECG.
+     DB-driven: patient-context.js (decorateEcgStudies) fills #ecg-mount from
+     /api/patient-exams ecg_studies, hydrating the Lumen SVG inline. Hidden until
+     a study exists, so patients without an ECG (incl. Leo) show nothing here. -->
+<section class="report-section" id="ecg-section" style="display:none;">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">1.h · Cardiac electrophysiology</span><span class="lang-pt">1.h · Eletrofisiologia cardíaca</span></div>
+    <div id="ecg-mount"></div>
+  </div>
+</section>
+
 <!-- 09C BLOOD & URINE LABS -->
 <section class="report-section" id="labs">
   <div class="container">
@@ -5133,7 +5145,7 @@
 <script src="assets/cristina-labs.js?v=1"></script>
 <script src="assets/leo-mode.js?v=14"></script>
 <script src="assets/lab-taxonomy.js?v=1"></script>
-<script src="assets/patient-context.js?v=51"></script>
+<script src="assets/patient-context.js?v=53"></script>
 <script src="assets/insights-update.js?v=3"></script>
 <script src="assets/upload-card.js?v=1"></script>
 <script src="assets/data.js?v=22"></script>

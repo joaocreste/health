@@ -325,6 +325,66 @@ function pick(obj, keys) {
   return out;
 }
 
+// Ensure the clinical ECG table exists (migration 0012, self-applied — same
+// precedent as the other ingestion paths). Idempotent.
+async function ensureEcgStudiesTable(sql) {
+  await sql`CREATE TABLE IF NOT EXISTS ecg_studies (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    patient_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    study_date date NOT NULL, recorded_at timestamptz,
+    modality text NOT NULL DEFAULT '12-lead', lead_layout text,
+    source_format text NOT NULL, fidelity text,
+    ordering_doctor text, validating_doctor text, clinic text,
+    heart_rate integer, pr_ms integer, qrs_ms integer, qt_ms integer, qtc_ms integer,
+    axis_p integer, axis_qrs integer, axis_t integer,
+    interpretation text, report_text text, source_sha text,
+    original_key text, report_key text, svg_key text,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ecg_studies_dedup UNIQUE NULLS NOT DISTINCT (patient_id, study_date, source_sha))`;
+  await sql`CREATE INDEX IF NOT EXISTS ecg_studies_patient_date_idx ON ecg_studies (patient_id, study_date DESC)`;
+}
+
+// GET /api/patient-ecg-object?clerk=&id=&kind=svg|report|original
+// Streams one ECG R2 object via the binding (no S3 token). svg/report inline so
+// they render in-page; original is a download. Access is scoped by joining the
+// study to the patient clerk, so a key can't be fetched cross-patient.
+async function handleEcgObject(request, env) {
+  if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  const id = url.searchParams.get("id");
+  const kind = url.searchParams.get("kind") || "svg";
+  if (!clerk || !id) return jsonError(400, "clerk_and_id_required");
+  if (!["svg", "report", "original"].includes(kind)) return jsonError(400, "bad_kind");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const rows = await sql`
+      SELECT s.svg_key, s.report_key, s.original_key
+      FROM ecg_studies s JOIN users u ON u.id = s.patient_id
+      WHERE u.clerk_user_id = ${clerk} AND s.id = ${id} LIMIT 1`;
+    if (!rows.length) return jsonError(404, "study_not_found");
+    const key = kind === "svg" ? rows[0].svg_key : kind === "report" ? rows[0].report_key : rows[0].original_key;
+    if (!key) return jsonError(404, "object_not_found");
+    const obj = await env.R2_BUCKET.get(key);
+    if (!obj) return jsonError(404, "object_missing");
+    const ct = kind === "svg" ? "image/svg+xml"
+      : (obj.httpMetadata && obj.httpMetadata.contentType) || "application/pdf";
+    const headers = new Headers();
+    headers.set("Content-Type", ct);
+    headers.set("Cache-Control", "private, max-age=300");
+    if (kind === "original") {
+      const fn = (key.split("/").pop() || "ecg").replace(/["\\\r\n]/g, "_");
+      headers.set("Content-Disposition", `attachment; filename="${fn}"`);
+    } else {
+      headers.set("Content-Disposition", "inline");
+    }
+    return new Response(obj.body, { headers });
+  } catch (e) {
+    return jsonError(500, `ECG object failed: ${e.message}`);
+  }
+}
+
 async function handlePatientExams(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
@@ -389,6 +449,24 @@ async function handlePatientExams(request, env) {
       if (!panels[panel][row.marker]) panels[panel][row.marker] = [];
       panels[panel][row.marker].push(row);
     }
+    // Clinical ECG studies (migration 0012). Wrapped so a not-yet-created table
+    // (fresh env, before first ingest) degrades to [] rather than 500-ing exams.
+    // R2 keys are NOT exposed — the renderer fetches blobs via /api/patient-ecg-object
+    // by study id, which re-checks patient ownership.
+    let ecg_studies = [];
+    try {
+      ecg_studies = await sql`
+        SELECT id, study_date, recorded_at, modality, lead_layout, source_format, fidelity,
+               ordering_doctor, validating_doctor, clinic, heart_rate, pr_ms, qrs_ms, qt_ms, qtc_ms,
+               axis_p, axis_qrs, axis_t, interpretation, report_text,
+               (svg_key IS NOT NULL) AS has_svg,
+               (report_key IS NOT NULL) AS has_report,
+               (original_key IS NOT NULL) AS has_original
+        FROM ecg_studies
+        WHERE patient_id = ${pid}
+        ORDER BY study_date DESC, created_at DESC`;
+    } catch { ecg_studies = []; }
+
     // Convert to ordered arrays with summary per marker
     const groupedPanels = Object.keys(panels).sort().map((panelName) => {
       const markers = Object.keys(panels[panelName]).sort().map((markerName) => {
@@ -419,6 +497,7 @@ async function handlePatientExams(request, env) {
       imaging,
       medications,
       supplements,
+      ecg_studies,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Exams query failed: ${e.message}`);
@@ -2055,6 +2134,73 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/ecg-ingest — ingest one clinical ECG study.
+  // Body: { patient_clerk, study:{...fields}, files:{ original|report|svg:{ b64, contentType, name } } }
+  // Writes blobs to R2 via the env.R2_BUCKET binding (no S3 token) under
+  // patients/{id}/ecg/{study_date}/, then upserts an ecg_studies row (dedupe on
+  // patient+date+source_sha). Re-running the same study is a no-op update.
+  if (path === "/api/admin/ecg-ingest" && request.method === "POST") {
+    if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const patientClerk = String(body?.patient_clerk || "").trim();
+    const s = body?.study || {};
+    const files = body?.files || {};
+    if (!patientClerk) return jsonError(400, "patient_clerk_required");
+    if (!s.study_date) return jsonError(400, "study_date_required");
+    if (!s.source_format) return jsonError(400, "source_format_required");
+    try {
+      await ensureEcgStudiesTable(sql);
+      const p = await sql`SELECT id, role FROM users WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1`;
+      if (!p.length || p[0].role !== "patient") return jsonError(404, "patient_not_found");
+      const pid = p[0].id;
+
+      const base = `patients/${pid}/ecg/${s.study_date}`;
+      const keys = { original: null, report: null, svg: null };
+      for (const kind of ["original", "report", "svg"]) {
+        const meta = files[kind];
+        if (!meta || !meta.b64) continue;
+        const ext = kind === "svg" ? "svg" : (meta.name && meta.name.toLowerCase().endsWith(".pdf") ? "pdf" : "bin");
+        const key = `${base}/${kind}.${ext}`;
+        const bin = Uint8Array.from(atob(meta.b64), (c) => c.charCodeAt(0));
+        await env.R2_BUCKET.put(key, bin, { httpMetadata: { contentType: meta.contentType || "application/octet-stream" } });
+        keys[kind] = key;
+      }
+
+      const r = await sql`
+        INSERT INTO ecg_studies
+          (patient_id, study_date, recorded_at, modality, lead_layout, source_format, fidelity,
+           ordering_doctor, validating_doctor, clinic, heart_rate, pr_ms, qrs_ms, qt_ms, qtc_ms,
+           axis_p, axis_qrs, axis_t, interpretation, report_text, source_sha,
+           original_key, report_key, svg_key)
+        VALUES
+          (${pid}, ${s.study_date}::date, ${s.recorded_at || null}, ${s.modality || "12-lead"},
+           ${s.lead_layout || null}, ${s.source_format}, ${s.fidelity || null},
+           ${s.ordering_doctor || null}, ${s.validating_doctor || null}, ${s.clinic || null},
+           ${s.heart_rate ?? null}, ${s.pr_ms ?? null}, ${s.qrs_ms ?? null}, ${s.qt_ms ?? null}, ${s.qtc_ms ?? null},
+           ${s.axis_p ?? null}, ${s.axis_qrs ?? null}, ${s.axis_t ?? null},
+           ${s.interpretation || null}, ${s.report_text || null}, ${s.source_sha || null},
+           ${keys.original}, ${keys.report}, ${keys.svg})
+        ON CONFLICT ON CONSTRAINT ecg_studies_dedup DO UPDATE SET
+          recorded_at = EXCLUDED.recorded_at, modality = EXCLUDED.modality, lead_layout = EXCLUDED.lead_layout,
+          source_format = EXCLUDED.source_format, fidelity = EXCLUDED.fidelity,
+          ordering_doctor = EXCLUDED.ordering_doctor, validating_doctor = EXCLUDED.validating_doctor,
+          clinic = EXCLUDED.clinic, heart_rate = EXCLUDED.heart_rate, pr_ms = EXCLUDED.pr_ms,
+          qrs_ms = EXCLUDED.qrs_ms, qt_ms = EXCLUDED.qt_ms, qtc_ms = EXCLUDED.qtc_ms,
+          axis_p = EXCLUDED.axis_p, axis_qrs = EXCLUDED.axis_qrs, axis_t = EXCLUDED.axis_t,
+          interpretation = EXCLUDED.interpretation, report_text = EXCLUDED.report_text,
+          original_key = COALESCE(EXCLUDED.original_key, ecg_studies.original_key),
+          report_key = COALESCE(EXCLUDED.report_key, ecg_studies.report_key),
+          svg_key = COALESCE(EXCLUDED.svg_key, ecg_studies.svg_key)
+        RETURNING id`;
+      return new Response(JSON.stringify({ ok: true, id: r[0].id, keys }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `ECG ingest failed: ${e.message}`);
+    }
+  }
+
   // GET /api/admin/uploads — the review queue: every upload joined to patient identity.
   if (path === "/api/admin/uploads" && request.method === "GET") {
     try {
@@ -2420,6 +2566,9 @@ export default {
     }
     if (url.pathname === "/api/patient-exams") {
       return handlePatientExams(request, env);
+    }
+    if (url.pathname === "/api/patient-ecg-object") {
+      return handleEcgObject(request, env);
     }
     if (url.pathname === "/api/patient-dashboard") {
       return handlePatientDashboard(request, env);

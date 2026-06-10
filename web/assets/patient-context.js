@@ -1043,6 +1043,7 @@
     var panels = regroupByTaxonomy(exams.panels || []);
     var docs = exams.lab_documents || [];
     var imaging = exams.imaging || [];
+    var ecg = exams.ecg_studies || [];
     // Drugs present in this patient's record drive the AI cards' interaction
     // and "meds that move this marker" hints. Empty for patients with no meds.
     var drugSet = detectDrugs(exams.medications, exams.supplements);
@@ -1138,6 +1139,14 @@
         renderDocList(docs) +
       '</section>';
 
+    var ecgInner = buildEcgSectionHtml(ecg, p.clerk_user_id);
+    var ecgHtml = ecgInner === '' ? '' :
+      '<section class="ov-section" id="ecg">' +
+        '<h2>' + t('Electrocardiogram', 'Eletrocardiograma') +
+          ' <span class="ov-count-inline">' + ecg.length + '</span></h2>' +
+        ecgInner +
+      '</section>';
+
     var comparisonHtml = renderHistoricalComparison(panels);
 
     // Title before the panels begin, so the section is always clearly labelled.
@@ -1159,11 +1168,13 @@
         panelsHtml +
         comparisonHtml +
         imagingHtml +
+        ecgHtml +
         docsHtml +
       '</div>';
     document.body.appendChild(view);
     // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
     if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+    hydrateEcgCharts(view, p.clerk_user_id); // inject the Lumen ECG SVG(s) inline
 
     function amberCardHtml(label, bodyHtml) {
       return '<div class="ov-ai-inner">' +
@@ -2116,6 +2127,142 @@
       });
   }
 
+  /* ── Clinical ECG studies (DB-driven, migration 0012) ──────────────────
+     One reusable render path for EVERY patient (no special-casing). The shared
+     renderExams() injects buildEcgSectionHtml() for database-default patients;
+     Joao's static physical-exams page exposes an #ecg-mount that
+     decorateEcgStudies() fills the same way. The Lumen SVG is fetched and
+     injected INLINE (so it scales + uses the page fonts) by hydrateEcgCharts().
+     The amber AI card reuses the platform .ov-ai-summary tokens and is grounded
+     on the validated interpretation — it never over-reassures and always points
+     back to the ordering doctor. */
+  function injectEcgStyles() {
+    if (document.getElementById('ecg-style')) return;
+    var s = document.createElement('style');
+    s.id = 'ecg-style';
+    s.textContent =
+      '.ecg-study{margin:0 0 1rem;}' +
+      '.ecg-chart{background:#FFFFFF;border:1px solid #E4E9F0;border-radius:14px;padding:10px;overflow:hidden;}' +
+      '.ecg-chart .ecg-svg{display:block;width:100%;height:auto;}' +
+      '.ecg-chart-loading{color:#8895AC;font-family:"IBM Plex Mono",monospace;font-size:13px;padding:28px;text-align:center;}' +
+      '.ecg-fidelity{color:#4A5B73;font-family:"IBM Plex Mono",monospace;font-size:12px;margin:6px 2px 0;letter-spacing:.04em;}' +
+      '.ecg-sep{border:none;border-top:1px solid #EFEAE0;margin:2rem 0;}';
+    document.head.appendChild(s);
+  }
+
+  function ecgDateNice(iso) {
+    var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return { en: String(iso || ''), pt: String(iso || '') };
+    var en = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var pt = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    var d = parseInt(m[3], 10), mo = parseInt(m[2], 10) - 1;
+    return { en: d + ' ' + en[mo] + ' ' + m[1], pt: d + ' de ' + pt[mo] + ' de ' + m[1] };
+  }
+
+  function ecgFriendlyLine(s) {
+    var interp = (s.interpretation || s.report_text || '').toLowerCase();
+    var abnormal = /(abnormal|anormal|fibrill|flutter|\bblock\b|bloqueio|isch|isquem|infarct|infart|eleva|prolong|ectop|taquic|bradic|hypertroph|hipertrof)/.test(interp);
+    var normal = /(within normal|dentro dos limites normais|normal ecg|ecg normal|sinus rhythm|ritmo sinusal)/.test(interp) && !abnormal;
+    if (normal) {
+      return t(
+        'An ECG records your heart’s electrical rhythm. This one was read as normal — a regular (sinus) rhythm with a tracing within normal limits. Keep it on file and bring it to your next visit with the doctor who ordered it.',
+        'O ECG registra o ritmo elétrico do coração. Este foi avaliado como normal — ritmo regular (sinusal), com traçado dentro dos limites normais. Guarde-o e leve à sua próxima consulta com o médico que solicitou o exame.');
+    }
+    return t(
+      'An ECG records your heart’s electrical rhythm. The doctor’s validated reading is shown below — go through it with the doctor who ordered the exam; they can explain what it means for you.',
+      'O ECG registra o ritmo elétrico do coração. A leitura validada pelo médico está abaixo — converse com o médico que solicitou o exame para entender o que significa para você.');
+  }
+
+  function ecgLi(label, val) {
+    return val ? ('<li><strong>' + label + '.</strong> ' + escapeHtml(String(val)) + '</li>') : '';
+  }
+
+  function buildEcgStudyHtml(s, clerk) {
+    var dn = ecgDateNice(s.study_date);
+    var qs = 'clerk=' + encodeURIComponent(clerk) + '&id=' + encodeURIComponent(s.id);
+    var dlIcon = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    var reportBtn = s.has_report
+      ? ('<a class="export-btn-primary" href="/api/patient-ecg-object?' + qs + '&kind=report" target="_blank" rel="noopener">' + dlIcon +
+         '<span class="lang-en">Open report (PDF)</span><span class="lang-pt">Abrir laudo (PDF)</span></a>')
+      : '';
+    var ids = [
+      ecgLi(t('Exam', 'Exame'), (s.modality || 'ECG') + (s.lead_layout ? (' · ' + s.lead_layout) : '')),
+      ecgLi(t('Ordered by', 'Solicitado por'), s.ordering_doctor),
+      ecgLi(t('Validated by', 'Validado por'), s.validating_doctor),
+      ecgLi(t('Clinic', 'Clínica'), s.clinic),
+    ].join('');
+    var meas = [
+      ecgLi('HR', s.heart_rate ? (s.heart_rate + ' bpm') : null),
+      ecgLi('PR', s.pr_ms ? (s.pr_ms + ' ms') : null),
+      ecgLi('QRS', s.qrs_ms ? (s.qrs_ms + ' ms') : null),
+      ecgLi('QT', s.qt_ms ? (s.qt_ms + ' ms') : null),
+      ecgLi('QTcF', s.qtc_ms ? (s.qtc_ms + ' ms') : null),
+    ].join('');
+    var concl = s.interpretation
+      ? ('<div class="alert alert-info"><strong>' + t('Conclusion', 'Conclusão') + ':</strong> ' + escapeHtml(s.interpretation) + '</div>')
+      : '';
+    return '' +
+      '<h2 class="section-title"><span class="lang-en">Electrocardiogram (ECG) · ' + dn.en + '</span>' +
+        '<span class="lang-pt">Eletrocardiograma (ECG) · ' + dn.pt + '</span></h2>' +
+      (s.clinic || s.ordering_doctor
+        ? ('<p class="section-desc">' + escapeHtml([s.clinic, s.ordering_doctor ? ('· ' + t('ordered by', 'solicitado por') + ' ' + s.ordering_doctor) : ''].filter(Boolean).join(' ')) + '</p>')
+        : '') +
+      '<div class="ecg-chart" data-ecg-id="' + escapeHtml(String(s.id)) + '" data-clerk="' + escapeHtml(String(clerk)) + '">' +
+        '<div class="ecg-chart-loading">' + t('Loading chart…', 'Carregando traçado…') + '</div></div>' +
+      (s.fidelity ? ('<p class="ecg-fidelity">' + escapeHtml(s.fidelity) + '</p>') : '') +
+      (reportBtn ? ('<div class="report-export-row" style="margin-top:1rem;">' + reportBtn + '</div>') : '') +
+      '<div class="two-col mb-3" style="margin-top:1.25rem;">' +
+        '<div class="list-card"><h4>' + t('Study', 'Estudo') + '</h4><ul>' + ids + '</ul></div>' +
+        (meas ? ('<div class="list-card"><h4>' + t('Measurements', 'Medidas') + '</h4><ul>' + meas + '</ul></div>') : '') +
+      '</div>' +
+      concl +
+      '<section class="ov-ai-summary"><div class="ov-ai-inner">' +
+        '<div class="ov-ai-head"><span class="ai-pill">AI</span> <span class="ov-ai-label">' + t('AI Summary', 'Resumo por IA') + '</span></div>' +
+        '<div class="ov-ai-body">' + ecgFriendlyLine(s) + '</div>' +
+        '<div class="ov-ai-disc">' +
+          t('AI-generated explanation from your data — not a diagnosis. Discuss with your doctor.',
+            'Explicação gerada por IA a partir dos seus dados — não é um diagnóstico. Converse com seu médico.') +
+        '</div></div></section>';
+  }
+
+  function buildEcgSectionHtml(studies, clerk) {
+    if (!studies || !studies.length) return '';
+    return studies.map(function (s) {
+      return '<div class="ecg-study">' + buildEcgStudyHtml(s, clerk) + '</div>';
+    }).join('<hr class="ecg-sep">');
+  }
+
+  function hydrateEcgCharts(root, clerk) {
+    injectEcgStyles();
+    var nodes = (root || document).querySelectorAll('.ecg-chart[data-ecg-id]');
+    Array.prototype.forEach.call(nodes, function (node) {
+      var id = node.getAttribute('data-ecg-id');
+      var ck = node.getAttribute('data-clerk') || clerk;
+      fetch('/api/patient-ecg-object?clerk=' + encodeURIComponent(ck) + '&id=' + encodeURIComponent(id) + '&kind=svg')
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function (svg) { node.innerHTML = svg; })
+        .catch(function () { node.innerHTML = '<div class="ecg-chart-loading">' + t('Chart unavailable', 'Traçado indisponível') + '</div>'; });
+    });
+  }
+
+  // Joao's static physical-exams page: fill #ecg-mount from /api/patient-exams.
+  function decorateEcgStudies(clerk) {
+    var section = document.getElementById('ecg-section');
+    var mount = document.getElementById('ecg-mount');
+    if (!section || !mount) return;
+    fetch('/api/patient-exams?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (e) {
+        var studies = (e && e.ecg_studies) || [];
+        if (!studies.length) { section.style.display = 'none'; return; }
+        injectEcgStyles();
+        mount.innerHTML = buildEcgSectionHtml(studies, clerk);
+        section.style.display = '';
+        hydrateEcgCharts(mount, clerk);
+      })
+      .catch(function () { section.style.display = 'none'; });
+  }
+
   ready(function () {
     injectChangeButton();
     // Patient Zero's home is a static page that ends in <footer> — we can
@@ -2135,6 +2282,7 @@
         injectStyles();
         retrofitStaticLabHistory();
         decorateExamsWithAiOutliers(); // 9a — AI outlier explanation onto static lab cards
+        decorateEcgStudies(patient);   // DB-driven ECG block on the static page
       }
       // LLM-authored AI insights (patient_dashboards / section 'ai-insights').
       // Static pages otherwise skip the dashboard layer, so do it here. No-ops
