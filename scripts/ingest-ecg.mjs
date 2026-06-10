@@ -37,6 +37,7 @@ const APPLY = process.argv.includes("--apply");
 const PATIENT = arg("--patient", "pending:joao");
 const FOLDER = arg("--folder");
 const ENDPOINT = (arg("--endpoint", "https://lumenhealth.io")).replace(/\/$/, "");
+const VIEWER = arg("--viewer", "pending:admin"); // admin clerk for the gated endpoint
 const DATE_OVERRIDE = arg("--date");
 if (!FOLDER) { console.error("✗ --folder required"); process.exit(1); }
 
@@ -143,7 +144,7 @@ if (!APPLY) { console.log("\n(dry run — nothing posted. Re-run with --apply on
 // ── POST to the deployed admin endpoint (writes R2 + DB) ─────────────────────
 const res = await fetch(`${ENDPOINT}/api/admin/ecg-ingest`, {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
+  headers: { "Content-Type": "application/json", "X-Viewer-Clerk": VIEWER },
   body: JSON.stringify({ patient_clerk: PATIENT, study, files }),
 });
 const out = await res.json().catch(() => ({}));
