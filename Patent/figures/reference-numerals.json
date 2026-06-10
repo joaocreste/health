@@ -1,0 +1,305 @@
+{
+  "10": {
+    "pt": "Paciente",
+    "en": "Patient",
+    "figures": [
+      "FIG.1",
+      "FIG.2",
+      "FIG.9"
+    ]
+  },
+  "20": {
+    "pt": "Plataforma Lumen",
+    "en": "Lumen platform",
+    "figures": [
+      "FIG.1"
+    ]
+  },
+  "30": {
+    "pt": "Client Services",
+    "en": "Client Services",
+    "figures": [
+      "FIG.1",
+      "FIG.2",
+      "FIG.9"
+    ]
+  },
+  "40": {
+    "pt": "Médico",
+    "en": "Physician",
+    "figures": [
+      "FIG.1",
+      "FIG.7"
+    ]
+  },
+  "50": {
+    "pt": "Registro unificado do paciente",
+    "en": "Unified patient record",
+    "figures": [
+      "FIG.3",
+      "FIG.6",
+      "FIG.7"
+    ]
+  },
+  "60": {
+    "pt": "Armazenamento de blobs (UE)",
+    "en": "Blob storage (EU)",
+    "figures": [
+      "FIG.2",
+      "FIG.3",
+      "FIG.9"
+    ]
+  },
+  "70": {
+    "pt": "Banco de dados relacional",
+    "en": "Relational database",
+    "figures": [
+      "FIG.3",
+      "FIG.9"
+    ]
+  },
+  "80": {
+    "pt": "Agente de IA por paciente",
+    "en": "Per-patient AI agent",
+    "figures": [
+      "FIG.1",
+      "FIG.8"
+    ]
+  },
+  "90": {
+    "pt": "Portão de aprovação humana",
+    "en": "Human approval gate",
+    "figures": [
+      "FIG.3",
+      "FIG.4",
+      "FIG.5"
+    ]
+  },
+  "301": {
+    "pt": "Classificação de tipo de arquivo",
+    "en": "File-type classification",
+    "figures": [
+      "FIG.3"
+    ]
+  },
+  "302": {
+    "pt": "Registro de prompts",
+    "en": "Prompt registry",
+    "figures": [
+      "FIG.3"
+    ]
+  },
+  "303": {
+    "pt": "Estruturação por IA",
+    "en": "AI structuring",
+    "figures": [
+      "FIG.3"
+    ]
+  },
+  "304": {
+    "pt": "Normalização (taxonomia canônica)",
+    "en": "Normalization (canonical taxonomy)",
+    "figures": [
+      "FIG.3"
+    ]
+  },
+  "401": {
+    "pt": "Arquivo recebido",
+    "en": "File received",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "402": {
+    "pt": "Classificador",
+    "en": "Classifier",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "403": {
+    "pt": "Saída estruturada",
+    "en": "Structured output",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "404": {
+    "pt": "Consulta ao registro de prompts",
+    "en": "Prompt-registry lookup",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "405": {
+    "pt": "Classe de renderização padrão?",
+    "en": "Standard render class?",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "406": {
+    "pt": "Fan-out de ingestão",
+    "en": "Ingestion fan-out",
+    "figures": [
+      "FIG.4"
+    ]
+  },
+  "501": {
+    "pt": "Enviado",
+    "en": "Submitted",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "502": {
+    "pt": "Classificado",
+    "en": "Classified",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "503": {
+    "pt": "Em ingestão",
+    "en": "Ingesting",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "504": {
+    "pt": "Em verificação",
+    "en": "Verifying",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "505": {
+    "pt": "Publicado",
+    "en": "Published",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "506": {
+    "pt": "Falhou",
+    "en": "Failed",
+    "figures": [
+      "FIG.5"
+    ]
+  },
+  "601": {
+    "pt": "Mapeamento p/ taxonomia canônica",
+    "en": "Canonical-taxonomy mapping",
+    "figures": [
+      "FIG.6"
+    ]
+  },
+  "602": {
+    "pt": "Físico",
+    "en": "Physical",
+    "figures": [
+      "FIG.6",
+      "FIG.8"
+    ]
+  },
+  "603": {
+    "pt": "Mental",
+    "en": "Mental",
+    "figures": [
+      "FIG.6",
+      "FIG.8"
+    ]
+  },
+  "604": {
+    "pt": "Espiritual",
+    "en": "Spiritual",
+    "figures": [
+      "FIG.6",
+      "FIG.8"
+    ]
+  },
+  "605": {
+    "pt": "Vitais",
+    "en": "Vitals",
+    "figures": [
+      "FIG.6"
+    ]
+  },
+  "606": {
+    "pt": "Exames",
+    "en": "Exams",
+    "figures": [
+      "FIG.6"
+    ]
+  },
+  "607": {
+    "pt": "Genética",
+    "en": "Genetics",
+    "figures": [
+      "FIG.6"
+    ]
+  },
+  "701": {
+    "pt": "Visão do paciente",
+    "en": "Patient view",
+    "figures": [
+      "FIG.7"
+    ]
+  },
+  "702": {
+    "pt": "Visão do médico",
+    "en": "Physician view",
+    "figures": [
+      "FIG.7"
+    ]
+  },
+  "801": {
+    "pt": "Limite de dados do paciente",
+    "en": "Patient data boundary",
+    "figures": [
+      "FIG.8"
+    ]
+  },
+  "802": {
+    "pt": "Cartões de insight",
+    "en": "Insight cards",
+    "figures": [
+      "FIG.8"
+    ]
+  },
+  "803": {
+    "pt": "Dados de outro paciente",
+    "en": "Other patient data",
+    "figures": [
+      "FIG.8"
+    ]
+  },
+  "901": {
+    "pt": "Direito de exclusão",
+    "en": "Right to erasure",
+    "figures": [
+      "FIG.9"
+    ]
+  },
+  "902": {
+    "pt": "Exclusão total",
+    "en": "Total erasure",
+    "figures": [
+      "FIG.9"
+    ]
+  },
+  "903": {
+    "pt": "Exclusão parcial",
+    "en": "Partial erasure",
+    "figures": [
+      "FIG.9"
+    ]
+  },
+  "904": {
+    "pt": "Registro de auditoria",
+    "en": "Audit log",
+    "figures": [
+      "FIG.9"
+    ]
+  }
+}
