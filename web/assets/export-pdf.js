@@ -149,7 +149,7 @@
 
   /* ── State ─────────────────────────────────────────────────────────── */
   function openModal() {
-    if (!PATIENT) { alert('No patient in context.'); return; }
+    if (!PATIENT) { alert(lang() === 'pt' ? 'Nenhum paciente selecionado.' : 'No patient in context.'); return; }
     var root = buildShell();
     root.querySelector('.export-modal-error').hidden = true;
     root.querySelector('.export-modal-progress').hidden = true;

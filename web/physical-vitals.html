@@ -181,8 +181,6 @@
   </div>
 </header>
 
-<div class="container"><div class="pt-pending-notice">Os blocos de conteúdo clínico abaixo (composição corporal, arquitetura do sono, atividade, cardiovascular, pressão, avaliação osteopática) estão sendo traduzidos para o português. Por enquanto, os textos detalhados continuam em inglês.</div></div>
-
 <!-- 01 · AI VITALS SYNTHESIS -->
 <section class="report-section" id="ai-synthesis">
   <div class="container">
@@ -277,17 +275,20 @@
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">Body composition trend — Oct 2025 → Apr 2026</div>
-        <div class="chart-card-meta">Withings Scale · n=121 readings (showing recent 18 in trend)</div>
+        <div class="chart-card-title"><span class="lang-en">Body composition trend — Oct 2025 → Apr 2026</span><span class="lang-pt">Tendência da composição corporal — out 2025 → abr 2026</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Withings Scale · n=121 readings (showing recent 18 in trend)</span><span class="lang-pt">Balança Withings · n=121 leituras (mostrando as 18 recentes na tendência)</span></div>
       </div>
       <div class="chart-wrap"><canvas id="bodyChart"></canvas></div>
     </div>
 
     <div class="alert alert-watch mt-2">
-      <strong>Trend reading.</strong> Body composition has been essentially flat across the recorded
+      <span class="lang-en"><strong>Trend reading.</strong> Body composition has been essentially flat across the recorded
       period: weight 81.7 → 81.4 kg, body fat 24.5% → 24.2%, muscle mass 58.6 → 58.6 kg. Since
       1 January 2026 weight is +1.4 kg, body fat −0.9 pp, muscle +1.7 kg — directionally fine but
-      modest. Quetiapine-driven appetite remains a known headwind.
+      modest. Quetiapine-driven appetite remains a known headwind.</span><span class="lang-pt"><strong>Leitura da tendência.</strong> A composição corporal manteve-se essencialmente estável no
+      período registrado: peso 81,7 → 81,4 kg, gordura corporal 24,5% → 24,2%, massa muscular 58,6 → 58,6 kg. Desde
+      1º de janeiro de 2026 o peso está +1,4 kg, gordura corporal −0,9 pp, músculo +1,7 kg — na direção certa, mas
+      modesto. O apetite induzido pela Quetiapine segue como obstáculo conhecido.</span>
     </div>
 
     <!-- 03b · same section · InBody panel, right after the Withings chart -->
@@ -416,33 +417,37 @@
     <p class="section-desc"><span class="lang-en">222 long-sleep nights (≥3h) tracked between 18 October 2025 and 2 June 2026.</span><span class="lang-pt">222 noites de sono prolongado (≥3h) registradas entre 18 de outubro de 2025 e 2 de junho de 2026.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Total sleep (median)</div><div class="metric-value">8h 29m</div><div class="metric-note">IQR 7h00m – 9h46m</div></div>
-      <div class="metric-card"><div class="metric-label">Deep (median)</div><div class="metric-value">1h 32m</div><div class="metric-note">IQR 1h08m – 1h56m</div></div>
-      <div class="metric-card"><div class="metric-label">REM (median)</div><div class="metric-value">1h 23m</div><div class="metric-note">16% — <span class="pill pill-flag">Low</span> (benzo-driven)</div></div>
-      <div class="metric-card"><div class="metric-label">Light (median)</div><div class="metric-value">5h 28m</div><div class="metric-note">64% — Quetiapine signature</div></div>
-      <div class="metric-card"><div class="metric-label">Awake (median)</div><div class="metric-value">1h 20m</div><div class="metric-note">Normal &lt;30m · <span class="pill pill-flag">Elevated</span></div></div>
-      <div class="metric-card"><div class="metric-label">Sleep score</div><div class="metric-value">81<small>/100</small></div><div class="metric-note">IQR 75–87</div></div>
-      <div class="metric-card"><div class="metric-label">Efficiency (median)</div><div class="metric-value">85<small>%</small></div><div class="metric-note">Target ≥85% · <span class="pill pill-ok">At target</span></div></div>
-      <div class="metric-card"><div class="metric-label">Bedtime SD</div><div class="metric-value">±2.6<small>hrs</small></div><div class="metric-note">High circadian drift</div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Total sleep (median)</span><span class="lang-pt">Sono total (mediana)</span></div><div class="metric-value">8h 29m</div><div class="metric-note"><span class="lang-en">IQR 7h00m – 9h46m</span><span class="lang-pt">IIQ 7h00m – 9h46m</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Deep (median)</span><span class="lang-pt">Profundo (mediana)</span></div><div class="metric-value">1h 32m</div><div class="metric-note"><span class="lang-en">IQR 1h08m – 1h56m</span><span class="lang-pt">IIQ 1h08m – 1h56m</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">REM (median)</span><span class="lang-pt">REM (mediana)</span></div><div class="metric-value">1h 23m</div><div class="metric-note"><span class="lang-en">16% — <span class="pill pill-flag">Low</span> (benzo-driven)</span><span class="lang-pt">16% — <span class="pill pill-flag">Baixo</span> (induzido por benzo)</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Light (median)</span><span class="lang-pt">Leve (mediana)</span></div><div class="metric-value">5h 28m</div><div class="metric-note"><span class="lang-en">64% — Quetiapine signature</span><span class="lang-pt">64% — marca da Quetiapine</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Awake (median)</span><span class="lang-pt">Acordado (mediana)</span></div><div class="metric-value">1h 20m</div><div class="metric-note"><span class="lang-en">Normal &lt;30m · <span class="pill pill-flag">Elevated</span></span><span class="lang-pt">Normal &lt;30m · <span class="pill pill-flag">Elevado</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Sleep score</span><span class="lang-pt">Pontuação do sono</span></div><div class="metric-value">81<small>/100</small></div><div class="metric-note"><span class="lang-en">IQR 75–87</span><span class="lang-pt">IIQ 75–87</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Efficiency (median)</span><span class="lang-pt">Eficiência (mediana)</span></div><div class="metric-value">85<small>%</small></div><div class="metric-note"><span class="lang-en">Target ≥85% · <span class="pill pill-ok">At target</span></span><span class="lang-pt">Alvo ≥85% · <span class="pill pill-ok">No alvo</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Bedtime SD</span><span class="lang-pt">DP da hora de dormir</span></div><div class="metric-value">±2.6<small>hrs</small></div><div class="metric-note"><span class="lang-en">High circadian drift</span><span class="lang-pt">Alto desvio circadiano</span></div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">Sleep stage distribution — boxplot (±1.5 × IQR)</div>
-        <div class="chart-card-meta">Oura · n=222 nights · long-sleep events ≥3h</div>
+        <div class="chart-card-title"><span class="lang-en">Sleep stage distribution — boxplot (±1.5 × IQR)</span><span class="lang-pt">Distribuição dos estágios do sono — boxplot (±1,5 × IIQ)</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura · n=222 nights · long-sleep events ≥3h</span><span class="lang-pt">Oura · n=222 noites · eventos de sono prolongado ≥3h</span></div>
       </div>
       <div class="chart-wrap"><canvas id="sleepStageChart"></canvas></div>
       <div class="chart-legend mt-2">
-        <span style='--c:var(--blue-500);'>Box: Q1 – Q3 · Centre line: median · Whiskers extend to the furthest point within 1.5 × IQR · Dots: outliers</span>
+        <span style='--c:var(--blue-500);'><span class="lang-en">Box: Q1 – Q3 · Centre line: median · Whiskers extend to the furthest point within 1.5 × IQR · Dots: outliers</span><span class="lang-pt">Caixa: Q1 – Q3 · Linha central: mediana · Hastes vão até o ponto mais distante dentro de 1,5 × IIQ · Pontos: outliers</span></span>
       </div>
     </div>
 
     <div class="alert">
-      <strong>Clinical note.</strong> REM sleep median 1h23m (16% of total) still sits below the
+      <span class="lang-en"><strong>Clinical note.</strong> REM sleep median 1h23m (16% of total) still sits below the
       healthy 20–25% threshold. Benzodiazepines are potent REM suppressors, directly impairing
       emotional memory consolidation and PTSD recovery. Light sleep at 64% is a Quetiapine
       signature. As the diazepam taper progresses, expect REM rebound — vivid dreams and
-      initial fragmentation — before sustained improvement.
+      initial fragmentation — before sustained improvement.</span><span class="lang-pt"><strong>Nota clínica.</strong> A mediana de sono REM de 1h23m (16% do total) ainda está abaixo do
+      limiar saudável de 20–25%. Os benzodiazepínicos são potentes supressores de REM, prejudicando diretamente
+      a consolidação da memória emocional e a recuperação do TEPT. O sono leve em 64% é uma
+      marca da Quetiapine. À medida que o desmame do diazepam avança, espere rebote de REM — sonhos vívidos e
+      fragmentação inicial — antes da melhora sustentada.</span>
     </div>
   </div>
 </section>
@@ -456,31 +461,35 @@
       197 structured workouts auto-recorded by Oura Ring between October 2025 and June 2026. All
       sessions logged at moderate intensity. Note: lap-pool swimming and many gym sessions are not
       auto-detected and may be under-counted.
-    </span><span class="lang-pt">197 treinos estruturados registrados automaticamente pelo Oura Ring entre outubro de 2025 e junho de 2026. Todas as sessões em intensidade moderada. Observação: a natação em piscina é a modalidade principal do paciente (3×/semana, 30–45 min), mas não é detectada pelo anel; aparece apenas em passos e VFC.</span></p>
+    </span><span class="lang-pt">197 treinos estruturados registrados automaticamente pelo Oura Ring entre outubro de 2025 e junho de 2026. Todas as sessões em intensidade moderada. Observação: a natação em piscina e muitas sessões de academia não são detectadas automaticamente e podem estar subcontadas.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Total sessions</div><div class="metric-value">197</div><div class="metric-note">~33 weeks of data</div></div>
-      <div class="metric-card"><div class="metric-label">Walking sessions</div><div class="metric-value">159</div><div class="metric-note">3,119 min total</div></div>
-      <div class="metric-card"><div class="metric-label">Cycling sessions</div><div class="metric-value">33</div><div class="metric-note">900 min total</div></div>
-      <div class="metric-card"><div class="metric-label">Strength sessions</div><div class="metric-value">3</div><div class="metric-note">109 min · <span class="pill pill-flag">Very low</span></div></div>
-      <div class="metric-card"><div class="metric-label">Swimming sessions</div><div class="metric-value">2</div><div class="metric-note">100 min logged</div></div>
-      <div class="metric-card"><div class="metric-label">Avg session length</div><div class="metric-value">21<small>min</small></div><div class="metric-note">All intensities = moderate</div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Total sessions</span><span class="lang-pt">Total de sessões</span></div><div class="metric-value">197</div><div class="metric-note"><span class="lang-en">~33 weeks of data</span><span class="lang-pt">~33 semanas de dados</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Walking sessions</span><span class="lang-pt">Sessões de caminhada</span></div><div class="metric-value">159</div><div class="metric-note"><span class="lang-en">3,119 min total</span><span class="lang-pt">3.119 min no total</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Cycling sessions</span><span class="lang-pt">Sessões de ciclismo</span></div><div class="metric-value">33</div><div class="metric-note"><span class="lang-en">900 min total</span><span class="lang-pt">900 min no total</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Strength sessions</span><span class="lang-pt">Sessões de força</span></div><div class="metric-value">3</div><div class="metric-note"><span class="lang-en">109 min · <span class="pill pill-flag">Very low</span></span><span class="lang-pt">109 min · <span class="pill pill-flag">Muito baixo</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Swimming sessions</span><span class="lang-pt">Sessões de natação</span></div><div class="metric-value">2</div><div class="metric-note"><span class="lang-en">100 min logged</span><span class="lang-pt">100 min registrados</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Avg session length</span><span class="lang-pt">Duração média da sessão</span></div><div class="metric-value">21<small>min</small></div><div class="metric-note"><span class="lang-en">All intensities = moderate</span><span class="lang-pt">Todas as intensidades = moderada</span></div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">Exercise modality mix — total minutes</div>
-        <div class="chart-card-meta">Oura workouts · Oct 2025 – Jun 2026</div>
+        <div class="chart-card-title"><span class="lang-en">Exercise modality mix — total minutes</span><span class="lang-pt">Mix de modalidades — minutos totais</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura workouts · Oct 2025 – Jun 2026</span><span class="lang-pt">Treinos do Oura · out 2025 – jun 2026</span></div>
       </div>
       <div class="chart-wrap short"><canvas id="exerciseMixChart"></canvas></div>
     </div>
 
     <div class="alert alert-watch">
-      <strong>Programming constraints.</strong> Avoid overhead loading and barbell back squat
+      <span class="lang-en"><strong>Programming constraints.</strong> Avoid overhead loading and barbell back squat
       pending cervical MRI clearance. Cycling and swimming preferred for cardio; lower-body
       compound lifts (goblet squat, hip thrust, leg press) for strength. The data shows the
       programme is currently walking-dominant — strength and swimming are far below the
-      osteopath's recommendation of 150 Zone-2 minutes/week and 2× lower-body sessions.
+      osteopath's recommendation of 150 Zone-2 minutes/week and 2× lower-body sessions.</span><span class="lang-pt"><strong>Restrições do programa.</strong> Evitar carga acima da cabeça e agachamento com barra nas costas
+      até a liberação pela ressonância cervical. Ciclismo e natação preferidos para o cardio; exercícios
+      compostos de membros inferiores (agachamento goblet, elevação pélvica, leg press) para força. Os dados mostram que o
+      programa é atualmente dominado por caminhada — força e natação estão bem abaixo da
+      recomendação do osteopata de 150 minutos/semana em Zona 2 e 2× sessões de membros inferiores.</span>
     </div>
   </div>
 </section>
@@ -493,23 +502,23 @@
     <p class="section-desc"><span class="lang-en">229 days of Oura ambient activity, 17 October 2025 → 2 June 2026.</span><span class="lang-pt">229 dias de atividade ambiente do Oura, 17 de outubro de 2025 → 2 de junho de 2026.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Steps / day (median)</div><div class="metric-value">5,910</div><div class="metric-note">IQR 3,820 – 8,066 · target 10k</div></div>
-      <div class="metric-card"><div class="metric-label">Steps / day (mean)</div><div class="metric-value">6,208</div><div class="metric-note">Target 10,000 · <span class="pill pill-flag">Below target</span></div></div>
-      <div class="metric-card"><div class="metric-label">Days ≥10k steps</div><div class="metric-value">29<small>/220</small></div><div class="metric-note">13% of days</div></div>
-      <div class="metric-card"><div class="metric-label">Days ≥5k steps</div><div class="metric-value">134<small>/220</small></div><div class="metric-note">61% of days</div></div>
-      <div class="metric-card"><div class="metric-label">Sedentary time / day</div><div class="metric-value">8h 10m</div><div class="metric-note">Mean across 229 days</div></div>
-      <div class="metric-card"><div class="metric-label">Active calories / day</div><div class="metric-value">340<small>kcal</small></div><div class="metric-note">Mean</div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Steps / day (median)</span><span class="lang-pt">Passos / dia (mediana)</span></div><div class="metric-value">5,910</div><div class="metric-note"><span class="lang-en">IQR 3,820 – 8,066 · target 10k</span><span class="lang-pt">IIQ 3.820 – 8.066 · alvo 10 mil</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Steps / day (mean)</span><span class="lang-pt">Passos / dia (média)</span></div><div class="metric-value">6,208</div><div class="metric-note"><span class="lang-en">Target 10,000 · <span class="pill pill-flag">Below target</span></span><span class="lang-pt">Alvo 10.000 · <span class="pill pill-flag">Abaixo do alvo</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Days ≥10k steps</span><span class="lang-pt">Dias ≥10 mil passos</span></div><div class="metric-value">29<small>/220</small></div><div class="metric-note"><span class="lang-en">13% of days</span><span class="lang-pt">13% dos dias</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Days ≥5k steps</span><span class="lang-pt">Dias ≥5 mil passos</span></div><div class="metric-value">134<small>/220</small></div><div class="metric-note"><span class="lang-en">61% of days</span><span class="lang-pt">61% dos dias</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Sedentary time / day</span><span class="lang-pt">Tempo sedentário / dia</span></div><div class="metric-value">8h 10m</div><div class="metric-note"><span class="lang-en">Mean across 229 days</span><span class="lang-pt">Média em 229 dias</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Active calories / day</span><span class="lang-pt">Calorias ativas / dia</span></div><div class="metric-value">340<small>kcal</small></div><div class="metric-note"><span class="lang-en">Mean</span><span class="lang-pt">Média</span></div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">Daily steps — every recorded day</div>
-        <div class="chart-card-meta">Oura activity · n=229 days</div>
+        <div class="chart-card-title"><span class="lang-en">Daily steps — every recorded day</span><span class="lang-pt">Passos diários — cada dia registrado</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura activity · n=229 days</span><span class="lang-pt">Atividade do Oura · n=229 dias</span></div>
       </div>
       <div class="chart-wrap"><canvas id="stepsChart"></canvas></div>
       <div class="chart-legend mt-2">
-        <span style="--c:rgba(139,184,210,0.55);color:var(--blue-400);">Daily steps</span>
-        <span style="--c:var(--blue-700);color:var(--blue-700);">Weekly median</span>
+        <span style="--c:rgba(139,184,210,0.55);color:var(--blue-400);"><span class="lang-en">Daily steps</span><span class="lang-pt">Passos diários</span></span>
+        <span style="--c:var(--blue-700);color:var(--blue-700);"><span class="lang-en">Weekly median</span><span class="lang-pt">Mediana semanal</span></span>
       </div>
     </div>
   </div>
@@ -523,16 +532,16 @@
     <p class="section-desc"><span class="lang-en">222 nights of Oura HRV / lowest-RHR readings, October 2025 → June 2026.</span><span class="lang-pt">222 noites de leituras de VFC e FC em repouso mínima do Oura, outubro de 2025 → junho de 2026.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Resting HR (median)</div><div class="metric-value">67<small>bpm</small></div><div class="metric-note">Healthy 50–65 · <span class="pill pill-watch">Above target</span></div></div>
-      <div class="metric-card"><div class="metric-label">HRV (median)</div><div class="metric-value">16<small>ms</small></div><div class="metric-note">Age 55–65 · <span class="pill pill-flag">Critically low</span></div></div>
-      <div class="metric-card"><div class="metric-label">HRV (mean)</div><div class="metric-value">20.0<small>ms</small></div><div class="metric-note">Pulled up by occasional spikes</div></div>
-      <div class="metric-card"><div class="metric-label">Readiness (median)</div><div class="metric-value">76<small>/100</small></div><div class="metric-note">Mean 72.7 · <span class="pill pill-watch">Sub-optimal</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Resting HR (median)</span><span class="lang-pt">FC em repouso (mediana)</span></div><div class="metric-value">67<small>bpm</small></div><div class="metric-note"><span class="lang-en">Healthy 50–65 · <span class="pill pill-watch">Above target</span></span><span class="lang-pt">Saudável 50–65 · <span class="pill pill-watch">Acima do alvo</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">HRV (median)</span><span class="lang-pt">VFC (mediana)</span></div><div class="metric-value">16<small>ms</small></div><div class="metric-note"><span class="lang-en">Age 55–65 · <span class="pill pill-flag">Critically low</span></span><span class="lang-pt">Idade 55–65 · <span class="pill pill-flag">Criticamente baixa</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">HRV (mean)</span><span class="lang-pt">VFC (média)</span></div><div class="metric-value">20.0<small>ms</small></div><div class="metric-note"><span class="lang-en">Pulled up by occasional spikes</span><span class="lang-pt">Elevada por picos ocasionais</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Readiness (median)</span><span class="lang-pt">Prontidão (mediana)</span></div><div class="metric-value">76<small>/100</small></div><div class="metric-note"><span class="lang-en">Mean 72.7 · <span class="pill pill-watch">Sub-optimal</span></span><span class="lang-pt">Média 72,7 · <span class="pill pill-watch">Subótima</span></span></div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">HRV &amp; resting heart rate — monthly mean</div>
-        <div class="chart-card-meta">Oura Ring · n=222 nights</div>
+        <div class="chart-card-title"><span class="lang-en">HRV &amp; resting heart rate — monthly mean</span><span class="lang-pt">VFC e FC em repouso — média mensal</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura Ring · n=222 nights</span><span class="lang-pt">Oura Ring · n=222 noites</span></div>
       </div>
       <div class="chart-wrap"><canvas id="cardioChart"></canvas></div>
     </div>
@@ -547,27 +556,27 @@
 
     <div class="three-col mt-3">
       <div class="list-card">
-        <h4>HRV findings</h4>
+        <h4><span class="lang-en">HRV findings</span><span class="lang-pt">Achados de VFC</span></h4>
         <ul>
-          <li>64% of nights (141 / 222) below 20 ms — chronic autonomic dysregulation</li>
-          <li>Only 2 nights reached ≥60 ms across the entire period</li>
-          <li>Mean (20 ms) is pulled above the median (16 ms) by sparse high-HRV nights</li>
+          <li><span class="lang-en">64% of nights (141 / 222) below 20 ms — chronic autonomic dysregulation</span><span class="lang-pt">64% das noites (141 / 222) abaixo de 20 ms — disregulação autonômica crônica</span></li>
+          <li><span class="lang-en">Only 2 nights reached ≥60 ms across the entire period</span><span class="lang-pt">Apenas 2 noites atingiram ≥60 ms em todo o período</span></li>
+          <li><span class="lang-en">Mean (20 ms) is pulled above the median (16 ms) by sparse high-HRV nights</span><span class="lang-pt">A média (20 ms) é puxada acima da mediana (16 ms) por noites esparsas de VFC alta</span></li>
         </ul>
       </div>
       <div class="list-card">
-        <h4>Trend by month</h4>
+        <h4><span class="lang-en">Trend by month</span><span class="lang-pt">Tendência por mês</span></h4>
         <ul>
-          <li>Oct 19.4 · Nov 19.0 · Dec 19.5 ms</li>
-          <li>Jan 24.5 · Feb 24.6 · Mar 23.7 ms</li>
-          <li><strong>Apr 15.8 · May 13.9 ms</strong> — <span class="pill pill-flag">sustained regression</span></li>
+          <li><span class="lang-en">Oct 19.4 · Nov 19.0 · Dec 19.5 ms</span><span class="lang-pt">out 19,4 · nov 19,0 · dez 19,5 ms</span></li>
+          <li><span class="lang-en">Jan 24.5 · Feb 24.6 · Mar 23.7 ms</span><span class="lang-pt">jan 24,5 · fev 24,6 · mar 23,7 ms</span></li>
+          <li><span class="lang-en"><strong>Apr 15.8 · May 13.9 ms</strong> — <span class="pill pill-flag">sustained regression</span></span><span class="lang-pt"><strong>abr 15,8 · mai 13,9 ms</strong> — <span class="pill pill-flag">regressão sustentada</span></span></li>
         </ul>
       </div>
       <div class="list-card">
-        <h4>What changed Apr → May</h4>
+        <h4><span class="lang-en">What changed Apr → May</span><span class="lang-pt">O que mudou de abr → mai</span></h4>
         <ul>
-          <li>RHR has climbed in parallel: 64.9 (Mar) → 73.5 (Apr) → 76.5 (May) bpm</li>
-          <li>Coincides with cervical protrusion crisis (March), 29 April hospital admission, restarted Diprospan + Lyrica step-up</li>
-          <li>The Jan–Mar gains have unwound — autonomic load is back at baseline or worse</li>
+          <li><span class="lang-en">RHR has climbed in parallel: 64.9 (Mar) → 73.5 (Apr) → 76.5 (May) bpm</span><span class="lang-pt">A FC em repouso subiu em paralelo: 64,9 (mar) → 73,5 (abr) → 76,5 (mai) bpm</span></li>
+          <li><span class="lang-en">Coincides with cervical protrusion crisis (March), 29 April hospital admission, restarted Diprospan + Lyrica step-up</span><span class="lang-pt">Coincide com a crise de protrusão cervical (março), a internação de 29 de abril, o reinício do Diprospan e o aumento da Lyrica</span></li>
+          <li><span class="lang-en">The Jan–Mar gains have unwound — autonomic load is back at baseline or worse</span><span class="lang-pt">Os ganhos de jan–mar se desfizeram — a carga autonômica voltou à linha de base ou pior</span></li>
         </ul>
       </div>
     </div>
@@ -585,12 +594,12 @@
       <div class="metric-card">
         <div class="metric-label"><span class="lang-en">High-stress (median/day)</span><span class="lang-pt">Alto estresse (mediana/dia)</span></div>
         <div class="metric-value">60<small>min</small></div>
-        <div class="metric-note"><span class="lang-en">Mean 87 min · 229 days · <span class="pill pill-watch">Elevated load</span></span><span class="lang-pt">Média 87 min · 229 dias · <span class="pill pill-watch">Carga elevada</span></span></div>
+        <div class="metric-note"><span class="lang-en">Mean 88 min · 229 days · <span class="pill pill-watch">Elevated load</span></span><span class="lang-pt">Média 88 min · 229 dias · <span class="pill pill-watch">Carga elevada</span></span></div>
       </div>
       <div class="metric-card">
         <div class="metric-label"><span class="lang-en">Peak stress day</span><span class="lang-pt">Dia de pico</span></div>
         <div class="metric-value">525<small>min</small></div>
-        <div class="metric-note"><span class="lang-en">6 April 2026 — 8h 45m · <span class="pill pill-flag">Crisis-adjacent</span></span><span class="lang-pt">6 de abril de 2026 — 8h45 · <span class="pill pill-flag">Pré-crise</span></span></div>
+        <div class="metric-note"><span class="lang-en">6 April 2026 — 8h 45m · <span class="pill pill-flag">Crisis-adjacent</span></span><span class="lang-pt">6 de abril de 2026 — 8h45 · <span class="pill pill-flag">Próximo a crise</span></span></div>
       </div>
       <div class="metric-card">
         <div class="metric-label"><span class="lang-en">Resilience score (median)</span><span class="lang-pt">Pontuação de resiliência (mediana)</span></div>
@@ -649,18 +658,18 @@
     <p class="section-desc"><span class="lang-en">249 readings, 13 November 2025 – 3 May 2026.</span><span class="lang-pt">249 leituras, 13 de novembro de 2025 – 3 de maio de 2026.</span></p>
 
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-label">Systolic mean</div><div class="metric-value">134.9<small>mmHg</small></div><div class="metric-note">Stage 1 hypertension</div></div>
-      <div class="metric-card"><div class="metric-label">Systolic peak</div><div class="metric-value">172<small>mmHg</small></div><div class="metric-note">Hypertensive spike</div></div>
-      <div class="metric-card"><div class="metric-label">Diastolic mean</div><div class="metric-value">89.6<small>mmHg</small></div><div class="metric-note">Normal &lt;80 · <span class="pill pill-flag">Elevated</span></div></div>
-      <div class="metric-card"><div class="metric-label">Diastolic peak</div><div class="metric-value">116<small>mmHg</small></div><div class="metric-note">Hypertensive crisis range</div></div>
-      <div class="metric-card"><div class="metric-label">Latest reading (May 3)</div><div class="metric-value">138/94</div><div class="metric-note"><span class="pill pill-flag">Stage 2</span> — post-discharge</div></div>
-      <div class="metric-card"><div class="metric-label">Cuff HR mean</div><div class="metric-value">91.7<small>bpm</small></div><div class="metric-note">During measurement</div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Systolic mean</span><span class="lang-pt">Sistólica média</span></div><div class="metric-value">134.9<small>mmHg</small></div><div class="metric-note"><span class="lang-en">Stage 1 hypertension</span><span class="lang-pt">Hipertensão Estágio 1</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Systolic peak</span><span class="lang-pt">Pico sistólico</span></div><div class="metric-value">172<small>mmHg</small></div><div class="metric-note"><span class="lang-en">Hypertensive spike</span><span class="lang-pt">Pico hipertensivo</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Diastolic mean</span><span class="lang-pt">Diastólica média</span></div><div class="metric-value">89.6<small>mmHg</small></div><div class="metric-note"><span class="lang-en">Normal &lt;80 · <span class="pill pill-flag">Elevated</span></span><span class="lang-pt">Normal &lt;80 · <span class="pill pill-flag">Elevada</span></span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Diastolic peak</span><span class="lang-pt">Pico diastólico</span></div><div class="metric-value">116<small>mmHg</small></div><div class="metric-note"><span class="lang-en">Hypertensive crisis range</span><span class="lang-pt">Faixa de crise hipertensiva</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Latest reading (May 3)</span><span class="lang-pt">Última leitura (3 mai)</span></div><div class="metric-value">138/94</div><div class="metric-note"><span class="lang-en"><span class="pill pill-flag">Stage 2</span> — post-discharge</span><span class="lang-pt"><span class="pill pill-flag">Estágio 2</span> — pós-alta</span></div></div>
+      <div class="metric-card"><div class="metric-label"><span class="lang-en">Cuff HR mean</span><span class="lang-pt">FC média no monitor</span></div><div class="metric-value">91.7<small>bpm</small></div><div class="metric-note"><span class="lang-en">During measurement</span><span class="lang-pt">Durante a medição</span></div></div>
     </div>
 
     <div class="chart-card">
       <div class="chart-card-head">
-        <div class="chart-card-title">Blood pressure — monthly mean</div>
-        <div class="chart-card-meta">Withings BP · n=249</div>
+        <div class="chart-card-title"><span class="lang-en">Blood pressure — monthly mean</span><span class="lang-pt">Pressão arterial — média mensal</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Withings BP · n=249</span><span class="lang-pt">PA Withings · n=249</span></div>
       </div>
       <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
     </div>
@@ -672,11 +681,11 @@
       </div>
       <div class="chart-wrap tall"><canvas id="bpDailyChart"></canvas></div>
       <div class="bp-daily-legend">
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3F8A4D"></span> Normal &lt;120/80</span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#E5C04A"></span> Elevated 120–129</span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#D88B3A"></span> Stage 1 130–139 / 80–89</span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#C0392B"></span> Stage 2 ≥140 / 90</span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#7A1F1F"></span> Crisis ≥180 / 120</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3F8A4D"></span> <span class="lang-en">Normal &lt;120/80</span><span class="lang-pt">Normal &lt;120/80</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#E5C04A"></span> <span class="lang-en">Elevated 120–129</span><span class="lang-pt">Elevada 120–129</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#D88B3A"></span> <span class="lang-en">Stage 1 130–139 / 80–89</span><span class="lang-pt">Estágio 1 130–139 / 80–89</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#C0392B"></span> <span class="lang-en">Stage 2 ≥140 / 90</span><span class="lang-pt">Estágio 2 ≥140 / 90</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#7A1F1F"></span> <span class="lang-en">Crisis ≥180 / 120</span><span class="lang-pt">Crise ≥180 / 120</span></span>
       </div>
     </div>
 
@@ -687,31 +696,37 @@
       </div>
       <div id="bpPatternsChart" class="chart-wrap tall"></div>
       <div class="bp-daily-legend">
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E1D1D"></span> Systolic</span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#1B3B54"></span> Diastolic</span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E1D1D"></span> <span class="lang-en">Systolic</span><span class="lang-pt">Sistólica</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#1B3B54"></span> <span class="lang-en">Diastolic</span><span class="lang-pt">Diastólica</span></span>
       </div>
     </div>
 
     <table class="data-table">
-      <thead><tr><th>Month</th><th class="num">Readings</th><th class="num">Systolic mean</th><th class="num">Diastolic mean</th><th>Classification</th></tr></thead>
+      <thead><tr><th><span class="lang-en">Month</span><span class="lang-pt">Mês</span></th><th class="num"><span class="lang-en">Readings</span><span class="lang-pt">Leituras</span></th><th class="num"><span class="lang-en">Systolic mean</span><span class="lang-pt">Sistólica média</span></th><th class="num"><span class="lang-en">Diastolic mean</span><span class="lang-pt">Diastólica média</span></th><th><span class="lang-en">Classification</span><span class="lang-pt">Classificação</span></th></tr></thead>
       <tbody>
-        <tr><td>November 2025</td><td class="num">149</td><td class="num">137.3</td><td class="num">91.3</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
-        <tr><td>December 2025</td><td class="num">63</td><td class="num">132.1</td><td class="num">87.0</td><td><span class="pill pill-watch">Stage 1</span></td></tr>
-        <tr><td>January 2026</td><td class="num">11</td><td class="num">118.1</td><td class="num">78.1</td><td><span class="pill pill-ok">Normal / Elevated</span></td></tr>
-        <tr><td>February 2026</td><td class="num">6</td><td class="num">134.2</td><td class="num">88.8</td><td><span class="pill pill-watch">Stage 1</span></td></tr>
-        <tr><td>April 2026</td><td class="num">19</td><td class="num strong">135.2</td><td class="num strong">90.8</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
-        <tr><td>May 2026</td><td class="num">1</td><td class="num">138</td><td class="num">94</td><td><span class="pill pill-flag">Stage 2</span></td></tr>
+        <tr><td><span class="lang-en">November 2025</span><span class="lang-pt">Novembro de 2025</span></td><td class="num">149</td><td class="num">137.3</td><td class="num">91.3</td><td><span class="pill pill-flag"><span class="lang-en">Stage 2</span><span class="lang-pt">Estágio 2</span></span></td></tr>
+        <tr><td><span class="lang-en">December 2025</span><span class="lang-pt">Dezembro de 2025</span></td><td class="num">63</td><td class="num">132.1</td><td class="num">87.0</td><td><span class="pill pill-watch"><span class="lang-en">Stage 1</span><span class="lang-pt">Estágio 1</span></span></td></tr>
+        <tr><td><span class="lang-en">January 2026</span><span class="lang-pt">Janeiro de 2026</span></td><td class="num">11</td><td class="num">118.1</td><td class="num">78.1</td><td><span class="pill pill-ok"><span class="lang-en">Normal / Elevated</span><span class="lang-pt">Normal / Elevada</span></span></td></tr>
+        <tr><td><span class="lang-en">February 2026</span><span class="lang-pt">Fevereiro de 2026</span></td><td class="num">6</td><td class="num">134.2</td><td class="num">88.8</td><td><span class="pill pill-watch"><span class="lang-en">Stage 1</span><span class="lang-pt">Estágio 1</span></span></td></tr>
+        <tr><td><span class="lang-en">April 2026</span><span class="lang-pt">Abril de 2026</span></td><td class="num">19</td><td class="num strong">135.2</td><td class="num strong">90.8</td><td><span class="pill pill-flag"><span class="lang-en">Stage 2</span><span class="lang-pt">Estágio 2</span></span></td></tr>
+        <tr><td><span class="lang-en">May 2026</span><span class="lang-pt">Maio de 2026</span></td><td class="num">1</td><td class="num">138</td><td class="num">94</td><td><span class="pill pill-flag"><span class="lang-en">Stage 2</span><span class="lang-pt">Estágio 2</span></span></td></tr>
       </tbody>
     </table>
 
     <div class="alert alert-flag mt-3">
-      <strong>April–May readings remain in Stage 2 territory.</strong> Of 19 April readings (around the
+      <span class="lang-en"><strong>April–May readings remain in Stage 2 territory.</strong> Of 19 April readings (around the
       March cervical protrusion crisis and the 29 April hospital admission), the mean is 135.2 / 90.8 mmHg —
       with peaks like 28 Apr 146/101 and 29 Apr 135/96. The 27 Apr reading of 89/56 stands out as an
       anomalously low point (likely captured during the OD episode). The 3 May post-discharge reading is
       138/94 — still Stage 2. The peak diastolic of the entire dataset remains 116 mmHg. Pain, restarted
       Diprospan (corticosteroid), Depakote ER stepped up to 1,000 mg, Lyrica stepped up to 300 mg, Duloxetine
-      now discontinued, and benzodiazepine fluctuations are known contributors. Worth flagging to GP at the next visit.
+      now discontinued, and benzodiazepine fluctuations are known contributors. Worth flagging to GP at the next visit.</span><span class="lang-pt"><strong>As leituras de abril–maio permanecem em território de Estágio 2.</strong> Das 19 leituras de abril (em torno da
+      crise de protrusão cervical de março e da internação de 29 de abril), a média é 135,2 / 90,8 mmHg —
+      com picos como 28 abr 146/101 e 29 abr 135/96. A leitura de 27 abr de 89/56 destaca-se como um
+      ponto anomalamente baixo (provavelmente captado durante o episódio de sobredose). A leitura pós-alta de 3 mai é
+      138/94 — ainda Estágio 2. O pico diastólico de todo o conjunto de dados permanece em 116 mmHg. Dor, reinício do
+      Diprospan (corticosteroide), Depakote ER aumentado para 1.000 mg, Lyrica aumentada para 300 mg, Duloxetina
+      agora descontinuada e flutuações de benzodiazepínicos são contribuintes conhecidos. Vale levar ao clínico geral na próxima consulta.</span>
     </div>
   </div>
 </section>
@@ -725,67 +740,67 @@
       Letter from Luca Galvao Bueno, M.Ost BSc — The Body Formulae Clinic, London. A three-phase
       treatment plan addressing nervous-system regulation, gut motility, and post-concussion
       neuroinflammation.
-    </span><span class="lang-pt">Carta de Luca Galvão Bueno, M.Ost BSc — The Body Formulae Clinic, Londres. Um plano de tratamento em três fases abordando regulação do sistema nervoso, motilidade intestinal e reeducação do movimento.</span></p>
+    </span><span class="lang-pt">Carta de Luca Galvão Bueno, M.Ost BSc — The Body Formulae Clinic, Londres. Um plano de tratamento em três fases abordando regulação do sistema nervoso, motilidade intestinal e neuroinflamação pós-concussão.</span></p>
 
     <div class="three-col mb-3">
       <div class="list-card">
-        <h4>Phase 1 — Nervous system &amp; blood sugar</h4>
+        <h4><span class="lang-en">Phase 1 — Nervous system &amp; blood sugar</span><span class="lang-pt">Fase 1 — Sistema nervoso e glicemia</span></h4>
         <ul>
-          <li>Protein 90–100 g/day; eat every 3–4 h</li>
-          <li>Reduce alcohol progressively</li>
-          <li>No refined carbs on empty stomach</li>
-          <li>Avoid herbal teas on empty stomach</li>
-          <li>Cinnamon as blood-sugar regulator</li>
-          <li>Zone 2 cycling 150 min/week</li>
-          <li>Daily breathing / prayer / meditation</li>
-          <li>Dim lights / no screens 1h pre-bed</li>
+          <li><span class="lang-en">Protein 90–100 g/day; eat every 3–4 h</span><span class="lang-pt">Proteína 90–100 g/dia; comer a cada 3–4 h</span></li>
+          <li><span class="lang-en">Reduce alcohol progressively</span><span class="lang-pt">Reduzir o álcool progressivamente</span></li>
+          <li><span class="lang-en">No refined carbs on empty stomach</span><span class="lang-pt">Sem carboidratos refinados em jejum</span></li>
+          <li><span class="lang-en">Avoid herbal teas on empty stomach</span><span class="lang-pt">Evitar chás de ervas em jejum</span></li>
+          <li><span class="lang-en">Cinnamon as blood-sugar regulator</span><span class="lang-pt">Canela como reguladora da glicemia</span></li>
+          <li><span class="lang-en">Zone 2 cycling 150 min/week</span><span class="lang-pt">Ciclismo em Zona 2 150 min/semana</span></li>
+          <li><span class="lang-en">Daily breathing / prayer / meditation</span><span class="lang-pt">Respiração / oração / meditação diárias</span></li>
+          <li><span class="lang-en">Dim lights / no screens 1h pre-bed</span><span class="lang-pt">Luz baixa / sem telas 1h antes de dormir</span></li>
         </ul>
       </div>
       <div class="list-card">
-        <h4>Phase 2 — Gut motility &amp; bile flow</h4>
+        <h4><span class="lang-en">Phase 2 — Gut motility &amp; bile flow</span><span class="lang-pt">Fase 2 — Motilidade intestinal e fluxo biliar</span></h4>
         <ul>
-          <li>Kiwi, soaked flax/chia, oats — fibre</li>
-          <li>Ox bile + digestive enzymes — 1 cap × 3 with main meals</li>
-          <li>Partially hydrolyzed guar gum (PHGG) — prebiotic</li>
-          <li>Bitter vegetables before lunch (rocket, radicchio, chicory)</li>
-          <li>Or bitter teas (dandelion, burdock, fennel, nettle) right before meal</li>
-          <li>Olive / avocado oil or MCTs with meals</li>
+          <li><span class="lang-en">Kiwi, soaked flax/chia, oats — fibre</span><span class="lang-pt">Kiwi, linhaça/chia hidratadas, aveia — fibra</span></li>
+          <li><span class="lang-en">Ox bile + digestive enzymes — 1 cap × 3 with main meals</span><span class="lang-pt">Bile bovina + enzimas digestivas — 1 cáps × 3 nas refeições principais</span></li>
+          <li><span class="lang-en">Partially hydrolyzed guar gum (PHGG) — prebiotic</span><span class="lang-pt">Goma guar parcialmente hidrolisada (PHGG) — prebiótico</span></li>
+          <li><span class="lang-en">Bitter vegetables before lunch (rocket, radicchio, chicory)</span><span class="lang-pt">Vegetais amargos antes do almoço (rúcula, radicchio, chicória)</span></li>
+          <li><span class="lang-en">Or bitter teas (dandelion, burdock, fennel, nettle) right before meal</span><span class="lang-pt">Ou chás amargos (dente-de-leão, bardana, erva-doce, urtiga) logo antes da refeição</span></li>
+          <li><span class="lang-en">Olive / avocado oil or MCTs with meals</span><span class="lang-pt">Azeite / óleo de abacate ou TCM nas refeições</span></li>
         </ul>
       </div>
       <div class="list-card">
-        <h4>Phase 3 — Post-concussion neuroinflammation</h4>
+        <h4><span class="lang-en">Phase 3 — Post-concussion neuroinflammation</span><span class="lang-pt">Fase 3 — Neuroinflamação pós-concussão</span></h4>
         <ul>
-          <li>Largely addressed via Phases 1 &amp; 2</li>
-          <li>Once fat digestion improves, introduce Omega 3 — 2 caps/day with breakfast or lunch</li>
-          <li>Add Vitamin C</li>
+          <li><span class="lang-en">Largely addressed via Phases 1 &amp; 2</span><span class="lang-pt">Em grande parte abordada pelas Fases 1 e 2</span></li>
+          <li><span class="lang-en">Once fat digestion improves, introduce Omega 3 — 2 caps/day with breakfast or lunch</span><span class="lang-pt">Quando a digestão de gorduras melhorar, introduzir Ômega 3 — 2 cáps/dia no café da manhã ou almoço</span></li>
+          <li><span class="lang-en">Add Vitamin C</span><span class="lang-pt">Adicionar Vitamina C</span></li>
         </ul>
       </div>
     </div>
 
-    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:1rem 0 1rem;">Supplementation regime</h3>
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:1rem 0 1rem;"><span class="lang-en">Supplementation regime</span><span class="lang-pt">Regime de suplementação</span></h3>
     <table class="data-table mb-3">
-      <thead><tr><th>Phase</th><th>Supplement</th><th>Dose / timing</th><th>Rationale</th></tr></thead>
+      <thead><tr><th><span class="lang-en">Phase</span><span class="lang-pt">Fase</span></th><th><span class="lang-en">Supplement</span><span class="lang-pt">Suplemento</span></th><th><span class="lang-en">Dose / timing</span><span class="lang-pt">Dose / horário</span></th><th><span class="lang-en">Rationale</span><span class="lang-pt">Justificativa</span></th></tr></thead>
       <tbody>
-        <tr><td><span class="pill pill-info">Phase 1</span></td><td class="strong">Vitamin D3</td><td>4 sprays AM with food</td><td>London latitude insufficiency.</td></tr>
-        <tr><td><span class="pill pill-info">Phase 1</span></td><td class="strong">Taurine</td><td>1 cap lunch with food</td><td>GABA mimetic; aids bile flow.</td></tr>
-        <tr><td><span class="pill pill-info">Phase 1</span></td><td class="strong">Magnesium (3 forms)</td><td>2 caps PM with food</td><td>Calming; metabolic cofactor.</td></tr>
-        <tr><td><span class="pill pill-info">Phase 1</span></td><td class="strong">Glycine</td><td>3 caps 60 min pre-bed</td><td>Inhibitory neurotransmitter; sleep.</td></tr>
-        <tr><td><span class="pill pill-info">Phase 1</span></td><td class="strong">L-theanine</td><td>1–2 caps early/mid-PM</td><td>Calm focus; if agitated, drop to 1.</td></tr>
-        <tr><td><span class="pill pill-watch">Phase 2*</span></td><td class="strong">Methylated B-complex</td><td>1 cap AM with breakfast</td><td>B6 critical for GABA production.</td></tr>
-        <tr><td><span class="pill pill-watch">Phase 2*</span></td><td class="strong">Zinc</td><td>1 cap lunch</td><td>Improves GABA receptor function.</td></tr>
+        <tr><td><span class="pill pill-info"><span class="lang-en">Phase 1</span><span class="lang-pt">Fase 1</span></span></td><td class="strong">Vitamin D3</td><td><span class="lang-en">4 sprays AM with food</span><span class="lang-pt">4 borrifadas pela manhã com alimento</span></td><td><span class="lang-en">London latitude insufficiency.</span><span class="lang-pt">Insuficiência pela latitude de Londres.</span></td></tr>
+        <tr><td><span class="pill pill-info"><span class="lang-en">Phase 1</span><span class="lang-pt">Fase 1</span></span></td><td class="strong">Taurine</td><td><span class="lang-en">1 cap lunch with food</span><span class="lang-pt">1 cáps no almoço com alimento</span></td><td><span class="lang-en">GABA mimetic; aids bile flow.</span><span class="lang-pt">Mimético do GABA; auxilia o fluxo biliar.</span></td></tr>
+        <tr><td><span class="pill pill-info"><span class="lang-en">Phase 1</span><span class="lang-pt">Fase 1</span></span></td><td class="strong">Magnesium (3 forms)</td><td><span class="lang-en">2 caps PM with food</span><span class="lang-pt">2 cáps à noite com alimento</span></td><td><span class="lang-en">Calming; metabolic cofactor.</span><span class="lang-pt">Calmante; cofator metabólico.</span></td></tr>
+        <tr><td><span class="pill pill-info"><span class="lang-en">Phase 1</span><span class="lang-pt">Fase 1</span></span></td><td class="strong">Glycine</td><td><span class="lang-en">3 caps 60 min pre-bed</span><span class="lang-pt">3 cáps 60 min antes de dormir</span></td><td><span class="lang-en">Inhibitory neurotransmitter; sleep.</span><span class="lang-pt">Neurotransmissor inibitório; sono.</span></td></tr>
+        <tr><td><span class="pill pill-info"><span class="lang-en">Phase 1</span><span class="lang-pt">Fase 1</span></span></td><td class="strong">L-theanine</td><td><span class="lang-en">1–2 caps early/mid-PM</span><span class="lang-pt">1–2 cáps no início/meio da tarde</span></td><td><span class="lang-en">Calm focus; if agitated, drop to 1.</span><span class="lang-pt">Foco calmo; se agitado, reduzir para 1.</span></td></tr>
+        <tr><td><span class="pill pill-watch"><span class="lang-en">Phase 2*</span><span class="lang-pt">Fase 2*</span></span></td><td class="strong">Methylated B-complex</td><td><span class="lang-en">1 cap AM with breakfast</span><span class="lang-pt">1 cáps pela manhã com o café</span></td><td><span class="lang-en">B6 critical for GABA production.</span><span class="lang-pt">B6 crítica para a produção de GABA.</span></td></tr>
+        <tr><td><span class="pill pill-watch"><span class="lang-en">Phase 2*</span><span class="lang-pt">Fase 2*</span></span></td><td class="strong">Zinc</td><td><span class="lang-en">1 cap lunch</span><span class="lang-pt">1 cáps no almoço</span></td><td><span class="lang-en">Improves GABA receptor function.</span><span class="lang-pt">Melhora a função do receptor GABA.</span></td></tr>
       </tbody>
     </table>
-    <p class="text-faint" style="font-size: 12px;">* Phase 2 supplementation introduction depends on benzodiazepine taper progress and psychiatrist's directions.</p>
+    <p class="text-faint" style="font-size: 12px;"><span class="lang-en">* Phase 2 supplementation introduction depends on benzodiazepine taper progress and psychiatrist's directions.</span><span class="lang-pt">* A introdução da suplementação da Fase 2 depende do progresso do desmame de benzodiazepínicos e das orientações do psiquiatra.</span></p>
 
-    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;">Clinical formulation (31 March 2026)</h3>
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;"><span class="lang-en">Clinical formulation (31 March 2026)</span><span class="lang-pt">Formulação clínica (31 de março de 2026)</span></h3>
     <div class="list-card">
       <ul>
-        <li><strong>1. Nervous-system dysregulation.</strong> Benzodiazepine neurochemical dependence is the clinical epicentre. Chronic diazepam + alcohol has reduced endogenous GABA production and destabilised autonomic balance. Reframe: <em>not broken — under-buffered, and recoverable.</em></li>
-        <li><strong>2. Blood-sugar / metabolic instability.</strong> Fainting episodes likely have a glucose component amplified by vasovagal response. Eat every 3–4 h with protein, fat, low-glycemic carbs. No fasting. No empty-stomach tea or alcohol.</li>
-        <li><strong>3. Gut–liver axis dysfunction.</strong> Post-cholecystectomy: no bile reservoir. Constipation driven by sympathetic dominance suppressing motility. Sequence: nervous system first, then motility, then microbiome.</li>
-        <li><strong>4. Cervical radiculopathy.</strong> Wrist flexor / triceps deficit (right). C7–C8 nerve root involvement; median &amp; radial nerve. Grip 34.5 kg R / 33.3 kg L (norm ~40 kg). Symptoms driven by allostatic load + systemic inflammation, not structure alone.</li>
-        <li><strong>5. Neuroinflammation from concussion history.</strong> Will be addressed with omega-3s and vitamin C once fat digestion is optimised.</li>
-        <li><strong>Cranial nerve exam.</strong> All clear — no signs of brain pathology. Slight nystagmus (benign). Pupillary light reflex normal. Rules out central neurological concerns.</li>
+        <li><span class="lang-en"><strong>1. Nervous-system dysregulation.</strong> Benzodiazepine neurochemical dependence is the clinical epicentre. Chronic diazepam + alcohol has reduced endogenous GABA production and destabilised autonomic balance. Reframe: <em>not broken — under-buffered, and recoverable.</em></span><span class="lang-pt"><strong>1. Disregulação do sistema nervoso.</strong> A dependência neuroquímica de benzodiazepínicos é o epicentro clínico. O uso crônico de diazepam + álcool reduziu a produção endógena de GABA e desestabilizou o equilíbrio autonômico. Reformular: <em>não está danificado — está com pouca reserva, e é recuperável.</em></span></li>
+        <li><span class="lang-en"><strong>2. Blood-sugar / metabolic instability.</strong> Fainting episodes likely have a glucose component amplified by vasovagal response. Eat every 3–4 h with protein, fat, low-glycemic carbs. No fasting. No empty-stomach tea or alcohol.</span><span class="lang-pt"><strong>2. Instabilidade glicêmica / metabólica.</strong> Os episódios de desmaio provavelmente têm um componente glicêmico amplificado por resposta vasovagal. Comer a cada 3–4 h com proteína, gordura e carboidratos de baixo índice glicêmico. Sem jejum. Sem chá ou álcool em jejum.</span></li>
+        <li><span class="lang-en"><strong>3. Gut–liver axis dysfunction.</strong> Post-cholecystectomy: no bile reservoir. Constipation driven by sympathetic dominance suppressing motility. Sequence: nervous system first, then motility, then microbiome.</span><span class="lang-pt"><strong>3. Disfunção do eixo intestino–fígado.</strong> Pós-colecistectomia: sem reservatório de bile. Constipação impulsionada pela dominância simpática que suprime a motilidade. Sequência: primeiro o sistema nervoso, depois a motilidade, depois o microbioma.</span></li>
+        <li><span class="lang-en"><strong>4. Cervical radiculopathy.</strong> Wrist flexor / triceps deficit (right). C7–C8 nerve root involvement; median &amp; radial nerve. Grip 34.5 kg R / 33.3 kg L (norm ~40 kg). Symptoms driven by allostatic load + systemic inflammation, not structure alone.</span><span class="lang-pt"><strong>4. Radiculopatia cervical.</strong> Déficit de flexores do punho / tríceps (direito). Envolvimento das raízes nervosas C7–C8; nervos mediano e radial. Preensão 34,5 kg D / 33,3 kg E (norma ~40 kg). Sintomas impulsionados pela carga alostática + inflamação sistêmica, não só pela estrutura.</span></li>
+        <li><span class="lang-en"><strong>5. Neuroinflammation from concussion history.</strong> Will be addressed with omega-3s and vitamin C once fat digestion is optimised.</span><span class="lang-pt"><strong>5. Neuroinflamação por histórico de concussão.</strong> Será abordada com ômega-3 e vitamina C quando a digestão de gorduras estiver otimizada.</span></li>
+        <li><span class="lang-en"><strong>Cranial nerve exam.</strong> All clear — no signs of brain pathology. Slight nystagmus (benign). Pupillary light reflex normal. Rules out central neurological concerns.</span><span class="lang-pt"><strong>Exame dos nervos cranianos.</strong> Tudo normal — sem sinais de patologia cerebral. Discreto nistagmo (benigno). Reflexo fotomotor pupilar normal. Afasta preocupações neurológicas centrais.</span></li>
       </ul>
     </div>
   </div>
@@ -796,10 +811,10 @@
     <img src="assets/logo.svg" alt="">
     <span>Lumen Health · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
   </div>
-  <div>Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</div>
+  <div><span class="lang-en">Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</span><span class="lang-pt">Estritamente confidencial · Apenas para comunicação clínica · Não substitui aconselhamento médico licenciado.</span></div>
 </footer>
 
-<script src="assets/app.js?v=28"></script>
+<script src="assets/app.js?v=29"></script>
 <script src="assets/silvana-labs.js?v=2"></script>
 <script src="assets/leo-mode.js?v=14"></script>
 <script src="assets/patient-context.js?v=53"></script>
@@ -828,17 +843,34 @@ const axisCommon = {
   ticks:  { color: C.inkSoft },
 };
 
+/* Language helper — picks EN or PT for chart strings baked into Chart.js /
+   Plotly configs. Reads html[lang], which initI18n (app.js) sets from
+   localStorage synchronously on load, so charts build in the persisted
+   language. The registry below lets us tear down + rebuild every chart when
+   the user flips the .lang-btn toggle. */
+const L = (en, pt) => (document.documentElement.lang === 'pt' ? pt : en);
+
+/* Each entry: a builder fn. buildAllCharts() (re)runs them; chart builders
+   that hold a Chart.js instance destroy the prior one first via _vitalsCharts. */
+const _vitalsBuilders = [];
+const _vitalsCharts = {};
+function buildAllCharts() {
+  _vitalsBuilders.forEach((fn) => { try { fn(); } catch (e) { console.error('[chart build]', e); } });
+}
+
 /* 1 — Body composition (real data: 18 Withings readings, Oct 2025 → Apr 2026) */
-new Chart(document.getElementById('bodyChart'), {
+_vitalsBuilders.push(function bodyChartBuild() {
+  if (_vitalsCharts.body) _vitalsCharts.body.destroy();
+  _vitalsCharts.body = new Chart(document.getElementById('bodyChart'), {
   type: 'line',
   data: {
     labels: WEIGHT.map(r => r[0]),
     datasets: [
-      { label: 'Body weight (kg)', data: WEIGHT.map(r => r[1]),
+      { label: L('Body weight (kg)', 'Peso corporal (kg)'), data: WEIGHT.map(r => r[1]),
         borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.18)', tension: 0.3, yAxisID: 'y', fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: C.blue600 },
-      { label: 'Muscle mass (kg)', data: WEIGHT.map(r => r[3]),
+      { label: L('Muscle mass (kg)', 'Massa muscular (kg)'), data: WEIGHT.map(r => r[3]),
         borderColor: C.green500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.green500 },
-      { label: 'Body fat (%)', data: WEIGHT.map(r => r[2]),
+      { label: L('Body fat (%)', 'Gordura corporal (%)'), data: WEIGHT.map(r => r[2]),
         borderColor: C.red500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.red500, borderDash: [4,4] },
     ]
   },
@@ -852,6 +884,7 @@ new Chart(document.getElementById('bodyChart'), {
       x:  { ...axisCommon, ticks: { ...axisCommon.ticks, maxTicksLimit: 9 } }
     }
   }
+  });
 });
 
 /* 2 — Sleep stages — Tukey boxplot (1.5 × IQR whiskers).
@@ -871,12 +904,19 @@ const hm = (h) => {
   return `${hh}h ${String(mm).padStart(2, '0')}m`;
 };
 
-new Chart(document.getElementById('sleepStageChart'), {
+_vitalsBuilders.push(function sleepStageChartBuild() {
+  if (_vitalsCharts.sleep) _vitalsCharts.sleep.destroy();
+  /* Stage labels EN/PT — index-aligned with the data array below. */
+  const stageLabels = [
+    L('Deep', 'Profundo'), L('REM', 'REM'), L('Light', 'Leve'),
+    L('Awake', 'Acordado'), L('Total', 'Total')
+  ];
+  _vitalsCharts.sleep = new Chart(document.getElementById('sleepStageChart'), {
   type: 'boxplot',
   data: {
-    labels: ['Deep', 'REM', 'Light', 'Awake', 'Total'],
+    labels: stageLabels,
     datasets: [{
-      label: 'Hours per night',
+      label: L('Hours per night', 'Horas por noite'),
       backgroundColor: sleepFill,
       borderColor: sleepStroke,
       borderWidth: 1.25,
@@ -895,15 +935,15 @@ new Chart(document.getElementById('sleepStageChart'), {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          title: (items) => items[0].label + ' sleep',
+          title: (items) => items[0].label + L(' sleep', ' · sono'),
           label: (ctx) => {
             const v = ctx.parsed;
             return [
-              `Median:   ${hm(v.median)}`,
-              `IQR:      ${hm(v.q1)} – ${hm(v.q3)}`,
-              `Whiskers: ${hm(v.min)} – ${hm(v.max)}`,
-              `Mean:     ${hm(v.mean)}`,
-              v.items && v.items.length ? `Outliers: ${v.items.length}` : null,
+              `${L('Median:', 'Mediana:')}   ${hm(v.median)}`,
+              `${L('IQR:', 'IIQ:')}      ${hm(v.q1)} – ${hm(v.q3)}`,
+              `${L('Whiskers:', 'Hastes:')} ${hm(v.min)} – ${hm(v.max)}`,
+              `${L('Mean:', 'Média:')}     ${hm(v.mean)}`,
+              v.items && v.items.length ? `${L('Outliers:', 'Outliers:')} ${v.items.length}` : null,
             ].filter(Boolean);
           }
         }
@@ -914,20 +954,24 @@ new Chart(document.getElementById('sleepStageChart'), {
       y: {
         ...axisCommon,
         beginAtZero: true,
-        title: { display: true, text: 'hours per night', color: C.inkSoft },
+        title: { display: true, text: L('hours per night', 'horas por noite'), color: C.inkSoft },
         ticks: { ...axisCommon.ticks, callback: (v) => v + 'h' }
       }
     }
   }
+  });
 });
 
 /* 3 — Exercise mix (real totals from Oura workout.csv) */
-new Chart(document.getElementById('exerciseMixChart'), {
+_vitalsBuilders.push(function exerciseMixChartBuild() {
+  if (_vitalsCharts.exercise) _vitalsCharts.exercise.destroy();
+  const sessionCounts = [146, 33, 3, 1];  // index-aligned with labels/data
+  _vitalsCharts.exercise = new Chart(document.getElementById('exerciseMixChart'), {
   type: 'bar',
   data: {
-    labels: ['Walking', 'Cycling', 'Strength', 'Swimming'],
+    labels: [L('Walking', 'Caminhada'), L('Cycling', 'Ciclismo'), L('Strength', 'Força'), L('Swimming', 'Natação')],
     datasets: [{
-      label: 'Total minutes',
+      label: L('Total minutes', 'Minutos totais'),
       data: [2762, 900, 109, 60],
       backgroundColor: [C.blue400, C.blue600, C.green500, C.amber500],
       borderRadius: 4,
@@ -941,23 +985,25 @@ new Chart(document.getElementById('exerciseMixChart'), {
       tooltip: {
         callbacks: {
           label: (ctx) => {
-            const counts = {Walking: 146, Cycling: 33, Strength: 3, Swimming: 1};
-            return `${ctx.parsed.x} min · ${counts[ctx.label]} sessions`;
+            const n = sessionCounts[ctx.dataIndex];
+            return L(`${ctx.parsed.x} min · ${n} sessions`, `${ctx.parsed.x} min · ${n} sessões`);
           }
         }
       }
     },
     scales: {
-      x: { ...axisCommon, title: { display: true, text: 'minutes (cumulative)', color: C.inkSoft } },
+      x: { ...axisCommon, title: { display: true, text: L('minutes (cumulative)', 'minutos (acumulado)'), color: C.inkSoft } },
       y: { ...axisCommon }
     }
   }
+  });
 });
 
 /* 4 — Steps — pastel-blue bars at 25% opacity + weekly-median step line.
    Median is computed per ISO week (Mon–Sun). The line is held flat across
    each week and steps to the next value at the week boundary. */
-{
+_vitalsBuilders.push(function stepsChartBuild() {
+  if (_vitalsCharts.steps) _vitalsCharts.steps.destroy();
   const stepsArr = STEPS.map(r => r[1]);
 
   /* Map every date to its ISO-week Monday, then bucket and median. */
@@ -978,14 +1024,14 @@ new Chart(document.getElementById('exerciseMixChart'), {
   for (const w in buckets) weeklyMed[w] = Math.round(med(buckets[w]));
   const medianSeries = STEPS.map(([d]) => weeklyMed[isoMonday(d)]);
 
-  new Chart(document.getElementById('stepsChart'), {
+  _vitalsCharts.steps = new Chart(document.getElementById('stepsChart'), {
     type: 'bar',
     data: {
       labels: STEPS.map(r => r[0]),
       datasets: [
         {
           type: 'bar',
-          label: 'Steps',
+          label: L('Steps', 'Passos'),
           data: stepsArr,
           backgroundColor: 'rgba(139, 184, 210, 0.25)',  // blue-300 @ 25%
           borderColor:     'rgba(139, 184, 210, 0.55)',
@@ -996,7 +1042,7 @@ new Chart(document.getElementById('exerciseMixChart'), {
         },
         {
           type: 'line',
-          label: 'Weekly median',
+          label: L('Weekly median', 'Mediana semanal'),
           data: medianSeries,
           borderColor: C.blue700,
           borderWidth: 2,
@@ -1015,22 +1061,23 @@ new Chart(document.getElementById('exerciseMixChart'), {
         tooltip: { callbacks: {
           title: (items) => items[0].label,
           label: (ctx) => ctx.datasetIndex === 0
-            ? `${ctx.parsed.y.toLocaleString()} steps`
-            : `Weekly median: ${ctx.parsed.y.toLocaleString()}`
+            ? L(`${ctx.parsed.y.toLocaleString()} steps`, `${ctx.parsed.y.toLocaleString()} passos`)
+            : L(`Weekly median: ${ctx.parsed.y.toLocaleString()}`, `Mediana semanal: ${ctx.parsed.y.toLocaleString()}`)
         }}
       },
       scales: {
         x: { ...axisCommon, ticks: { ...axisCommon.ticks, maxTicksLimit: 14, maxRotation: 0 } },
         y: { ...axisCommon, beginAtZero: true,
-             title: { display: true, text: 'steps / day', color: C.inkSoft },
+             title: { display: true, text: L('steps / day', 'passos / dia'), color: C.inkSoft },
              ticks: { ...axisCommon.ticks, callback: (v) => (v/1000) + 'k' } }
       }
     }
   });
-}
+});
 
 /* 5 — HRV / RHR — monthly mean from real per-night Oura data */
-{
+_vitalsBuilders.push(function cardioChartBuild() {
+  if (_vitalsCharts.cardio) _vitalsCharts.cardio.destroy();
   // Aggregate per month
   const buckets = {};
   for (const [d, hrv, rhr] of HRV_RHR) {
@@ -1040,24 +1087,23 @@ new Chart(document.getElementById('exerciseMixChart'), {
     if (rhr != null) buckets[m].rhr.push(rhr);
   }
   const months = Object.keys(buckets).sort();
-  const fmtMonth = (m) => {
-    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return names[parseInt(m.slice(5,7),10)-1] + ' ' + m.slice(2,4);
-  };
+  const monthNames = L(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                       ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']);
+  const fmtMonth = (m) => monthNames[parseInt(m.slice(5,7),10)-1] + ' ' + m.slice(2,4);
   const mean = (a) => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
   const hrvSeries = months.map(m => +mean(buckets[m].hrv).toFixed(1));
   const rhrSeries = months.map(m => +mean(buckets[m].rhr).toFixed(1));
 
-  new Chart(document.getElementById('cardioChart'), {
+  _vitalsCharts.cardio = new Chart(document.getElementById('cardioChart'), {
     type: 'line',
     data: {
       labels: months.map(fmtMonth),
       datasets: [
-        { label: 'HRV (ms)', data: hrvSeries,
+        { label: L('HRV (ms)', 'VFC (ms)'), data: hrvSeries,
           borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.20)',
           tension: 0.35, yAxisID: 'y', fill: true, borderWidth: 2,
           pointRadius: 4, pointBackgroundColor: C.blue600 },
-        { label: 'Resting HR (bpm)', data: rhrSeries,
+        { label: L('Resting HR (bpm)', 'FC em repouso (bpm)'), data: rhrSeries,
           borderColor: C.red500, backgroundColor: 'transparent',
           tension: 0.35, yAxisID: 'y1', borderWidth: 2, borderDash: [4,4],
           pointRadius: 4, pointBackgroundColor: C.red500 },
@@ -1068,16 +1114,16 @@ new Chart(document.getElementById('exerciseMixChart'), {
       interaction: { mode: 'index', intersect: false },
       plugins: { legend: { position: 'bottom', labels: { color: C.inkSoft } } },
       scales: {
-        y:  { ...axisCommon, position: 'left',  title: { display: true, text: 'HRV (ms)', color: C.inkSoft },
+        y:  { ...axisCommon, position: 'left',  title: { display: true, text: L('HRV (ms)', 'VFC (ms)'), color: C.inkSoft },
               min: 0, max: 35 },
         y1: { ...axisCommon, position: 'right', grid: { drawOnChartArea: false },
-              title: { display: true, text: 'RHR (bpm)', color: C.inkSoft },
+              title: { display: true, text: L('RHR (bpm)', 'FC rep. (bpm)'), color: C.inkSoft },
               min: 55, max: 80 },
         x:  { ...axisCommon }
       }
     }
   });
-}
+});
 
 /* 5b — Stress & resilience — daily high-stress minutes (left axis) and the
  *      composite resilience score (right axis). Daily series is shown as a
@@ -1086,7 +1132,9 @@ new Chart(document.getElementById('exerciseMixChart'), {
  *      [day, stress_min, recovery_min, score, level, summary] tuples
  *      produced by extract_stress() in bin/extract.py.
  */
-if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
+_vitalsBuilders.push(function stressChartBuild() {
+  if (typeof STRESS_RES === 'undefined' || !STRESS_RES.length) return;
+  if (_vitalsCharts.stress) _vitalsCharts.stress.destroy();
   const labels  = STRESS_RES.map(r => r[0]);
   const stress  = STRESS_RES.map(r => (typeof r[1] === 'number' ? r[1] : null));
   const score   = STRESS_RES.map(r => (typeof r[3] === 'number' ? r[3] : null));
@@ -1104,24 +1152,24 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
   const stressMA = rolling(stress, 7);
   const scoreMA  = rolling(score,  7);
 
-  new Chart(document.getElementById('stressChart'), {
+  _vitalsCharts.stress = new Chart(document.getElementById('stressChart'), {
     type: 'line',
     data: {
       labels,
       datasets: [
-        { label: 'High-stress (min/day)', data: stress,
+        { label: L('High-stress (min/day)', 'Alto estresse (min/dia)'), data: stress,
           borderColor: 'rgba(199,62,62,0.28)', backgroundColor: 'rgba(199,62,62,0.06)',
           tension: 0.25, yAxisID: 'y', fill: true, borderWidth: 1,
           pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.red500 },
-        { label: 'High-stress · 7-day mean', data: stressMA,
+        { label: L('High-stress · 7-day mean', 'Alto estresse · média 7 dias'), data: stressMA,
           borderColor: C.red500, backgroundColor: 'transparent',
           tension: 0.35, yAxisID: 'y', borderWidth: 2.5,
           pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.red500 },
-        { label: 'Resilience score (0–100)', data: score,
+        { label: L('Resilience score (0–100)', 'Pontuação de resiliência (0–100)'), data: score,
           borderColor: 'rgba(61,148,96,0.30)', backgroundColor: 'transparent',
           tension: 0.25, yAxisID: 'y1', borderWidth: 1,
           pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.green500 },
-        { label: 'Resilience · 7-day mean', data: scoreMA,
+        { label: L('Resilience · 7-day mean', 'Resiliência · média 7 dias'), data: scoreMA,
           borderColor: C.green500, backgroundColor: 'transparent',
           tension: 0.35, yAxisID: 'y1', borderWidth: 2.5, borderDash: [5,3],
           pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.green500 },
@@ -1137,8 +1185,8 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
             afterBody: (items) => {
               const row = STRESS_RES[items[0].dataIndex];
               const bits = [];
-              if (row[4]) bits.push(`level: ${row[4]}`);
-              if (row[5]) bits.push(`summary: ${row[5]}`);
+              if (row[4]) bits.push(`${L('level:', 'nível:')} ${row[4]}`);
+              if (row[5]) bits.push(`${L('summary:', 'resumo:')} ${row[5]}`);
               return bits.length ? bits.join(' · ') : '';
             }
           }
@@ -1146,11 +1194,11 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
       },
       scales: {
         y:  { ...axisCommon, position: 'left',
-              title: { display: true, text: 'High-stress (min/day)', color: C.inkSoft },
+              title: { display: true, text: L('High-stress (min/day)', 'Alto estresse (min/dia)'), color: C.inkSoft },
               min: 0, max: 600,
               ticks: { ...axisCommon.ticks, stepSize: 120 } },
         y1: { ...axisCommon, position: 'right', grid: { drawOnChartArea: false },
-              title: { display: true, text: 'Resilience score', color: C.inkSoft },
+              title: { display: true, text: L('Resilience score', 'Pontuação de resiliência'), color: C.inkSoft },
               min: 0, max: 100,
               ticks: { ...axisCommon.ticks, stepSize: 20 } },
         x:  { ...axisCommon,
@@ -1162,10 +1210,11 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
       }
     }
   });
-}
+});
 
 /* 6 — Blood pressure — daily means with monthly mean overlay */
-{
+_vitalsBuilders.push(function bpChartBuild() {
+  if (_vitalsCharts.bp) _vitalsCharts.bp.destroy();
   // Per-month aggregate
   const buckets = {};
   for (const [d, sys, dia] of BP) {
@@ -1175,22 +1224,21 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
     buckets[m].dia.push(dia);
   }
   const months = Object.keys(buckets).sort();
-  const fmtMonth = (m) => {
-    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return names[parseInt(m.slice(5,7),10)-1] + ' ' + m.slice(2,4);
-  };
+  const monthNames = L(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                       ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']);
+  const fmtMonth = (m) => monthNames[parseInt(m.slice(5,7),10)-1] + ' ' + m.slice(2,4);
   const mean = (a) => a.length ? a.reduce((s,v)=>s+v,0)/a.length : null;
   const sysM = months.map(m => +mean(buckets[m].sys).toFixed(1));
   const diaM = months.map(m => +mean(buckets[m].dia).toFixed(1));
 
-  new Chart(document.getElementById('bpChart'), {
+  _vitalsCharts.bp = new Chart(document.getElementById('bpChart'), {
     type: 'bar',
     data: {
       labels: months.map(fmtMonth),
       datasets: [
-        { label: 'Systolic (mmHg)',  data: sysM, backgroundColor: C.blue300,
+        { label: L('Systolic (mmHg)', 'Sistólica (mmHg)'),  data: sysM, backgroundColor: C.blue300,
           borderColor: C.blue600, borderWidth: 1, borderRadius: 3 },
-        { label: 'Diastolic (mmHg)', data: diaM, backgroundColor: C.blue700,
+        { label: L('Diastolic (mmHg)', 'Diastólica (mmHg)'), data: diaM, backgroundColor: C.blue700,
           borderColor: C.blue900, borderWidth: 1, borderRadius: 3 },
       ]
     },
@@ -1201,7 +1249,7 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
         tooltip: { callbacks: {
           afterLabel: (ctx) => {
             const m = months[ctx.dataIndex];
-            return `n = ${buckets[m].sys.length} readings`;
+            return L(`n = ${buckets[m].sys.length} readings`, `n = ${buckets[m].sys.length} leituras`);
           }
         }}
       },
@@ -1212,13 +1260,14 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
       }
     }
   });
-}
+});
 
 /* 6b — Blood pressure — daily readings, full timeline (Withings-style
  *      floating bars: thin pill from diastolic to systolic with hollow
  *      circles at each end, colour-coded by BP category). One continuous
  *      chart across all dates — no month navigation. */
-{
+_vitalsBuilders.push(function bpDailyChartBuild() {
+  if (_vitalsCharts.bpDaily) _vitalsCharts.bpDaily.destroy();
   // ACC/AHA 2017 BP categories — colour by the worst-case (sys or dia).
   function bpColor(sys, dia) {
     if (sys >= 180 || dia >= 120) return '#7A1F1F'; // crisis
@@ -1228,11 +1277,11 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
     return '#3F8A4D';                                 // Normal
   }
 
-  const labels = BP.map(([d]) => d);                 // ISO date strings, sorted
-  const dataPts = BP.map(([d, sys, dia]) => ({
+  const bpDaily_labels = BP.map(([d]) => d);          // ISO date strings, sorted
+  const bpDaily_dataPts = BP.map(([d, sys, dia]) => ({
     x: d, y: [dia, sys], sys, dia,
   }));
-  const colors  = BP.map(([_, sys, dia]) => bpColor(sys, dia));
+  const bpDaily_colors  = BP.map(([_, sys, dia]) => bpColor(sys, dia));
 
   // Custom plugin: hollow circles at top (systolic) and bottom (diastolic)
   // of every floating bar. Hand-rendered after the dataset is drawn.
@@ -1261,27 +1310,28 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
   };
 
   // Format an ISO date as "Nov 13" — used in tooltips and tick callbacks.
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const months = L(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                   ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']);
   const fmtShort = (iso) => `${months[parseInt(iso.slice(5,7),10)-1]} ${parseInt(iso.slice(8,10),10)}`;
 
   // Tick callback: only show a label when the month changes (compact spacing
   // for a long timeline) — falls back to first day of each month.
   function tickFormatter(value, index, ticks) {
-    const iso = labels[index];
+    const iso = bpDaily_labels[index];
     if (!iso) return '';
-    const prev = index > 0 ? labels[index - 1] : null;
+    const prev = index > 0 ? bpDaily_labels[index - 1] : null;
     const isFirst = !prev || prev.slice(0, 7) !== iso.slice(0, 7);
     return isFirst ? months[parseInt(iso.slice(5,7),10)-1] + ' ' + iso.slice(2,4) : '';
   }
 
-  new Chart(document.getElementById('bpDailyChart'), {
+  _vitalsCharts.bpDaily = new Chart(document.getElementById('bpDailyChart'), {
     type: 'bar',
     data: {
-      labels,
+      labels: bpDaily_labels,
       datasets: [{
         label: 'BP',
-        data: dataPts,
-        borderColor: colors,
+        data: bpDaily_dataPts,
+        borderColor: bpDaily_colors,
         backgroundColor: 'transparent',
         borderWidth: 1.5,
         borderRadius: 8,
@@ -1324,7 +1374,7 @@ if (typeof STRESS_RES !== 'undefined' && STRESS_RES.length) {
     },
     plugins: [endpointCirclesPlugin]
   });
-}
+});
 
 /* 7 — Glucose — Plotly line with a continuous colorscale on the value
    (red <60 / >180, green at 90, smooth gradient through amber). */
@@ -1333,7 +1383,7 @@ function renderGlucoseChart() {
   if (!el) return;
   const showErr = (msg) => {
     el.innerHTML = '<div style="padding:1rem;color:#9b3535;font-size: 14px;">'
-      + 'Glucose chart failed to load: ' + msg + '</div>';
+      + L('Glucose chart failed to load: ', 'Falha ao carregar o gráfico de glicose: ') + msg + '</div>';
     console.error('[glucose]', msg);
   };
   if (typeof GLUCOSE === 'undefined') return showErr('GLUCOSE data not loaded');
@@ -1501,11 +1551,15 @@ function renderGlucosePatternsChart() {
         line: { color: '#1A2129', width: 2.5, shape: 'spline' },
         customdata: xs.map(min => {
           const h = Math.floor(min / 60), mm = min % 60;
+          if (document.documentElement.lang === 'pt') {
+            return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+          }
           const ampm = h < 12 ? 'am' : 'pm';
           const h12 = (h % 12) === 0 ? 12 : (h % 12);
           return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
         }),
-        hovertemplate: '%{customdata}<br>Median <b>%{y:.0f} mg/dL</b><extra></extra>',
+        hovertemplate: L('%{customdata}<br>Median <b>%{y:.0f} mg/dL</b><extra></extra>',
+                         '%{customdata}<br>Mediana <b>%{y:.0f} mg/dL</b><extra></extra>'),
         showlegend: false }
     ];
 
@@ -1527,7 +1581,8 @@ function renderGlucosePatternsChart() {
       xaxis: {
         tickmode: 'array',
         tickvals: [0, 180, 360, 540, 720, 900, 1080, 1260, 1440],
-        ticktext: ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+        ticktext: L(['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+                    ['0h', '3h', '6h', '9h', '12h', '15h', '18h', '21h', '0h']),
         range: [0, 1440],
         showgrid: true, gridcolor: C.grid,
         zeroline: false,
@@ -1615,11 +1670,15 @@ function renderHrPatternsChart() {
         line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },  /* red-800 */
         customdata: xs.map(min => {
           const h = Math.floor(min / 60), mm = min % 60;
+          if (document.documentElement.lang === 'pt') {
+            return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+          }
           const ampm = h < 12 ? 'am' : 'pm';
           const h12 = (h % 12) === 0 ? 12 : (h % 12);
           return `${h12}:${String(mm).padStart(2, '0')} ${ampm}`;
         }),
-        hovertemplate: '%{customdata}<br>Median <b>%{y:.0f} bpm</b><extra></extra>',
+        hovertemplate: L('%{customdata}<br>Median <b>%{y:.0f} bpm</b><extra></extra>',
+                         '%{customdata}<br>Mediana <b>%{y:.0f} bpm</b><extra></extra>'),
         showlegend: false }
     ];
 
@@ -1641,7 +1700,8 @@ function renderHrPatternsChart() {
       xaxis: {
         tickmode: 'array',
         tickvals: [0, 180, 360, 540, 720, 900, 1080, 1260, 1440],
-        ticktext: ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+        ticktext: L(['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+                    ['0h', '3h', '6h', '9h', '12h', '15h', '18h', '21h', '0h']),
         range: [0, 1440],
         showgrid: true, gridcolor: C.grid,
         zeroline: false,
@@ -1712,7 +1772,8 @@ function renderBpPatternsChart() {
         line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },  /* red-800 */
         marker: { color: '#5E1D1D', size: 5 },
         customdata: BP_BY_WEEK.map(r => r[1]),
-        hovertemplate: 'Week of %{x}<br>Systolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+        hovertemplate: L('Week of %{x}<br>Systolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+                         'Semana de %{x}<br>Mediana sistólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
         showlegend: false },
 
       /* Diastolic — blue palette */
@@ -1730,7 +1791,8 @@ function renderBpPatternsChart() {
         line: { color: '#1B3B54', width: 2.5, shape: 'spline' },  /* blue-800 */
         marker: { color: '#1B3B54', size: 5 },
         customdata: BP_BY_WEEK.map(r => r[1]),
-        hovertemplate: 'Week of %{x}<br>Diastolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+        hovertemplate: L('Week of %{x}<br>Diastolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+                         'Semana de %{x}<br>Mediana diastólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
         showlegend: false }
     ];
 
@@ -1781,19 +1843,28 @@ function renderBpPatternsChart() {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    renderGlucoseChart();
-    renderGlucosePatternsChart();
-    renderHrPatternsChart();
-    renderBpPatternsChart();
-  });
-} else {
-  renderGlucoseChart();
+function renderAllVitalsCharts() {
+  buildAllCharts();            // Chart.js charts (body, sleep, exercise, steps, cardio, stress, bp, bpDaily)
+  renderGlucoseChart();        // Plotly
   renderGlucosePatternsChart();
   renderHrPatternsChart();
   renderBpPatternsChart();
 }
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderAllVitalsCharts);
+} else {
+  renderAllVitalsCharts();
+}
+
+/* Re-render every chart when the language toggle flips, so baked-in
+   Chart.js / Plotly strings (labels, axes, tooltips, ticks) switch language.
+   Mirrors the .lang-btn click pattern used elsewhere; defers one tick so it
+   runs after app.js's own click handler has updated html[lang]. */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.lang-btn');
+  if (btn) setTimeout(renderAllVitalsCharts, 0);
+});
 
 /* 9 — InBody body-composition panel (single read, 1 Jul 2025).
    Range bars reuse the global .lab-test/.lab-bar styles; segmental
@@ -1963,7 +2034,7 @@ if (document.readyState === 'loading') {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="assets/export-pdf.js?v=3"></script>
+<script src="assets/export-pdf.js?v=4"></script>
 
 </body>
 </html>

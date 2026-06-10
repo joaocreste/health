@@ -288,7 +288,7 @@
       document.body.classList.remove('locked');
       return false;
     }
-    err.textContent = 'Incorrect password.';
+    err.textContent = (document.documentElement.lang === 'pt') ? 'Senha incorreta.' : 'Incorrect password.';
     input.value = '';
     input.focus();
     return false;
@@ -296,11 +296,11 @@
 </script>
 <div id="auth-gate" role="dialog" aria-labelledby="auth-title" aria-modal="true">
   <form class="auth-card" onsubmit="return jcAuthSubmit(event);">
-    <h1 id="auth-title">AI-based overview</h1>
-    <p>This section is protected. Please enter the access password to continue.</p>
-    <label for="auth-input">Password</label>
+    <h1 id="auth-title"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></h1>
+    <p><span class="lang-en">This section is protected. Please enter the access password to continue.</span><span class="lang-pt">Esta seção é protegida. Digite a senha de acesso para continuar.</span></p>
+    <label for="auth-input"><span class="lang-en">Password</span><span class="lang-pt">Senha</span></label>
     <input type="password" id="auth-input" autocomplete="current-password" autofocus required>
-    <button type="submit">Unlock</button>
+    <button type="submit"><span class="lang-en">Unlock</span><span class="lang-pt">Desbloquear</span></button>
     <div class="auth-error" id="auth-error" aria-live="polite"></div>
   </form>
 </div>
@@ -514,7 +514,7 @@
      reachable without the general login. */
   window.JC_PUBLIC = true;
 </script>
-<script src="assets/app.js?v=28"></script>
+<script src="assets/app.js?v=29"></script>
 <script src="assets/silvana-labs.js?v=2"></script>
 <script src="assets/leo-mode.js?v=14"></script>
 <script src="assets/patient-context.js?v=53"></script>

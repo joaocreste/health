@@ -51,7 +51,7 @@
               '<span class="lang-pt">PDFs, imagens, DICOM, Excel, CSV, Word, texto. Múltiplos arquivos são suportados — cada um é classificado e roteado automaticamente.</span>' +
             '</p>' +
           '</div>' +
-          '<button type="button" class="add-data-close" aria-label="Close">×</button>' +
+          '<button type="button" class="add-data-close" aria-label="' + (document.documentElement.lang === 'pt' ? 'Fechar' : 'Close') + '">×</button>' +
         '</div>' +
 
         '<div class="add-data-drop" id="add-data-drop" tabindex="0" role="button">' +
@@ -283,7 +283,14 @@
     if (item.status === 'done') {
       if (item.result) {
         var c = item.result.classified_as || 'unclassified';
-        return { en: c, pt: c, css: 'done' };
+        var CLASS_PT = {
+          labs: 'exames',
+          imaging: 'imagem',
+          genetics: 'genética',
+          mental: 'saúde mental',
+          unclassified: 'não classificado',
+        };
+        return { en: c, pt: CLASS_PT[c] || c, css: 'done' };
       }
       return { en: 'Done', pt: 'Pronto', css: 'done' };
     }
@@ -451,8 +458,8 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'add-data-btn';
-    btn.setAttribute('aria-label', 'Add or edit data');
-    btn.setAttribute('title', 'Add or edit data');
+    btn.setAttribute('aria-label', document.documentElement.lang === 'pt' ? 'Adicionar dados' : 'Add or edit data');
+    btn.setAttribute('title', document.documentElement.lang === 'pt' ? 'Adicionar dados' : 'Add or edit data');
     btn.onclick = openModal;
     btn.innerHTML =
       '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +

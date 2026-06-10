@@ -158,8 +158,8 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ct-fs-btn';
-      btn.setAttribute('aria-label', 'Toggle fullscreen');
-      btn.title = 'Expand (Esc to close)';
+      btn.setAttribute('aria-label', document.documentElement.lang === 'pt' ? 'Alternar tela cheia' : 'Toggle fullscreen');
+      btn.title = document.documentElement.lang === 'pt' ? 'Expandir (Esc para fechar)' : 'Expand (Esc to close)';
       btn.innerHTML = FS_ENTER_ICON;
 
       let overlay = null;
