@@ -1,29 +1,56 @@
 #!/usr/bin/env python3
 """Ingest Joao's 3 MRIs (Face / Brain / Knee, 2026-06-08, Sirio-Libanes).
 
-- Maps the pre-rendered jpeg series groups (image_s000N_i000M.jpg) onto the
-  DICOM SeriesDescription positionally (by SeriesNumber order, count-validated).
-- Masks the burned-in PHI corners (name/MRN/DOB/accession top-left, facility/date
-  top-right) on every slice; anatomy preserved per operator decision.
-- Writes optimized JPEGs to web/scans/{slug}/ keeping original filenames.
+Renders previews DIRECTLY FROM DICOM PIXEL DATA (apply_voi_lut + normalize),
+NOT from the CD's pre-rendered JPEGs. The CD JPEGs carry a viewer-rendered
+overlay (patient name / MRN / DOB burned into the corners); the stored DICOM
+pixel data is clean, so rendering from it is inherently de-identified with no
+masking artifacts and no PHI. Handles 512/768/1024 series uniformly.
+
+- One DICOM series (SeriesNumber) -> one Sequence value; instances ordered by
+  InstanceNumber. Writes 512px JPEGs to web/scans/{slug}/image_sNNNN_iMMMM.jpg.
 - Emits {ways,stacks,defaultSelect} manifest (live .ct-viewer contract) with the
   KEY_IMAGES series as default.
 - Copies each report PDF to web/scans/{slug}-report.pdf.
 
-Re-runnable / idempotent. Reads DICOM tags only (no pixel data leaves the box).
+Re-runnable / idempotent. Pixel data is rendered locally and never sent anywhere.
 """
 import os, re, glob, json, shutil, sys
 from collections import defaultdict
+import numpy as np
 import pydicom
-from PIL import Image, ImageDraw
+from pydicom.pixel_data_handlers.util import apply_voi_lut
+from PIL import Image
 
 ROOT = "/Users/joaocreste/Claude Agent/Health WebbApp"
 ING  = os.path.join(ROOT, "Patients/Joao Victor Creste/Ingestion")
 SCANS = os.path.join(ROOT, "web/scans")
 
-# Burned-in PHI corner masks (512x512 frames; overlay is screen-fixed across all studies)
-MASKS = [(0, 0, 172, 170), (328, 0, 512, 108)]   # top-left ID block, top-right facility/date
-JPEG_Q = 82
+MAXSIDE = 512       # longest side of web preview
+JPEG_Q  = 85
+
+def render_dicom(path):
+    """DICOM file -> de-identified PIL image (clean pixel data, no overlay)."""
+    ds = pydicom.dcmread(path, force=True)
+    arr = ds.pixel_array
+    pi = str(ds.get("PhotometricInterpretation", "MONOCHROME2"))
+    if arr.ndim == 3 and pi.startswith(("RGB", "YBR")):          # colour capture
+        img = Image.fromarray(arr.astype("uint8")[..., :3], "RGB")
+    else:
+        if arr.ndim == 3:                                        # multiframe mono -> middle
+            arr = arr[arr.shape[0] // 2]
+        try:
+            a = apply_voi_lut(arr, ds).astype(float)
+        except Exception:
+            a = arr.astype(float)
+        if pi == "MONOCHROME1":
+            a = a.max() - a
+        a = a - a.min()
+        a = a / (a.max() or 1) * 255.0
+        img = Image.fromarray(a.astype("uint8"), "L").convert("RGB")
+    if max(img.size) > MAXSIDE:
+        img.thumbnail((MAXSIDE, MAXSIDE), Image.LANCZOS)
+    return img
 
 STUDIES = [
     dict(folder="MRI Face June 10 2026",  pdf="Rm De Face Ou Seios Da Face.pdf",
@@ -85,7 +112,9 @@ def label_for(desc):
     return (desc.replace("_", " ").strip(), desc.replace("_", " ").strip())
 
 def dicom_series(folder):
-    """Return list of (SeriesNumber, SeriesDescription, count) sorted by SeriesNumber."""
+    """Return list of (SeriesNumber, SeriesDescription, [instance_paths]) sorted
+    by SeriesNumber; instances sorted by InstanceNumber (fallback SliceLocation,
+    then filename)."""
     base = os.path.join(folder, "exam")
     roots = [d for d in glob.glob(os.path.join(base, "*"))
              if os.path.isdir(d) and os.path.basename(d) != "jpeg"]
@@ -98,46 +127,33 @@ def dicom_series(folder):
                      if os.path.isfile(f) and os.path.basename(f) not in ("VERSION", "LOCKFILE")]
             if not files:
                 continue
-            ds = pydicom.dcmread(files[0], stop_before_pixels=True, force=True)
-            out.append((int(ds.get("SeriesNumber", 0) or 0),
-                        str(ds.get("SeriesDescription", "?")), len(files)))
-    return sorted(out)
-
-def jpeg_groups(folder):
-    """Return OrderedDict {s-index: [filenames sorted by instance]}."""
-    jdir = os.path.join(folder, "exam", "jpeg")
-    groups = defaultdict(list)
-    for fn in os.listdir(jdir):
-        m = re.match(r"image_s(\d+)_i(\d+)\.jpe?g$", fn, re.I)
-        if not m:
-            continue
-        groups[int(m.group(1))].append((int(m.group(2)), fn))
-    return {k: [fn for _, fn in sorted(v)] for k, v in sorted(groups.items())}
-
-def mask_and_save(src, dst):
-    im = Image.open(src).convert("RGB")
-    dr = ImageDraw.Draw(im)
-    for (x0, y0, x1, y1) in MASKS:
-        dr.rectangle([x0, y0, x1, y1], fill=(0, 0, 0))
-    im.save(dst, "JPEG", quality=JPEG_Q, optimize=True)
+            keyed = []
+            sn = sd_desc = None
+            for f in files:
+                h = pydicom.dcmread(f, stop_before_pixels=True, force=True)
+                if sn is None:
+                    sn = int(h.get("SeriesNumber", 0) or 0)
+                    sd_desc = str(h.get("SeriesDescription", "?"))
+                inst = h.get("InstanceNumber", None)
+                loc = h.get("SliceLocation", None)
+                keyed.append(((int(inst) if inst is not None else 1 << 30,
+                               float(loc) if loc is not None else 0.0,
+                               os.path.basename(f)), f))
+            paths = [f for _, f in sorted(keyed)]
+            out.append((sn, sd_desc, paths))
+    return sorted(out, key=lambda t: t[0])
 
 def process(study, dry=False):
     folder = os.path.join(ING, study["folder"])
     slug = study["slug"]
     outdir = os.path.join(SCANS, slug)
     dser = dicom_series(folder)
-    jgrp = jpeg_groups(folder)
     print(f"\n=== {study['studyEn']}  ->  {slug}")
-    print(f"    DICOM series: {len(dser)}   jpeg groups: {len(jgrp)}")
-    if len(dser) != len(jgrp):
-        print(f"    !! count mismatch ({len(dser)} vs {len(jgrp)}) -- positional map may be off")
-    jkeys = list(jgrp.keys())
+    print(f"    DICOM series: {len(dser)}")
     used_keys = {}
     values, stacks, default_key = [], [], None
     total_imgs = 0
-    for i, (sn, desc, dcount) in enumerate(dser):
-        jk = jkeys[i] if i < len(jkeys) else None
-        files = jgrp.get(jk, [])
+    for i, (sn, desc, paths) in enumerate(dser, start=1):
         en, pt = label_for(desc)
         # de-dupe value keys + labels (e.g. face has t2_tse_stir_cor twice)
         base_key = slugify(en)
@@ -149,13 +165,14 @@ def process(study, dry=False):
             pt = f"{pt} ({cnt})"
         else:
             key = base_key
-        flag = "" if len(files) == dcount else f"  <jpeg {len(files)} != dcm {dcount}>"
-        print(f"    s{sn:02d} {desc:<36} -> {en:<28} [{len(files)} img]{flag}")
+        names = [f"image_s{i:04d}_i{j:04d}.jpg?v=2" for j in range(1, len(paths) + 1)]
+        print(f"    s{sn:02d} {desc:<36} -> {en:<28} [{len(paths)} img]")
         if "KEY_IMAGES" in desc.upper():
             default_key = key
         values.append(dict(key=key, labelEn=en, labelPt=pt))
-        stacks.append(dict(select={"sequence": key}, count=len(files), slices=files))
-        total_imgs += len(files)
+        stacks.append(dict(select={"sequence": key}, count=len(paths), slices=names,
+                           _paths=paths))
+        total_imgs += len(paths)
     if default_key is None and values:
         default_key = values[0]["key"]
     print(f"    total images: {total_imgs}   default: {default_key}")
@@ -163,17 +180,19 @@ def process(study, dry=False):
     if dry:
         return total_imgs
 
-    # write masked previews
+    # render previews from DICOM pixel data (clean / de-identified)
+    if os.path.isdir(outdir):
+        shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
-    jdir = os.path.join(folder, "exam", "jpeg")
     n = 0
     for st in stacks:
-        for fn in st["slices"]:
-            mask_and_save(os.path.join(jdir, fn), os.path.join(outdir, fn))
+        for name, src in zip(st["slices"], st.pop("_paths")):
+            render_dicom(src).save(os.path.join(outdir, name), "JPEG",
+                                   quality=JPEG_Q, optimize=True)
             n += 1
-            if n % 250 == 0:
-                print(f"      masked {n}/{total_imgs}")
-    print(f"      masked {n}/{total_imgs} -> {outdir}")
+            if n % 300 == 0:
+                print(f"      rendered {n}/{total_imgs}")
+    print(f"      rendered {n}/{total_imgs} -> {outdir}")
 
     # report pdf
     shutil.copyfile(os.path.join(folder, study["pdf"]),
