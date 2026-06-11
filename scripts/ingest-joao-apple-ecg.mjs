@@ -44,7 +44,7 @@ function parseCsvHeader(file) {
   const cls = head.match(/Classification,([^\n\r]+)/);
   const ahr = head.match(/Average Heart Rate,\s*"?(\d+)/i);
   const rawDate = rec ? rec[1].trim() : null;
-  const iso = rawDate ? new Date(rawDate.replace(" ", "T").replace(/\s\+/, "+")).toISOString() : null;
+  const iso = rawDate ? new Date(rawDate.replace(" ", "T").replace(/\s([+-]\d{4})$/, "$1")).toISOString() : null;
   const label = cls ? cls[1].trim() : null;
   const classification = label ? (CLASS_MAP[label.toLowerCase()] || "other") : "other";
   return { recorded_at: iso, classification, average_hr: ahr ? Number(ahr[1]) : null, label, file };
