@@ -56,7 +56,7 @@
   // inject stylesheet (one include per page = just this script)
   if (!document.querySelector('link[data-lumen-chat]')) {
     var link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'assets/chat-widget.css?v=1'; link.setAttribute('data-lumen-chat', '1');
+    link.rel = 'stylesheet'; link.href = 'assets/chat-widget.css?v=2'; link.setAttribute('data-lumen-chat', '1');
     document.head.appendChild(link);
   }
 

@@ -37,7 +37,10 @@
 /* ── panel ── */
 .lc-panel {
   position: absolute; left: 0; bottom: 70px;
-  width: 380px; max-height: min(640px, calc(100vh - 110px));
+  width: 380px;
+  /* Roomy by default (~30% of the viewport) with a floor so it never reads as
+     cramped, and a cap so it always fits above the launcher. */
+  height: min(max(30vh, 440px), calc(100vh - 110px));
   background: var(--lc-bg); color: var(--lc-text);
   border: 1px solid var(--lc-border); border-radius: 16px;
   box-shadow: 0 16px 50px rgba(0,0,0,.5);
