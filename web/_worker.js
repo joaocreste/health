@@ -388,6 +388,229 @@ async function handleEcgObject(request, env) {
   }
 }
 
+/* ── /api/vitals-range ─────────────────────────────────────────────
+ * GET /api/vitals-range?clerk=&from=YYYY-MM-DD&to=YYYY-MM-DD
+ *
+ * Date-truncated chart payloads for the Vitals page range selector. Returns
+ * every series in EXACTLY the shape of the static data.js consts so the
+ * frontend can swap them in and re-render without reshaping:
+ *   weight            [[d, kg, fat_pct, muscle_kg], ...]          (WEIGHT)
+ *   steps             [[d, steps], ...]                            (STEPS)
+ *   hrvRhr            [[d, hrv, rhr], ...] per sleep period        (HRV_RHR)
+ *   stressRes         [[d, stress_min, recovery_min, score, level, summary]]
+ *   bp                [[d, sysMean, diaMean], ...]                 (BP)
+ *   bpByWeek          [[wk, n, sysMed, sysMean, sysSd, diaMed, diaMean, diaSd]]
+ *   sleepBox          {deep, rem, light, awake, total}             (SLEEP_BOX)
+ *   sleepStagesByWeek [{week, n, deep, light, rem, awake, tst}]
+ *   hrByTod           [[count, median, mean, sd] x 288]            (HR_BY_TOD)
+ *
+ * Sources: vitals_daily per-source rows + extras backfilled by
+ * scripts/backfill-joao-vitals-range.mjs (sleep_periods, stress_*, bp_list)
+ * and the hr_readings table (migration 0013). Aggregation math mirrors
+ * bin/extract.py (Tukey 1.5xIQR box with Python-style exclusive quantiles,
+ * population SD for BP weeks, fat% = fat_mass/weight, skip bf% < 5).
+ * Trust model matches /api/patient-exams: clerk identifies the patient. */
+
+function vrMean(a) { return a.length ? a.reduce((s, v) => s + v, 0) / a.length : null; }
+function vrMedian(a) {
+  if (!a.length) return null;
+  const s = [...a].sort((x, y) => x - y);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function vrPstdev(a) {
+  if (a.length < 2) return 0;
+  const m = vrMean(a);
+  return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / a.length);
+}
+// Python statistics.quantiles(..., n=4) 'exclusive' method — (n+1)-position
+// linear interpolation. Needed so a full-window custom range reproduces the
+// extract.py-generated SLEEP_BOX exactly.
+function vrQuantileExc(sorted, q) {
+  const n = sorted.length;
+  if (!n) return null;
+  if (n === 1) return sorted[0];
+  const pos = q * (n + 1);
+  const lo = Math.floor(pos) - 1;
+  const frac = pos - Math.floor(pos);
+  if (lo < 0) return sorted[0];
+  if (lo >= n - 1) return sorted[n - 1];
+  return sorted[lo] + frac * (sorted[lo + 1] - sorted[lo]);
+}
+function vrBoxstats(values) {
+  if (!values.length) return null;
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  const s = [...values].sort((a, b) => a - b);
+  const n = s.length;
+  const q1 = n >= 4 ? vrQuantileExc(s, 0.25) : s[0];
+  const q3 = n >= 4 ? vrQuantileExc(s, 0.75) : s[n - 1];
+  const med = vrMedian(s);
+  const iqr = q3 - q1;
+  const lo = q1 - 1.5 * iqr, hi = q3 + 1.5 * iqr;
+  const inside = s.filter((v) => v >= lo && v <= hi);
+  const items = s.filter((v) => v < lo || v > hi).map(r3);
+  if (!inside.length) return null;
+  return {
+    n, min: r3(inside[0]), q1: r3(q1), median: r3(med), q3: r3(q3),
+    max: r3(inside[inside.length - 1]), mean: r3(vrMean(s)), items,
+  };
+}
+function vrIsoMonday(day) {
+  const d = new Date(day + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+async function handleVitalsRange(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  const from = url.searchParams.get("from");
+  const to = url.searchParams.get("to");
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  if (!clerk) return jsonError(400, "clerk_required");
+  if (!DAY.test(from || "") || !DAY.test(to || "")) return jsonError(400, "from_to_required_yyyy_mm_dd");
+  if (from > to) return jsonError(400, "from_after_to");
+
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const patientRows = await sql`
+      SELECT id FROM users
+      WHERE clerk_user_id = ${clerk} AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (!patientRows.length) return jsonError(404, "patient_not_found");
+    const pid = patientRows[0].id;
+
+    const [scale, oura, cuff, todRows] = await Promise.all([
+      sql`SELECT day::text AS d, weight_kg, extras FROM vitals_daily
+          WHERE patient_id = ${pid} AND source = 'withings_scale'
+            AND day BETWEEN ${from} AND ${to} ORDER BY day`,
+      sql`SELECT day::text AS d, steps, extras FROM vitals_daily
+          WHERE patient_id = ${pid} AND source = 'oura'
+            AND day BETWEEN ${from} AND ${to} ORDER BY day`,
+      sql`SELECT day::text AS d, blood_pressure_sys, blood_pressure_dia, extras FROM vitals_daily
+          WHERE patient_id = ${pid} AND source = 'withings_cuff'
+            AND day BETWEEN ${from} AND ${to} ORDER BY day`,
+      // HR-by-time-of-day: bin readings into 288 five-minute slots of the
+      // local Europe/London day (DST-correct, unlike fixed-offset math).
+      sql`SELECT floor((extract(hour from ts AT TIME ZONE 'Europe/London') * 60
+                      + extract(minute from ts AT TIME ZONE 'Europe/London')) / 5)::int AS slot,
+                 count(*)::int AS n,
+                 percentile_cont(0.5) WITHIN GROUP (ORDER BY bpm) AS med,
+                 avg(bpm) AS mean,
+                 coalesce(stddev_pop(bpm), 0) AS sd
+          FROM hr_readings
+          WHERE patient_id = ${pid} AND source = 'oura'
+            AND (ts AT TIME ZONE 'Europe/London')::date BETWEEN ${from} AND ${to}
+          GROUP BY slot ORDER BY slot`,
+    ]);
+
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const r2 = (v) => Math.round(v * 100) / 100;
+
+    // WEIGHT — fat% from fat_mass/weight; drop failed impedance reads (<5%).
+    const weight = [];
+    for (const r of scale) {
+      const w = Number(r.weight_kg);
+      if (!w) continue;
+      const fm = Number(r.extras?.fat_mass_kg);
+      const bf = Number.isFinite(fm) ? r2((fm / w) * 100) : null;
+      if (bf == null || bf < 5) continue;
+      const mm = Number(r.extras?.muscle_mass_kg);
+      weight.push([r.d, r2(w), bf, Number.isFinite(mm) ? r2(mm) : null]);
+    }
+
+    // STEPS / HRV_RHR / STRESS_RES / sleep periods — all off the oura rows.
+    const steps = [], hrvRhr = [], stressRes = [], periods = [];
+    for (const r of oura) {
+      if (r.steps != null) steps.push([r.d, r.steps]);
+      const x = r.extras || {};
+      for (const p of x.sleep_periods || []) {
+        periods.push({ d: r.d, ...p });
+        if (p.hrv != null) hrvRhr.push([r.d, p.hrv, p.rhr ?? null]);
+      }
+      if (x.stress_min !== undefined || x.resilience_score !== undefined) {
+        stressRes.push([r.d, x.stress_min ?? null, x.recovery_min ?? null,
+          x.resilience_score ?? null, x.resilience_level ?? null, x.stress_summary ?? null]);
+      }
+    }
+
+    // SLEEP_BOX — Tukey box per stage, hours.
+    const sleepBox = {};
+    for (const stage of ["deep", "rem", "light", "awake", "total"]) {
+      sleepBox[stage] = vrBoxstats(periods.map((p) => p[stage]).filter((v) => v != null));
+    }
+
+    // SLEEP_STAGES_BY_WEEK — weekly mean of per-night stage % + total hours.
+    const wkSleep = new Map();
+    for (const p of periods) {
+      const sum = (p.deep ?? 0) + (p.light ?? 0) + (p.rem ?? 0) + (p.awake ?? 0);
+      if (!sum) continue;
+      const wk = vrIsoMonday(p.d);
+      if (!wkSleep.has(wk)) wkSleep.set(wk, []);
+      wkSleep.get(wk).push({
+        deep: (p.deep / sum) * 100, light: (p.light / sum) * 100,
+        rem: (p.rem / sum) * 100, awake: (p.awake / sum) * 100, tst: p.total,
+      });
+    }
+    const sleepStagesByWeek = [...wkSleep.keys()].sort().map((wk) => {
+      const ns = wkSleep.get(wk);
+      return {
+        week: wk, n: ns.length,
+        deep: r1(vrMean(ns.map((x) => x.deep))), light: r1(vrMean(ns.map((x) => x.light))),
+        rem: r1(vrMean(ns.map((x) => x.rem))), awake: r1(vrMean(ns.map((x) => x.awake))),
+        tst: r2(vrMean(ns.map((x) => x.tst))),
+      };
+    });
+
+    // BP daily means + weekly variability from the per-reading bp_list.
+    const bp = [], wkBp = new Map();
+    for (const r of cuff) {
+      const list = r.extras?.bp_list;
+      const wkAdd = (sys, dia) => {
+        const wk = vrIsoMonday(r.d);
+        if (!wkBp.has(wk)) wkBp.set(wk, { sys: [], dia: [] });
+        wkBp.get(wk).sys.push(...sys);
+        wkBp.get(wk).dia.push(...dia);
+      };
+      if (Array.isArray(list) && list.length) {
+        const sys = list.map((x) => x[1]), dia = list.map((x) => x[2]);
+        bp.push([r.d, r1(vrMean(sys)), r1(vrMean(dia))]);
+        wkAdd(sys, dia);
+      } else if (r.blood_pressure_sys != null && r.blood_pressure_dia != null) {
+        bp.push([r.d, r.blood_pressure_sys, r.blood_pressure_dia]);
+        wkAdd([r.blood_pressure_sys], [r.blood_pressure_dia]);
+      }
+    }
+    const bpByWeek = [...wkBp.keys()].sort().map((wk) => {
+      const { sys, dia } = wkBp.get(wk);
+      return [wk, sys.length,
+        r1(vrMedian(sys)), r2(vrMean(sys)), r2(vrPstdev(sys)),
+        r1(vrMedian(dia)), r2(vrMean(dia)), r2(vrPstdev(dia))];
+    });
+
+    // HR_BY_TOD — dense 288-slot array; empty slots stay [0, null, null, null].
+    const hrByTod = Array.from({ length: 288 }, () => [0, null, null, null]);
+    let hrCount = 0;
+    for (const r of todRows) {
+      if (r.slot < 0 || r.slot > 287) continue;
+      hrByTod[r.slot] = [r.n, r2(Number(r.med)), r2(Number(r.mean)), r2(Number(r.sd))];
+      hrCount += r.n;
+    }
+
+    return new Response(JSON.stringify({
+      range: { from, to },
+      weight, steps, hrvRhr, stressRes, bp, bpByWeek,
+      sleepBox, sleepStagesByWeek, hrByTod,
+      meta: {
+        nights: periods.length, hrReadings: hrCount,
+        bpReadings: [...wkBp.values()].reduce((s, w) => s + w.sys.length, 0),
+      },
+    }), { headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=300" } });
+  } catch (e) {
+    return jsonError(500, `vitals-range failed: ${e.message}`);
+  }
+}
+
 async function handlePatientExams(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
@@ -2810,6 +3033,9 @@ export default {
     }
     if (url.pathname === "/api/patient-ecg-object") {
       return handleEcgObject(request, env);
+    }
+    if (url.pathname === "/api/vitals-range") {
+      return handleVitalsRange(request, env);
     }
     if (url.pathname === "/api/patient-dashboard") {
       return handlePatientDashboard(request, env);

@@ -145,6 +145,21 @@
   #inbody .inbody-mgmt-value.inbody-neg { color: #C73E3E; }
   #inbody .inbody-mgmt-value.inbody-pos { color: #3D9460; }
   #inbody .inbody-mgmt-note { font-family: "IBM Plex Sans", sans-serif; font-size: 11.5px; color: #6E7B8A; margin-top: 6px; }
+
+  /* Vitals data-range selector — lives inside the dark page header. */
+  .vr-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 18px; }
+  .vr-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.66); }
+  .vr-pills { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .vr-pill { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; padding: 5px 13px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.30); background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .vr-pill:hover { background: rgba(255,255,255,0.16); }
+  .vr-pill.active { background: #F9F7F4; border-color: #F9F7F4; color: #0D1B2A; font-weight: 600; }
+  .vr-custom { display: inline-flex; align-items: center; gap: 7px; }
+  .vr-custom input[type="date"] { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.30); background: rgba(255,255,255,0.10); color: #FFFFFF; color-scheme: dark; }
+  .vr-dash { color: rgba(255,255,255,0.55); }
+  .vr-apply { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; font-weight: 600; padding: 5px 13px; border-radius: 999px; border: 1px solid #F9F7F4; background: #F9F7F4; color: #0D1B2A; cursor: pointer; }
+  .vr-apply:hover { background: #FFFFFF; }
+  .vr-status { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: rgba(255,255,255,0.70); }
+  .vr-status.vr-err { color: #EB8585; }
 </style>
 </head>
 <body class="has-side-nav">
@@ -178,6 +193,23 @@
     <div class="page-eyebrow">Physical · Vitals</div>
     <h1 class="page-title">Vitals</h1>
     <p class="page-desc"><span class="lang-en">Daily and continuous biometrics — Withings scale, Oura Ring sleep + activity + HRV / RHR, Withings BP cuff — plus the latest integrative osteopath read.</span><span class="lang-pt">Biometria diária e contínua — balança Withings, sono + atividade + VFC / FC em repouso do Oura Ring, monitor de pressão Withings — mais a avaliação osteopática integrativa mais recente.</span></p>
+    <div class="vr-bar" id="vitalsRangeBar">
+      <span class="vr-label"><span class="lang-en">Select data range:</span><span class="lang-pt">Selecionar período:</span></span>
+      <div class="vr-pills" role="group" aria-label="Data range">
+        <button type="button" class="vr-pill active" data-range="all"><span class="lang-en">All</span><span class="lang-pt">Tudo</span></button>
+        <button type="button" class="vr-pill" data-range="30"><span class="lang-en">30 days</span><span class="lang-pt">30 dias</span></button>
+        <button type="button" class="vr-pill" data-range="60"><span class="lang-en">60 days</span><span class="lang-pt">60 dias</span></button>
+        <button type="button" class="vr-pill" data-range="90"><span class="lang-en">90 days</span><span class="lang-pt">90 dias</span></button>
+        <button type="button" class="vr-pill" data-range="custom"><span class="lang-en">Custom</span><span class="lang-pt">Personalizado</span></button>
+      </div>
+      <div class="vr-custom" id="vrCustom" hidden>
+        <input type="date" id="vrFrom" aria-label="From">
+        <span class="vr-dash">–</span>
+        <input type="date" id="vrTo" aria-label="To">
+        <button type="button" class="vr-apply" id="vrApply"><span class="lang-en">Apply</span><span class="lang-pt">Aplicar</span></button>
+      </div>
+      <span class="vr-status" id="vrStatus" aria-live="polite"></span>
+    </div>
   </div>
 </header>
 
@@ -892,6 +924,20 @@ const axisCommon = {
    the user flips the .lang-btn toggle. */
 const L = (en, pt) => (document.documentElement.lang === 'pt' ? pt : en);
 
+/* ── Range view-model ──
+   The nine range-aware charts read their series from VR, not the data.js
+   consts directly. "All" = the static consts (byte-identical to the
+   pre-selector render); picking 30/60/90/custom swaps in the truncated
+   series from GET /api/vitals-range (same shapes) and re-renders.
+   Charts NOT in VR (glucose CGM week, exercise mix, BP monthly means,
+   RHR weekly, total-sleep weekly) are all-data by design and keep reading
+   the consts. */
+const VR_DEFAULTS = {
+  WEIGHT, SLEEP_BOX, STEPS, HRV_RHR, STRESS_RES, BP,
+  HR_BY_TOD, BP_BY_WEEK, SLEEP_STAGES_BY_WEEK,
+};
+const VR = { ...VR_DEFAULTS };
+
 /* Each entry: a builder fn. buildAllCharts() (re)runs them; chart builders
    that hold a Chart.js instance destroy the prior one first via _vitalsCharts. */
 const _vitalsBuilders = [];
@@ -903,16 +949,17 @@ function buildAllCharts() {
 /* 1 — Body composition (real data: 18 Withings readings, Oct 2025 → Apr 2026) */
 _vitalsBuilders.push(function bodyChartBuild() {
   if (_vitalsCharts.body) _vitalsCharts.body.destroy();
+  const W = VR.WEIGHT;
   _vitalsCharts.body = new Chart(document.getElementById('bodyChart'), {
   type: 'line',
   data: {
-    labels: WEIGHT.map(r => r[0]),
+    labels: W.map(r => r[0]),
     datasets: [
-      { label: L('Body weight (kg)', 'Peso corporal (kg)'), data: WEIGHT.map(r => r[1]),
+      { label: L('Body weight (kg)', 'Peso corporal (kg)'), data: W.map(r => r[1]),
         borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.18)', tension: 0.3, yAxisID: 'y', fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: C.blue600 },
-      { label: L('Muscle mass (kg)', 'Massa muscular (kg)'), data: WEIGHT.map(r => r[3]),
+      { label: L('Muscle mass (kg)', 'Massa muscular (kg)'), data: W.map(r => r[3]),
         borderColor: C.green500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.green500 },
-      { label: L('Body fat (%)', 'Gordura corporal (%)'), data: WEIGHT.map(r => r[2]),
+      { label: L('Body fat (%)', 'Gordura corporal (%)'), data: W.map(r => r[2]),
         borderColor: C.red500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.red500, borderDash: [4,4] },
     ]
   },
@@ -930,8 +977,8 @@ _vitalsBuilders.push(function bodyChartBuild() {
 });
 
 /* 2 — Sleep stages — Tukey boxplot (1.5 × IQR whiskers).
-   Source of truth: SLEEP_BOX in data.js (regenerated by `python3 bin/extract.py`). */
-const sleepBox = SLEEP_BOX;
+   Source of truth: VR.SLEEP_BOX (data.js SLEEP_BOX on "All", /api/vitals-range
+   for a truncated window — both regenerate with the same Tukey recipe). */
 
 /* Boxplot palette — health-palette blue scale.
    Deep = blue-600 (most saturated), fading to blue-200 (cloud) at Awake;
@@ -953,6 +1000,7 @@ _vitalsBuilders.push(function sleepStageChartBuild() {
     L('Deep', 'Profundo'), L('REM', 'REM'), L('Light', 'Leve'),
     L('Awake', 'Acordado'), L('Total', 'Total')
   ];
+  const sleepBox = VR.SLEEP_BOX;
   _vitalsCharts.sleep = new Chart(document.getElementById('sleepStageChart'), {
   type: 'boxplot',
   data: {
@@ -1046,7 +1094,8 @@ _vitalsBuilders.push(function exerciseMixChartBuild() {
    each week and steps to the next value at the week boundary. */
 _vitalsBuilders.push(function stepsChartBuild() {
   if (_vitalsCharts.steps) _vitalsCharts.steps.destroy();
-  const stepsArr = STEPS.map(r => r[1]);
+  const STEPS_V = VR.STEPS;
+  const stepsArr = STEPS_V.map(r => r[1]);
 
   /* Map every date to its ISO-week Monday, then bucket and median. */
   const isoMonday = (s) => {
@@ -1056,7 +1105,7 @@ _vitalsBuilders.push(function stepsChartBuild() {
     return d.toISOString().slice(0, 10);
   };
   const buckets = {};
-  for (const [d, v] of STEPS) (buckets[isoMonday(d)] ||= []).push(v);
+  for (const [d, v] of STEPS_V) (buckets[isoMonday(d)] ||= []).push(v);
   const med = (a) => {
     const s = [...a].sort((x, y) => x - y);
     const m = Math.floor(s.length / 2);
@@ -1064,12 +1113,12 @@ _vitalsBuilders.push(function stepsChartBuild() {
   };
   const weeklyMed = {};
   for (const w in buckets) weeklyMed[w] = Math.round(med(buckets[w]));
-  const medianSeries = STEPS.map(([d]) => weeklyMed[isoMonday(d)]);
+  const medianSeries = STEPS_V.map(([d]) => weeklyMed[isoMonday(d)]);
 
   _vitalsCharts.steps = new Chart(document.getElementById('stepsChart'), {
     type: 'bar',
     data: {
-      labels: STEPS.map(r => r[0]),
+      labels: STEPS_V.map(r => r[0]),
       datasets: [
         {
           type: 'bar',
@@ -1122,7 +1171,7 @@ _vitalsBuilders.push(function cardioChartBuild() {
   if (_vitalsCharts.cardio) _vitalsCharts.cardio.destroy();
   // Aggregate per month
   const buckets = {};
-  for (const [d, hrv, rhr] of HRV_RHR) {
+  for (const [d, hrv, rhr] of VR.HRV_RHR) {
     const m = d.slice(0, 7);
     if (!buckets[m]) buckets[m] = { hrv: [], rhr: [] };
     if (hrv != null) buckets[m].hrv.push(hrv);
@@ -1175,11 +1224,12 @@ _vitalsBuilders.push(function cardioChartBuild() {
  *      produced by extract_stress() in bin/extract.py.
  */
 _vitalsBuilders.push(function stressChartBuild() {
-  if (typeof STRESS_RES === 'undefined' || !STRESS_RES.length) return;
+  const SR = VR.STRESS_RES;
+  if (!SR || !SR.length) return;
   if (_vitalsCharts.stress) _vitalsCharts.stress.destroy();
-  const labels  = STRESS_RES.map(r => r[0]);
-  const stress  = STRESS_RES.map(r => (typeof r[1] === 'number' ? r[1] : null));
-  const score   = STRESS_RES.map(r => (typeof r[3] === 'number' ? r[3] : null));
+  const labels  = SR.map(r => r[0]);
+  const stress  = SR.map(r => (typeof r[1] === 'number' ? r[1] : null));
+  const score   = SR.map(r => (typeof r[3] === 'number' ? r[3] : null));
 
   // Centered 7-day rolling mean. Skips nulls so partial windows still resolve.
   const rolling = (arr, window) => {
@@ -1225,7 +1275,7 @@ _vitalsBuilders.push(function stressChartBuild() {
         tooltip: {
           callbacks: {
             afterBody: (items) => {
-              const row = STRESS_RES[items[0].dataIndex];
+              const row = SR[items[0].dataIndex];
               const bits = [];
               if (row[4]) bits.push(`${L('level:', 'nível:')} ${row[4]}`);
               if (row[5]) bits.push(`${L('summary:', 'resumo:')} ${row[5]}`);
@@ -1319,11 +1369,12 @@ _vitalsBuilders.push(function bpDailyChartBuild() {
     return '#3F8A4D';                                 // Normal
   }
 
-  const bpDaily_labels = BP.map(([d]) => d);          // ISO date strings, sorted
-  const bpDaily_dataPts = BP.map(([d, sys, dia]) => ({
+  const BP_V = VR.BP;
+  const bpDaily_labels = BP_V.map(([d]) => d);          // ISO date strings, sorted
+  const bpDaily_dataPts = BP_V.map(([d, sys, dia]) => ({
     x: d, y: [dia, sys], sys, dia,
   }));
-  const bpDaily_colors  = BP.map(([_, sys, dia]) => bpColor(sys, dia));
+  const bpDaily_colors  = BP_V.map(([_, sys, dia]) => bpColor(sys, dia));
 
   // Custom plugin: hollow circles at top (systolic) and bottom (diastolic)
   // of every floating bar. Hand-rendered after the dataset is drawn.
@@ -1660,13 +1711,14 @@ function renderGlucosePatternsChart() {
 function renderHrPatternsChart() {
   const el = document.getElementById('hrPatternsChart');
   if (!el) return;
-  if (typeof HR_BY_TOD === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.HR_BY_TOD || typeof Plotly === 'undefined') return;
 
   try {
-    const N = HR_BY_TOD.length;
-    const rawMed  = HR_BY_TOD.map(r => r[1]);
-    const rawMean = HR_BY_TOD.map(r => r[2]);
-    const rawSd   = HR_BY_TOD.map(r => r[3]);
+    const TOD = VR.HR_BY_TOD;
+    const N = TOD.length;
+    const rawMed  = TOD.map(r => r[1]);
+    const rawMean = TOD.map(r => r[2]);
+    const rawSd   = TOD.map(r => r[3]);
 
     /* Circular rolling mean to smooth midnight wrap (±3 slots ≈ 35-min). */
     const smooth = (arr, w) => {
@@ -1777,16 +1829,17 @@ function renderHrPatternsChart() {
 function renderBpPatternsChart() {
   const el = document.getElementById('bpPatternsChart');
   if (!el) return;
-  if (typeof BP_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.BP_BY_WEEK || typeof Plotly === 'undefined') return;
 
   try {
-    const xs       = BP_BY_WEEK.map(r => r[0]);
-    const sysMed   = BP_BY_WEEK.map(r => r[2]);
-    const sysMean  = BP_BY_WEEK.map(r => r[3]);
-    const sysSd    = BP_BY_WEEK.map(r => r[4]);
-    const diaMed   = BP_BY_WEEK.map(r => r[5]);
-    const diaMean  = BP_BY_WEEK.map(r => r[6]);
-    const diaSd    = BP_BY_WEEK.map(r => r[7]);
+    const BPW      = VR.BP_BY_WEEK;
+    const xs       = BPW.map(r => r[0]);
+    const sysMed   = BPW.map(r => r[2]);
+    const sysMean  = BPW.map(r => r[3]);
+    const sysSd    = BPW.map(r => r[4]);
+    const diaMed   = BPW.map(r => r[5]);
+    const diaMean  = BPW.map(r => r[6]);
+    const diaSd    = BPW.map(r => r[7]);
 
     const sysL2 = sysMean.map((m, i) => m - 2 * sysSd[i]);
     const sysU2 = sysMean.map((m, i) => m + 2 * sysSd[i]);
@@ -1813,7 +1866,7 @@ function renderBpPatternsChart() {
       { x: xs, y: sysMed, type: 'scatter', mode: 'lines+markers',
         line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },  /* red-800 */
         marker: { color: '#5E1D1D', size: 5 },
-        customdata: BP_BY_WEEK.map(r => r[1]),
+        customdata: BPW.map(r => r[1]),
         hovertemplate: L('Week of %{x}<br>Systolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
                          'Semana de %{x}<br>Mediana sistólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
         showlegend: false },
@@ -1832,7 +1885,7 @@ function renderBpPatternsChart() {
       { x: xs, y: diaMed, type: 'scatter', mode: 'lines+markers',
         line: { color: '#1B3B54', width: 2.5, shape: 'spline' },  /* blue-800 */
         marker: { color: '#1B3B54', size: 5 },
-        customdata: BP_BY_WEEK.map(r => r[1]),
+        customdata: BPW.map(r => r[1]),
         hovertemplate: L('Week of %{x}<br>Diastolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
                          'Semana de %{x}<br>Mediana diastólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
         showlegend: false }
@@ -2038,11 +2091,12 @@ function renderSleepTotalChart() {
 function renderSleepStageCompositionChart() {
   const el = document.getElementById('sleep-stage-weekly-composition');
   if (!el) return;
-  if (typeof SLEEP_STAGES_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.SLEEP_STAGES_BY_WEEK || typeof Plotly === 'undefined') return;
 
   try {
-    const xs = SLEEP_STAGES_BY_WEEK.map(r => r.week);
-    const ns = SLEEP_STAGES_BY_WEEK.map(r => r.n);
+    const SSW = VR.SLEEP_STAGES_BY_WEEK;
+    const xs = SSW.map(r => r.week);
+    const ns = SSW.map(r => r.n);
     /* Same order + colors as the boxplot above (sleepFill/sleepStroke). */
     const stages = [
       { key: 'deep',  en: 'Deep',  pt: 'Profundo', fill: 'rgba(47,100,137,0.80)',  stroke: '#1B3B54' },  /* blue-600 / blue-800 */
@@ -2052,7 +2106,7 @@ function renderSleepStageCompositionChart() {
     ];
     const traces = stages.map(s => ({
       x: xs,
-      y: SLEEP_STAGES_BY_WEEK.map(r => r[s.key]),
+      y: SSW.map(r => r[s.key]),
       name: L(s.en, s.pt),
       type: 'scatter', mode: 'lines',
       stackgroup: 'one',
@@ -2124,6 +2178,97 @@ document.addEventListener('click', (e) => {
   const btn = e.target.closest && e.target.closest('.lang-btn');
   if (btn) setTimeout(renderAllVitalsCharts, 0);
 });
+
+/* ── Data-range selector ──
+   All = static data.js consts, no network. 30/60/90 anchor on the most
+   recent day present in the daily series (not "today", so a stale export
+   doesn't yield near-empty windows); Custom takes any from/to pair. Every
+   non-All pick calls GET /api/vitals-range and swaps the truncated series
+   into VR, then re-renders. Language flips keep the active range because
+   they re-render from VR. */
+(function initVitalsRange() {
+  const bar = document.getElementById('vitalsRangeBar');
+  if (!bar) return;
+  const pills   = [...bar.querySelectorAll('.vr-pill')];
+  const custom  = document.getElementById('vrCustom');
+  const fromEl  = document.getElementById('vrFrom');
+  const toEl    = document.getElementById('vrTo');
+  const apply   = document.getElementById('vrApply');
+  const status  = document.getElementById('vrStatus');
+  const CLERK   = 'pending:joao';
+
+  /* Latest + earliest day across the daily series — selector bounds. */
+  const dailySeries = [VR_DEFAULTS.STEPS, VR_DEFAULTS.BP, VR_DEFAULTS.WEIGHT, VR_DEFAULTS.STRESS_RES];
+  const allDays = dailySeries.flatMap(a => (a && a.length) ? [a[0][0], a[a.length - 1][0]] : []).sort();
+  const firstDay = allDays[0] || '2025-10-01';
+  const lastDay  = allDays[allDays.length - 1] || new Date().toISOString().slice(0, 10);
+  fromEl.value = firstDay; toEl.value = lastDay;
+  fromEl.min = toEl.min = firstDay; fromEl.max = toEl.max = lastDay;
+
+  let seq = 0;  // guards against out-of-order fetch responses
+  const setActive = (btn) => pills.forEach(p => p.classList.toggle('active', p === btn));
+  const setStatus = (en, pt, isErr) => {
+    status.innerHTML = en
+      ? `<span class="lang-en">${en}</span><span class="lang-pt">${pt}</span>` : '';
+    status.classList.toggle('vr-err', !!isErr);
+  };
+
+  async function applyRange(from, to) {
+    const mySeq = ++seq;
+    setStatus('Loading…', 'Carregando…');
+    try {
+      const viewer = sessionStorage.getItem('jc_viewer_clerk') || '';
+      const res = await fetch(`/api/vitals-range?clerk=${encodeURIComponent(CLERK)}&from=${from}&to=${to}`,
+        { headers: viewer ? { 'X-Viewer-Clerk': viewer } : {} });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try { msg = (await res.json()).error || msg; } catch (_) { /* keep status */ }
+        throw new Error(msg);
+      }
+      const d = await res.json();
+      if (mySeq !== seq) return;  // a newer selection superseded this one
+      VR.WEIGHT = d.weight;                       VR.STEPS = d.steps;
+      VR.HRV_RHR = d.hrvRhr;                      VR.STRESS_RES = d.stressRes;
+      VR.BP = d.bp;                               VR.BP_BY_WEEK = d.bpByWeek;
+      VR.SLEEP_BOX = d.sleepBox;                  VR.SLEEP_STAGES_BY_WEEK = d.sleepStagesByWeek;
+      VR.HR_BY_TOD = d.hrByTod;
+      renderAllVitalsCharts();
+      setStatus(`Showing ${from} → ${to} · ${d.meta.nights} nights · ${d.meta.hrReadings.toLocaleString()} HR readings`,
+                `Exibindo ${from} → ${to} · ${d.meta.nights} noites · ${d.meta.hrReadings.toLocaleString()} leituras de FC`);
+    } catch (err) {
+      if (mySeq !== seq) return;
+      console.error('[vitals-range]', err);
+      setStatus(`Could not load range (${err.message}). Showing previous data.`,
+                `Não foi possível carregar o período (${err.message}). Exibindo dados anteriores.`, true);
+    }
+  }
+
+  function resetAll() {
+    seq++;
+    Object.assign(VR, VR_DEFAULTS);
+    renderAllVitalsCharts();
+    setStatus('', '');
+  }
+
+  pills.forEach((btn) => btn.addEventListener('click', () => {
+    const r = btn.dataset.range;
+    setActive(btn);
+    custom.hidden = r !== 'custom';
+    if (r === 'all') return resetAll();
+    if (r === 'custom') return;  // waits for Apply
+    const days = parseInt(r, 10);
+    const anchor = new Date(lastDay + 'T12:00:00Z');
+    anchor.setUTCDate(anchor.getUTCDate() - (days - 1));
+    applyRange(anchor.toISOString().slice(0, 10), lastDay);
+  }));
+
+  apply.addEventListener('click', () => {
+    const from = fromEl.value, to = toEl.value;
+    if (!from || !to) return setStatus('Pick both dates.', 'Escolha as duas datas.', true);
+    if (from > to)    return setStatus('"From" must be before "to".', '"De" deve vir antes de "até".', true);
+    applyRange(from, to);
+  });
+})();
 
 /* 9 — InBody body-composition panel (single read, 1 Jul 2025).
    Range bars reuse the global .lab-test/.lab-bar styles; segmental
