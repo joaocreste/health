@@ -12,6 +12,10 @@ totalgene.pdf
 Doc1.docx
 DATA-PROVENANCE.md
 
+# Raw imaging ingestion drops — DICOM + unmasked previews carry burned-in PHI.
+# Only the de-identified web/scans/ previews are committed; sources stay local.
+/Patients/
+
 # ==========================================================================
 # Build / OS / editor noise
 # ==========================================================================
@@ -53,6 +57,8 @@ JC-Advisory-demo.mp4
 token.txt
 *.token
 *.secret
+.dev.vars
+.dev.vars.*
 
 # ==========================================================================
 # Cloudflare / Wrangler local cache
