@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-02",
+  "generated_at": "2026-06-11",
   "weight": {
     "series_recent": [
       {
@@ -109,24 +109,36 @@
         "w": 81.41,
         "bf": 24.19,
         "mm": 58.63
+      },
+      {
+        "d": "2026-05-04",
+        "w": 81.96,
+        "bf": 24.27,
+        "mm": 58.96
+      },
+      {
+        "d": "2026-05-08",
+        "w": 81.89,
+        "bf": 24.56,
+        "mm": 58.69
       }
     ],
     "latest": {
-      "d": "2026-04-01",
-      "w": 81.41,
-      "bf": 24.19,
-      "mm": 58.63
+      "d": "2026-05-08",
+      "w": 81.89,
+      "bf": 24.56,
+      "mm": 58.69
     },
     "deltas_since_2026_jan": {
-      "w_kg": 1.44,
-      "bf_pp": -0.91,
-      "mm_kg": 1.71
+      "w_kg": 1.92,
+      "bf_pp": -0.54,
+      "mm_kg": 1.77
     },
-    "bmi": 26.89,
-    "n_total": 121,
+    "bmi": 27.05,
+    "n_total": 123,
     "range": [
       "2015-01-20",
-      "2026-04-01"
+      "2026-05-08"
     ]
   },
   "sleep": {
@@ -3232,16 +3244,16 @@
     ]
   },
   "bp": {
-    "n_total": 249,
+    "n_total": 278,
     "range": [
       "2025-11-13",
-      "2026-05-03"
+      "2026-06-07"
     ],
-    "sys_mean": 134.9,
-    "dia_mean": 89.6,
+    "sys_mean": 134.1,
+    "dia_mean": 89.1,
     "sys_peak": 172,
     "dia_peak": 116,
-    "cuff_hr_mean": 91.7,
+    "cuff_hr_mean": 92.0,
     "monthly": {
       "2025-11": {
         "n": 149,
@@ -3274,32 +3286,38 @@
         "class": "Stage 2"
       },
       "2026-05": {
-        "n": 1,
-        "sys": 138,
-        "dia": 94,
-        "class": "Stage 2"
+        "n": 15,
+        "sys": 130.7,
+        "dia": 89.7,
+        "class": "Stage 1"
+      },
+      "2026-06": {
+        "n": 15,
+        "sys": 123.3,
+        "dia": 81.1,
+        "class": "Stage 1"
       }
     },
     "daily_series": [
       {
         "d": "2025-11-13",
-        "sys": 136,
-        "dia": 92
+        "sys": 134.2,
+        "dia": 88.5
       },
       {
         "d": "2025-11-14",
-        "sys": 136.3,
-        "dia": 91
+        "sys": 135.7,
+        "dia": 91.1
       },
       {
         "d": "2025-11-15",
-        "sys": 127,
+        "sys": 128.4,
         "dia": 80.7
       },
       {
         "d": "2025-11-16",
-        "sys": 146.9,
-        "dia": 95
+        "sys": 148.6,
+        "dia": 96.9
       },
       {
         "d": "2025-11-17",
@@ -3308,23 +3326,23 @@
       },
       {
         "d": "2025-11-18",
-        "sys": 131.2,
-        "dia": 88.9
+        "sys": 130.7,
+        "dia": 88.4
       },
       {
         "d": "2025-11-19",
-        "sys": 131.6,
-        "dia": 85.4
+        "sys": 134,
+        "dia": 85
       },
       {
         "d": "2025-11-20",
-        "sys": 134.2,
-        "dia": 89.9
+        "sys": 132.8,
+        "dia": 89.6
       },
       {
         "d": "2025-11-21",
-        "sys": 132.7,
-        "dia": 89
+        "sys": 139,
+        "dia": 90
       },
       {
         "d": "2025-11-22",
@@ -3338,13 +3356,13 @@
       },
       {
         "d": "2025-11-24",
-        "sys": 145.0,
-        "dia": 100.3
+        "sys": 144.8,
+        "dia": 99.8
       },
       {
         "d": "2025-11-25",
-        "sys": 132,
-        "dia": 84.8
+        "sys": 129.8,
+        "dia": 84
       },
       {
         "d": "2025-11-26",
@@ -3443,23 +3461,23 @@
       },
       {
         "d": "2025-12-22",
-        "sys": 132,
-        "dia": 83
+        "sys": 134,
+        "dia": 86.3
       },
       {
         "d": "2025-12-23",
-        "sys": 131.7,
-        "dia": 88
+        "sys": 128.5,
+        "dia": 85.5
       },
       {
         "d": "2025-12-24",
-        "sys": 138.6,
-        "dia": 88.8
+        "sys": 137.9,
+        "dia": 83
       },
       {
         "d": "2025-12-25",
-        "sys": 128,
-        "dia": 72.5
+        "sys": 119.3,
+        "dia": 71.7
       },
       {
         "d": "2025-12-26",
@@ -3567,7 +3585,7 @@
         "dia": 87
       },
       {
-        "d": "2026-04-20",
+        "d": "2026-04-19",
         "sys": 139,
         "dia": 86
       },
@@ -3602,17 +3620,82 @@
         "dia": 96
       },
       {
-        "d": "2026-05-03",
+        "d": "2026-05-02",
         "sys": 138,
         "dia": 94
+      },
+      {
+        "d": "2026-05-06",
+        "sys": 125,
+        "dia": 84
+      },
+      {
+        "d": "2026-05-07",
+        "sys": 129,
+        "dia": 83
+      },
+      {
+        "d": "2026-05-08",
+        "sys": 120,
+        "dia": 85
+      },
+      {
+        "d": "2026-05-11",
+        "sys": 133,
+        "dia": 94
+      },
+      {
+        "d": "2026-05-13",
+        "sys": 138,
+        "dia": 100
+      },
+      {
+        "d": "2026-05-14",
+        "sys": 138,
+        "dia": 93
+      },
+      {
+        "d": "2026-05-18",
+        "sys": 132,
+        "dia": 92.5
+      },
+      {
+        "d": "2026-05-19",
+        "sys": 121,
+        "dia": 82.7
+      },
+      {
+        "d": "2026-05-23",
+        "sys": 135,
+        "dia": 90
+      },
+      {
+        "d": "2026-05-24",
+        "sys": 138.5,
+        "dia": 95
+      },
+      {
+        "d": "2026-06-01",
+        "sys": 138.3,
+        "dia": 93.3
+      },
+      {
+        "d": "2026-06-03",
+        "sys": 116.1,
+        "dia": 76.8
+      },
+      {
+        "d": "2026-06-07",
+        "sys": 126.2,
+        "dia": 80.8
       }
     ],
-    "latest_month": "2026-05",
+    "latest_month": "2026-06",
     "latest_month_means": {
-      "n": 1,
-      "sys": 138,
-      "dia": 94,
-      "class": "Stage 2"
+      "n": 15,
+      "sys": 123.3,
+      "dia": 81.1,
+      "class": "Stage 1"
     }
   },
   "activity": {
@@ -4620,6 +4703,466 @@
     "valium_n": 2,
     "most_recent_alcohol": "2026-03-23",
     "most_recent_valium": "2025-11-05"
+  },
+  "ecgs": {
+    "n_total": 64,
+    "by_class": {
+      "Sinus Rhythm": 43,
+      "High Heart Rate": 18,
+      "Poor Recording": 3
+    },
+    "records": [
+      {
+        "date": "2026-06-01",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-06-01.csv"
+      },
+      {
+        "date": "2026-05-25",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-25.csv"
+      },
+      {
+        "date": "2026-05-06",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-06.csv"
+      },
+      {
+        "date": "2026-05-06",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-05-06_1.csv"
+      },
+      {
+        "date": "2026-05-03",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "Rapid, pounding, or fluttering heartbeat,Shortness of breath,Dizziness",
+        "file": "ecg_2026-05-03.csv"
+      },
+      {
+        "date": "2026-04-26",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-26.csv"
+      },
+      {
+        "date": "2026-04-26",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-26_1.csv"
+      },
+      {
+        "date": "2026-04-16",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-16.csv"
+      },
+      {
+        "date": "2026-04-14",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-14.csv"
+      },
+      {
+        "date": "2026-04-11",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-11.csv"
+      },
+      {
+        "date": "2026-04-11",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2026-04-11_1.csv"
+      },
+      {
+        "date": "2025-11-23",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-11-23.csv"
+      },
+      {
+        "date": "2025-11-18",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-11-18.csv"
+      },
+      {
+        "date": "2025-11-18",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-11-18_1.csv"
+      },
+      {
+        "date": "2025-11-14",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-11-14.csv"
+      },
+      {
+        "date": "2025-11-14",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-11-14_1.csv"
+      },
+      {
+        "date": "2025-09-10",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "Rapid, pounding, or fluttering heartbeat",
+        "file": "ecg_2025-09-10.csv"
+      },
+      {
+        "date": "2025-09-10",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-09-10_1.csv"
+      },
+      {
+        "date": "2025-09-08",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-09-08.csv"
+      },
+      {
+        "date": "2025-09-08",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-09-08_1.csv"
+      },
+      {
+        "date": "2025-07-15",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2025-07-15.csv"
+      },
+      {
+        "date": "2024-09-18",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-09-18.csv"
+      },
+      {
+        "date": "2024-09-03",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-09-03.csv"
+      },
+      {
+        "date": "2024-08-12",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-08-12.csv"
+      },
+      {
+        "date": "2024-07-26",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-07-26.csv"
+      },
+      {
+        "date": "2024-07-26",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-07-26_1.csv"
+      },
+      {
+        "date": "2024-07-24",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-07-24.csv"
+      },
+      {
+        "date": "2024-07-01",
+        "class": "Poor Recording",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-07-01.csv"
+      },
+      {
+        "date": "2024-07-01",
+        "class": "Poor Recording",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-07-01_1.csv"
+      },
+      {
+        "date": "2024-06-02",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-06-02.csv"
+      },
+      {
+        "date": "2024-04-21",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-04-21.csv"
+      },
+      {
+        "date": "2024-04-05",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-04-05.csv"
+      },
+      {
+        "date": "2024-04-01",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-04-01.csv"
+      },
+      {
+        "date": "2024-03-22",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-03-22.csv"
+      },
+      {
+        "date": "2024-03-17",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-03-17.csv"
+      },
+      {
+        "date": "2024-02-24",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-02-24.csv"
+      },
+      {
+        "date": "2024-02-12",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-02-12.csv"
+      },
+      {
+        "date": "2024-02-11",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-02-11.csv"
+      },
+      {
+        "date": "2024-02-11",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-02-11_1.csv"
+      },
+      {
+        "date": "2024-02-08",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-02-08.csv"
+      },
+      {
+        "date": "2024-02-08",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "Rapid, pounding, or fluttering heartbeat,Shortness of breath",
+        "file": "ecg_2024-02-08_1.csv"
+      },
+      {
+        "date": "2024-01-26",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-01-26.csv"
+      },
+      {
+        "date": "2024-01-19",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-01-19.csv"
+      },
+      {
+        "date": "2024-01-15",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-01-15.csv"
+      },
+      {
+        "date": "2024-01-11",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-01-11.csv"
+      },
+      {
+        "date": "2024-01-07",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2024-01-07.csv"
+      },
+      {
+        "date": "2023-12-16",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-12-16.csv"
+      },
+      {
+        "date": "2023-11-06",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-11-06.csv"
+      },
+      {
+        "date": "2023-10-28",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-28.csv"
+      },
+      {
+        "date": "2023-10-27",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-27.csv"
+      },
+      {
+        "date": "2023-10-23",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-23.csv"
+      },
+      {
+        "date": "2023-10-20",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-20.csv"
+      },
+      {
+        "date": "2023-10-18",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-18.csv"
+      },
+      {
+        "date": "2023-10-16",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-16.csv"
+      },
+      {
+        "date": "2023-10-15",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-15.csv"
+      },
+      {
+        "date": "2023-10-14",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-14.csv"
+      },
+      {
+        "date": "2023-10-13",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-13.csv"
+      },
+      {
+        "date": "2023-10-13",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-13_1.csv"
+      },
+      {
+        "date": "2023-10-11",
+        "class": "Poor Recording",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-11.csv"
+      },
+      {
+        "date": "2023-10-10",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "Other",
+        "file": "ecg_2023-10-10.csv"
+      },
+      {
+        "date": "2023-10-10",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-10_1.csv"
+      },
+      {
+        "date": "2023-10-09",
+        "class": "High Heart Rate",
+        "avg_hr": "",
+        "symptoms": "Chest tightness or pain,Dizziness",
+        "file": "ecg_2023-10-09.csv"
+      },
+      {
+        "date": "2023-10-08",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-08.csv"
+      },
+      {
+        "date": "2023-10-05",
+        "class": "Sinus Rhythm",
+        "avg_hr": "",
+        "symptoms": "",
+        "file": "ecg_2023-10-05.csv"
+      }
+    ],
+    "recent_30_n": 11,
+    "recent_30_high": 6
   },
   "medications": [
     {
