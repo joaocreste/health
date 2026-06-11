@@ -2553,7 +2553,7 @@ async function handleExportPdf(request, env) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   Ask Lumen v2 — per-patient AI chat (claude-fable-5)
+   Ask Lumen v2 — per-patient AI chat (claude-opus-4-8; was claude-fable-5)
 
    Dedicated key ANTHROPIC_API_KEY_CHAT (NEVER the insights key). Identity is
    resolved at this boundary: a patient can only chat over their OWN record;
@@ -2715,7 +2715,7 @@ async function handleChatV2Message(request, env) {
       try {
         for (let turn = 0; turn < 4; turn++) {
           const stream = client.messages.stream({
-            model: "claude-fable-5",
+            model: "claude-opus-4-8", // switched from claude-fable-5 for cost (~half the per-token price); same request surface
             max_tokens: 8192,
             output_config: { effort: "medium" }, // interactive chat — keep turns snappy
             system,
