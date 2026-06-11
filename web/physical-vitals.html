@@ -438,6 +438,20 @@
       </div>
     </div>
 
+    <div class="chart-card mt-3">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Sleep stage composition — weekly average (% of total sleep)</span><span class="lang-pt">Composição dos estágios do sono — média semanal (% do sono total)</span></div>
+        <div class="chart-card-meta"><span class="lang-en">Oura Ring · 222 long-sleep nights ≥3h folded into 34 ISO weeks · 18 Oct 2025 → 2 Jun 2026 · each stage as % of (deep+light+REM+awake)</span><span class="lang-pt">Oura Ring · 222 noites de sono prolongado ≥3h agrupadas em 34 semanas ISO · 18 out 2025 → 2 jun 2026 · cada estágio como % de (profundo+leve+REM+acordado)</span></div>
+      </div>
+      <div id="sleep-stage-weekly-composition" class="chart-wrap tall"></div>
+      <div class="bp-daily-legend">
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#2F6489"></span> <span class="lang-en">Deep</span><span class="lang-pt">Profundo</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3E7CA3"></span> <span class="lang-en">REM</span><span class="lang-pt">REM</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E97BC"></span> <span class="lang-en">Light</span><span class="lang-pt">Leve</span></span>
+        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#B5D2E5"></span> <span class="lang-en">Awake</span><span class="lang-pt">Acordado</span></span>
+      </div>
+    </div>
+
     <div class="alert">
       <span class="lang-en"><strong>Clinical note.</strong> REM sleep median 1h23m (16% of total) still sits below the
       healthy 20–25% threshold. Benzodiazepines are potent REM suppressors, directly impairing
@@ -823,7 +837,7 @@
 <script src="assets/patient-context.js?v=53"></script>
 <script src="assets/insights-update.js?v=3"></script>
 <script src="assets/upload-card.js?v=1"></script>
-<script src="assets/data.js?v=30"></script>
+<script src="assets/data.js?v=31"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -1846,12 +1860,82 @@ function renderBpPatternsChart() {
   }
 }
 
+/* 7e — Sleep stage composition — SLEEP_STAGES_BY_WEEK rows are
+   {week, n, deep, light, rem, awake} (% of the night's four-stage sum,
+   weekly mean of per-night percentages; sums to ~100 so no groupnorm).
+   100% stacked area. Stacking order bottom->top matches the boxplot:
+   Deep, REM, Light, Awake. Colors are the boxplot's exact fill/stroke pairs. */
+function renderSleepStageCompositionChart() {
+  const el = document.getElementById('sleep-stage-weekly-composition');
+  if (!el) return;
+  if (typeof SLEEP_STAGES_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    const xs = SLEEP_STAGES_BY_WEEK.map(r => r.week);
+    const ns = SLEEP_STAGES_BY_WEEK.map(r => r.n);
+    /* Same order + colors as the boxplot above (sleepFill/sleepStroke). */
+    const stages = [
+      { key: 'deep',  en: 'Deep',  pt: 'Profundo', fill: 'rgba(47,100,137,0.80)',  stroke: '#1B3B54' },  /* blue-600 / blue-800 */
+      { key: 'rem',   en: 'REM',   pt: 'REM',      fill: 'rgba(62,124,163,0.80)',  stroke: '#244E6E' },  /* blue-500 / blue-700 */
+      { key: 'light', en: 'Light', pt: 'Leve',     fill: 'rgba(94,151,188,0.80)',  stroke: '#2F6489' },  /* blue-400 / blue-600 */
+      { key: 'awake', en: 'Awake', pt: 'Acordado', fill: 'rgba(181,210,229,0.80)', stroke: '#5E97BC' },  /* blue-200 / blue-400 */
+    ];
+    const traces = stages.map(s => ({
+      x: xs,
+      y: SLEEP_STAGES_BY_WEEK.map(r => r[s.key]),
+      name: L(s.en, s.pt),
+      type: 'scatter', mode: 'lines',
+      stackgroup: 'one',
+      line: { color: s.stroke, width: 1.25 },
+      fillcolor: s.fill,
+      customdata: ns,
+      hovertemplate: L(
+        'Week of %{x}<br>' + s.en + ' <b>%{y:.1f}%</b> · n=%{customdata} nights<extra></extra>',
+        'Semana de %{x}<br>' + s.pt + ' <b>%{y:.1f}%</b> · n=%{customdata} noites<extra></extra>'),
+    }));
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      xaxis: {
+        type: 'date',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: L('% of total sleep', '% do sono total'), font: { color: C.inkSoft } },
+        range: [0, 100],
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, traces, layout, config);
+    console.log('[sleep-stage-composition] rendered', xs.length, 'weeks');
+  } catch (e) {
+    console.error('[sleep-stage-composition]', e);
+  }
+}
+
 function renderAllVitalsCharts() {
   buildAllCharts();            // Chart.js charts (body, sleep, exercise, steps, cardio, stress, bp, bpDaily)
   renderGlucoseChart();        // Plotly
   renderGlucosePatternsChart();
   renderHrPatternsChart();
   renderBpPatternsChart();
+  renderSleepStageCompositionChart();
 }
 
 if (document.readyState === 'loading') {
