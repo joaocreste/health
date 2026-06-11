@@ -160,6 +160,18 @@
   .vr-apply:hover { background: #FFFFFF; }
   .vr-status { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: rgba(255,255,255,0.70); }
   .vr-status.vr-err { color: #EB8585; }
+
+  /* "Updating" modal shown while /api/vitals-range filters + charts rebuild. */
+  .vr-overlay { position: fixed; inset: 0; z-index: 4000; background: rgba(13,27,42,0.45); display: flex; align-items: center; justify-content: center; }
+  .vr-overlay[hidden] { display: none; }
+  .vr-overlay-card { background: #FFFFFF; border-radius: 12px; padding: 26px 38px; text-align: center; box-shadow: 0 12px 40px rgba(13,27,42,0.35); }
+  .vr-overlay-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin-top: 12px; }
+  .vr-overlay-sub { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; color: #6E7B8A; margin-top: 4px; }
+  .vr-spinner { width: 30px; height: 30px; margin: 0 auto; border-radius: 50%; border: 3px solid #D8E8F2; border-top-color: #2F6489; animation: vr-spin 0.8s linear infinite; }
+  @keyframes vr-spin { to { transform: rotate(360deg); } }
+
+  /* Empty-state note for charts whose data falls outside the selected range. */
+  .vr-empty { display: flex; align-items: center; justify-content: center; height: 100%; min-height: 180px; padding: 1rem; text-align: center; font-family: "IBM Plex Sans", sans-serif; font-size: 13.5px; color: #6E7B8A; }
 </style>
 </head>
 <body class="has-side-nav">
@@ -925,16 +937,16 @@ const axisCommon = {
 const L = (en, pt) => (document.documentElement.lang === 'pt' ? pt : en);
 
 /* ── Range view-model ──
-   The nine range-aware charts read their series from VR, not the data.js
+   EVERY chart with a timestamped series reads from VR, not the data.js
    consts directly. "All" = the static consts (byte-identical to the
    pre-selector render); picking 30/60/90/custom swaps in the truncated
-   series from GET /api/vitals-range (same shapes) and re-renders.
-   Charts NOT in VR (glucose CGM week, exercise mix, BP monthly means,
-   RHR weekly, total-sleep weekly) are all-data by design and keep reading
-   the consts. */
+   series from GET /api/vitals-range (same shapes; GLUCOSE is filtered
+   client-side from the full const) and re-renders. The only chart left
+   unfiltered is the exercise mix — data.js carries cumulative totals
+   only, no per-session dates. */
 const VR_DEFAULTS = {
   WEIGHT, SLEEP_BOX, STEPS, HRV_RHR, STRESS_RES, BP,
-  HR_BY_TOD, BP_BY_WEEK, SLEEP_STAGES_BY_WEEK,
+  HR_BY_TOD, BP_BY_WEEK, SLEEP_STAGES_BY_WEEK, RHR_BY_WEEK, GLUCOSE,
 };
 const VR = { ...VR_DEFAULTS };
 
@@ -1309,7 +1321,7 @@ _vitalsBuilders.push(function bpChartBuild() {
   if (_vitalsCharts.bp) _vitalsCharts.bp.destroy();
   // Per-month aggregate
   const buckets = {};
-  for (const [d, sys, dia] of BP) {
+  for (const [d, sys, dia] of VR.BP) {
     const m = d.slice(0,7);
     if (!buckets[m]) buckets[m] = { sys: [], dia: [] };
     buckets[m].sys.push(sys);
@@ -1479,12 +1491,16 @@ function renderGlucoseChart() {
       + L('Glucose chart failed to load: ', 'Falha ao carregar o gráfico de glicose: ') + msg + '</div>';
     console.error('[glucose]', msg);
   };
-  if (typeof GLUCOSE === 'undefined') return showErr('GLUCOSE data not loaded');
+  if (!VR.GLUCOSE) return showErr('GLUCOSE data not loaded');
   if (typeof Plotly  === 'undefined') return showErr('Plotly library not loaded');
 
   try {
-    const xs = GLUCOSE.map(r => r[0]);
-    const ys = GLUCOSE.map(r => r[1]);
+    if (!VR.GLUCOSE.length) {
+      el.innerHTML = '<div class="vr-empty"><span class="lang-en">No CGM data in the selected period (sensor worn 26 Apr – 2 May 2026).</span><span class="lang-pt">Sem dados de CGM no per&iacute;odo selecionado (sensor usado de 26 abr a 2 mai 2026).</span></div>';
+      return;
+    }
+    const xs = VR.GLUCOSE.map(r => r[0]);
+    const ys = VR.GLUCOSE.map(r => r[1]);
 
     /* Continuous colorscale anchored at the danger thresholds:
          40 deep red · 60 red · 75 amber · 90 green · 120 green ·
@@ -1569,13 +1585,17 @@ function renderGlucoseChart() {
 function renderGlucosePatternsChart() {
   const el = document.getElementById('glucosePatternsChart');
   if (!el) return;
-  if (typeof GLUCOSE === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.GLUCOSE || typeof Plotly === 'undefined') return;
 
   try {
+    if (!VR.GLUCOSE.length) {
+      el.innerHTML = '<div class="vr-empty"><span class="lang-en">No CGM data in the selected period (sensor worn 26 Apr – 2 May 2026).</span><span class="lang-pt">Sem dados de CGM no per&iacute;odo selecionado (sensor usado de 26 abr a 2 mai 2026).</span></div>';
+      return;
+    }
     /* Bin every reading into one of 288 five-minute slots (0..287). */
     const N = 288;
     const slots = Array.from({ length: N }, () => []);
-    for (const [ts, v] of GLUCOSE) {
+    for (const [ts, v] of VR.GLUCOSE) {
       const h = parseInt(ts.slice(11, 13), 10);
       const m = parseInt(ts.slice(14, 16), 10);
       const k = Math.floor((h * 60 + m) / 5);
@@ -1946,15 +1966,16 @@ function renderBpPatternsChart() {
 function renderRhrTimelineChart() {
   const el = document.getElementById('rhr-weekly-timeline');
   if (!el) return;
-  if (typeof RHR_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.RHR_BY_WEEK || typeof Plotly === 'undefined') return;
 
   try {
+    const RBW = VR.RHR_BY_WEEK;
     /* Insert nulls where consecutive weeks are >7 days apart -> visible gaps. */
     const xs = [], ys = [], ns = [];
     const WEEK_MS = 7 * 24 * 3600 * 1000;
-    RHR_BY_WEEK.forEach((r, i) => {
+    RBW.forEach((r, i) => {
       if (i > 0) {
-        const prev = Date.parse(RHR_BY_WEEK[i - 1].week);
+        const prev = Date.parse(RBW[i - 1].week);
         if (Date.parse(r.week) - prev > WEEK_MS) { xs.push(r.week); ys.push(null); ns.push(null); }
       }
       xs.push(r.week); ys.push(r.rhr); ns.push(r.n);
@@ -2008,7 +2029,7 @@ function renderRhrTimelineChart() {
     };
 
     Plotly.newPlot(el, [trace], layout, config);
-    console.log('[rhr-timeline] rendered', RHR_BY_WEEK.length, 'weeks');
+    console.log('[rhr-timeline] rendered', RBW.length, 'weeks');
   } catch (e) {
     console.error('[rhr-timeline]', e);
   }
@@ -2020,12 +2041,12 @@ function renderRhrTimelineChart() {
 function renderSleepTotalChart() {
   const el = document.getElementById('sleep-total-weekly-timeline');
   if (!el) return;
-  if (typeof SLEEP_STAGES_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+  if (!VR.SLEEP_STAGES_BY_WEEK || typeof Plotly === 'undefined') return;
 
   try {
-    const xs = SLEEP_STAGES_BY_WEEK.map(r => r.week);
-    const ys = SLEEP_STAGES_BY_WEEK.map(r => r.tst);
-    const ns = SLEEP_STAGES_BY_WEEK.map(r => r.n);
+    const xs = VR.SLEEP_STAGES_BY_WEEK.map(r => r.week);
+    const ys = VR.SLEEP_STAGES_BY_WEEK.map(r => r.tst);
+    const ns = VR.SLEEP_STAGES_BY_WEEK.map(r => r.n);
 
     const trace = {
       x: xs, y: ys,
@@ -2213,8 +2234,28 @@ document.addEventListener('click', (e) => {
     status.classList.toggle('vr-err', !!isErr);
   };
 
+  /* "Updating" modal card — shown while the backend filters + charts rebuild. */
+  const overlay = document.createElement('div');
+  overlay.className = 'vr-overlay';
+  overlay.innerHTML = '<div class="vr-overlay-card"><div class="vr-spinner"></div>'
+    + '<div class="vr-overlay-title"><span class="lang-en">Updating</span><span class="lang-pt">Atualizando</span></div>'
+    + '<div class="vr-overlay-sub"><span class="lang-en">Filtering all data to the selected period…</span><span class="lang-pt">Filtrando todos os dados para o per&iacute;odo selecionado…</span></div></div>';
+  overlay.hidden = true;
+  document.body.appendChild(overlay);
+  const showOverlay = (on) => { overlay.hidden = !on; };
+
+  /* Persist the selection so a page reload (e.g. insights-update.js calls
+     location.reload() when a rebuild job finishes) restores the range
+     instead of silently snapping back to "All". */
+  const STORE = 'jc_vitals_range';
+  const remember = (mode, from, to) => {
+    try { sessionStorage.setItem(STORE, JSON.stringify({ mode, from, to })); } catch (_) {}
+  };
+  const forget = () => { try { sessionStorage.removeItem(STORE); } catch (_) {} };
+
   async function applyRange(from, to) {
     const mySeq = ++seq;
+    showOverlay(true);
     setStatus('Loading…', 'Carregando…');
     try {
       const viewer = sessionStorage.getItem('jc_viewer_clerk') || '';
@@ -2231,7 +2272,9 @@ document.addEventListener('click', (e) => {
       VR.HRV_RHR = d.hrvRhr;                      VR.STRESS_RES = d.stressRes;
       VR.BP = d.bp;                               VR.BP_BY_WEEK = d.bpByWeek;
       VR.SLEEP_BOX = d.sleepBox;                  VR.SLEEP_STAGES_BY_WEEK = d.sleepStagesByWeek;
-      VR.HR_BY_TOD = d.hrByTod;
+      VR.HR_BY_TOD = d.hrByTod;                   VR.RHR_BY_WEEK = d.rhrByWeek;
+      /* Glucose ships complete in data.js — filter client-side by day. */
+      VR.GLUCOSE = VR_DEFAULTS.GLUCOSE.filter((r) => { const day = r[0].slice(0, 10); return day >= from && day <= to; });
       renderAllVitalsCharts();
       setStatus(`Showing ${from} → ${to} · ${d.meta.nights} nights · ${d.meta.hrReadings.toLocaleString()} HR readings`,
                 `Exibindo ${from} → ${to} · ${d.meta.nights} noites · ${d.meta.hrReadings.toLocaleString()} leituras de FC`);
@@ -2240,15 +2283,25 @@ document.addEventListener('click', (e) => {
       console.error('[vitals-range]', err);
       setStatus(`Could not load range (${err.message}). Showing previous data.`,
                 `Não foi possível carregar o período (${err.message}). Exibindo dados anteriores.`, true);
+    } finally {
+      if (mySeq === seq) showOverlay(false);
     }
   }
 
   function resetAll() {
     seq++;
+    forget();
     Object.assign(VR, VR_DEFAULTS);
     renderAllVitalsCharts();
     setStatus('', '');
+    showOverlay(false);
   }
+
+  const presetWindow = (days) => {
+    const anchor = new Date(lastDay + 'T12:00:00Z');
+    anchor.setUTCDate(anchor.getUTCDate() - (days - 1));
+    return [anchor.toISOString().slice(0, 10), lastDay];
+  };
 
   pills.forEach((btn) => btn.addEventListener('click', () => {
     const r = btn.dataset.range;
@@ -2256,18 +2309,29 @@ document.addEventListener('click', (e) => {
     custom.hidden = r !== 'custom';
     if (r === 'all') return resetAll();
     if (r === 'custom') return;  // waits for Apply
-    const days = parseInt(r, 10);
-    const anchor = new Date(lastDay + 'T12:00:00Z');
-    anchor.setUTCDate(anchor.getUTCDate() - (days - 1));
-    applyRange(anchor.toISOString().slice(0, 10), lastDay);
+    const [from, to] = presetWindow(parseInt(r, 10));
+    remember(r, from, to);
+    applyRange(from, to);
   }));
 
   apply.addEventListener('click', () => {
     const from = fromEl.value, to = toEl.value;
     if (!from || !to) return setStatus('Pick both dates.', 'Escolha as duas datas.', true);
     if (from > to)    return setStatus('"From" must be before "to".', '"De" deve vir antes de "até".', true);
+    remember('custom', from, to);
     applyRange(from, to);
   });
+
+  /* Restore a persisted range after any reload. */
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STORE) || 'null');
+    if (saved && saved.from && saved.to) {
+      const btn = pills.find(p => p.dataset.range === saved.mode);
+      if (btn) { setActive(btn); custom.hidden = saved.mode !== 'custom'; }
+      if (saved.mode === 'custom') { fromEl.value = saved.from; toEl.value = saved.to; }
+      applyRange(saved.from, saved.to);
+    }
+  } catch (_) { /* corrupted state — stay on All */ }
 })();
 
 /* 9 — InBody body-composition panel (single read, 1 Jul 2025).

@@ -484,7 +484,7 @@ async function handleVitalsRange(request, env) {
       sql`SELECT day::text AS d, weight_kg, extras FROM vitals_daily
           WHERE patient_id = ${pid} AND source = 'withings_scale'
             AND day BETWEEN ${from} AND ${to} ORDER BY day`,
-      sql`SELECT day::text AS d, steps, extras FROM vitals_daily
+      sql`SELECT day::text AS d, steps, resting_hr, extras FROM vitals_daily
           WHERE patient_id = ${pid} AND source = 'oura'
             AND day BETWEEN ${from} AND ${to} ORDER BY day`,
       sql`SELECT day::text AS d, blood_pressure_sys, blood_pressure_dia, extras FROM vitals_daily
@@ -519,10 +519,16 @@ async function handleVitalsRange(request, env) {
       weight.push([r.d, r2(w), bf, Number.isFinite(mm) ? r2(mm) : null]);
     }
 
-    // STEPS / HRV_RHR / STRESS_RES / sleep periods — all off the oura rows.
+    // STEPS / HRV_RHR / STRESS_RES / RHR weekly / sleep periods — oura rows.
     const steps = [], hrvRhr = [], stressRes = [], periods = [];
+    const wkRhr = new Map();
     for (const r of oura) {
       if (r.steps != null) steps.push([r.d, r.steps]);
+      if (r.resting_hr != null) {
+        const wk = vrIsoMonday(r.d);
+        if (!wkRhr.has(wk)) wkRhr.set(wk, []);
+        wkRhr.get(wk).push(Number(r.resting_hr));
+      }
       const x = r.extras || {};
       for (const p of x.sleep_periods || []) {
         periods.push({ d: r.d, ...p });
@@ -533,6 +539,13 @@ async function handleVitalsRange(request, env) {
           x.resilience_score ?? null, x.resilience_level ?? null, x.stress_summary ?? null]);
       }
     }
+
+    // RHR_BY_WEEK — Oura-only weekly mean resting HR (same recipe as
+    // scripts/aggregate-rhr-by-week.mjs / the static const).
+    const rhrByWeek = [...wkRhr.keys()].sort().map((wk) => {
+      const vs = wkRhr.get(wk);
+      return { week: wk, n: vs.length, rhr: r1(vrMean(vs)) };
+    });
 
     // SLEEP_BOX — Tukey box per stage, hours.
     const sleepBox = {};
@@ -599,7 +612,7 @@ async function handleVitalsRange(request, env) {
 
     return new Response(JSON.stringify({
       range: { from, to },
-      weight, steps, hrvRhr, stressRes, bp, bpByWeek,
+      weight, steps, hrvRhr, stressRes, bp, bpByWeek, rhrByWeek,
       sleepBox, sleepStagesByWeek, hrByTod,
       meta: {
         nights: periods.length, hrReadings: hrCount,
