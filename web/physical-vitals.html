@@ -572,12 +572,25 @@
       <div class="chart-wrap"><canvas id="cardioChart"></canvas></div>
     </div>
 
-    <div class="chart-card mt-3">
-      <div class="chart-card-head">
-        <div class="chart-card-title"><span class="lang-en">Daily patterns — heart rate by time of day</span><span class="lang-pt">Padrões diários — frequência cardíaca por hora do dia</span></div>
-        <div class="chart-card-meta"><span class="lang-en">Oura wrist HR · 286,392 readings folded onto a 24-hour day · median curve · ±1 SD · ±2 SD · Oct 2025 → Jun 2026</span><span class="lang-pt">FC do Oura · 286.392 leituras dobradas em 24h · curva mediana · ±1 DP · ±2 DP · out 2025 → jun 2026</span></div>
+    <div class="two-col mt-3">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Daily patterns — heart rate by time of day</span><span class="lang-pt">Padrões diários — frequência cardíaca por hora do dia</span></div>
+          <div class="chart-card-meta"><span class="lang-en">Oura wrist HR · 286,392 readings folded onto a 24-hour day · median curve · ±1 SD · ±2 SD · Oct 2025 → Jun 2026</span><span class="lang-pt">FC do Oura · 286.392 leituras dobradas em 24h · curva mediana · ±1 DP · ±2 DP · out 2025 → jun 2026</span></div>
+        </div>
+        <div id="hrPatternsChart" class="chart-wrap tall"></div>
       </div>
-      <div id="hrPatternsChart" class="chart-wrap tall"></div>
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Resting heart rate — weekly average (all data)</span><span class="lang-pt">FC em repouso — média semanal (todos os dados)</span></div>
+          <div class="chart-card-meta"><span class="lang-en">Apple Watch (Mar 2018 →) + Oura Ring (Oct 2025 →) · 1,129 days folded into 250 ISO weeks · Oura wins overlapping days · gaps left open</span><span class="lang-pt">Apple Watch (mar 2018 →) + Oura Ring (out 2025 →) · 1.129 dias agrupados em 250 semanas ISO · Oura prevalece em dias sobrepostos · lacunas mantidas abertas</span></div>
+        </div>
+        <div id="rhr-weekly-timeline" class="chart-wrap tall"></div>
+        <div class="bp-daily-legend">
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E1D1D"></span> <span class="lang-en">Weekly mean resting HR</span><span class="lang-pt">FC em repouso — média semanal</span></span>
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#C29327"></span> <span class="lang-en">Healthy band 50–65 bpm</span><span class="lang-pt">Faixa saudável 50–65 bpm</span></span>
+        </div>
+      </div>
     </div>
 
     <div class="three-col mt-3">
@@ -849,7 +862,7 @@
 <script src="assets/patient-context.js?v=53"></script>
 <script src="assets/insights-update.js?v=3"></script>
 <script src="assets/upload-card.js?v=1"></script>
-<script src="assets/data.js?v=32"></script>
+<script src="assets/data.js?v=33"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -1872,6 +1885,94 @@ function renderBpPatternsChart() {
   }
 }
 
+/* 7d2 — Resting HR weekly timeline — RHR_BY_WEEK rows are {week, n, rhr, src}
+   (weekly mean of per-day resting HR resolved oura > apple_watch; src tells
+   which device owned the week). All data: Apple Watch 2018 -> + Oura 2025-10 ->.
+   Line breaks at gaps >1 week so missing months are not bridged; a dotted
+   vertical marks the Oura handover so the device switch is not misread as a
+   physiological event. Red palette to match the HR-by-time-of-day chart. */
+function renderRhrTimelineChart() {
+  const el = document.getElementById('rhr-weekly-timeline');
+  if (!el) return;
+  if (typeof RHR_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    /* Insert nulls where consecutive weeks are >7 days apart -> visible gaps. */
+    const xs = [], ys = [], ns = [], srcs = [];
+    const WEEK_MS = 7 * 24 * 3600 * 1000;
+    RHR_BY_WEEK.forEach((r, i) => {
+      if (i > 0) {
+        const prev = Date.parse(RHR_BY_WEEK[i - 1].week);
+        if (Date.parse(r.week) - prev > WEEK_MS) { xs.push(r.week); ys.push(null); ns.push(null); srcs.push(''); }
+      }
+      xs.push(r.week); ys.push(r.rhr); ns.push(r.n); srcs.push(r.src);
+    });
+
+    const srcLabel = (s) => s === 'oura' ? 'Oura' : (s === 'apple_watch' ? 'Apple Watch' : L('Oura + Apple Watch', 'Oura + Apple Watch'));
+    const trace = {
+      x: xs, y: ys,
+      type: 'scatter', mode: 'lines',
+      line: { color: '#5E1D1D', width: 2 },  /* red-800, same as HR-by-TOD median */
+      connectgaps: false,
+      customdata: ns.map((n, i) => [n, srcLabel(srcs[i])]),
+      hovertemplate: L('Week of %{x}<br>Resting HR <b>%{y:.1f} bpm</b> · n=%{customdata[0]} days · %{customdata[1]}<extra></extra>',
+                       'Semana de %{x}<br>FC em repouso <b>%{y:.1f} bpm</b> · n=%{customdata[0]} dias · %{customdata[1]}<extra></extra>'),
+      showlegend: false
+    };
+
+    const ouraFrom = (RHR_BY_WEEK.find((r) => r.src !== 'apple_watch') || {}).week;
+    const refLines = [
+      /* Healthy resting-HR band edges, amber dotted like the BP references. */
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 50, y1: 50,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 65, y1: 65,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },
+    ];
+    if (ouraFrom) {
+      refLines.push({ type: 'line', xref: 'x', x0: ouraFrom, x1: ouraFrom, yref: 'paper', y0: 0, y1: 1,
+        line: { color: C.inkSoft, width: 1, dash: 'dot' } });
+    }
+    const annotations = ouraFrom ? [{
+      x: ouraFrom, xref: 'x', y: 1, yref: 'paper', yanchor: 'bottom', showarrow: false,
+      text: L('Oura takes over', 'Oura assume'), font: { size: 10, color: C.inkSoft },
+    }] : [];
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 18, b: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      shapes: refLines,
+      annotations,
+      xaxis: {
+        type: 'date',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: 'bpm', font: { color: C.inkSoft } },
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, [trace], layout, config);
+    console.log('[rhr-timeline] rendered', RHR_BY_WEEK.length, 'weeks');
+  } catch (e) {
+    console.error('[rhr-timeline]', e);
+  }
+}
+
 /* 7e2 — Total sleep timeline — SLEEP_STAGES_BY_WEEK.tst is the weekly mean of
    Oura's total_sleep_duration in hours (excludes awake — the boxplot's "Total").
    Spline + soft area fill in the boxplot's Total colors (blue-900 / #0B1A28). */
@@ -2016,6 +2117,7 @@ function renderAllVitalsCharts() {
   renderGlucosePatternsChart();
   renderHrPatternsChart();
   renderBpPatternsChart();
+  renderRhrTimelineChart();
   renderSleepTotalChart();
   renderSleepStageCompositionChart();
 }
