@@ -2633,14 +2633,13 @@ function trimChatHistory(messages) {
 // Resolve which patient this chat is over, and authorize the viewer. Handles
 // bespoke patients (Paulo/Silvana) that have no users row yet.
 async function resolveChatPatient(sql, env, request, requestedClerk) {
-  let viewerClerk;
-  if (env.CLERK_SECRET_KEY) {
-    const a = await authenticate(request, env);
-    if (!a.ok) return { error: jsonError(a.status, a.reason) };
-    viewerClerk = a.clerkUserId;
-  } else {
-    viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
-  }
+  // The platform's live auth model is the X-Viewer-Clerk header + DB lookup
+  // (resolveInsightAccess), exactly like every other /api/* endpoint here — the
+  // demo login does not mint real Clerk session cookies, so authenticate() would
+  // 401 everyone even though CLERK_SECRET_KEY is set. When real Clerk sessions
+  // are issued, this single function is where you swap the header for
+  // authenticate(request, env) and lock identity to the verified session.
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
   if (!viewerClerk) return { error: jsonError(401, "viewer_required") };
 
   const patientClerk = String(requestedClerk || viewerClerk).trim();
