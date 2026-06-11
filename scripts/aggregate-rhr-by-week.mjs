@@ -1,19 +1,15 @@
 #!/usr/bin/env node
-/* Weekly average resting heart rate across ALL available data, for the
-   physical-vitals timeline. Source: Neon vitals_daily per-device rows
-   (apple_health 2018 ->, oura 2025-10 ->), patient pending:joao.
+/* Weekly average resting heart rate, Oura only, for the physical-vitals
+   timeline. Source: Neon vitals_daily source='oura' rows (2025-10 ->),
+   patient pending:joao. Apple Watch is deliberately excluded — its sparse,
+   spot-check resting-HR days made the long timeline noisy and the device
+   handover dominated the visual story.
 
-   Per the device hierarchy in lib/vitals-resolve.js, when both sources report
-   resting_hr on the same day Oura wins (rank 1) over Apple Watch (rank 2) —
-   no blending. Days are then binned into ISO weeks (Mon-Sun, same Monday-key
-   convention as aggregate-bp-by-week.mjs) and averaged.
-
-   Each row carries n (days) and src ('oura' | 'apple_watch' | 'mixed') so the
-   chart can annotate the device handover instead of letting a source switch
-   read as a physiological event.
+   Days are binned into ISO weeks (Mon-Sun, same Monday-key convention as
+   aggregate-bp-by-week.mjs) and averaged.
 
    Output: single-line const RHR_BY_WEEK ready to paste into web/assets/data.js:
-   const RHR_BY_WEEK = [{week:"2018-03-26",n:2,rhr:55.5,src:"apple_watch"},...]; */
+   const RHR_BY_WEEK = [{week:"2025-10-13",n:2,rhr:67},...]; */
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -40,43 +36,35 @@ function weekStart(yyyy_mm_dd) {
 
 const sql = neon(loadDatabaseUrl());
 const rows = await sql`
-  SELECT v.day::text AS day, v.source, v.resting_hr
+  SELECT v.day::text AS day, v.resting_hr
   FROM vitals_daily v JOIN users u ON u.id = v.patient_id
   WHERE u.clerk_user_id = ${CLERK} AND v.resting_hr IS NOT NULL
-    AND v.source IN ('apple_health', 'oura')
+    AND v.source = 'oura'
   ORDER BY v.day`;
 
-/* Resolve per day: oura beats apple_health (hierarchy rank 1 vs 2). */
 const byDay = new Map();
-for (const r of rows) {
-  const prev = byDay.get(r.day);
-  if (!prev || (r.source === 'oura' && prev.source !== 'oura')) byDay.set(r.day, r);
-}
+for (const r of rows) byDay.set(r.day, r);
 
-const buckets = new Map(); // weekStart -> [{rhr, source}]
+const buckets = new Map(); // weekStart -> [rhr]
 for (const [day, r] of byDay) {
   const wk = weekStart(day);
   if (!buckets.has(wk)) buckets.set(wk, []);
-  buckets.get(wk).push({ rhr: Number(r.resting_hr), source: r.source });
+  buckets.get(wk).push(Number(r.resting_hr));
 }
 
 const out = [...buckets.keys()].sort().map((wk) => {
   const ds = buckets.get(wk);
-  const srcs = new Set(ds.map((d) => d.source));
-  const src = srcs.size > 1 ? 'mixed' : (srcs.has('oura') ? 'oura' : 'apple_watch');
   return {
     week: wk, n: ds.length,
-    rhr: Number((ds.reduce((s, d) => s + d.rhr, 0) / ds.length).toFixed(1)),
-    src,
+    rhr: Number((ds.reduce((s, d) => s + d, 0) / ds.length).toFixed(1)),
   };
 });
 
 const days = [...byDay.keys()].sort();
-const ouraFrom = out.find((r) => r.src !== 'apple_watch')?.week || null;
-const fmt = (r) => `{week:"${r.week}",n:${r.n},rhr:${r.rhr},src:"${r.src}"}`;
+const fmt = (r) => `{week:"${r.week}",n:${r.n},rhr:${r.rhr}}`;
 
-console.log(`/* RHR_BY_WEEK — resting HR, weekly mean of resolved per-day values (oura > apple_watch on overlap, lib/vitals-resolve.js hierarchy), ISO weeks (Mon-Sun). ${days[0]} -> ${days[days.length - 1]} · ${out.length} weeks · ${days.length} days · Oura from ${ouraFrom}. Source: Neon vitals_daily via scripts/aggregate-rhr-by-week.mjs. */`);
+console.log(`/* RHR_BY_WEEK — resting HR, weekly mean of Oura daily values (source='oura' only, Apple Watch excluded), ISO weeks (Mon-Sun). ${days[0]} -> ${days[days.length - 1]} · ${out.length} weeks · ${days.length} days. Source: Neon vitals_daily via scripts/aggregate-rhr-by-week.mjs. */`);
 console.log(`const RHR_BY_WEEK = [${out.map(fmt).join(',')}];`);
 console.error(`\nsample first 3: ${out.slice(0, 3).map(fmt).join(' ')}`);
 console.error(`sample last 3 : ${out.slice(-3).map(fmt).join(' ')}`);
-console.error(`weeks=${out.length} days=${days.length} window=${days[0]}..${days[days.length - 1]} oura-from=${ouraFrom}`);
+console.error(`weeks=${out.length} days=${days.length} window=${days[0]}..${days[days.length - 1]}`);
