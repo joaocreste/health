@@ -338,7 +338,8 @@
           el.classList.contains('jc-paulo-exams') ||
           el.classList.contains('jc-silvana-exams') ||
           el.classList.contains('jc-danger-zone') ||
-          el.classList.contains('jc-danger-backdrop')) continue;
+          el.classList.contains('jc-danger-backdrop') ||
+          el.classList.contains('lumen-chat-root')) continue;
       el.style.display = 'none';
     }
   }

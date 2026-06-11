@@ -8,6 +8,9 @@ import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/
 import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
 import { buildManifest, validateSections } from "../lib/export-manifest.js";
 import { buildReportPdf, reportFilename } from "../lib/export-render.js";
+import { buildPatientContext, PATIENT_ZERO, PAULO_SILOTTO, SILVANA_CRESTE } from "../lib/chat-context.js";
+import { createChatPdfExport, serveChatExport } from "../lib/chat-pdf.js";
+import { deidentifyContext } from "../lib/deidentify.js";
 
 const SYSTEM_INSTRUCTIONS = `You are the Lumen Health portal assistant for the patient Joao Victor Creste.
 
@@ -2549,11 +2552,250 @@ async function handleExportPdf(request, env) {
   }
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   Ask Lumen v2 — per-patient AI chat (claude-fable-5)
+
+   Dedicated key ANTHROPIC_API_KEY_CHAT (NEVER the insights key). Identity is
+   resolved at this boundary: a patient can only chat over their OWN record;
+   admins/doctors may target another patient only with patient_access. Clerk
+   isn't wired yet (CLERK_SECRET_KEY unset) — until it is, the viewer asserts
+   its id via X-Viewer-Clerk like every other endpoint here; the moment Clerk
+   is configured this resolver switches to the verified session automatically.
+   ════════════════════════════════════════════════════════════════════════ */
+
+const CHAT_SYSTEM_V2 = `You are "Ask Lumen", a health assistant inside the Lumen Health patient portal. You speak with the patient about THEIR OWN health record, which is provided to you below inside <patient_record>.
+
+GROUNDING — non-negotiable:
+- Answer using ONLY the information in <patient_record>. It is your single source of truth.
+- You may apply general medical knowledge to INTERPRET the patient's own data (explain what a marker means, why a value matters), but NEVER invent data — no labs, dates, medications, diagnoses, or events that are not in the record.
+- If the record does not contain what is asked, say so plainly. Do not guess.
+
+ROLE — you bridge the doctor-patient conversation, you do not replace it:
+- You are NOT a doctor. Do not diagnose and do not prescribe. Frame things as preparation for the patient's own clinician.
+- Strong outputs look like: "3 things worth raising with your cardiologist", "which of your current medications list weight gain as a known side effect — confirm with your prescriber", "your TSH trend over the last 3 years".
+- Close any clinically actionable answer with a short pointer to discuss it with the treating physician.
+
+LANGUAGE:
+- Reply in the SAME language the patient wrote in — English or Brazilian Portuguese. The record may contain both; both are valid sources.
+
+FORMAT:
+- Be concise and direct. Light markdown is fine (short bold labels, simple bullet/numbered lists). Cite the section in parentheses when you quote a specific value, e.g. "(Labs)", "(Imaging)".
+
+PDF EXPORT:
+- When the patient asks for a PDF, summary document, report, or something to take/print, call the generate_pdf tool with a clear title, the language of the conversation, and well-structured sections (heading + body_markdown). After it returns, present the download link conversationally in one short sentence. Only use it when a document is genuinely requested.`;
+
+const GENERATE_PDF_TOOL = {
+  name: "generate_pdf",
+  description: "Render a branded Lumen Health PDF document for the patient to download or print. Use only when the patient asks for a PDF, report, summary document, or printable handout. Build the sections from the patient's own record.",
+  input_schema: {
+    type: "object",
+    properties: {
+      title: { type: "string", description: "Document title, in the conversation language." },
+      language: { type: "string", enum: ["en", "pt"], description: "Language of the document." },
+      sections: {
+        type: "array",
+        description: "Ordered sections of the document.",
+        items: {
+          type: "object",
+          properties: {
+            heading: { type: "string", description: "Section heading." },
+            body_markdown: { type: "string", description: "Section body in light markdown (paragraphs, bold, bullet/numbered lists)." },
+          },
+          required: ["heading", "body_markdown"],
+        },
+      },
+    },
+    required: ["title", "sections"],
+  },
+};
+
+const CHAT_BESPOKE = new Set([PATIENT_ZERO, PAULO_SILOTTO, SILVANA_CRESTE]);
+const CHAT_HISTORY_CAP = 24; // messages kept, oldest dropped first
+
+function validateChatMessages(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) return "messages array required.";
+  if (messages.length > 60) return "Conversation too long.";
+  for (const m of messages) {
+    if (!m || (m.role !== "user" && m.role !== "assistant") || typeof m.content !== "string") {
+      return "Each message needs role (user|assistant) and string content.";
+    }
+    if (m.content.length > 6000) return "Message too long.";
+  }
+  return null;
+}
+
+function trimChatHistory(messages) {
+  let out = messages.length > CHAT_HISTORY_CAP ? messages.slice(-CHAT_HISTORY_CAP) : messages.slice();
+  while (out.length && out[0].role !== "user") out = out.slice(1); // must start on a user turn
+  return out;
+}
+
+// Resolve which patient this chat is over, and authorize the viewer. Handles
+// bespoke patients (Paulo/Silvana) that have no users row yet.
+async function resolveChatPatient(sql, env, request, requestedClerk) {
+  let viewerClerk;
+  if (env.CLERK_SECRET_KEY) {
+    const a = await authenticate(request, env);
+    if (!a.ok) return { error: jsonError(a.status, a.reason) };
+    viewerClerk = a.clerkUserId;
+  } else {
+    viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  }
+  if (!viewerClerk) return { error: jsonError(401, "viewer_required") };
+
+  const patientClerk = String(requestedClerk || viewerClerk).trim();
+  const [patientRows, viewerRows] = await Promise.all([
+    sql`SELECT id, full_name FROM users WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1`,
+    sql`SELECT id, role FROM users WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`,
+  ]);
+
+  if (patientRows.length > 0) {
+    const patientId = patientRows[0].id;
+    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
+    if (!access.ok) return { error: jsonError(access.status, access.reason) };
+    return { patientId, patientClerk, fullName: patientRows[0].full_name, actorId: access.viewerId };
+  }
+
+  // Patient not in DB — only the documented bespoke patients are valid here.
+  if (!CHAT_BESPOKE.has(patientClerk)) return { error: jsonError(404, "patient_not_found") };
+  const isSelf = viewerClerk === patientClerk;
+  const isAdmin = viewerRows[0]?.role === "admin";
+  if (!isSelf && !isAdmin) return { error: jsonError(403, "forbidden") };
+  return { patientId: null, patientClerk, fullName: null, actorId: viewerRows[0]?.id || null };
+}
+
+async function handleChatV2Message(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  // Fail loud and clearly — the insights engine (ANTHROPIC_API_KEY) is unaffected.
+  if (!env.ANTHROPIC_API_KEY_CHAT) return jsonError(503, "chat_not_configured");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const validationError = validateChatMessages(body?.messages);
+  if (validationError) return jsonError(400, validationError);
+  const messages = trimChatHistory(body.messages);
+  if (messages.length === 0) return jsonError(400, "messages array required.");
+
+  const sql = neon(env.DATABASE_URL);
+  const resolved = await resolveChatPatient(sql, env, request, body?.patient_clerk);
+  if (resolved.error) return resolved.error;
+  const { patientId, patientClerk, fullName, actorId } = resolved;
+
+  let context;
+  try {
+    context = await buildPatientContext({ id: patientId, clerkUserId: patientClerk, fullName }, env, request);
+  } catch (e) {
+    return jsonError(500, `could_not_build_context: ${e.message}`);
+  }
+  const recordText = deidentifyContext(context.text, env, { names: fullName ? [fullName] : [] });
+  const origin = new URL(request.url).origin;
+  const storageId = patientId || patientClerk.replace(/[^a-z0-9-]/gi, "_");
+
+  // Best-effort audit (groundwork for the compliance flip): only when we have a
+  // real users actor. Bespoke demo patients without rows aren't logged yet.
+  if (actorId) {
+    try {
+      await sql`INSERT INTO audit_log (actor_user_id, action, target_table, patient_context, metadata)
+        VALUES (${actorId}, 'chat_message', 'chat', ${patientId},
+          ${JSON.stringify({ route: "/api/chat/v2/message", render_class: context.renderClass, turns: messages.length })}::jsonb)`;
+    } catch { /* never let audit break the chat */ }
+  }
+
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY_CHAT, maxRetries: 3 });
+  const system = [
+    { type: "text", text: CHAT_SYSTEM_V2 },
+    { type: "text", text: `<patient_record>\n${recordText}\n</patient_record>`, cache_control: { type: "ephemeral", ttl: "1h" } },
+  ];
+
+  const encoder = new TextEncoder();
+  const readable = new ReadableStream({
+    async start(controller) {
+      const send = (obj) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+      const convo = messages.map((m) => ({ role: m.role, content: m.content }));
+      try {
+        for (let turn = 0; turn < 4; turn++) {
+          const stream = client.messages.stream({
+            model: "claude-fable-5",
+            max_tokens: 8192,
+            output_config: { effort: "medium" }, // interactive chat — keep turns snappy
+            system,
+            tools: [GENERATE_PDF_TOOL],
+            messages: convo,
+          });
+          for await (const event of stream) {
+            if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+              send({ text: event.delta.text });
+            }
+          }
+          const final = await stream.finalMessage();
+
+          if (final.stop_reason === "refusal") {
+            send({ error: "refusal", message: "I couldn't process that one — please rephrase or ask about a specific part of your record." });
+            break;
+          }
+
+          if (final.stop_reason === "tool_use") {
+            convo.push({ role: "assistant", content: final.content });
+            const toolResults = [];
+            for (const block of final.content) {
+              if (block.type !== "tool_use" || block.name !== "generate_pdf") continue;
+              send({ status: "generating_pdf" });
+              try {
+                const exp = await createChatPdfExport(env, { patientId: storageId, doc: block.input, origin });
+                send({ pdf_ready: { url: exp.url, filename: exp.filename, size: exp.size, expires_at: new Date(exp.exp).toISOString() } });
+                toolResults.push({ type: "tool_result", tool_use_id: block.id,
+                  content: JSON.stringify({ ok: true, download_url: exp.url, filename: exp.filename, expires_in_days: 7 }) });
+              } catch (e) {
+                send({ pdf_error: e.message });
+                toolResults.push({ type: "tool_result", tool_use_id: block.id, is_error: true,
+                  content: `PDF generation failed: ${e.message}` });
+              }
+            }
+            convo.push({ role: "user", content: toolResults });
+            continue; // re-stream so the model presents the link
+          }
+
+          // end_turn (or anything terminal)
+          send({ done: true, stop_reason: final.stop_reason,
+            usage: { input: final.usage.input_tokens, output: final.usage.output_tokens,
+              cache_read: final.usage.cache_read_input_tokens ?? 0 } });
+          break;
+        }
+      } catch (e) {
+        send({ error: "server_error", message: e?.message ?? String(e) });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(readable, {
+    headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store", "X-Accel-Buffering": "no" },
+  });
+}
+
+async function handleChatV2Export(request, env, token) {
+  if (!env.CHAT_EXPORT_SIGNING_KEY) return jsonError(503, "export_not_configured");
+  if (!env.R2_BUCKET) return jsonError(503, "storage_unavailable");
+  try {
+    return await serveChatExport(env, token);
+  } catch (e) {
+    return jsonError(500, e?.message ?? "export_failed");
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/api/chat") {
       return handleChat(request, env);
+    }
+    if (url.pathname === "/api/chat/v2/message") {
+      return handleChatV2Message(request, env);
+    }
+    if (url.pathname.startsWith("/api/chat/v2/export/")) {
+      return handleChatV2Export(request, env, decodeURIComponent(url.pathname.slice("/api/chat/v2/export/".length)));
     }
     if (url.pathname === "/api/me") {
       return handleMe(request, env);
