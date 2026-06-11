@@ -130,6 +130,17 @@ export const patientAccess = pgTable(
     grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
     grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
     notes: text("notes"),
+    // ── Scoped access (migration 0014) ──
+    // scopes: string[] validated in the Worker against the canonical taxonomy
+    // (profile_basic, imaging, labs, vitals, medications, clinical_history,
+    // genetics, mental, journal). profile_basic is implied by any grant.
+    scopes: jsonb("scopes").notNull().default(sql`'[]'::jsonb`),
+    // e.g. { "imaging_study_ids": ["uuid", ...] } — narrows imaging to studies.
+    resourceFilter: jsonb("resource_filter"),
+    // NULL = grant NEVER expires (first-class state). Past = expired = no
+    // grant at read time; rows are never deleted on expiry (audit trail).
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    reason: text("reason"),
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.patientId] }),

@@ -43,6 +43,235 @@ function jsonError(status, message) {
   });
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+ * Scoped patient access — patient_access v2 (migration 0014).
+ *
+ * One resolver (loadScopeGrant), one static gate (gateStaticRequest), and the
+ * canonical scope taxonomy. Enforcement lives HERE at the Worker boundary;
+ * client code (patient-context.js etc.) only adapts UI and is never the gate.
+ * No patient names appear in the auth LOGIC — the surface tables below are
+ * configuration (which path belongs to which patient), like nginx location
+ * blocks, and unmapped /scans/ paths are DENY-BY-DEFAULT (admin only).
+ * ════════════════════════════════════════════════════════════════════════════ */
+
+const SCOPE_KEYS = [
+  "profile_basic", "imaging", "labs", "vitals", "medications",
+  "clinical_history", "genetics", "mental", "journal",
+];
+
+const PATIENT_CLERKS = {
+  joao: "pending:joao",                            // Patient Zero (static pages)
+  paulo: "pending:paulo-silotto-df3441",
+  silvana: "pending:silvana-creste-18ba19",
+  cristina: "pending:cristina-cresti-d7479c",
+  maria: "pending:maria-regina-coury-0cfb1b",
+};
+
+/* ── Signed session cookie ──
+ * The demo login (sessionStorage + X-Viewer-Clerk header) can't gate static
+ * asset requests — browsers send no custom headers when loading HTML/images.
+ * /api/login therefore also sets an HMAC-signed HttpOnly cookie so EVERY
+ * request carries identity. Header > ?viewer= > cookie precedence keeps all
+ * existing API clients working. Requires the SESSION_SECRET Pages secret;
+ * when unset, cookies are disabled and the static gate FAILS CLOSED. */
+const SESSION_COOKIE = "jc_session";
+const SESSION_TTL_S = 30 * 86400;
+
+const _b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
+  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const _b64uDecode = (s) => {
+  const pad = s.replace(/-/g, "+").replace(/_/g, "/");
+  return Uint8Array.from(atob(pad + "=".repeat((4 - pad.length % 4) % 4)), (c) => c.charCodeAt(0));
+};
+
+async function hmacB64u(secret, msg) {
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return _b64u(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg)));
+}
+
+async function makeSessionCookie(env, clerk) {
+  if (!env.SESSION_SECRET) return null;
+  const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_S;
+  const body = `${_b64u(new TextEncoder().encode(clerk))}.${exp}`;
+  const sig = await hmacB64u(env.SESSION_SECRET, body);
+  return `${SESSION_COOKIE}=${body}.${sig}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_TTL_S}`;
+}
+
+async function sessionClerkFromRequest(request, env) {
+  if (!env.SESSION_SECRET) return null;
+  const m = (request.headers.get("Cookie") || "").match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`));
+  if (!m) return null;
+  const parts = m[1].split(".");
+  if (parts.length !== 3) return null;
+  const [encClerk, expStr, sig] = parts;
+  if (!(parseInt(expStr, 10) > Date.now() / 1000)) return null;
+  const expect = await hmacB64u(env.SESSION_SECRET, `${encClerk}.${expStr}`);
+  if (sig !== expect) return null;
+  try { return new TextDecoder().decode(_b64uDecode(encClerk)); } catch { return null; }
+}
+
+async function viewerFromRequest(request, env) {
+  const url = new URL(request.url);
+  return request.headers.get("X-Viewer-Clerk")
+    || url.searchParams.get("viewer")
+    || (await sessionClerkFromRequest(request, env))
+    || "";
+}
+
+/* ── Scope resolution (single source of truth) ──
+ * self -> all scopes; admin -> all scopes; else the patient_access row:
+ * no row -> none; expires_at in the past -> expired (deny, row kept for
+ * audit); else the row's scopes (+ implied profile_basic) and filter. */
+async function loadScopeGrant(sql, viewerClerk, patientClerk) {
+  const none = { status: "none", scopes: new Set(), filter: null, permanent: null, viewerId: null, viewerRole: null, patientId: null };
+  if (!viewerClerk || !patientClerk) return none;
+  const rows = await sql`
+    SELECT v.id AS viewer_id, v.role AS viewer_role, p.id AS patient_id,
+           pa.scopes, pa.resource_filter, pa.expires_at
+    FROM users v
+    JOIN users p ON p.clerk_user_id = ${patientClerk} AND p.archived_at IS NULL
+    LEFT JOIN patient_access pa ON pa.user_id = v.id AND pa.patient_id = p.id
+    WHERE v.clerk_user_id = ${viewerClerk} AND v.archived_at IS NULL
+    LIMIT 1`;
+  if (!rows.length) return none;
+  const r = rows[0];
+  const base = { viewerId: r.viewer_id, viewerRole: r.viewer_role, patientId: r.patient_id, filter: null, permanent: null };
+  if (viewerClerk === patientClerk) return { ...base, status: "self", scopes: new Set(SCOPE_KEYS) };
+  if (r.viewer_role === "admin") return { ...base, status: "admin", scopes: new Set(SCOPE_KEYS) };
+  if (!r.scopes) return { ...base, status: "none", scopes: new Set() };
+  if (r.expires_at && new Date(r.expires_at).getTime() <= Date.now()) {
+    return { ...base, status: "expired", scopes: new Set() };
+  }
+  const scopes = new Set((Array.isArray(r.scopes) ? r.scopes : []).filter((s) => SCOPE_KEYS.includes(s)));
+  if (scopes.size) scopes.add("profile_basic"); // implied by any valid grant
+  return { ...base, status: "grant", scopes, filter: r.resource_filter || null, permanent: r.expires_at == null };
+}
+
+const isPrivileged = (g) => g.status === "self" || g.status === "admin";
+const scopeHasAny = (g, keys) => keys.some((k) => g.scopes.has(k));
+
+/* Best-effort audit of third-party scoped reads — records WHICH scopes the
+ * access ran under and whether the grant was permanent. Never throws. */
+async function auditScopedRead(sql, grant, action, route, scopesUsed) {
+  if (grant.status !== "grant") return;
+  try {
+    await sql`INSERT INTO audit_log (actor_user_id, action, target_table, patient_context, metadata)
+      VALUES (${grant.viewerId}, ${action}, 'patient_access', ${grant.patientId},
+        ${JSON.stringify({ route, scopes: scopesUsed, grant_permanent: grant.permanent })}::jsonb)`;
+  } catch { /* audit must never break a read */ }
+}
+
+/* Convenience for write paths: viewer must be the patient or an admin. */
+async function requireSelfAdmin(sql, request, env, patientClerk) {
+  const viewerClerk = await viewerFromRequest(request, env);
+  if (!viewerClerk) return { error: jsonError(401, "viewer_required") };
+  const g = await loadScopeGrant(sql, viewerClerk, patientClerk);
+  if (!isPrivileged(g)) return { error: jsonError(403, "self_or_admin_only") };
+  return { ok: true, viewerClerk, viewerId: g.viewerId, grant: g };
+}
+
+/* ── Static surface tables (configuration, not logic) ── */
+
+// Per-patient data assets: precise per-patient gates.
+const GATED_ASSETS = [
+  { re: /^\/assets\/patient-record\.txt$/, patient: PATIENT_CLERKS.joao, selfAdmin: true },
+  { re: /^\/assets\/(data|add-data)\.js$/, patient: PATIENT_CLERKS.joao, anyOf: ["vitals"] },
+  { re: /^\/assets\/metrics\.json$/, patient: PATIENT_CLERKS.joao, anyOf: ["vitals"] },
+  { re: /^\/assets\/silvana-labs\.js$/, patient: PATIENT_CLERKS.silvana, anyOf: ["labs"] },
+  { re: /^\/assets\/cristina-labs\.js$/, patient: PATIENT_CLERKS.cristina, anyOf: ["labs"] },
+];
+
+// /scans/** ownership by path prefix. Anything under /scans/ that matches NO
+// entry is served to admins only (private-until-mapped).
+const SCAN_OWNERS = [
+  { prefix: "/scans/paulo-", patient: PATIENT_CLERKS.paulo, anyOf: ["imaging"], honorFilter: true },
+  { prefix: "/scans/maria-regina-coury-", patient: PATIENT_CLERKS.maria, anyOf: ["imaging"], honorFilter: true },
+  { prefix: "/scans/silvana-source-pdfs/", patient: PATIENT_CLERKS.silvana, anyOf: ["labs"] },
+  { prefix: "/scans/cristina-source-pdfs/", patient: PATIENT_CLERKS.cristina, anyOf: ["labs"] },
+  // Patient Zero's scan slugs are historically unprefixed:
+  ...["/scans/mri-", "/scans/us-", "/scans/tc-heart", "/scans/tc1", "/scans/eeg",
+      "/scans/forehead", "/scans/ct-", "/scans/punction-"]
+    .map((p) => ({ prefix: p, patient: PATIENT_CLERKS.joao, anyOf: ["imaging"], honorFilter: true })),
+];
+
+// App-shell pages. These double as the renderer shell for EVERY patient
+// (patient-context.js rewrites them client-side), so: admins and
+// patient-role viewers pass; doctors/family need the page's scope on at
+// least one live grant. Page-level granularity per the confirmed map.
+const PAGE_RULES = [
+  { re: /^\/(mental|loops)(\.html)?$/, anyOf: ["mental"] },
+  { re: /^\/spiritual(\.html)?$/, anyOf: ["journal"] },
+  { re: /^\/physical-exams(\.html)?$/, anyOf: ["imaging", "labs"] },
+  { re: /^\/physical-vitals(\.html)?$/, anyOf: ["vitals"] },
+  { re: /^\/physical-genetics(\.html)?$/, anyOf: ["genetics"] },
+  { re: /^\/physical(\.html)?$/, anyOf: ["imaging", "labs", "vitals"] },
+  { re: /^\/assessment(\.html)?$/, requireAll: true },   // whole-record AI synthesis
+  { re: /^\/(home(\.html)?|patients(\.html)?|upload(\.html)?)$/, anyAuth: true },
+  { re: /^\/(admin|uploads-review)(\.html)?$/, adminOnly: true },
+];
+
+/* The gate. Returns a Response (redirect/403) to short-circuit, or null to
+ * let env.ASSETS serve the file. Pages redirect to /home (authed) or the
+ * login page (anonymous); data assets get a plain 403. */
+async function gateStaticRequest(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+  const path = url.pathname;
+
+  const assetRule = GATED_ASSETS.find((r) => r.re.test(path));
+  const scanRule = !assetRule && path.startsWith("/scans/")
+    ? (SCAN_OWNERS.find((r) => path.startsWith(r.prefix)) || { unknownScan: true })
+    : null;
+  const pageRule = !assetRule && !scanRule ? PAGE_RULES.find((r) => r.re.test(path)) : null;
+  if (!assetRule && !scanRule && !pageRule) return null; // public shell (css, libs, login)
+
+  const isPage = !!pageRule;
+  const deny = (authed) => isPage
+    ? Response.redirect(new URL(authed ? "/home" : "/index.html", url).toString(), 302)
+    : jsonError(403, "forbidden");
+
+  if (!env.DATABASE_URL) return isPage ? deny(false) : jsonError(500, "DATABASE_URL not configured.");
+  const viewerClerk = await viewerFromRequest(request, env);
+  if (!viewerClerk) return deny(false);
+  const sql = neon(env.DATABASE_URL);
+
+  if (pageRule) {
+    const vr = await sql`SELECT id, role FROM users WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`;
+    if (!vr.length) return deny(false);
+    const { id: vid, role } = vr[0];
+    if (role === "admin") return null;
+    if (pageRule.adminOnly) return deny(true);
+    if (pageRule.anyAuth) return null;
+    if (role === "patient") return null; // own app shell (data comes via scoped APIs)
+    const hit = pageRule.requireAll
+      ? await sql`SELECT 1 FROM patient_access
+          WHERE user_id = ${vid} AND (expires_at IS NULL OR expires_at > now())
+            AND scopes @> ${JSON.stringify(SCOPE_KEYS)}::jsonb LIMIT 1`
+      : await sql`SELECT 1 FROM patient_access
+          WHERE user_id = ${vid} AND (expires_at IS NULL OR expires_at > now())
+            AND scopes ?| ${pageRule.anyOf} LIMIT 1`;
+    return hit.length ? null : deny(true);
+  }
+
+  const rule = assetRule || scanRule;
+  if (rule.unknownScan) {
+    const g = await loadScopeGrant(sql, viewerClerk, PATIENT_CLERKS.joao);
+    return g.status === "admin" ? null : deny(true);
+  }
+  const g = await loadScopeGrant(sql, viewerClerk, rule.patient);
+  if (rule.selfAdmin) return isPrivileged(g) ? null : deny(true);
+  if (!g.scopes.size || !scopeHasAny(g, rule.anyOf)) return deny(true);
+  if (rule.honorFilter && g.status === "grant" && Array.isArray(g.filter?.imaging_study_ids) && g.filter.imaging_study_ids.length) {
+    const rows = await sql`SELECT jpeg_preview_prefix FROM imaging_studies
+      WHERE patient_id = ${g.patientId} AND id = ANY(${g.filter.imaging_study_ids}::uuid[])`;
+    const prefixes = rows.map((r) => (r.jpeg_preview_prefix || "").replace(/^web\//, "/"))
+      .filter((p) => p.startsWith("/scans/"));
+    if (!prefixes.some((p) => path.startsWith(p))) return deny(true);
+  }
+  await auditScopedRead(sql, g, "static_read", path, rule.anyOf || []);
+  return null;
+}
+
 // Fire a simple Slack message via an Incoming Webhook. No-op (and never throws)
 // when SLACK_WEBHOOK_URL isn't set, so it can ship before the webhook exists and
 // a Slack outage can never break an upload. The webhook is bound to its channel
@@ -219,6 +448,15 @@ async function handlePatientSummary(request, env) {
     const patient = patientRows[0];
     const pid = patient.id;
 
+    // Scoped access: self/admin see everything; granted viewers get a
+    // payload FILTERED to their scopes (not allow/deny); zero scopes -> 403.
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!grant.scopes.size) {
+      return jsonError(viewerClerk ? 403 : 401,
+        grant.status === "expired" ? "grant_expired" : "forbidden");
+    }
+
     // Single multi-pillar count query — saves round trips.
     const [pillars, recentDocs, recentLabs, pendingFiles, medications, supplements, procedures] = await Promise.all([
       sql`
@@ -293,14 +531,31 @@ async function handlePatientSummary(request, env) {
     ]);
 
     const c = pillars[0] || {};
+    // Which scope governs each count key (canonical taxonomy mapping).
+    const SCOPE_OF_KEY = {
+      lab_results: "labs", imaging_studies: "imaging",
+      medications: "medications", supplements: "medications", prescriptions: "medications",
+      vitals_days: "vitals", ecg_events: "vitals",
+      pgx_findings: "genetics",
+      encounters: "clinical_history", surgeries: "clinical_history",
+      injuries: "clinical_history", clinical_history: "clinical_history",
+      risk_assessments: "clinical_history",
+      psych_items: "mental", mood_entries: "mental", panic_events: "mental",
+      wheel_of_life: "mental", life_events: "mental",
+      writings: "journal",
+    };
+    const has = (s) => grant.scopes.has(s);
+    const allowedKey = (k) => has(SCOPE_OF_KEY[k] || "profile_basic");
     const physicalKeys = [
       "lab_results", "imaging_studies", "medications", "supplements",
       "encounters", "prescriptions", "vitals_days", "ecg_events",
       "pgx_findings", "surgeries", "injuries", "clinical_history",
-    ];
-    const mentalKeys = ["psych_items", "mood_entries", "panic_events", "risk_assessments", "writings"];
-    const spiritualKeys = ["wheel_of_life", "life_events"];
+    ].filter(allowedKey);
+    const mentalKeys = ["psych_items", "mood_entries", "panic_events", "risk_assessments", "writings"].filter(allowedKey);
+    const spiritualKeys = ["wheel_of_life", "life_events"].filter(allowedKey);
     const totalIn = (keys) => keys.reduce((acc, k) => acc + (c[k] || 0), 0);
+
+    await auditScopedRead(sql, grant, "patient_summary_read", "/api/patient-summary", [...grant.scopes]);
 
     return new Response(JSON.stringify({
       patient,
@@ -309,13 +564,16 @@ async function handlePatientSummary(request, env) {
         mental:   { total: totalIn(mentalKeys),   breakdown: pick(c, mentalKeys) },
         spiritual:{ total: totalIn(spiritualKeys),breakdown: pick(c, spiritualKeys) },
       },
-      counts: { documents: c.documents || 0, imports: c.imports || 0 },
-      recent_documents: recentDocs,
-      recent_labs: recentLabs,
-      pending_files: pendingFiles,
-      medications,
-      supplements,
-      procedures,
+      counts: {
+        documents: has("journal") ? (c.documents || 0) : 0,
+        imports: isPrivileged(grant) ? (c.imports || 0) : 0,
+      },
+      recent_documents: has("journal") ? recentDocs : [],
+      recent_labs: has("labs") ? recentLabs : [],
+      pending_files: isPrivileged(grant) ? pendingFiles : [],
+      medications: has("medications") ? medications : [],
+      supplements: has("medications") ? supplements : [],
+      procedures: has("clinical_history") ? procedures : [],
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Summary failed: ${e.message}`);
@@ -362,6 +620,12 @@ async function handleEcgObject(request, env) {
   if (!["svg", "report", "original"].includes(kind)) return jsonError(400, "bad_kind");
   try {
     const sql = neon(env.DATABASE_URL);
+    // Clinical ECG blobs map to the imaging scope (confirmed taxonomy ruling).
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !grant.scopes.has("imaging")) {
+      return jsonError(viewerClerk ? 403 : 401, "imaging_scope_required");
+    }
     const rows = await sql`
       SELECT s.svg_key, s.report_key, s.original_key
       FROM ecg_studies s JOIN users u ON u.id = s.patient_id
@@ -479,6 +743,14 @@ async function handleVitalsRange(request, env) {
       WHERE clerk_user_id = ${clerk} AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
     if (!patientRows.length) return jsonError(404, "patient_not_found");
     const pid = patientRows[0].id;
+
+    // Scoped access: this endpoint is pure vitals.
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !grant.scopes.has("vitals")) {
+      return jsonError(viewerClerk ? 403 : 401, "vitals_scope_required");
+    }
+    await auditScopedRead(sql, grant, "vitals_range_read", "/api/vitals-range", ["vitals"]);
 
     const [scale, oura, cuff, todRows] = await Promise.all([
       sql`SELECT day::text AS d, weight_kg, extras FROM vitals_daily
@@ -641,6 +913,15 @@ async function handlePatientExams(request, env) {
     const patient = patientRows[0];
     const pid = patient.id;
 
+    // Scoped access: this endpoint requires imaging and/or labs; each slice of
+    // the payload is gated by its own scope below.
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !scopeHasAny(grant, ["imaging", "labs"])) {
+      return jsonError(viewerClerk ? 403 : 401,
+        grant.status === "expired" ? "grant_expired" : "imaging_or_labs_scope_required");
+    }
+
     const [labs, labDocs, imaging, medications, supplements] = await Promise.all([
       sql`
         SELECT panel, marker, value, value_text, unit, ref_low, ref_high, flag,
@@ -729,14 +1010,24 @@ async function handlePatientExams(request, env) {
       return { panel: panelName, markers };
     });
 
+    // Scope-filter each slice; honor resource_filter.imaging_study_ids.
+    const has = (s) => grant.scopes.has(s);
+    let imagingOut = has("imaging") ? imaging : [];
+    let ecgOut = has("imaging") ? ecg_studies : [];   // clinical ECG studies map to imaging
+    const ids = grant.status === "grant" && Array.isArray(grant.filter?.imaging_study_ids)
+      ? grant.filter.imaging_study_ids : null;
+    if (ids && ids.length) imagingOut = imagingOut.filter((s) => ids.includes(s.id));
+
+    await auditScopedRead(sql, grant, "patient_exams_read", "/api/patient-exams", [...grant.scopes]);
+
     return new Response(JSON.stringify({
       patient,
-      panels: groupedPanels,
-      lab_documents: labDocs,
-      imaging,
-      medications,
-      supplements,
-      ecg_studies,
+      panels: has("labs") ? groupedPanels : [],
+      lab_documents: has("labs") ? labDocs : [],
+      imaging: imagingOut,
+      medications: has("medications") ? medications : [],
+      supplements: has("medications") ? supplements : [],
+      ecg_studies: ecgOut,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Exams query failed: ${e.message}`);
@@ -762,13 +1053,18 @@ async function handleLogin(request, env) {
     if (rows.length === 0 || rows[0].demo_password !== password) {
       return jsonError(401, "invalid_credentials");
     }
-    return new Response(JSON.stringify({
+    // Signed HttpOnly session cookie so static-asset requests carry identity
+    // for the scoped-access gate (sessionStorage headers never reach them).
+    const res = new Response(JSON.stringify({
       ok: true,
       clerk_user_id: rows[0].clerk_user_id,
       role: rows[0].role,
       full_name: rows[0].full_name,
       username,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    const cookie = await makeSessionCookie(env, rows[0].clerk_user_id);
+    if (cookie) res.headers.append("Set-Cookie", cookie);
+    return res;
   } catch (e) {
     return jsonError(500, `Login failed: ${e.message}`);
   }
@@ -786,7 +1082,22 @@ async function handlePatientDashboard(request, env) {
         AND role = 'patient' AND archived_at IS NULL LIMIT 1
     `;
     if (rows.length === 0) return jsonError(404, "patient_not_found");
-    const sections = await fetchAllDashboards(sql, rows[0].id);
+
+    // Scoped access: zero scopes -> 403. The only stored section today is
+    // 'ai-insights' — a whole-record synthesis, so it requires the FULL scope
+    // set; partially-scoped viewers get a valid, smaller (empty) sections map.
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!grant.scopes.size) {
+      return jsonError(viewerClerk ? 403 : 401,
+        grant.status === "expired" ? "grant_expired" : "forbidden");
+    }
+    let sections = await fetchAllDashboards(sql, rows[0].id);
+    if (!isPrivileged(grant) && !SCOPE_KEYS.every((s) => grant.scopes.has(s))) {
+      sections = Object.fromEntries(Object.entries(sections || {})
+        .filter(([key]) => key !== "ai-insights"));
+    }
+    await auditScopedRead(sql, grant, "patient_dashboard_read", "/api/patient-dashboard", [...grant.scopes]);
     return new Response(JSON.stringify({ sections }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     });
@@ -865,6 +1176,10 @@ async function nextInsightsVersion(sql, patientId) {
 // allow only: the patient themselves, an admin, or a user holding patient_access
 // to this patient. Never trust the client's claim of role/identity beyond the id.
 async function resolveInsightAccess(sql, viewerClerk, patientId) {
+  // patient_access v2: every consumer of this resolver is a WRITE/rebuild path
+  // (dashboard-build + status, uploads presign/put/complete/list) — scoped
+  // viewers are read-only, so these are self-view and admin ONLY. Scoped reads
+  // go through loadScopeGrant instead.
   if (!viewerClerk) return { ok: false, status: 401, reason: "viewer_required" };
   const rows = await sql`SELECT id, role FROM users
     WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`;
@@ -873,10 +1188,7 @@ async function resolveInsightAccess(sql, viewerClerk, patientId) {
   if (viewer.id === patientId || viewer.role === "admin") {
     return { ok: true, viewerId: viewer.id, role: viewer.role };
   }
-  const acc = await sql`SELECT 1 FROM patient_access
-    WHERE user_id = ${viewer.id} AND patient_id = ${patientId} LIMIT 1`;
-  if (acc.length > 0) return { ok: true, viewerId: viewer.id, role: viewer.role };
-  return { ok: false, status: 403, reason: "forbidden" };
+  return { ok: false, status: 403, reason: "self_or_admin_only" };
 }
 
 const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
@@ -1653,6 +1965,8 @@ async function handlePatients(request, env) {
           WHERE pa.user_id = ${viewer[0].id}
             AND u.archived_at IS NULL
             AND u.role = 'patient'
+            AND (pa.expires_at IS NULL OR pa.expires_at > now())
+            AND pa.scopes != '[]'::jsonb
           ORDER BY u.full_name
         `;
     return new Response(JSON.stringify({
@@ -1879,6 +2193,8 @@ async function handleAdmin(request, env) {
         sql`
           SELECT
             pa.user_id, pa.patient_id, pa.notes, pa.granted_at,
+            pa.scopes, pa.resource_filter, pa.expires_at, pa.reason,
+            (pa.expires_at IS NOT NULL AND pa.expires_at <= now()) AS expired,
             u_user.clerk_user_id   AS user_clerk,
             u_user.full_name       AS user_name,
             u_user.role            AS user_role,
@@ -2232,7 +2548,27 @@ async function handleAdmin(request, env) {
     }
   }
 
-  // POST /api/admin/access — { action: 'grant' | 'revoke', user_clerk, patient_clerk, notes? }
+  // GET /api/admin/imaging-studies?patient=<clerk> — id/modality/body_part/date
+  // list for the grant UI's optional study picker (resource_filter).
+  if (path === "/api/admin/imaging-studies" && request.method === "GET") {
+    const patientClerk = String(url.searchParams.get("patient") || "").trim();
+    if (!patientClerk) return jsonError(400, "patient_required");
+    try {
+      const rows = await sql`
+        SELECT i.id, i.modality, i.body_part, i.study_date::text AS study_date
+        FROM imaging_studies i JOIN users u ON u.id = i.patient_id
+        WHERE u.clerk_user_id = ${patientClerk}
+        ORDER BY i.study_date DESC`;
+      return new Response(JSON.stringify({ studies: rows }), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      });
+    } catch (e) {
+      return jsonError(500, `imaging_studies_failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/admin/access — { action: 'grant' | 'revoke', user_clerk, patient_clerk, notes?,
+  //   scopes?: string[], expires_at?: ISO|null (null = never), resource_filter?, reason? }
   if (path === "/api/admin/access" && request.method === "POST") {
     let body;
     try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
@@ -2253,13 +2589,55 @@ async function handleAdmin(request, env) {
 
       if (action === "grant") {
         const notes = String(body?.notes || "").trim() || null;
+
+        // ── Scope validation (patient_access v2) ──
+        // Legacy callers that send no scopes get the FULL taxonomy (unchanged
+        // behavior); explicit scope arrays are validated strictly.
+        let scopes = body?.scopes === undefined ? [...SCOPE_KEYS] : body?.scopes;
+        if (!Array.isArray(scopes) || scopes.length === 0) {
+          return jsonError(400, "scopes_must_be_nonempty_array");
+        }
+        const unknown = scopes.filter((s) => !SCOPE_KEYS.includes(s));
+        if (unknown.length) return jsonError(400, `unknown_scopes: ${unknown.join(",")}`);
+        if (!scopes.includes("profile_basic")) scopes = ["profile_basic", ...scopes];
+        scopes = [...new Set(scopes)];
+
+        // expires_at: ISO timestamp or literal null (= NEVER expires).
+        // Past timestamps are rejected — expiry only ever points forward.
+        let expiresAt = body?.expires_at ?? null;
+        if (expiresAt !== null) {
+          const t = Date.parse(expiresAt);
+          if (!Number.isFinite(t)) return jsonError(400, "expires_at_must_be_iso_or_null");
+          if (t <= Date.now()) return jsonError(400, "expires_at_in_past");
+          expiresAt = new Date(t).toISOString();
+        }
+
+        // resource_filter: only { imaging_study_ids: string[] } is understood.
+        let resourceFilter = body?.resource_filter ?? null;
+        if (resourceFilter !== null) {
+          const ids = resourceFilter?.imaging_study_ids;
+          if (!Array.isArray(ids) || ids.some((x) => typeof x !== "string")) {
+            return jsonError(400, "resource_filter_imaging_study_ids_must_be_string_array");
+          }
+          resourceFilter = ids.length ? { imaging_study_ids: ids } : null;
+        }
+
+        const reason = String(body?.reason || "").trim() || null;
+
         await sql`
-          INSERT INTO patient_access (user_id, patient_id, notes, granted_by)
-          VALUES (${userRow[0].id}, ${patRow[0].id}, ${notes}, ${admin.id})
+          INSERT INTO patient_access (user_id, patient_id, notes, granted_by, scopes, resource_filter, expires_at, reason)
+          VALUES (${userRow[0].id}, ${patRow[0].id}, ${notes}, ${admin.id},
+                  ${JSON.stringify(scopes)}::jsonb,
+                  ${resourceFilter === null ? null : JSON.stringify(resourceFilter)}::jsonb,
+                  ${expiresAt}, ${reason})
           ON CONFLICT (user_id, patient_id) DO UPDATE SET
             notes = COALESCE(EXCLUDED.notes, patient_access.notes),
             granted_by = EXCLUDED.granted_by,
-            granted_at = now()
+            granted_at = now(),
+            scopes = EXCLUDED.scopes,
+            resource_filter = EXCLUDED.resource_filter,
+            expires_at = EXCLUDED.expires_at,
+            reason = EXCLUDED.reason
         `;
       } else {
         await sql`
@@ -2657,23 +3035,12 @@ async function handleAdmin(request, env) {
  */
 
 async function gateExportViewer(request, env, patientClerk) {
-  // Best-effort gate that MATCHES the rest of this app. Today every data endpoint
-  // (e.g. handlePatientSummary) is open and trusts the patient param — Clerk is
-  // not fully wired (sessions don't validate via authenticateRequest), so calling
-  // it here would 401 logged-in users. So: if Clerk genuinely authenticates a
-  // patient, enforce viewer<->patient; otherwise fall OPEN like the rest of the
-  // app. When real per-user auth lands app-wide, this tightens automatically.
-  let auth;
-  try {
-    auth = await authenticate(request, env);
-  } catch (e) {
-    return { ok: true, mode: "open" };
-  }
-  if (!auth.ok) return { ok: true, mode: "open" };
-  if (auth.role === "patient" && auth.clerkUserId !== patientClerk) {
-    return jsonError(403, "forbidden");
-  }
-  return { ok: true, mode: "auth", auth };
+  // Whole-record PDF export: self-view and admin only (scoped viewers are
+  // read-only on granted sections; the export assembles everything).
+  const sql = neon(env.DATABASE_URL);
+  const access = await requireSelfAdmin(sql, request, env, patientClerk);
+  if (access.error) return access.error;
+  return { ok: true, mode: "scoped", viewerClerk: access.viewerClerk };
 }
 
 async function resolveExportPatient(sql, clerk) {
@@ -2885,10 +3252,12 @@ async function resolveChatPatient(sql, env, request, requestedClerk) {
   ]);
 
   if (patientRows.length > 0) {
-    const patientId = patientRows[0].id;
-    const access = await resolveInsightAccess(sql, viewerClerk, patientId);
-    if (!access.ok) return { error: jsonError(access.status, access.reason) };
-    return { patientId, patientClerk, fullName: patientRows[0].full_name, actorId: access.viewerId };
+    // Chat assembles the WHOLE record — self-view and admin only this release
+    // (no scope-filtered record assembly yet).
+    const isSelf = viewerClerk === patientClerk;
+    const isAdmin = viewerRows[0]?.role === "admin";
+    if (!isSelf && !isAdmin) return { error: jsonError(403, "chat_self_or_admin_only") };
+    return { patientId: patientRows[0].id, patientClerk, fullName: patientRows[0].full_name, actorId: viewerRows[0]?.id || null };
   }
 
   // Patient not in DB — only the documented bespoke patients are valid here.
@@ -3081,6 +3450,22 @@ export default {
       return handleAdmin(request, env);
     }
     if (url.pathname === "/api/ingest") {
+      // Write path: self/admin only (scoped viewers are read-only).
+      try {
+        const ingestPatient = url.searchParams.get("patient") || url.searchParams.get("clerk") || "";
+        if (env.DATABASE_URL && ingestPatient) {
+          const sql = neon(env.DATABASE_URL);
+          const access = await requireSelfAdmin(sql, request, env, ingestPatient);
+          if (access.error) return access.error;
+        } else if (env.DATABASE_URL) {
+          // No patient param — require an admin viewer outright.
+          const sql = neon(env.DATABASE_URL);
+          const gate = await getAdminViewer(request, sql);
+          if (gate.error) return gate.error;
+        }
+      } catch (e) {
+        return jsonError(500, `ingest_gate_failed: ${e.message}`);
+      }
       return handleIngest(request, env);
     }
     if (url.pathname === "/api/export-manifest") {
@@ -3089,6 +3474,18 @@ export default {
     if (url.pathname === "/api/export-pdf") {
       return handleExportPdf(request, env);
     }
+    if (url.pathname === "/api/logout") {
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: {
+          "Content-Type": "application/json",
+          "Set-Cookie": `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
+        },
+      });
+    }
+    // Scoped-access gate for static surfaces (pages, scans, patient assets).
+    // Returns a redirect/403 to short-circuit, or null to serve normally.
+    const gated = await gateStaticRequest(request, env, url);
+    if (gated) return gated;
     return env.ASSETS.fetch(request);
   },
 };

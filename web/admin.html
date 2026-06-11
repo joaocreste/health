@@ -239,6 +239,24 @@
   }
   .grant-form .btn { padding: 6px 12px; font-size: 12px; }
 
+  /* ---------- Scoped grants (patient_access v2) ---------- */
+  .grant-form { align-items: flex-start; flex-direction: column; }
+  .grant-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100%; }
+  .scope-grid { display: flex; gap: 4px 12px; flex-wrap: wrap; padding: 6px 8px; border: 1px dashed #DDD8CC; border-radius: 6px; }
+  .scope-grid label { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: #0D1B2A; font-family: 'IBM Plex Sans', sans-serif; }
+  .scope-grid label.locked { color: #7A8FA6; }
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .preset-btn { padding: 3px 9px; font-size: 10.5px; border: 1px solid #B8954A; background: #FFF; color: #785818; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; }
+  .preset-btn:hover { background: #FBF6EC; }
+  .expiry-row { display: inline-flex; gap: 12px; align-items: center; font-size: 11.5px; font-family: 'IBM Plex Sans', sans-serif; color: #0D1B2A; }
+  .study-picker { width: 100%; padding: 6px 8px; border: 1px dashed #DDD8CC; border-radius: 6px; font-size: 11.5px; max-height: 110px; overflow: auto; }
+  .study-picker label { display: flex; gap: 6px; align-items: center; font-family: 'IBM Plex Sans', sans-serif; }
+  .access-pill .scopes-tag { font-size: 9.5px; color: #4E5D6E; letter-spacing: 0.02em; }
+  .access-pill .expiry-tag { font-size: 9.5px; color: #2D5F3F; }
+  .access-pill .expiry-tag.bound { color: #785818; }
+  .access-pill.expired { opacity: 0.45; }
+  .access-pill.expired .expiry-tag { color: #A53030; font-weight: 600; }
+
   /* ---------- Edit-user modal ---------- */
   .edit-modal-backdrop {
     position: fixed; inset: 0; z-index: 90;
@@ -434,7 +452,7 @@
   </div>
 </div>
 
-<script src="assets/app.js?v=29"></script>
+<script src="assets/app.js?v=30"></script>
 <script>
   (function () {
     'use strict';
@@ -468,6 +486,41 @@
     }
 
     var state = { patients: [], users: [], access: [], pending: {} };
+
+    /* ---------- Scoped grants (patient_access v2) ---------- */
+    var SCOPE_KEYS = ['profile_basic','imaging','labs','vitals','medications','clinical_history','genetics','mental','journal'];
+    var SCOPE_LABELS = {
+      profile_basic:    ['Basic profile', 'Perfil básico'],
+      imaging:          ['Imaging', 'Imagem'],
+      labs:             ['Labs', 'Laboratório'],
+      vitals:           ['Vitals', 'Sinais vitais'],
+      medications:      ['Medications', 'Medicações'],
+      clinical_history: ['Clinical history', 'Histórico clínico'],
+      genetics:         ['Genetics', 'Genética'],
+      mental:           ['Mental', 'Mental'],
+      journal:          ['Journal', 'Diário'],
+    };
+    var SCOPE_PRESETS = {
+      'imaging-specialist': ['profile_basic','imaging'],
+      'full-clinical':      ['profile_basic','imaging','labs','vitals','medications','clinical_history','genetics'],
+      'mental-health':      ['profile_basic','mental','journal','medications'],
+      'full-access':        SCOPE_KEYS.slice(),
+    };
+    function langSpan(en, pt) {
+      return '<span class="lang-en">' + escapeHtml(en) + '</span><span class="lang-pt">' + escapeHtml(pt) + '</span>';
+    }
+    function scopeCheckboxes() {
+      return SCOPE_KEYS.map(function (s) {
+        var locked = s === 'profile_basic';
+        return '<label' + (locked ? ' class="locked"' : '') + '>' +
+          '<input type="checkbox" name="scope" value="' + s + '"' +
+          (locked ? ' checked disabled' : '') + '> ' +
+          langSpan(SCOPE_LABELS[s][0], SCOPE_LABELS[s][1]) + '</label>';
+      }).join('');
+    }
+    function presetBtn(key, en, pt) {
+      return '<button type="button" class="preset-btn" data-preset="' + key + '">' + langSpan(en, pt) + '</button>';
+    }
 
     function renderPatients() {
       var listEl = document.getElementById('patients-list');
@@ -512,9 +565,24 @@
         var rows = (byPatient[p.clerk_user_id] || []);
         var pills = rows.map(function (a) {
           var isSelf = a.user_clerk === a.patient_clerk;
-          return '<li class="access-pill' + (isSelf ? ' self' : '') + '">' +
+          var scopes = Array.isArray(a.scopes) ? a.scopes : [];
+          var scopesTag = isSelf ? '' :
+            '<span class="scopes-tag">' +
+              (scopes.length >= SCOPE_KEYS.length ? langSpan('all scopes', 'todos os escopos')
+                : escapeHtml(scopes.filter(function (s) { return s !== 'profile_basic'; }).join(', ') || 'profile_basic')) +
+            '</span>';
+          var expiryTag;
+          if (a.expired) {
+            expiryTag = '<span class="expiry-tag">' + langSpan('Expired', 'Expirado') + '</span>';
+          } else if (a.expires_at) {
+            expiryTag = '<span class="expiry-tag bound">' + langSpan('until ', 'até ') + escapeHtml(String(a.expires_at).slice(0, 10)) + '</span>';
+          } else {
+            expiryTag = '<span class="expiry-tag">' + langSpan('Never expires', 'Nunca expira') + '</span>';
+          }
+          return '<li class="access-pill' + (isSelf ? ' self' : '') + (a.expired ? ' expired' : '') + '">' +
                    '<span>' + escapeHtml(a.user_name || a.user_clerk) + '</span>' +
                    '<span class="role-tag">' + escapeHtml(a.user_role) + (a.notes ? ' · ' + escapeHtml(a.notes) : '') + '</span>' +
+                   scopesTag + (isSelf ? '' : expiryTag) +
                    (isSelf ? '' :
                      '<button type="button" title="Revoke" data-action="revoke" ' +
                        'data-user="' + escapeHtml(a.user_clerk) + '" ' +
@@ -532,9 +600,26 @@
             '</div>' +
             '<ul class="access-list">' + (pills || '<li class="access-pill">No access rows</li>') + '</ul>' +
             '<form class="grant-form" data-patient="' + escapeHtml(p.clerk_user_id) + '">' +
-              '<select name="user_clerk" required><option value="">Grant access to…</option>' + userOptions + '</select>' +
-              '<input name="notes" type="text" placeholder="relation (e.g. psychiatrist)">' +
-              '<button class="btn btn-gold" type="submit">Grant</button>' +
+              '<div class="grant-row">' +
+                '<select name="user_clerk" required><option value="">Grant access to…</option>' + userOptions + '</select>' +
+                '<input name="notes" type="text" placeholder="relation (e.g. psychiatrist)">' +
+                '<input name="reason" type="text" placeholder="reason (optional) / motivo (opcional)">' +
+              '</div>' +
+              '<div class="preset-row">' +
+                presetBtn('imaging-specialist', 'Imaging specialist', 'Especialista em imagem') +
+                presetBtn('full-clinical', 'Full clinical', 'Clínico completo') +
+                presetBtn('mental-health', 'Mental health professional', 'Profissional de saúde mental') +
+                presetBtn('full-access', 'Full access', 'Acesso total') +
+              '</div>' +
+              '<div class="scope-grid">' + scopeCheckboxes() + '</div>' +
+              '<div class="grant-row expiry-row">' +
+                '<strong>' + langSpan('Expires:', 'Expira:') + '</strong>' +
+                '<label><input type="radio" name="expiry_mode" value="never" checked> ' + langSpan('Never', 'Nunca') + '</label>' +
+                '<label><input type="radio" name="expiry_mode" value="until"> ' + langSpan('Until', 'Até') + ' </label>' +
+                '<input name="expiry_date" type="date" disabled>' +
+              '</div>' +
+              '<div class="study-picker" hidden data-loaded="0"></div>' +
+              '<div class="grant-row"><button class="btn btn-gold" type="submit">' + langSpan('Grant', 'Conceder') + '</button></div>' +
             '</form>' +
           '</div>'
         );
@@ -632,17 +717,85 @@
 
       // Wire grant forms
       Array.prototype.forEach.call(listEl.querySelectorAll('form.grant-form'), function (form) {
+        var patient = form.getAttribute('data-patient');
+        var picker = form.querySelector('.study-picker');
+        var imagingBox = form.querySelector('input[name="scope"][value="imaging"]');
+        var dateInput = form.querySelector('input[name="expiry_date"]');
+
+        // Presets pre-fill the checkboxes only — no new DB concept.
+        Array.prototype.forEach.call(form.querySelectorAll('.preset-btn'), function (btn) {
+          btn.addEventListener('click', function () {
+            var set = SCOPE_PRESETS[btn.getAttribute('data-preset')] || [];
+            Array.prototype.forEach.call(form.querySelectorAll('input[name="scope"]'), function (cb) {
+              if (cb.value === 'profile_basic') return; // locked, always on
+              cb.checked = set.indexOf(cb.value) !== -1;
+            });
+            imagingBox.dispatchEvent(new Event('change'));
+          });
+        });
+
+        // Expiry radio: "Never" (default) disables the date picker.
+        Array.prototype.forEach.call(form.querySelectorAll('input[name="expiry_mode"]'), function (r) {
+          r.addEventListener('change', function () {
+            dateInput.disabled = form.querySelector('input[name="expiry_mode"]:checked').value !== 'until';
+          });
+        });
+
+        // Optional study picker — only when imaging is checked; lazy-loaded.
+        imagingBox.addEventListener('change', function () {
+          if (!imagingBox.checked) { picker.hidden = true; return; }
+          picker.hidden = false;
+          if (picker.getAttribute('data-loaded') === '1') return;
+          picker.innerHTML = langSpan('Loading studies…', 'Carregando estudos…');
+          api('/api/admin/imaging-studies?patient=' + encodeURIComponent(patient))
+            .then(function (d) {
+              picker.setAttribute('data-loaded', '1');
+              if (!d.studies.length) {
+                picker.innerHTML = langSpan('No imaging studies on record — grant covers all future imaging.',
+                                            'Nenhum estudo de imagem registrado — a concessão cobre toda a imagem futura.');
+                return;
+              }
+              picker.innerHTML =
+                '<div style="margin-bottom:4px;color:#7A8FA6;">' +
+                  langSpan('Limit to specific studies (none selected = all imaging):',
+                           'Limitar a estudos específicos (nenhum selecionado = toda a imagem):') + '</div>' +
+                d.studies.map(function (s) {
+                  var label = [s.modality, s.body_part, s.study_date].filter(Boolean).join(' · ');
+                  return '<label><input type="checkbox" name="study_id" value="' + escapeHtml(s.id) + '"> ' + escapeHtml(label) + '</label>';
+                }).join('');
+            })
+            .catch(function (e) { picker.innerHTML = 'Failed to load studies: ' + escapeHtml(e.message); });
+        });
+
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           var fd = new FormData(form);
           var user = String(fd.get('user_clerk') || '');
-          var notes = String(fd.get('notes') || '').trim();
-          var patient = form.getAttribute('data-patient');
           if (!user) return;
-          api('/api/admin/access', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'grant', user_clerk: user, patient_clerk: patient, notes: notes || null }),
-          }).then(reload).catch(function (e) { alert('Grant failed: ' + e.message); });
+          var scopes = ['profile_basic'];
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="scope"]:checked'), function (cb) {
+            if (scopes.indexOf(cb.value) === -1) scopes.push(cb.value);
+          });
+          var expiresAt = null; // "Never" — the default, first-class state
+          if (String(fd.get('expiry_mode')) === 'until') {
+            var d = String(fd.get('expiry_date') || '');
+            if (!d) return alert('Pick an expiry date, or choose Never.');
+            expiresAt = d + 'T23:59:59Z';
+          }
+          var studyIds = [];
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="study_id"]:checked'), function (cb) {
+            studyIds.push(cb.value);
+          });
+          var body = {
+            action: 'grant', user_clerk: user, patient_clerk: patient,
+            notes: String(fd.get('notes') || '').trim() || null,
+            reason: String(fd.get('reason') || '').trim() || null,
+            scopes: scopes,
+            expires_at: expiresAt,
+            resource_filter: studyIds.length ? { imaging_study_ids: studyIds } : null,
+          };
+          api('/api/admin/access', { method: 'POST', body: JSON.stringify(body) })
+            .then(reload).catch(function (e) { alert('Grant failed: ' + e.message); });
         });
       });
     }

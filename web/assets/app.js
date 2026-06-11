@@ -24,6 +24,9 @@
 
   /* Expose a simple sign-out helper for the topnav button */
   window.jcSignOut = function () {
+    // Clear the HttpOnly session cookie server-side (the scoped-access gate
+    // reads it); best-effort so signout never blocks on the network.
+    try { fetch('/api/logout', { method: 'POST', keepalive: true }).catch(function () {}); } catch (e) {}
     sessionStorage.removeItem('jc_authed');
     sessionStorage.removeItem('jc_viewer_clerk');
     sessionStorage.removeItem('jc_viewer_username');
