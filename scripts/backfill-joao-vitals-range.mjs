@@ -70,7 +70,9 @@ function parseCSV(file, delim) {
   return rows.filter((r) => r.length > 1).map((r) => Object.fromEntries(header.map((h, j) => [h, r[j]])));
 }
 
-const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+/* Empty CSV fields must be null, NOT 0 — bp.csv has pulse-only rows with
+   blank Systolic/Diastolic that would otherwise become 0/0 readings. */
+const num = (v) => { if (v == null || v === "") return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
 const isDay = (d) => /^\d{4}-\d{2}-\d{2}$/.test(d || "");
 const h3 = (sec) => Math.round((sec / 3600) * 1000) / 1000;
 
