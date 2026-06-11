@@ -9,8 +9,12 @@
    Night filter mirrors the SLEEP_BOX boxplot exactly (bin/extract.py):
    type='long_sleep' AND total_sleep_duration >= 3 h.
 
+   Each row also carries tst = weekly mean of Oura's total_sleep_duration in
+   hours (the boxplot's "Total" figure — excludes awake), for the companion
+   total-sleep timeline.
+
    Output is a single-line JS const ready to paste into web/assets/data.js:
-   const SLEEP_STAGES_BY_WEEK = [{week:"2026-04-27",n:7,deep:14.2,light:52.1,rem:21.4,awake:12.3},...]; */
+   const SLEEP_STAGES_BY_WEEK = [{week:"2026-04-27",n:7,deep:14.2,light:52.1,rem:21.4,awake:12.3,tst:7.42},...]; */
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -54,6 +58,7 @@ for (let i = 1; i < lines.length; i++) {
   buckets.get(wk).push({
     deep: deep / denom * 100, light: light / denom * 100,
     rem: rem / denom * 100, awake: awake / denom * 100,
+    tst: total / 3600,
   });
   nights++;
   if (firstDay === null || day < firstDay) firstDay = day;
@@ -70,10 +75,11 @@ const rows = weeks.map((wk) => {
     light: Number(mean(ns.map((x) => x.light)).toFixed(1)),
     rem:   Number(mean(ns.map((x) => x.rem)).toFixed(1)),
     awake: Number(mean(ns.map((x) => x.awake)).toFixed(1)),
+    tst:   Number(mean(ns.map((x) => x.tst)).toFixed(2)),
   };
 });
 
-const fmt = (r) => `{week:"${r.week}",n:${r.n},deep:${r.deep},light:${r.light},rem:${r.rem},awake:${r.awake}}`;
+const fmt = (r) => `{week:"${r.week}",n:${r.n},deep:${r.deep},light:${r.light},rem:${r.rem},awake:${r.awake},tst:${r.tst}}`;
 
 console.log(`/* SLEEP_STAGES_BY_WEEK — Oura long_sleep nights (>=3h, same filter as SLEEP_BOX), ISO weeks (Mon-Sun). ${firstDay} -> ${lastDay} · ${rows.length} weeks · ${nights} nights · % of (deep+light+rem+awake), weekly mean of per-night %. */`);
 console.log(`const SLEEP_STAGES_BY_WEEK = [${rows.map(fmt).join(',')}];`);

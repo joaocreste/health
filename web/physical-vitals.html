@@ -438,17 +438,29 @@
       </div>
     </div>
 
-    <div class="chart-card mt-3">
-      <div class="chart-card-head">
-        <div class="chart-card-title"><span class="lang-en">Sleep stage composition — weekly average (% of total sleep)</span><span class="lang-pt">Composição dos estágios do sono — média semanal (% do sono total)</span></div>
-        <div class="chart-card-meta"><span class="lang-en">Oura Ring · 222 long-sleep nights ≥3h folded into 34 ISO weeks · 18 Oct 2025 → 2 Jun 2026 · each stage as % of (deep+light+REM+awake)</span><span class="lang-pt">Oura Ring · 222 noites de sono prolongado ≥3h agrupadas em 34 semanas ISO · 18 out 2025 → 2 jun 2026 · cada estágio como % de (profundo+leve+REM+acordado)</span></div>
+    <div class="two-col mt-3">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Total sleep — weekly average (hours per night)</span><span class="lang-pt">Sono total — média semanal (horas por noite)</span></div>
+          <div class="chart-card-meta"><span class="lang-en">Oura Ring · 222 long-sleep nights ≥3h folded into 34 ISO weeks · 18 Oct 2025 → 2 Jun 2026</span><span class="lang-pt">Oura Ring · 222 noites de sono prolongado ≥3h agrupadas em 34 semanas ISO · 18 out 2025 → 2 jun 2026</span></div>
+        </div>
+        <div id="sleep-total-weekly-timeline" class="chart-wrap tall"></div>
+        <div class="bp-daily-legend">
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#122A3D"></span> <span class="lang-en">Total sleep (Oura — excludes awake)</span><span class="lang-pt">Sono total (Oura — exclui tempo acordado)</span></span>
+        </div>
       </div>
-      <div id="sleep-stage-weekly-composition" class="chart-wrap tall"></div>
-      <div class="bp-daily-legend">
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#2F6489"></span> <span class="lang-en">Deep</span><span class="lang-pt">Profundo</span></span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3E7CA3"></span> <span class="lang-en">REM</span><span class="lang-pt">REM</span></span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E97BC"></span> <span class="lang-en">Light</span><span class="lang-pt">Leve</span></span>
-        <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#B5D2E5"></span> <span class="lang-en">Awake</span><span class="lang-pt">Acordado</span></span>
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Sleep stage composition — weekly average (% of total sleep)</span><span class="lang-pt">Composição dos estágios do sono — média semanal (% do sono total)</span></div>
+          <div class="chart-card-meta"><span class="lang-en">Oura Ring · 222 long-sleep nights ≥3h folded into 34 ISO weeks · 18 Oct 2025 → 2 Jun 2026 · each stage as % of (deep+light+REM+awake)</span><span class="lang-pt">Oura Ring · 222 noites de sono prolongado ≥3h agrupadas em 34 semanas ISO · 18 out 2025 → 2 jun 2026 · cada estágio como % de (profundo+leve+REM+acordado)</span></div>
+        </div>
+        <div id="sleep-stage-weekly-composition" class="chart-wrap tall"></div>
+        <div class="bp-daily-legend">
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#2F6489"></span> <span class="lang-en">Deep</span><span class="lang-pt">Profundo</span></span>
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#3E7CA3"></span> <span class="lang-en">REM</span><span class="lang-pt">REM</span></span>
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#5E97BC"></span> <span class="lang-en">Light</span><span class="lang-pt">Leve</span></span>
+          <span class="bp-daily-leg-item"><span class="bp-daily-leg-dot" style="background:#B5D2E5"></span> <span class="lang-en">Awake</span><span class="lang-pt">Acordado</span></span>
+        </div>
       </div>
     </div>
 
@@ -837,7 +849,7 @@
 <script src="assets/patient-context.js?v=53"></script>
 <script src="assets/insights-update.js?v=3"></script>
 <script src="assets/upload-card.js?v=1"></script>
-<script src="assets/data.js?v=31"></script>
+<script src="assets/data.js?v=32"></script>
 <script>
 /* ───────── Page-specific charts ─ health-palette tokens ───────── */
 const C = {
@@ -1860,6 +1872,75 @@ function renderBpPatternsChart() {
   }
 }
 
+/* 7e2 — Total sleep timeline — SLEEP_STAGES_BY_WEEK.tst is the weekly mean of
+   Oura's total_sleep_duration in hours (excludes awake — the boxplot's "Total").
+   Spline + soft area fill in the boxplot's Total colors (blue-900 / #0B1A28). */
+function renderSleepTotalChart() {
+  const el = document.getElementById('sleep-total-weekly-timeline');
+  if (!el) return;
+  if (typeof SLEEP_STAGES_BY_WEEK === 'undefined' || typeof Plotly === 'undefined') return;
+
+  try {
+    const xs = SLEEP_STAGES_BY_WEEK.map(r => r.week);
+    const ys = SLEEP_STAGES_BY_WEEK.map(r => r.tst);
+    const ns = SLEEP_STAGES_BY_WEEK.map(r => r.n);
+
+    const trace = {
+      x: xs, y: ys,
+      type: 'scatter', mode: 'lines+markers',
+      line: { color: '#0B1A28', width: 2.5, shape: 'spline' },
+      marker: { color: '#0B1A28', size: 5 },
+      fill: 'tozeroy', fillcolor: 'rgba(18,42,61,0.14)',  /* blue-900 */
+      customdata: ns,
+      hovertemplate: L('Week of %{x}<br>Total sleep <b>%{y:.1f} h</b> · n=%{customdata} nights<extra></extra>',
+                       'Semana de %{x}<br>Sono total <b>%{y:.1f} h</b> · n=%{customdata} noites<extra></extra>'),
+      showlegend: false
+    };
+
+    /* Adult sleep guidance band edges, drawn faintly like the BP reference lines. */
+    const refLines = [
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 7, y1: 7,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 9, y1: 9,
+        line: { color: '#C29327', width: 1, dash: 'dot' } },
+    ];
+
+    const layout = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 8, b: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      shapes: refLines,
+      xaxis: {
+        type: 'date',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      yaxis: {
+        title: { text: L('hours per night', 'horas por noite'), font: { color: C.inkSoft } },
+        rangemode: 'tozero',
+        showgrid: true, gridcolor: C.grid,
+        zeroline: false,
+        tickfont: { color: C.inkSoft }
+      },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+
+    const config = {
+      displaylogo: false, responsive: true,
+      modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+    };
+
+    Plotly.newPlot(el, [trace], layout, config);
+    console.log('[sleep-total] rendered', xs.length, 'weeks');
+  } catch (e) {
+    console.error('[sleep-total]', e);
+  }
+}
+
 /* 7e — Sleep stage composition — SLEEP_STAGES_BY_WEEK rows are
    {week, n, deep, light, rem, awake} (% of the night's four-stage sum,
    weekly mean of per-night percentages; sums to ~100 so no groupnorm).
@@ -1935,6 +2016,7 @@ function renderAllVitalsCharts() {
   renderGlucosePatternsChart();
   renderHrPatternsChart();
   renderBpPatternsChart();
+  renderSleepTotalChart();
   renderSleepStageCompositionChart();
 }
 
