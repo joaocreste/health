@@ -2307,6 +2307,10 @@
           // sit below any sibling already inserted higher up).
           injectDangerZone(document.querySelector('main.jc-home'));
           decorateWithDashboard('home', { isHome: true });
+          // LLM-authored AI insights (patient_dashboards / 'ai-insights'):
+          // headline + cross-domain links on the landing. No-ops when the
+          // patient has no insights row (docks next to the danger zone).
+          decorateWithAiInsights('home');
         })
         .catch(function () {
           renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente'));
@@ -2318,6 +2322,7 @@
     if (section === 'physical-exams') {
       if (patient === PAULO_SILOTTO) {
         renderPauloPhysicalExams();
+        decorateWithAiInsights('physical'); // DB attention points + strengths -> bottom dock
         return;
       }
       if (patient === SILVANA_CRESTE) {
@@ -2343,6 +2348,7 @@
     if (patient === PAULO_SILOTTO &&
         (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
       renderPauloPhysicalExams();
+      decorateWithAiInsights('physical'); // DB attention points + strengths -> bottom dock
       return;
     }
 
