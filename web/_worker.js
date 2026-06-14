@@ -2158,6 +2158,72 @@ function wipeQuery(sql, table, pid) {
   }
 }
 
+/* Promote a portal upload (uploads + upload_objects) into the ingest pipeline:
+   create one `imports` row + one `import_files` row per uploaded object, with
+   blob_key referencing the EXISTING R2 blob IN PLACE by its uploads/... key — no
+   copy, no move. Records-only: no clinical parsing here (staging/extraction stays
+   the downstream step). The upload flip to 'ingested', the import rows, and the
+   audit entry all run in ONE sql.transaction so a partial failure can never leave
+   an import with missing file rows.
+
+   Idempotent via blob_key overlap: an object's r2_key is globally unique
+   (uploads/{patient}/{upload_id}/{path}), so if any import_files row already
+   points at one of this upload's keys, the upload was already promoted — we skip
+   the inserts and return that existing import id. */
+async function promoteUploadToImport(sql, uploadId, adminId) {
+  const upRows = await sql`SELECT id, doc_ref, patient_id FROM uploads WHERE id = ${uploadId} LIMIT 1`;
+  if (upRows.length === 0) return { error: "upload_not_found" };
+  const up = upRows[0];
+  const objs = await sql`
+    SELECT r2_key, relative_path, content_type, bytes
+    FROM upload_objects WHERE upload_id = ${uploadId} ORDER BY id`;
+
+  const keys = objs.map((o) => o.r2_key).filter(Boolean);
+  let existingImportId = null;
+  if (keys.length) {
+    const existing = await sql`SELECT import_id FROM import_files WHERE blob_key = ANY(${keys}) LIMIT 1`;
+    if (existing.length) existingImportId = existing[0].import_id;
+  }
+
+  const importId = existingImportId || (objs.length ? crypto.randomUUID() : null);
+  const stmts = [];
+  if (!existingImportId && objs.length) {
+    stmts.push(sql`
+      INSERT INTO imports (id, patient_id, initiated_by, source, status, total_files, created_at)
+      VALUES (${importId}, ${up.patient_id}, ${adminId}, 'admin_upload', 'pending', ${objs.length}, now())`);
+    for (const o of objs) {
+      const originalPath = o.relative_path || (o.r2_key ? o.r2_key.split("/").pop() : null) || "unnamed";
+      stmts.push(sql`
+        INSERT INTO import_files (import_id, original_path, mime_type, size_bytes, blob_key, status)
+        VALUES (${importId}, ${originalPath}, ${o.content_type || null},
+                ${o.bytes != null ? Number(o.bytes) : null}, ${o.r2_key}, 'received')`);
+    }
+  }
+  // Flip the upload to 'ingested' (clears any stale data_error note) + record review.
+  stmts.push(sql`
+    UPDATE uploads
+    SET status = 'ingested'::upload_status, error_note = null,
+        reviewed_by = ${adminId}, reviewed_at = now()
+    WHERE id = ${uploadId}
+    RETURNING id, doc_ref, patient_id, status, error_note, reviewed_at`);
+  stmts.push(sql`
+    INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
+    VALUES (${adminId}, 'upload_promoted', 'uploads', ${uploadId}, ${up.patient_id},
+            ${JSON.stringify({
+              doc_ref: up.doc_ref, import_id: importId, file_count: objs.length,
+              source_upload_id: uploadId, already_promoted: !!existingImportId,
+            })}::jsonb)`);
+
+  const results = await sql.transaction(stmts);
+  // Statement order ends with [..., UPDATE...RETURNING, audit INSERT]; the UPDATE
+  // result is second-to-last (audit INSERT returns no rows).
+  const uploadRow = results[results.length - 2][0];
+  return {
+    importId, fileCount: objs.length,
+    alreadyPromoted: !!existingImportId, empty: objs.length === 0, upload: uploadRow,
+  };
+}
+
 async function handleAdmin(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const sql = neon(env.DATABASE_URL);
@@ -2851,6 +2917,23 @@ async function handleAdmin(request, env) {
     if (!["pending_review", "ingested", "data_error"].includes(status)) return jsonError(400, "status_invalid");
     try {
       await ensureUploadsTables(sql);
+      // 'ingested' now PROMOTES the upload: it creates the import + import_files
+      // records (referencing R2 blobs in place) and flips the status, all in one
+      // transaction. Idempotent — re-promoting returns the existing import id.
+      if (status === "ingested") {
+        const res = await promoteUploadToImport(sql, uploadId, admin.id);
+        if (res.error) return jsonError(404, res.error);
+        return new Response(JSON.stringify({
+          ok: true,
+          upload: res.upload,
+          import: {
+            id: res.importId,
+            file_count: res.fileCount,
+            already_promoted: res.alreadyPromoted,
+            empty: res.empty,
+          },
+        }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+      }
       const noteToStore = status === "data_error" ? errorNote : null;
       const upd = await sql`
         UPDATE uploads
