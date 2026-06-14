@@ -3526,6 +3526,12 @@
       'main.jc-paulo-exams .po-pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #B8954A; }',
       'main.jc-paulo-exams .po-pdf { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
       'main.jc-paulo-exams .po-pdf:hover { background: #FFF6E5; }',
+      'main.jc-paulo-exams .po-ai { margin-top: 2px; padding: 12px 14px; background: #FFFCF5; border: 1px solid #F0E4C8; border-radius: 8px; }',
+      'main.jc-paulo-exams .po-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }',
+      'main.jc-paulo-exams .po-ai-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      'main.jc-paulo-exams .po-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      'main.jc-paulo-exams .po-ai-body strong { color: #0D1B2A; }',
+      'main.jc-paulo-exams .po-ai-body em { font-style: italic; color: #244E6E; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -3840,6 +3846,15 @@
           '<div class="po-card-date">' + t(c.dateEn, c.datePt) + '</div>' +
         '</header>' +
         '<ul class="po-findings">' + findingsHtml + '</ul>' +
+        ((c.aiEn || c.aiPt) ?
+          '<div class="po-ai">' +
+            '<div class="po-ai-head">' +
+              '<span class="ai-pill">AI</span>' +
+              '<span class="po-ai-label">' + t('AI read', 'Leitura da IA') + '</span>' +
+            '</div>' +
+            '<p class="po-ai-body lang-en">' + (c.aiEn || '') + '</p>' +
+            '<p class="po-ai-body lang-pt">' + (c.aiPt || '') + '</p>' +
+          '</div>' : '') +
         '<div class="po-card-foot">' +
           '<span class="po-pending">' +
             t('Imaging not yet uploaded', 'Imagens ainda não carregadas') +
@@ -3876,6 +3891,8 @@
           'Tendão do cabo longo do bíceps centrado na goteira, calibre e sinal habituais.',
           'Ausência de efusão na bursa subacromial-subdeltoidea. Sem derrame articular.',
         ],
+        aiEn: 'Tied with the 2015 cervical MRI as the <strong>earliest study on file</strong>, and the first sign that Paulo&apos;s degeneration is <strong>not spine-only</strong>: the acromioclavicular joint is intensely arthritic (osteophytes, subchondral cysts, bone oedema) while the rotator cuff is intact. So the shoulder pain generator is the AC joint itself, not a tear — a mechanical, point-tender source amenable to local injection. Read alongside the knee (2019) and the dorsolumbar spine, this marks a <strong>systemic osteoarthritic diathesis</strong> rather than a single bad region.',
+        aiPt: 'Empatado com a RM cervical de 2015 como o <strong>estudo mais antigo do histórico</strong>, e o primeiro sinal de que a degeneração do Paulo <strong>não se restringe à coluna</strong>: a articulação acromioclavicular está intensamente artrósica (osteófitos, cistos subcondrais, edema ósseo) com manguito rotador íntegro. Logo, o gerador de dor é a própria articulação AC, e não uma ruptura — fonte mecânica, dolorosa à palpação, tratável por infiltração local. Lido junto ao joelho (2019) e à coluna dorsolombar, configura uma <strong>tendência osteoartrósica sistêmica</strong>, não uma região isolada.',
       },
       {
         eyebrowEn: '4B · MRI · Right knee',
@@ -3901,6 +3918,8 @@
           'Amputação da borda livre na transição corpo / corno posterior do <strong>menisco lateral</strong> — possível ruptura radial prévia.',
           '<strong>Condropatia femoropatelar grau III</strong> na margem medial da articulação. Moderado derrame articular.',
         ],
+        aiEn: 'Four years after the shoulder, a <strong>second load-bearing joint degenerates</strong> — grade III femoropatellar chondropathy, mucinoid meniscal degeneration and a moderate effusion, on a knee already scarred by old injury (likely Osgood-Schlatter sequela, prior lateral-meniscus radial tear). This reinforces the systemic pattern and adds a <strong>lower-limb mechanical burden</strong>: an antalgic, knee-sparing gait would load the already-compromised left lumbar segments and the S1 root further — the knee and the spine are not independent problems.',
+        aiPt: 'Quatro anos após o ombro, uma <strong>segunda articulação de carga degenera</strong> — condropatia femoropatelar grau III, degeneração meniscal mucinoide e derrame moderado, num joelho já marcado por lesão antiga (provável sequela de Osgood-Schlatter, ruptura radial prévia do menisco lateral). Reforça o padrão sistêmico e acrescenta uma <strong>sobrecarga mecânica no membro inferior</strong>: uma marcha antálgica, poupando o joelho, sobrecarregaria ainda mais os segmentos lombares esquerdos e a raiz S1 — joelho e coluna não são problemas independentes.',
       },
       {
         eyebrowEn: '4C · CT · Abdomen & pelvis',
@@ -3928,6 +3947,8 @@
           '<strong>Alterações degenerativas acentuadas da coluna dorsolombar</strong> com discopatia L4–L5 grave — corrobora os achados de RM abaixo.',
           'Redução volumétrica da musculatura regional (paravertebral + glútea). Granuloma calcificado no subcutâneo da região glútea esquerda.',
         ],
+        aiEn: 'The most clinically actionable non-spine study, on two fronts. First, it <strong>corroborates the spine disease from a different modality</strong> and shows paravertebral <em>and</em> gluteal muscle wasting already in 2022 — four years before the 2026 MRI quantified it, so the deconditioning is long-standing, not recent. Second, genuinely new and <strong>off the musculoskeletal axis</strong>: bladder-wall thickening with a globose prostate (the report itself recommends a <strong>urology workup</strong>) and sigmoid diverticulosis. These deserve a follow-up track of their own and should not get lost behind the spine narrative.',
+        aiPt: 'O estudo não-coluna mais acionável, em duas frentes. Primeiro, <strong>corrobora a doença da coluna por outra modalidade</strong> e já mostra atrofia muscular paravertebral <em>e</em> glútea em 2022 — quatro anos antes de a RM de 2026 quantificá-la, ou seja, o descondicionamento é antigo, não recente. Segundo, genuinamente novo e <strong>fora do eixo musculoesquelético</strong>: espessamento da parede vesical com próstata globosa (o próprio laudo recomenda <strong>investigação urológica</strong>) e diverticulose sigmoide. Merecem um acompanhamento próprio e não devem se perder atrás da narrativa da coluna.',
       },
       {
         eyebrowEn: '4D · CT · Cranium',
@@ -3953,6 +3974,8 @@
           'Calcificações em torno da foice cerebral e adjacentes à tábua óssea parietal. Possível mínimo alargamento de espaço perivascular nos núcleos da base à direita.',
           'Discreto espessamento mucoso no seio esfenoidal esquerdo e no maxilar direito. Sem fratura.',
         ],
+        aiEn: 'Largely <strong>reassuring</strong> — no bleed, no mass, no midline shift; the sulcal widening is age-appropriate involution. The one telling detail is the <strong>residual myelography contrast</strong> in the basal cisterns: Paulo underwent invasive contrast imaging of the spinal canal years ago, evidence that his spine disease is <strong>decades-deep</strong> and was once significant enough to warrant a pre-MRI-era investigation. Nothing here demands acute action; it anchors how long the spinal story has been running.',
+        aiPt: 'Em geral <strong>tranquilizador</strong> — sem sangramento, sem massa, sem desvio de linha média; o alargamento dos sulcos é involução compatível com a idade. O detalhe revelador é o <strong>resíduo de contraste de mielografia</strong> nas cisternas basais: o Paulo foi submetido, anos atrás, a imagem contrastada invasiva do canal vertebral — prova de que a doença da coluna é <strong>de décadas</strong> e já foi significativa o bastante para justificar uma investigação da era pré-RM. Nada aqui exige ação aguda; situa há quanto tempo a história da coluna corre.',
       },
       {
         eyebrowEn: '4E · CT · Face / sinuses',
@@ -3978,6 +4001,8 @@
           'Fossas olfatórias assimétricas (Keros tipo II). Fossas pterigopalatinas e espaços parafaríngeos normais.',
           'Achado adjacente: possível resíduo de mielografia antiga nas cisternas da base — cruza-se com o achado da TC de crânio acima.',
         ],
+        aiEn: 'A <strong>benign, ENT-referable</strong> finding set: low-grade chronic sinus inflammation plus an anatomic septal deviation — together a plausible cause of chronic nasal obstruction / recurrent sinus symptoms, and the kind of fixable structural issue worth surfacing even though it sits well outside the spine story. The same old myelography residue seen on the cranium CT is noted again, cross-confirming it. No aggressive sinonasal disease.',
+        aiPt: 'Conjunto <strong>benigno e encaminhável ao otorrino</strong>: sinusopatia crônica de baixo grau somada a um desvio anatômico do septo — juntos, causa plausível de obstrução nasal crônica / sintomas sinusais recorrentes, e um problema estrutural corrigível que vale registrar mesmo estando fora da história da coluna. O mesmo resíduo de mielografia antiga visto na TC de crânio reaparece, confirmando-o de forma cruzada. Sem doença sinonasal agressiva.',
       },
     ];
 
@@ -3997,6 +4022,76 @@
           '</p>' +
           '<div class="po-grid">' +
             cards.map(buildPauloOtherStudyCard).join('') +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
+  /* ── Overall clinical evolution · the major cross-study link ──────
+     The capstone synthesis. Sections 1–4 each look at one axis (the
+     current snapshot, the spine viewer, the per-region longitudinal
+     arcs, the isolated studies). This ties ALL ten studies — spine,
+     peripheral joints and systemic CT — into one eleven-year clinical
+     story, and surfaces the non-spine follow-up that the spine
+     narrative tends to bury. */
+
+  function buildPauloOverallEvolution() {
+    return (
+      '<section class="paulo-ai-summary-wrap" id="paulo-overall-evolution">' +
+        '<div class="container">' +
+          '<div class="paulo-ai-summary">' +
+            '<header class="paulo-ai-summary-head">' +
+              '<h2>' + t('5 · Overall clinical evolution', '5 · Evolução clínica geral') + '</h2>' +
+              '<span class="ai-pill">AI</span>' +
+            '</header>' +
+            '<div class="paulo-ai-summary-meta">' +
+              t('The through-line across all 10 studies · spine, peripheral joints and systemic CT · 2015 → 2026 · 11 years',
+                'O fio condutor entre os 10 estudos · coluna, articulações periféricas e TC sistêmica · 2015 → 2026 · 11 anos') +
+            '</div>' +
+            '<div class="paulo-ai-subhead">' +
+              t('The one-line read', 'A leitura em uma linha') +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-en">' +
+              '<p>Across eleven years and ten studies, the picture is coherent: a <strong>single, slowly-progressive and currently-active systemic degenerative process</strong>, worst in the spine but not confined to it, carrying an unbroken <strong>left-sided radicular burden</strong> and a parallel arc of <strong>muscle deconditioning</strong>. Paulo does not have a bad back and a few unrelated incidental findings — he has a body-wide osteoarthritic diathesis whose most symptomatic site happens to be the spine.</p>' +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-pt">' +
+              '<p>Ao longo de onze anos e dez estudos, o quadro é coerente: um <strong>único processo degenerativo sistêmico, lentamente progressivo e atualmente ativo</strong>, pior na coluna mas não restrito a ela, com um <strong>encargo radicular à esquerda</strong> ininterrupto e um arco paralelo de <strong>descondicionamento muscular</strong>. O Paulo não tem uma coluna ruim mais alguns achados incidentais soltos — tem uma tendência osteoartrósica de todo o corpo cujo sítio mais sintomático é a coluna.</p>' +
+            '</div>' +
+
+            '<div class="paulo-ai-arcs-block">' +
+              '<div class="paulo-ai-subhead">' +
+                t('Three threads, one process', 'Três fios, um processo') +
+              '</div>' +
+              '<div class="paulo-ai-arcs">' +
+                '<div class="paulo-ai-arc">' +
+                  '<div class="paulo-ai-arc-head">' +
+                    '<h3 class="paulo-ai-arc-title">' + t('1 · The spine is the spine of the story', '1 · A coluna é a espinha da história') + '</h3>' +
+                    '<span class="paulo-ai-arc-span">' + t('5 MRIs · 2015 → 2026', '5 RMs · 2015 → 2026') + '</span>' +
+                  '</div>' +
+                  '<p class="paulo-ai-arc-body lang-en">The dominant, progressive thread. Cervically the lesion <strong>migrated upward</strong> (C6–C7 → C5–C6) and now <strong>contacts the cord</strong>; lumbarly the L5–S1 left-S1 extrusion held its shape but the surrounding tissue turned <strong>active (Modic I)</strong> and a second focus — L3–L4 canal stenosis — appeared. The constant across both regions and both decades: a <strong>left-sided radicular pattern</strong> (S1 below, C6/C7 above).</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">O fio dominante e progressivo. Na cervical a lesão <strong>migrou para cima</strong> (C6–C7 → C5–C6) e agora <strong>toca a medula</strong>; na lombar a extrusão L5–S1 (raiz S1 esquerda) manteve a forma, mas o tecido ao redor ficou <strong>ativo (Modic I)</strong> e surgiu um segundo foco — estenose do canal em L3–L4. A constante nas duas regiões e nas duas décadas: um <strong>padrão radicular à esquerda</strong> (S1 abaixo, C6/C7 acima).</p>' +
+                '</div>' +
+                '<div class="paulo-ai-arc">' +
+                  '<div class="paulo-ai-arc-head">' +
+                    '<h3 class="paulo-ai-arc-title">' + t('2 · Systemic, not focal', '2 · Sistêmico, não focal') + '</h3>' +
+                    '<span class="paulo-ai-arc-span">' + t('Shoulder 2015 · Knee 2019', 'Ombro 2015 · Joelho 2019') + '</span>' +
+                  '</div>' +
+                  '<p class="paulo-ai-arc-body lang-en">The shoulder (intense AC arthropathy, 2015) and the knee (grade III chondropathy + meniscal degeneration, 2019) show the <strong>same degenerative diathesis in load-bearing joints</strong> — the spine is the worst-hit site, not the only one. Practically, the lower-limb disease matters to the spine: a knee-sparing, antalgic gait <strong>reloads the compromised left lumbar segments</strong>, so these are not independent problems.</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">O ombro (artropatia AC intensa, 2015) e o joelho (condropatia grau III + degeneração meniscal, 2019) mostram a <strong>mesma tendência degenerativa em articulações de carga</strong> — a coluna é o sítio mais afetado, não o único. Na prática, a doença do membro inferior importa para a coluna: uma marcha antálgica poupando o joelho <strong>sobrecarrega os segmentos lombares esquerdos comprometidos</strong>, de modo que não são problemas independentes.</p>' +
+                '</div>' +
+                '<div class="paulo-ai-arc">' +
+                  '<div class="paulo-ai-arc-head">' +
+                    '<h3 class="paulo-ai-arc-title">' + t('3 · The muscle dimension', '3 · A dimensão muscular') + '</h3>' +
+                    '<span class="paulo-ai-arc-span">' + t('Confirmed on MRI + CT', 'Confirmado em RM + TC') + '</span>' +
+                  '</div>' +
+                  '<p class="paulo-ai-arc-body lang-en">Paravertebral (and, on the 2022 CT, gluteal) <strong>muscle wasting shows up across two modalities four years apart</strong> — so the deconditioning is long-standing, both a consequence and a driver of the pain. It is also the <strong>single most modifiable lever</strong>: targeted strengthening is the one thread on this page Paulo can change without a needle or a scalpel.</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">A <strong>atrofia muscular</strong> paravertebral (e glútea, na TC de 2022) <strong>aparece em duas modalidades com quatro anos de diferença</strong> — logo, o descondicionamento é antigo, ao mesmo tempo consequência e motor da dor. É também a <strong>alavanca mais modificável</strong>: o fortalecimento direcionado é o único fio desta página que o Paulo pode mudar sem agulha nem bisturi.</p>' +
+                '</div>' +
+              '</div>' +
+              '<p class="paulo-ai-arcs-cross lang-en"><strong>Beyond the musculoskeletal — don&apos;t let the spine bury these.</strong> The 2022 abdomen/pelvis CT carries a <strong>bladder-wall thickening + globose prostate that the report itself flags for urology workup</strong> — the one genuinely time-sensitive non-spine item — plus sigmoid diverticulosis. The head and face CTs are reassuring but both show <strong>residual myelography contrast</strong>, proof the spinal disease is decades-deep; the face CT adds a benign, ENT-referable chronic sinus disease with septal deviation. These belong on a <strong>separate follow-up track</strong> from the spine.</p>' +
+              '<p class="paulo-ai-arcs-cross lang-pt"><strong>Além do musculoesquelético — não deixe a coluna enterrar estes.</strong> A TC de abdome/pelve de 2022 traz um <strong>espessamento da parede vesical + próstata globosa que o próprio laudo encaminha para investigação urológica</strong> — o único item não-coluna realmente sensível ao tempo — além de diverticulose sigmoide. As TCs de crânio e face são tranquilizadoras, mas ambas mostram <strong>resíduo de mielografia</strong>, prova de que a doença da coluna é de décadas; a TC de face acrescenta uma sinusopatia crônica benigna, encaminhável ao otorrino, com desvio de septo. Estes pertencem a um <strong>acompanhamento à parte</strong> do da coluna.</p>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</section>'
@@ -4465,10 +4560,11 @@
 
     var history      = buildPauloHistorySection();
     var otherStudies = buildPauloOtherStudiesSection();
+    var overall      = buildPauloOverallEvolution();
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery + history + otherStudies;
+    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall;
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
