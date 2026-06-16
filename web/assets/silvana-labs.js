@@ -21,6 +21,7 @@ window.SILVANA_LABS = {
 
   /* Source PDFs, newest first */
   documents: [
+    { date: '2026-06-15', laboratory: 'Lab. Hospital Unimed Ribeirão Preto', doctor: 'Dr. Matheus Goulart Ferreira',        pdf: 'silvana-source-pdfs/silvana-unimed-2026-06-15.pdf',          title_en: 'CBC + liver + amylase + CRP — Dr. Matheus Goulart (15 Jun 2026)', title_pt: 'Hemograma + fígado + amilase + PCR — Dr. Matheus Goulart (15 jun 2026)' },
     { date: '2026-04-25', laboratory: 'Lab. Behring',                 doctor: 'Dr. Laerte Coelho Filho',                 pdf: 'silvana-source-pdfs/exames_dr_laerte.pdf',                   title_en: 'Comprehensive panel — Dr. Laerte (25 Apr 2026)',   title_pt: 'Painel completo — Dr. Laerte (25 abr 2026)' },
     { date: '2026-04-13', laboratory: 'Fleury · Ribeirão Preto',      doctor: 'Dra. Elisabete Pinheiro Ferreira Pires',  pdf: 'silvana-source-pdfs/silvana_creste.pdf',                     title_en: 'Hormones & liver — Dra. Elisabete (13 Apr 2026)', title_pt: 'Hormônios & fígado — Dra. Elisabete (13 abr 2026)' },
     { date: '2026-03-27', laboratory: 'Lab. Behring',                 doctor: null,                                       pdf: 'silvana-source-pdfs/exames_deamina_oxidade_e_tsh.pdf',       title_en: 'TSH & DAO (histamine) — 27 Mar 2026',             title_pt: 'TSH & DAO (histamina) — 27 mar 2026' },
@@ -477,6 +478,7 @@ window.SILVANA_LABS = {
           ref_text_en: 'Women: up to 32 U/L',
           ref_text_pt: 'Mulheres: até 32 U/L',
           points: [
+            { date: '2026-06-15', value: 24 },
             { date: '2026-04-25', value: 31 },
             { date: '2026-04-13', value: 20 },
             { date: '2023-02-16', value: 21 },
@@ -491,11 +493,13 @@ window.SILVANA_LABS = {
           ref_text_en: 'Women: up to 33 U/L',
           ref_text_pt: 'Mulheres: até 33 U/L',
           points: [
+            { date: '2026-06-15', value: 23 },
             { date: '2026-04-25', value: 25 },
             { date: '2026-04-13', value: 28 },
             { date: '2023-02-16', value: 24 },
             { date: '2021-08-14', value: 28 },
             { date: '2019-12-06', value: 19 },
+            { date: '2017-10-09', value: 20 },
           ],
         },
         {
@@ -511,6 +515,40 @@ window.SILVANA_LABS = {
             { date: '2023-02-16', value: 16 },
             { date: '2021-07-13', value: 17 },
             { date: '2019-12-06', value: 13 },
+          ],
+        },
+        {
+          marker_en: 'Total bilirubin',
+          marker_pt: 'Bilirrubina total',
+          unit: 'mg/dL',
+          ref_low: null, ref_high: 1.2,
+          ref_text_en: 'Adults: up to 1.2 mg/dL',
+          ref_text_pt: 'Adultos: até 1,2 mg/dL',
+          points: [
+            { date: '2026-06-15', value: 0.40 },
+            { date: '2017-10-09', value: 0.30 },
+          ],
+        },
+        {
+          marker_en: 'Direct bilirubin',
+          marker_pt: 'Bilirrubina direta',
+          unit: 'mg/dL',
+          ref_low: null, ref_high: 0.20,
+          ref_text_en: 'Up to 0.20 mg/dL',
+          ref_text_pt: 'Menor ou igual a 0,20 mg/dL',
+          points: [
+            { date: '2026-06-15', value: 0.20 },
+          ],
+        },
+        {
+          marker_en: 'Indirect bilirubin',
+          marker_pt: 'Bilirrubina indireta',
+          unit: 'mg/dL',
+          ref_low: null, ref_high: 1.0,
+          ref_text_en: 'Adults: up to ~1.0 mg/dL',
+          ref_text_pt: 'Adultos: até ~1,0 mg/dL',
+          points: [
+            { date: '2026-06-15', value: 0.20 },
           ],
         },
       ],
@@ -776,6 +814,17 @@ window.SILVANA_LABS = {
           ],
         },
         {
+          marker_en: 'C-reactive protein (CRP)',
+          marker_pt: 'Proteína C reativa (PCR)',
+          unit: 'mg/dL',
+          ref_low: null, ref_high: 0.5,
+          ref_text_en: 'Adults: < 0.5 mg/dL',
+          ref_text_pt: 'Adultos: < 0,5 mg/dL',
+          points: [
+            { date: '2026-06-15', value: 0.20 },
+          ],
+        },
+        {
           marker_en: 'Rheumatoid factor',
           marker_pt: 'Fator reumatoide (FR)',
           unit: 'IU/mL',
@@ -1025,6 +1074,7 @@ window.SILVANA_LABS = {
           ref_text_en: 'Women: 11.7 – 15.7 g/dL',
           ref_text_pt: 'Mulheres: 11,7 a 15,7 g/dL',
           points: [
+            { date: '2026-06-15', value: 14.80 },
             { date: '2025-12-12', value: 15.73, flag: 'H', note_en: 'Just over the upper bound; repeat reading confirmed', note_pt: 'Logo acima do limite; resultado confirmado em nova leitura' },
             { date: '2026-02-18', value: 14.92 },
             { date: '2025-10-24', value: 14.40 },
@@ -1042,6 +1092,7 @@ window.SILVANA_LABS = {
           ref_text_en: 'Women: 3.70 – 5.30 million/mm³',
           ref_text_pt: 'Mulheres: 3,70 a 5,30 milhões/mm³',
           points: [
+            { date: '2026-06-15', value: 5.20, note_en: 'High-normal here; Unimed’s narrower range (3.8–4.8) flagged it high', note_pt: 'Normal-alto aqui; o intervalo mais estreito da Unimed (3,8–4,8) sinalizou como alto' },
             { date: '2025-12-12', value: 5.45, flag: 'H' },
             { date: '2026-02-18', value: 5.08 },
             { date: '2025-10-24', value: 4.99 },
@@ -1059,6 +1110,7 @@ window.SILVANA_LABS = {
           ref_text_en: 'Women: 35.0 – 47.0 %',
           ref_text_pt: 'Mulheres: 35,0 a 47,0 %',
           points: [
+            { date: '2026-06-15', value: 44.00 },
             { date: '2025-12-12', value: 47.50, flag: 'H' },
             { date: '2026-02-18', value: 45.10 },
             { date: '2025-10-24', value: 43.25 },
@@ -1073,6 +1125,7 @@ window.SILVANA_LABS = {
           ref_text_en: '3,600 – 11,000 /mm³',
           ref_text_pt: '3.600 a 11.000 /mm³',
           points: [
+            { date: '2026-06-15', value: 8380 },
             { date: '2025-12-12', value: 9180 },
             { date: '2026-02-18', value: 8750 },
             { date: '2025-10-24', value: 8030 },
@@ -1090,6 +1143,7 @@ window.SILVANA_LABS = {
           ref_text_en: '140,000 – 400,000 /mm³',
           ref_text_pt: '140.000 a 400.000 /mm³',
           points: [
+            { date: '2026-06-15', value: 362000 },
             { date: '2025-12-12', value: 426400, flag: 'H', note_en: 'Mild reactive thrombocytosis — value confirmed on the same sample', note_pt: 'Trombocitose reativa discreta — valor confirmado na mesma amostra' },
             { date: '2026-02-18', value: 361100 },
             { date: '2025-10-24', value: 314000 },
@@ -1099,16 +1153,126 @@ window.SILVANA_LABS = {
             { date: '2019-06-13', value: 365000 },
           ],
         },
+        {
+          marker_en: 'MCV (mean corpuscular volume)',
+          marker_pt: 'VCM (volume corpuscular médio)',
+          unit: 'fL',
+          ref_low: 80.0, ref_high: 100.0,
+          ref_text_en: '80.0 – 100.0 fL',
+          ref_text_pt: '80,0 a 100,0 fL',
+          points: [
+            { date: '2026-06-15', value: 84.0 },
+          ],
+        },
+        {
+          marker_en: 'MCH (mean corpuscular hemoglobin)',
+          marker_pt: 'HCM (hemoglobina corpuscular média)',
+          unit: 'pg',
+          ref_low: 26.0, ref_high: 32.0,
+          ref_text_en: '26.0 – 32.0 pg',
+          ref_text_pt: '26,0 a 32,0 pg',
+          points: [
+            { date: '2026-06-15', value: 28.2 },
+          ],
+        },
+        {
+          marker_en: 'MCHC (mean corpuscular Hb concentration)',
+          marker_pt: 'CHCM (concentração de Hb corpuscular média)',
+          unit: 'g/dL',
+          ref_low: 31.5, ref_high: 36.5,
+          ref_text_en: '31.5 – 36.5 g/dL',
+          ref_text_pt: '31,5 a 36,5 g/dL',
+          points: [
+            { date: '2026-06-15', value: 33.6 },
+          ],
+        },
+        {
+          marker_en: 'RDW',
+          marker_pt: 'RDW',
+          unit: '%',
+          ref_low: 11.5, ref_high: 14.6,
+          ref_text_en: '11.5 – 14.6 %',
+          ref_text_pt: '11,5 a 14,6 %',
+          points: [
+            { date: '2026-06-15', value: 12.6 },
+          ],
+        },
+        {
+          marker_en: 'Neutrophils (segmented)',
+          marker_pt: 'Neutrófilos segmentados',
+          unit: '/mm³',
+          ref_low: 2000, ref_high: 7000,
+          ref_text_en: '2,000 – 7,000 /mm³',
+          ref_text_pt: '2.000 a 7.000 /mm³',
+          points: [
+            { date: '2026-06-15', value: 4240, note_en: '50.6% of leukocytes', note_pt: '50,6% dos leucócitos' },
+          ],
+        },
+        {
+          marker_en: 'Lymphocytes',
+          marker_pt: 'Linfócitos',
+          unit: '/mm³',
+          ref_low: 1000, ref_high: 3500,
+          ref_text_en: '1,000 – 3,500 /mm³',
+          ref_text_pt: '1.000 a 3.500 /mm³',
+          points: [
+            { date: '2026-06-15', value: 3444, note_en: '41.1% of leukocytes — upper-normal', note_pt: '41,1% dos leucócitos — normal-alto' },
+          ],
+        },
+        {
+          marker_en: 'Monocytes',
+          marker_pt: 'Monócitos',
+          unit: '/mm³',
+          ref_low: 200, ref_high: 1000,
+          ref_text_en: '200 – 1,000 /mm³',
+          ref_text_pt: '200 a 1.000 /mm³',
+          points: [
+            { date: '2026-06-15', value: 587, note_en: '7.0% of leukocytes', note_pt: '7,0% dos leucócitos' },
+          ],
+        },
+        {
+          marker_en: 'Eosinophils',
+          marker_pt: 'Eosinófilos',
+          unit: '/mm³',
+          ref_low: 20, ref_high: 500,
+          ref_text_en: '20 – 500 /mm³',
+          ref_text_pt: '20 a 500 /mm³',
+          points: [
+            { date: '2026-06-15', value: 67, note_en: '0.8% of leukocytes', note_pt: '0,8% dos leucócitos' },
+          ],
+        },
+        {
+          marker_en: 'Basophils',
+          marker_pt: 'Basófilos',
+          unit: '/mm³',
+          ref_low: 0, ref_high: 200,
+          ref_text_en: '0 – 200 /mm³',
+          ref_text_pt: '0 a 200 /mm³',
+          points: [
+            { date: '2026-06-15', value: 42, note_en: '0.5% of leukocytes', note_pt: '0,5% dos leucócitos' },
+          ],
+        },
       ],
     },
 
     {
       slug: 'other',
-      title_en: 'Other — DAO, CPK, LDH, coagulation, lactose tolerance',
-      title_pt: 'Outros — DAO, CPK, LDH, coagulação, tolerância à lactose',
+      title_en: 'Other — amylase, DAO, CPK, LDH, coagulation, lactose tolerance',
+      title_pt: 'Outros — amilase, DAO, CPK, LDH, coagulação, tolerância à lactose',
       subtitle_en: 'Histamine intolerance workup and miscellaneous markers',
       subtitle_pt: 'Investigação de intolerância à histamina e marcadores diversos',
       markers: [
+        {
+          marker_en: 'Amylase',
+          marker_pt: 'Amilase',
+          unit: 'U/L',
+          ref_low: 28, ref_high: 100,
+          ref_text_en: '28 – 100 U/L',
+          ref_text_pt: 'De 28 a 100 U/L',
+          points: [
+            { date: '2026-06-15', value: 85 },
+          ],
+        },
         {
           marker_en: 'Diamine oxidase (DAO)',
           marker_pt: 'Diamina oxidase (DAO)',
