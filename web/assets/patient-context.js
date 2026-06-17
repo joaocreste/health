@@ -1786,20 +1786,9 @@
       '.ov-cards-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }',
       '.ov-cards-head-actions .btn { padding: 6px 12px; font-size: 12px; }',
       '.ov-cards-stack { display: flex; flex-direction: column; gap: 12px; }',
-      '.ov-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 18px 20px; }',
-      '.ov-card-narrative { border-top: 3px solid #B8954A; }',
-      '.ov-card-panel     { border-top: 3px solid #244E6E; }',
-      '.ov-card-timeline  { border-top: 3px solid #3E7CA3; }',
-      '.ov-card-flags     { border-top: 3px solid #7A2E22; }',
-      '.ov-card-empty     { border-top: 3px solid #DDD8CC; }',
-      '.ov-card-head { margin-bottom: 10px; }',
-      '.ov-card-head h3 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 0 0 4px; letter-spacing: 0; text-transform: none; }',
-      '.ov-card-subtitle { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; letter-spacing: 0.04em; }',
-      '.ov-card-body p { margin: 0 0 10px; line-height: 1.55; font-size: 14px; color: #1E2D3D; font-family: "IBM Plex Sans", sans-serif; }',
-      '.ov-card-body p:last-child { margin-bottom: 0; }',
-      '.ov-card-empty p { margin: 0; font-size: 13px; color: #7A8FA6; }',
-      '.ov-card .exam-table { margin-top: 4px; }',
-      '.ov-card .lab-panel-body { padding: 8px 0 0; border-top: 1px solid #E5E2DC; }',
+      // Generic dashboard cards now use the canon .chart-card shell — their styling
+      // (shell, per-kind accents, card-body, lab-panel-body, timeline pills) lives in
+      // styles.css under "Generic dashboard cards (CARD_RENDERERS)". Single source of truth.
       '.lab-panel-body-flat { padding: 0; border-top: none; }',
       // Flagged cells in the historical-comparison table
       '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
@@ -1848,12 +1837,8 @@
       '.jc-danger-modal-actions button.jc-danger-go { color: #FFFFFF; background: #7A2E22; border-color: #7A2E22; }',
       '.jc-danger-modal-actions button.jc-danger-go:disabled { opacity: 0.4; cursor: not-allowed; }',
       '.jc-danger-error { color: #7A2E22; font-size: 12px; font-family: "IBM Plex Mono", monospace; }',
-      '.ov-chart-wrap { margin-top: 6px; }',
+      // .card-chart-svg + .ov-pt-* relocated to styles.css (Generic dashboard cards).
       '.ov-chart { width: 100%; max-width: 100%; height: auto; display: block; }',
-      '.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }',
-      '.ov-pt-pill { display: inline-flex; align-items: baseline; gap: 6px; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 6px; padding: 3px 8px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #1E2D3D; }',
-      '.ov-pt-pill .ov-pt-date { color: #7A8FA6; }',
-      '.ov-pt-pill .ov-pt-val { font-weight: 500; }',
       '.ov-rangebar { width: 160px; height: 14px; display: block; }',
       '.exam-bar { width: 180px; padding-right: 0; }',
       '@media (max-width: 720px) { .exam-bar { display: none; } }',
@@ -2651,13 +2636,20 @@
     return s + (unit ? ' ' + escapeHtml(unit) : '');
   }
 
+  // Canon card shell (matches the chart-card family in styles.css + the template).
+  // kind -> a chart-card--<kind> modifier carries the per-section accent border.
+  function ovCardHead(title, subtitle, extraMeta) {
+    var meta = '';
+    if (subtitle) meta += '<div class="chart-card-meta">' + escapeHtml(subtitle) + '</div>';
+    if (extraMeta) meta += extraMeta;
+    return '<div class="chart-card-head"><div class="chart-card-title">' + escapeHtml(title) + '</div>' + meta + '</div>';
+  }
+
   function renderCardNarrative(c) {
     return (
-      '<section class="ov-card ov-card-narrative">' +
-        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
-          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
-        '</header>' +
-        '<div class="ov-card-body">' + mdToHtml(c.body_md || '') + '</div>' +
+      '<section class="chart-card chart-card--narrative">' +
+        ovCardHead(c.title, c.subtitle) +
+        '<div class="card-body">' + mdToHtml(c.body_md || '') + '</div>' +
       '</section>'
     );
   }
@@ -2665,10 +2657,8 @@
   function renderCardPanelSnapshot(c) {
     var tests = (c.markers || []).map(renderLabTest).join('');
     return (
-      '<section class="ov-card ov-card-panel">' +
-        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
-          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
-        '</header>' +
+      '<section class="chart-card chart-card--panel">' +
+        ovCardHead(c.title, c.subtitle) +
         '<div class="lab-panel-body">' + tests + '</div>' +
       '</section>'
     );
@@ -2679,7 +2669,7 @@
       return dateMs(a.date) - dateMs(b.date);
     });
     var ref = refRangeStr(c.ref_low, c.ref_high);
-    var refLine = (ref !== '—' ? '<div class="ov-card-subtitle">' + t('Reference:', 'Referência:') + ' ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
+    var refLine = (ref !== '—' ? '<div class="chart-card-meta">' + t('Reference:', 'Referência:') + ' ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
     var chart = svgLineChart({
       series: [{ marker: c.marker, unit: c.unit, color: CHART_PALETTE[0], points: points }],
       ref_low: c.ref_low, ref_high: c.ref_high,
@@ -2695,12 +2685,9 @@
       '</span>';
     }).join('');
     return (
-      '<section class="ov-card ov-card-timeline">' +
-        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
-          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
-          refLine +
-        '</header>' +
-        '<div class="ov-chart-wrap">' + chart + '</div>' +
+      '<section class="chart-card chart-card--timeline">' +
+        ovCardHead(c.title, c.subtitle, refLine) +
+        '<div class="card-chart-svg">' + chart + '</div>' +
         (pills ? '<div class="ov-pt-pills">' + pills + '</div>' : '') +
       '</section>'
     );
@@ -2724,11 +2711,9 @@
       width: 640, height: 220,
     });
     return (
-      '<section class="ov-card ov-card-timeline">' +
-        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
-          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
-        '</header>' +
-        '<div class="ov-chart-wrap">' + chart + '</div>' +
+      '<section class="chart-card chart-card--timeline">' +
+        ovCardHead(c.title, c.subtitle) +
+        '<div class="card-chart-svg">' + chart + '</div>' +
       '</section>'
     );
   }
@@ -2736,10 +2721,8 @@
   function renderCardFlagList(c) {
     var tests = (c.items || []).map(renderLabTest).join('');
     return (
-      '<section class="ov-card ov-card-flags">' +
-        '<header class="ov-card-head"><h3>' + escapeHtml(c.title) + '</h3>' +
-          (c.subtitle ? '<div class="ov-card-subtitle">' + escapeHtml(c.subtitle) + '</div>' : '') +
-        '</header>' +
+      '<section class="chart-card chart-card--flags">' +
+        ovCardHead(c.title, c.subtitle) +
         '<div class="lab-panel-body">' + tests + '</div>' +
       '</section>'
     );
@@ -5385,11 +5368,99 @@
     injectDangerZone(main);
   }
 
+  /* Cristina imaging studies — full report text (verbatim PT + EN), the
+     plain-language AI synthesis card, and source-scan links. Reuses the
+     Silvana study-card / AI-card classes; .cris-rep-block styles the
+     findings/impression sub-lists. Report-only studies (no slice stacks),
+     so there is no viewer — the laudo itself is the whole view. */
+  function cristinaReportBlock(labelEn, labelPt, en, pt) {
+    if (!en || !en.length) return '';
+    var li = function (x) { return '<li>' + escapeHtml(x) + '</li>'; };
+    return (
+      '<div class="cris-rep-block">' +
+        '<h4>' + t(labelEn, labelPt) + '</h4>' +
+        '<ul class="lang-en">' + en.map(li).join('') + '</ul>' +
+        '<ul class="lang-pt">' + pt.map(li).join('') + '</ul>' +
+      '</div>'
+    );
+  }
+
+  function cristinaStudyCard(s) {
+    var src = (s.images || []).map(function (img) {
+      return '<a href="scans/' + escapeHtml(img) + '" target="_blank" rel="noopener" class="silv-study-src">' +
+        t('View source laudo', 'Ver laudo original') + '</a>';
+    }).join('');
+    var tech = s.technique_en
+      ? '<p class="silv-study-concl"><strong>' + t('Technique', 'Técnica') + ':</strong> ' +
+          '<span class="lang-en">' + escapeHtml(s.technique_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(s.technique_pt) + '</span></p>'
+      : '';
+    return (
+      '<div class="silv-study silv-study-imaging">' +
+        '<div class="silv-study-head">' +
+          '<span class="silv-study-cat silv-study-cat-imaging">' +
+            t('Imaging', 'Imagem') + ' · ' + escapeHtml(s.modality) + '</span>' +
+          '<span class="silv-study-date">' + escapeHtml(formatDate(s.date)) + '</span>' +
+        '</div>' +
+        '<div class="silv-study-title">' +
+          '<span class="lang-en">' + escapeHtml(s.title_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(s.title_pt) + '</span>' +
+        '</div>' +
+        '<div class="silv-study-meta">' +
+          escapeHtml(s.laboratory || '—') +
+          (s.doctor ? ' · ' + escapeHtml(s.doctor) : '') +
+          (s.requested_by ? ' · ' + t('req. ', 'sol. ') + escapeHtml(s.requested_by) : '') +
+        '</div>' +
+        tech +
+        cristinaReportBlock('Findings', 'Análise', s.findings_en, s.findings_pt) +
+        cristinaReportBlock('Impression', 'Impressão diagnóstica', s.impression_en, s.impression_pt) +
+        (src ? '<div class="silv-study-srcs">' + src + '</div>' : '') +
+      '</div>'
+    );
+  }
+
+  function cristinaImagingSection(data) {
+    var studies = (data.studies || []).filter(function (s) { return s.category === 'imaging'; });
+    if (!studies.length) return '';
+    var ai = data.imaging_ai;
+    var aiCard = !ai ? '' : (
+      '<div class="ai-insight-card silv-study-ai">' +
+        '<div class="silv-study-ai-head">' +
+          '<span class="ai-pill">AI</span>' +
+          '<span class="silv-study-ai-title">' + t('AI Insights', 'Insights de IA') + '</span>' +
+        '</div>' +
+        '<div class="silv-study-ai-body lang-en">' + ai.en + '</div>' +
+        '<div class="silv-study-ai-body lang-pt">' + ai.pt + '</div>' +
+        '<p class="silv-study-ai-disc">' +
+          t('AI-generated summary of the radiologist’s report — for discussion with your doctor, not a diagnosis.',
+            'Resumo gerado por IA do laudo do radiologista — para discussão com seu médico, não um diagnóstico.') +
+        '</p>' +
+      '</div>'
+    );
+    return (
+      '<style>' +
+        '.jc-cristina-exams .cris-rep-block{margin:10px 0 0;}' +
+        '.jc-cristina-exams .cris-rep-block h4{margin:0 0 4px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;opacity:.7;}' +
+        '.jc-cristina-exams .cris-rep-block ul{margin:0;padding-left:18px;}' +
+        '.jc-cristina-exams .cris-rep-block li{margin:2px 0;line-height:1.5;}' +
+      '</style>' +
+      '<div class="section-label">' + t('Imaging studies', 'Estudos de imagem') + '</div>' +
+      '<h2 class="section-title">' + t('Right-shoulder MRI', 'RM do ombro direito') +
+        ' <span class="ov-count-inline">' + studies.length + '</span></h2>' +
+      '<p class="section-desc">' +
+        t('A single DIAGi report (15 Jun 2026) with two reads: an MRI of the right shoulder and a plain X-ray of both shoulders. Each card shows the radiologist’s full report; the AI card explains it in plain language.',
+          'Um único laudo da DIAGi (15 jun 2026) com duas leituras: a RM do ombro direito e o raio-X dos dois ombros. Cada cartão traz o laudo completo do radiologista; o cartão de IA explica em linguagem simples.') +
+      '</p>' +
+      aiCard +
+      '<div class="silv-studies">' + studies.map(cristinaStudyCard).join('') + '</div>'
+    );
+  }
+
   /* ── Cristina Cresti · bespoke lab-history page ─────────────────────
      Reads window.CRISTINA_LABS (loaded via assets/cristina-labs.js) and
      reuses the Silvana exam scaffolding (styles + panel/marker/doc
-     helpers). First ingested data: a single thyroid-autoantibody panel,
-     so there is no historical-comparison table or studies section yet. */
+     helpers). Carries a thyroid-autoantibody panel plus a shoulder MRI
+     imaging study (full report text + AI synthesis). */
   function renderCristinaPhysicalExams() {
     if (!window.CRISTINA_LABS) {
       console.error('CRISTINA_LABS data not loaded — expected via assets/cristina-labs.js');
@@ -5401,6 +5472,7 @@
 
     var data = window.CRISTINA_LABS;
     var nMarkers = data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
+    var nStudies = (data.studies || []).length;
     var doc = (data.documents && data.documents[0]) || {};
     var examDate = doc.date || '2026-03-11';
 
@@ -5409,30 +5481,26 @@
         '<div class="container">' +
           '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
           '<h1 class="hero-title">' +
-            t('Lab history · Cristina Cresti', 'Histórico laboratorial · Cristina Cresti') +
+            t('Exams · Cristina Cresti', 'Exames · Cristina Cresti') +
           '</h1>' +
           '<p class="hero-sub">' +
-            t('First ingested exam: a thyroid-autoantibody panel from ' + escapeHtml(doc.laboratory || 'the laboratory') + ', collected ' + formatDate(examDate) + '. The panel below shows each marker with its reference range and status pill. As more reports are added, per-marker history and a side-by-side comparison table appear automatically.',
-              'Primeiro exame ingerido: um painel de autoanticorpos tireoidianos do ' + escapeHtml(doc.laboratory || 'laboratório') + ', coletado em ' + formatDate(examDate) + '. O painel abaixo mostra cada marcador com seu intervalo de referência e o status. À medida que novos laudos forem adicionados, o histórico por marcador e a tabela comparativa aparecem automaticamente.') +
+            t('The newest exam is a right-shoulder MRI (DIAGi, 15 Jun 2026) showing a full-thickness rotator-cuff tear — the radiologist’s full report and a plain-language explanation are below. A thyroid-autoantibody panel follows, with each marker’s reference range and status. As more reports are added they appear here automatically.',
+              'O exame mais recente é uma RM do ombro direito (DIAGi, 15 jun 2026) que mostra uma rotura de espessura completa do manguito rotador — o laudo completo do radiologista e uma explicação em linguagem simples estão abaixo. Em seguida vem um painel de autoanticorpos tireoidianos, com o intervalo de referência e o status de cada marcador. À medida que novos laudos forem adicionados, eles aparecem aqui automaticamente.') +
           '</p>' +
           '<div class="hero-meta">' +
             '<div class="hero-meta-item">' +
               '<span>' + t('Patient', 'Paciente') + '</span><span>' + escapeHtml(data.patient.full_name) + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
-              '<span>' + t('Collection date', 'Data da coleta') + '</span>' +
+              '<span>' + t('Latest document', 'Documento mais recente') + '</span>' +
               '<span>' + escapeHtml(formatDate(examDate)) + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
-              '<span>' + t('Laboratory', 'Laboratório') + '</span>' +
-              '<span>' + escapeHtml(doc.laboratory || '—') + '</span>' +
+              '<span>' + t('Imaging studies', 'Exames de imagem') + '</span>' +
+              '<span>' + nStudies + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
-              '<span>' + t('Requested by', 'Solicitante') + '</span>' +
-              '<span>' + escapeHtml(doc.doctor || '—') + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Markers tracked', 'Marcadores') + '</span>' +
+              '<span>' + t('Lab markers', 'Marcadores') + '</span>' +
               '<span>' + nMarkers + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
@@ -5466,6 +5534,7 @@
     var content =
       '<section id="silv-content">' +
         '<div class="container">' +
+          cristinaImagingSection(data) +
           ai +
           '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
           '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
