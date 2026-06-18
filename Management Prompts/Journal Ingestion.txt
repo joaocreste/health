@@ -1,0 +1,29 @@
+For patient [], under "Writings" folder, you will find a series of writings the patient wrote about him/herself throughout life. Consider those as journals.
+
+This must be your primary source  of information for the “Mental Health” analysis of the patient, and all text must be considered.
+
+Update the entire Mental Health for patient for patient [], taking into account their writings and building:
+
+-	Psychological archetype: consider Carl Jung theories and try to build the following:
+
+
+-	Coping mechanisms, positive and negative
+-	Timeline of major life events
+-	Strengths and Weaknesses analysis
+-	Risk and Leverage analysis
+
+_________________________________________________________
+
+Two options
+
+(i) There might already be data available. Rewrite everything according to the folder.
+
+(ii) Use existing data and only update new texts and finds you encouter.
+---
+
+## Provenance classification — narrative
+
+A journal/writing is a **narrative** source. Only the **authored date** applies
+(`writings.written_at`); the system ingestion timestamp is `writings.created_at`. No
+exam date, no requesting/performing doctor, no lab name/city/country — those are all
+`n/a`. Do not fabricate a clinician or facility for a personal text.

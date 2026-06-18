@@ -1,0 +1,215 @@
+# Lumen Health — Medication Ingestion Prompt (Claude Code)
+
+> Paste everything below the line into Claude Code, run from the repo root.
+> This ingests the medications ONE patient takes — from typed text OR one/several
+> photos of the boxes/strips/prescription — and stores, per medication, the **total
+> amount taken per day** (g / mg / mcg / or the unit that fits) in the `medications` table.
+> Backend only: **no front-end work in this task.** The stored result must be structured so
+> the AI Insights engine can reason over it (drug <-> lab / vital / symptom correlations).
+
+---
+
+You are working in the **Lumen Health** repository. Your job is to ingest one patient's
+current medications and persist, for each drug, the **daily dose** they actually take. Same
+pipeline any patient would use — **no special-casing Patient Zero**, never reintroduce
+client-side auth, and **do not touch the front-end** in this task.
+
+## 0. FIRST — ask the operator these three questions (ask -> confirm -> act)
+
+Before reading, parsing, or writing anything, STOP and ask these three. Do not proceed until
+all three are answered:
+
+1. **Who is the patient?** Their name. Resolve it to the canonical internal identifier from
+   the schema / seed data (a clerk handle like `pending:silvana-creste-18ba19`, or the
+   `patient_id`). Never infer the patient from a box label or a prescription header — lab/pharmacy
+   artifacts get mislabeled. Confirm the resolved identifier back to me in one line before doing
+   anything.
+
+2. **Where are the medications?** The file(s) or text. Any of:
+   - pasted / typed text (a list of drugs + doses), or
+   - one or several **photos** of the boxes / blister strips / prescription / handwritten note
+     (read them with vision, the way the imaging pipeline already feeds JPEGs to the model), or
+   - a PDF (pharmacy printout / prescription), or a path / R2 prefix in the patient's folder.
+   Whatever the form, the meds must be clearly legible. If anything is unreadable, **flag it and
+   ask** — never guess a drug name or a strength.
+
+3. **Is any medication taken more than once a day (or on a non-daily schedule)?**
+   A photo of a box shows the strength **per unit** (e.g. "Valium 10 mg") but NOT how many times
+   a day it's taken — and that is what sets the daily total. So for each drug, ask me the
+   frequency if the source doesn't already state it:
+   - more than once daily (e.g. 3x/day),
+   - once daily, or
+   - non-daily (every other day, weekly, etc.).
+   Worked example: Valium 10 mg taken 3x/day -> **30 mg/day**.
+
+Confirm patient + the count of meds you parsed + the frequencies back to me, and WAIT for my
+go-ahead before any write (see SS8).
+
+## 1. Ground truth — read these first (repo wins)
+
+Do not invent columns, enums, units, table names, or routes. Read for the real shapes:
+
+- `CLAUDE.md` / project memory at repo root — ops rules, deploy workflow, conventions.
+- `db/schema.ts` + `db/migrations/` — the **`medications`** table is the destination. Read its
+  exact columns / enums BEFORE writing. Note the SEPARATE **`supplements`** table — meds and
+  supplements are different tables.
+- `web/_worker.js` — the `/api/*` routes incl. `/api/ingest`; auth / role gating lives at the
+  Worker boundary. (You are not changing front-end pages, but you may need the ingest path and
+  the patient resolver.)
+- `lib/ai-insights.js` and the prompt-library entry `lumen-insights-rebuild-prompt.md` — the AI
+  Insights synthesis engine. You will make sure medications reach it (SS6). Use whichever
+  actually exists in the repo; repo wins.
+- `scripts/build-patient-record.mjs` -> `web/assets/patient-record.txt` — how the patient
+  record / context is assembled. Medications must be in it.
+- The existing `Ingestion Prompts/` (Blood Tests, Imagery, InBody, Journal, Oura, Apple Health)
+  — match their parsing / normalization conventions and house style.
+- `DATA-PROVENANCE.md` — log where this medication data came from.
+
+Do NOT change anything you weren't asked to. No writes to any clinical / source table other than
+`medications` (and `supplements` only if I approve it at intake). No front-end edits.
+
+## 2. What "ingesting meds" means here
+
+For the named patient, produce the **list of medications they currently take, each with the
+total amount taken per day**, and persist it to `medications`. Keep it source-faithful AND
+computed:
+
+- Keep what the source literally says: drug name (generic / canonical + brand as written),
+  strength per unit + unit, form, route, prescriber, start date, status, and the raw frequency.
+- **Plus** compute and store the normalized **daily dose** (amount + unit) — the number SS3
+  describes. This is the field the Summary table and the AI Insights engine consume.
+
+## 3. The daily-dose math (the core of this task)
+
+For each medication:
+
+```
+daily_dose = strength_per_unit  x  units_per_dose  x  doses_per_day
+```
+
+Worked example (the operator's case):
+- Box reads **Valium 10 mg**; patient takes **1 tablet, 3x/day**
+  -> 10 mg x 1 x 3 = **30 mg/day**. Store `30` + `mg`.
+
+Rules:
+
+- **Pick the unit that reads cleanly** ("the unit that makes more sense"): default to **mg**;
+  use **mcg** for sub-milligram drugs (levothyroxine **75 mcg/day**, not 0.075 mg); use **g**
+  only for large daily totals (metformin **2 g/day**, paracetamol **3 g/day**). Aim for a
+  human-readable number; never bury the unit inside the figure, and never convert between mass
+  units in a way that produces an ugly number.
+- **Non-mass units stay in their clinical unit** — do NOT force them into grams: insulin in
+  **units/day**, inhalers in **puffs/day**, drops in **drops/day**, vitamin D in **IU/day**.
+  Store the numeric amount and the unit string separately.
+- **PRN / as-needed:** if a drug is taken only as needed there is no fixed daily total — mark it
+  PRN, store the per-dose strength and the **max doses/day** if known, and leave the daily total
+  null (or "up to X mg" if a ceiling is given). Do not fabricate a daily number.
+- **Non-daily schedules:** record the true schedule (e.g. "0.5 mg, weekly"). Store a daily
+  equivalent only if it is clinically meaningful and clearly labelled as an average; otherwise
+  keep it honest as a schedule and leave the daily total null.
+- **Split / uneven schedules:** "1 tab morning + 2 tabs night" = 3 doses/day -> sum them.
+- **Combination products** (one pill, two or more actives, e.g. acetaminophen + codeine):
+  compute the daily total **per active ingredient**; if the schema can't hold two actives on one
+  row, flag it to me rather than dropping one.
+- If frequency is genuinely unknown after asking, do NOT guess — store strength + status and mark
+  the daily dose as needs-review.
+
+If `db/schema.ts` has no field to hold a normalized daily dose (amount + unit), add a Drizzle
+migration (next number after the latest, e.g. `0008_*`) that adds them — match the existing
+migration / column-naming conventions (e.g. `daily_dose_amount` numeric + `daily_dose_unit`
+text). Regenerate / apply with the repo's `db:generate` / `db:migrate` scripts. **Keep the raw
+per-dose strength + frequency columns too** — the daily dose is additive, not a replacement, so
+the value stays auditable.
+
+## 4. Parse -> normalize -> write
+
+- Accept heterogeneous input. Text -> parse the list. Image / PDF -> read it with vision;
+  transcribe carefully, flag illegible items, never guess.
+- Use canonical / generic drug names; keep the brand as written in a brand / notes field if the
+  schema has one.
+- **Idempotency:** match on (patient + normalized drug name + strength) and **upsert** — re-running
+  must not duplicate rows.
+- **Replace vs add:** if I tell you this is the patient's COMPLETE current list, treat it as the
+  authoritative active set — upsert the actives and mark any previously-active med that is absent
+  now as needs-review. **Never hard-delete** — discontinued meds have clinical value. If I say
+  it is an addition, just upsert the new ones and leave the rest untouched.
+- **Scope strictly** by the patient identifier. Write ONLY to `medications` (and `supplements`
+  only if approved at intake).
+- **Provenance:** medications are an **informational record, NOT a clinician-ordered exam**, so
+  the five-fact exam provenance contract (used by the Blood/Imagery/ECG prompts) does **not**
+  apply here. Provenance for meds = the row's `source_blob_key` (R2 key of the source PDF, when
+  any) PLUS a one-line note in `DATA-PROVENANCE.md` recording each med's source (filename /
+  "pasted list" / PDF name). The system ingestion timestamp is `medications.created_at`. Do not
+  fabricate a prescriber, exam date, or facility.
+
+## 5. Medications vs supplements
+
+The schema separates them. Classify each line. Route true medications to `medications`. If the
+source also contains supplements / vitamins (vitamin D, fish oil, magnesium, etc.), do not
+silently drop or misfile them — list them back to me and ask whether to also ingest them into
+`supplements` with the same daily-dose treatment.
+
+## 6. AI Insights MUST consume the medications (backend wiring — required)
+
+The whole reason for storing daily doses is that **every AI Insights update reasons over the
+patient's current meds.** Do this without changing any front-end:
+
+- **Make meds reach the engine.** Ensure the patient context assembled for the synthesis engine
+  (via `scripts/build-patient-record.mjs` / whatever `lib/ai-insights.js` reads) includes a
+  current-medications block: each active drug with its **daily dose**, route, and status. If it is
+  not already included, add it — additively, without re-architecting the engine or special-casing
+  any patient.
+- **Make the engine reason pharmacologically.** In the synthesis system prompt (the
+  `lumen-insights-rebuild-prompt.md` / `lib/ai-insights.js` instruction), add guidance that the
+  model must check the medication list FIRST when interpreting any lab, vital, or symptom:
+  attribute drug-explained findings to the drug rather than to pathology, and surface plausible
+  drug <-> finding correlations. Illustrative only (NOT a hardcoded table — rely on the model's
+  own pharmacology):
+  - Cymbalta (duloxetine) and shifts in estradiol / prolactin / sexual-endocrine markers.
+  - Metformin -> low B12 (drug-induced, not necessarily deficiency disease).
+  - Statins -> raised CK / transaminases, muscle symptoms.
+  - PPIs -> low magnesium / B12.
+  - Beta-blockers -> low resting HR (a wearable's "low HR" may be the drug, not fitness).
+  - Levothyroxine -> suppressed TSH (expected on replacement, not hyperthyroidism).
+  - Diuretics / corticosteroids -> electrolyte and glucose shifts.
+- The engine keeps its existing autonomy and JSON contract — this is an **additive** instruction,
+  not a new output shape. Do not break `data_sufficient` / `data_available` sparsity handling.
+
+(Front-end display of the meds table on Summary / Physical is explicitly OUT of scope for this
+task, per the brief. This task only guarantees correct storage + that the insights engine
+ingests it. Client Services can request the display later as a separate job.)
+
+## 7. PHI / tier note
+
+Anthropic standard tier today: PHI must not reach the model in production. Parsing med photos /
+PDFs here is an operator (terminal) step on dev data. If a de-identification boundary exists at
+the model call site, respect it; otherwise leave a clear `TODO(PHI)` at any model call you add.
+No PHI in URLs or logs.
+
+## 8. Confirm before writing, then write
+
+Before any DB write, print the parsed medication table for my approval:
+
+| Drug (generic / brand) | Strength / unit | Frequency | **Daily dose** | Route | Status | Source |
+
+Wait for my "yes". Only then upsert.
+
+## 9. Commit / deploy
+
+- The DB write itself targets Neon and needs **no Pages deploy** (the live site reads Neon at
+  runtime). **But** if you changed any bundled code — `db/schema.ts`, a migration the worker
+  consumes, `lib/ai-insights.js`, `_worker.js`, or `scripts/build-patient-record.mjs` whose
+  output ships in `web/assets/` — then do the full **two-step** ship:
+  1. `git add` + `git commit` + `git push`. Commit message **ASCII only** — use `->`, never the
+     Unicode arrow, or the Pages API rejects the deploy.
+  2. `wrangler pages deploy web --project-name=lumenhealth --branch=main --commit-dirty=true`
+     with `CLOUDFLARE_API_TOKEN` (from `token.txt`) + `CLOUDFLARE_ACCOUNT_ID`.
+  Then `curl -sL` the live URL to verify. When uncertain whether a change is bundled, deploy.
+- If you regenerated `patient-record.txt`, bump its `?v=N` cache-buster where it is referenced.
+
+## 10. Closing summary
+
+Report back: the confirmed patient identifier; how many meds were ingested and from what source;
+the daily-dose table as written; whether `supplements` was touched; any migration added; whether
+a deploy happened; and the `DATA-PROVENANCE.md` line(s) appended. List anything you flagged as
+needs-review or illegible.

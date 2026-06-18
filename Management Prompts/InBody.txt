@@ -1,0 +1,24 @@
+New task now for [PATIENT]: in her Physical, under Vitals — as Joao Victor Creste already has — and no longer under Exams, we will have some data to add.
+
+We will start with Body Composition, which was done at the nutritionist’s request and whose results are in the file:
+
+[]
+
+Create the Body Composition Analysis cards, with bars just like the ones we have in the blood test section.
+
+Then, create the Muscle-Fat Analysis charts with Weight, Skeletal Muscle Mass, and Body Fat Mass.
+
+Then, create the Obesity Analysis charts with BMI and PBF.
+
+After that, create two human silhouettes in SVG and plot, in the appropriate areas according to the report provided, the Segmental Lean Analysis and the Segmental Fat Analysis. For everything marked as Normal, add a small green “Normal” card. “Below” and “Above” should be red cards.
+
+Finally, create a line chart with the Body Composition History, with the dates of each measurement at the top followed by Weight, Skeletal Muscle Mass, and PBF.
+---
+
+PROVENANCE NOTE — InBody is a clinician/nutritionist-ordered exam, so all five
+provenance facts (exam date, requesting + performing professional, facility name/city/
+country) conceptually apply. However InBody has NO dedicated DB table today — this prompt
+builds front-end HTML only. Provenance persistence is therefore DEFERRED until an InBody
+table (or a documents-backed route) exists. When that table is added, mirror the
+clinician-ordered contract from the Blood Test / Imagery prompts. For now, record the
+provenance in DATA-PROVENANCE.md as a source note so it is not lost.

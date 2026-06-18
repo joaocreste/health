@@ -1,0 +1,171 @@
+# Lumen Health — Oura Ring Ingestion Prompt (Claude Code)
+
+> Paste everything below the line into Claude Code, running from the repo root.
+> This ingests an **Oura Ring data export from a local folder** for one patient and
+> **fully replaces** that patient's existing Oura data. It does NOT append.
+
+---
+
+You are working in the **Lumen Health** repository. I want you to ingest a fresh **Oura Ring**
+data export and load it into the platform's data model, **completely replacing** the patient's
+previous Oura data.
+
+## 0. First — ask me two questions, then stop and wait
+
+Before reading any files, deleting anything, or writing any code, **ask me both of these and
+wait for my answers**:
+
+1. **Which patient is this Oura data for?** (a name or internal identifier). Once I answer,
+   resolve the exact internal identifier from the schema/seed data and **confirm it back to me**
+   before proceeding — do not hardcode a guess. **No special-casing for Patient Zero**: whoever I
+   name, the data takes the same path any other patient's Oura data would.
+2. **Where is the Oura data folder?** (the absolute path on my machine, e.g.
+   `/Users/joao/lumen-data/oura-export-2026-06`). It may be an extracted Oura app export or a
+   folder of Oura API v2 JSON dumps — you'll read everything under it recursively. Verify the
+   path exists and report what you see at the top level before going further.
+
+Do not assume defaults for either. If I haven't answered both, ask again rather than guessing.
+Only once you have a confirmed patient identifier **and** a verified folder path do you continue
+to the steps below.
+
+## 1. Ground truth — read these first (repo wins)
+
+Before writing or deleting anything, read these for the *real* shapes — do not invent columns,
+tables, enums, sources, or routes:
+
+- `CLAUDE.md` / project memory at repo root — ops rules, conventions.
+- `db/schema.ts` and `db/migrations/` — the real tables, columns, enums (`import_source`,
+  `import_status`, `import_file_status`, etc.), and the `0000`–`0007` + `meta/_journal` pattern.
+  Pay attention to **how `vitals_daily` is shaped** and whether rows/metrics carry a source tag.
+- `lib/ingest.js` and `POST /api/ingest` in `web/_worker.js` — the existing ingestion path,
+  classification, and the R2 partition scheme `patients/{patient_id}/{category}/{file}`.
+- The existing ingestion prompts in `Ingestion Prompts/` (`Blood Tests.txt`, `Imagery.txt`,
+  `InBody.txt`, `Journal Ingestion.txt`) — **match their structure, tone, and conventions.**
+- `scripts/build-patient-record.mjs` and `scripts/aggregate-hr-by-tod.mjs` — how the chatbot
+  record and the variability charts are assembled (relevant in §5).
+- `DATA-PROVENANCE.md` — you will update this.
+
+If anything in this prompt conflicts with the repo, **the repo wins** — except the
+full-replacement rule in §3, which is the whole point of the task.
+
+## 2. What's in an Oura export and where each part goes
+
+First **detect the format** of the folder and log what you found:
+- **Oura app export** — CSV "trends" (one daily row, many columns) and/or a JSON bundle.
+- **Oura API v2 dumps** — JSON per endpoint: `daily_sleep`, `daily_readiness`, `daily_activity`,
+  `sleep` (detailed sessions: hypnogram + `hr_5min` / `hrv_5min`), `heartrate` (continuous),
+  `daily_spo2`, `daily_stress`, `daily_resilience`, `workout`, `sessions`, `tags`, `vO2max`.
+
+Then route the data the platform's usual way:
+
+| Oura data | Destination |
+|---|---|
+| **Raw export files** (the source CSV/JSON themselves) | **R2** under `patients/{patient_id}/oura/…`, with the usual pointer row(s) in `imports` / `import_files` |
+| **Daily structured metrics** (sleep, readiness, activity, HR, SpO₂, temp, respiratory rate) | **Neon** — map onto existing `vitals_daily` columns |
+| **Detailed sessions / continuous HR & HRV** | source material for the variability charts (§5) — only if the schema/scripts already consume it; otherwise keep the raw file in R2 and skip |
+
+Concrete daily-metric mapping (map to whatever the columns are actually named in `schema.ts` —
+add a migration only if a metric has **no** home, per §4):
+
+- **Sleep:** total sleep time, sleep efficiency, deep / REM / light minutes, awake time,
+  sleep latency, bedtime start/end, restfulness, sleep score. *(Sleep efficiency surfaces in
+  the "At a glance" summary, so make sure it lands.)*
+- **Readiness:** readiness score, **resting heart rate**, **HRV (rMSSD)**, body-temperature
+  deviation, recovery index. *(Resting HR also surfaces in the summary.)*
+- **Activity:** steps, active calories, total calories, MET minutes, activity score,
+  sedentary time.
+- **Other:** average SpO₂ (during sleep), respiratory rate, and stress/resilience if present.
+
+## 3. FULL REPLACEMENT — the key requirement
+
+Oura data **accumulates over time**: each export is a *superset* of every prior export. So the
+correct, dedup-free strategy is **wipe the patient's existing Oura data, then load the new folder
+fresh** — never merge or append.
+
+Do this carefully and **scoped to (this patient) AND (Oura provenance) only**:
+
+1. **Identify Oura provenance.** Determine exactly how an Oura-sourced row/blob is distinguished
+   from Apple Health / Withings / lab data — a `source` column, the `import_source` enum value,
+   or linkage through `imports` / `import_files`. **Use that as your delete filter.** If you
+   cannot prove a row is Oura-sourced, do NOT delete it.
+2. **Delete the old Oura data:**
+   - The patient's Oura-derived rows in `vitals_daily` (and any sleep/HR detail tables fed from
+     Oura).
+   - The patient's Oura `import_files` + `imports` rows.
+   - The R2 blobs under `patients/{patient_id}/oura/`.
+3. **Guardrail — shared daily rows.** If `vitals_daily` stores **one row per day merged across
+   devices** (rather than one row per source), do NOT nuke whole days. Instead null out only the
+   Oura-owned columns for those days, then repopulate. Inspect the schema and pick the safe path;
+   tell me which one you took and why.
+4. **Never touch non-Oura sources.** Apple Health (incl. the ECG CSVs / export.xml), Withings,
+   labs, imaging, writings, etc. must be left completely untouched.
+5. **Then reingest** everything from the folder I confirmed in §0, fresh, for the patient I
+   confirmed in §0.
+
+Wrap the delete+reload in a transaction where feasible so a mid-run failure can't leave the
+patient with half their Oura history.
+
+## 4. Schema changes — only if needed
+
+Map onto existing columns first. **Only if** an Oura metric has no home, add migration `0008`
+(or next free number) following the exact `0000`–`0007` + `meta/_journal` convention, plus the
+matching Drizzle change in `db/schema.ts`. Don't add speculative columns for metrics not in this
+export. Run `db:generate` / `db:migrate` per the package scripts.
+
+> **Local `.env` gotcha:** the `neondb_owner` password was rotated; the live `lumenhealth`
+> secret is current but the **local `.env` may be STALE** (`password authentication failed`).
+> If local DB writes fail, refresh `.env` from the Neon dashboard before assuming data loss —
+> the live `/api/login` still works. Do not change the live secret.
+
+## 5. Charts & chatbot record (only if affected)
+
+- If any Plotly variability chart const in `web/assets/data.js` (e.g. an HR-by-time-of-day or
+  similar band) is derived from Oura data, **re-run the relevant `scripts/aggregate-*.mjs`**,
+  paste the regenerated single-line const back into `data.js`, and **bump the `?v=N`** on its
+  `<script>` include. Follow the validated variability-chart recipe (stacked ±1/±2 SD bands,
+  median spline, palette-800 stroke, reference lines, bilingual title/meta).
+- Re-run `npm run build:patient-record` so the chatbot's `patient-record.txt` reflects the new
+  Oura data.
+
+## 6. Provenance & verification
+
+- Update `DATA-PROVENANCE.md`: note the new Oura export (folder name, export date, date range
+  covered, file count) and that it **replaced** the prior Oura import.
+- Report, before vs after: row counts in each affected table, and the **min/max date** of the
+  ingested daily metrics, so I can see the new coverage window.
+- Spot-check live: `curl -sL` the relevant API (`/api/patient-summary`, and the vitals endpoint)
+  and confirm **sleep efficiency** and **resting heart rate** reflect the new data.
+
+## 7. Deploy guardrail
+
+- DB (Neon) and R2 are external — writing to them needs **no Pages deploy**. Changes confined to
+  `db/`, `scripts/`, `DATA-PROVENANCE.md`, and the raw data are **git add/commit/push only**.
+- **If you touched anything under `web/`** (e.g. `data.js` const or a `?v=` bump), run the full
+  ritual: `git push` **and**
+  `wrangler pages deploy web --project-name=lumenhealth --branch=main --commit-dirty=true`
+  (with `CLOUDFLARE_API_TOKEN` from `token.txt` + the account ID), then `curl -sL` the live URL
+  and grep for a distinctive string to verify.
+- Use ASCII `->` (never `→`) in **git commit messages** — the Pages API rejects the Unicode arrow.
+- Ensure `node_modules` exists at repo root (`npm install`) before any bundle/build step.
+
+## 8. Do NOT
+
+- Do **not** special-case Patient Zero.
+- Do **not** delete or modify any non-Oura source data.
+- Do **not** move auth client-side or change the live secrets.
+- Do **not** invent columns, endpoints, or enum values — read the repo.
+- Do **not** append/merge Oura data — this is a clean full replacement.
+
+When done, give me a short summary: format detected, what was deleted, what was loaded, the new
+date range, any migration added, whether a deploy was required, and the verification result.
+---
+
+## Provenance classification — device self-captured
+
+This is a **device self-captured** source, so the clinician provenance facts do
+**NOT** apply. Only the **measurement date** applies — it is the per-row date/timestamp
+already written (`vitals_daily.day`, `ecg_events.recorded_at`) and the device is recorded
+in `source` (e.g. `oura`, `apple_health`, `withings_*`). The system ingestion timestamp is
+the existing `created_at`. Requesting/performing doctor and lab name/city/country are
+`n/a` here — do **not** force the clinical fields onto wearable rows. (Contrast with the
+clinician-ordered Blood/Imagery/ECG prompts, where all five facts apply.)
