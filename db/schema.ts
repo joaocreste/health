@@ -228,9 +228,11 @@ export const ecgStudies = pgTable("ecg_studies", {
   leadLayout: text("lead_layout"),
   sourceFormat: text("source_format").notNull(), // vector_pdf | dicom_waveform | raster_pdf | image
   fidelity: text("fidelity"),
-  orderingDoctor: text("ordering_doctor"),
-  validatingDoctor: text("validating_doctor"),
-  clinic: text("clinic"),
+  orderingDoctor: text("ordering_doctor"),      // requesting doctor (name + reg ID inline)
+  validatingDoctor: text("validating_doctor"),  // performing/signing doctor (name + reg ID inline)
+  clinic: text("clinic"),                        // facility name (= lab_name role)
+  labCity: text("lab_city"),
+  labCountry: text("lab_country"),
   heartRate: integer("heart_rate"),
   prMs: integer("pr_ms"),
   qrsMs: integer("qrs_ms"),
@@ -283,8 +285,11 @@ export const labResults = pgTable("lab_results", {
   refHigh: real("ref_high"),
   flag: text("flag"),                      // 'L' | 'H' | 'HH' | 'LL' | null
   takenAt: date("taken_at").notNull(),
-  laboratory: text("laboratory"),
-  requestingDoctor: text("requesting_doctor"),  // "Dr. X" / "Dra. Y" who ordered the panel
+  laboratory: text("laboratory"),            // facility name (= lab_name role), original spelling
+  labCity: text("lab_city"),                 // city the panel was performed in
+  labCountry: text("lab_country"),           // country the panel was performed in
+  requestingDoctor: text("requesting_doctor"),  // "Dr. X" / "Dra. Y" who ordered the panel (name + reg ID inline)
+  performingDoctor: text("performing_doctor"),  // who performed/signed/is responsible (name + reg ID inline)
   sourceBlobKey: text("source_blob_key"),  // R2 key of original PDF
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
@@ -347,6 +352,11 @@ export const imagingStudies = pgTable("imaging_studies", {
   jpegPreviewPrefix: text("jpeg_preview_prefix"), // generated previews (DICOM only)
   fileCount: integer("file_count"),
   notes: text("notes"),
+  requestingDoctor: text("requesting_doctor"),  // who ordered the study (name + reg ID inline)
+  performingDoctor: text("performing_doctor"),  // reporting/performing radiologist (name + reg ID inline)
+  labName: text("lab_name"),                    // imaging center / clinic, original spelling
+  labCity: text("lab_city"),
+  labCountry: text("lab_country"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("imaging_patient_date_idx").on(t.patientId, t.studyDate)]);
 

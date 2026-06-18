@@ -596,12 +596,16 @@ async function ensureEcgStudiesTable(sql) {
     modality text NOT NULL DEFAULT '12-lead', lead_layout text,
     source_format text NOT NULL, fidelity text,
     ordering_doctor text, validating_doctor text, clinic text,
+    lab_city text, lab_country text,
     heart_rate integer, pr_ms integer, qrs_ms integer, qt_ms integer, qtc_ms integer,
     axis_p integer, axis_qrs integer, axis_t integer,
     interpretation text, report_text text, source_sha text,
     original_key text, report_key text, svg_key text,
     created_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT ecg_studies_dedup UNIQUE NULLS NOT DISTINCT (patient_id, study_date, source_sha))`;
+  // Provenance location columns (migration 0015) — idempotent for pre-existing tables.
+  await sql`ALTER TABLE ecg_studies ADD COLUMN IF NOT EXISTS lab_city text`;
+  await sql`ALTER TABLE ecg_studies ADD COLUMN IF NOT EXISTS lab_country text`;
   await sql`CREATE INDEX IF NOT EXISTS ecg_studies_patient_date_idx ON ecg_studies (patient_id, study_date DESC)`;
 }
 
@@ -2853,13 +2857,15 @@ async function handleAdmin(request, env) {
       const r = await sql`
         INSERT INTO ecg_studies
           (patient_id, study_date, recorded_at, modality, lead_layout, source_format, fidelity,
-           ordering_doctor, validating_doctor, clinic, heart_rate, pr_ms, qrs_ms, qt_ms, qtc_ms,
+           ordering_doctor, validating_doctor, clinic, lab_city, lab_country,
+           heart_rate, pr_ms, qrs_ms, qt_ms, qtc_ms,
            axis_p, axis_qrs, axis_t, interpretation, report_text, source_sha,
            original_key, report_key, svg_key)
         VALUES
           (${pid}, ${s.study_date}::date, ${s.recorded_at || null}, ${s.modality || "12-lead"},
            ${s.lead_layout || null}, ${s.source_format}, ${s.fidelity || null},
            ${s.ordering_doctor || null}, ${s.validating_doctor || null}, ${s.clinic || null},
+           ${s.lab_city || null}, ${s.lab_country || null},
            ${s.heart_rate ?? null}, ${s.pr_ms ?? null}, ${s.qrs_ms ?? null}, ${s.qt_ms ?? null}, ${s.qtc_ms ?? null},
            ${s.axis_p ?? null}, ${s.axis_qrs ?? null}, ${s.axis_t ?? null},
            ${s.interpretation || null}, ${s.report_text || null}, ${s.source_sha || null},
@@ -2868,7 +2874,8 @@ async function handleAdmin(request, env) {
           recorded_at = EXCLUDED.recorded_at, modality = EXCLUDED.modality, lead_layout = EXCLUDED.lead_layout,
           source_format = EXCLUDED.source_format, fidelity = EXCLUDED.fidelity,
           ordering_doctor = EXCLUDED.ordering_doctor, validating_doctor = EXCLUDED.validating_doctor,
-          clinic = EXCLUDED.clinic, heart_rate = EXCLUDED.heart_rate, pr_ms = EXCLUDED.pr_ms,
+          clinic = EXCLUDED.clinic, lab_city = EXCLUDED.lab_city, lab_country = EXCLUDED.lab_country,
+          heart_rate = EXCLUDED.heart_rate, pr_ms = EXCLUDED.pr_ms,
           qrs_ms = EXCLUDED.qrs_ms, qt_ms = EXCLUDED.qt_ms, qtc_ms = EXCLUDED.qtc_ms,
           axis_p = EXCLUDED.axis_p, axis_qrs = EXCLUDED.axis_qrs, axis_t = EXCLUDED.axis_t,
           interpretation = EXCLUDED.interpretation, report_text = EXCLUDED.report_text,
