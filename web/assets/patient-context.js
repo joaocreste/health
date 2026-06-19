@@ -652,6 +652,209 @@
     document.body.appendChild(overview);
   }
 
+  /* ── Paulo Silotto · AI pain map / symptom inference (Summary) ──────
+     A bespoke rebuild of section "04 · Inferência da IA" from the
+     standalone spine-journey report, refreshed against the full record
+     now on file (18 imaging studies 2013→2026, the cervical/lumbar MRIs,
+     the ergometric series and 13-year labs) and rendered bilingually.
+     There is no symptom/pain/medication data in the chart — every value
+     below is inferred from anatomy, framed as an educational estimate.
+     Injected on the Summary page just under the AI-authored summary card
+     via injectPauloPainMap(). */
+  function injectPauloPainMapStyles() {
+    if (document.getElementById('paulo-painmap-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'paulo-painmap-styles';
+    var P = '.paulo-painmap-section ';
+    s.textContent = [
+      P + '.painwrap { background: #FFFCF5; border: 1px solid #F0E4C8; border-radius: 16px; padding: 28px 28px 12px; margin-top: 6px; }',
+      P + '.painmap-disclaimer { font-size: 13px; color: #9c7a32; background: #FFF6E5; border: 1px solid #E0C681; border-radius: 8px; padding: 10px 14px; margin: 0 0 22px; }',
+      P + '.painlayout { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: start; }',
+      '@media (max-width: 820px) { ' + P + '.painlayout { grid-template-columns: 1fr; } }',
+      P + '.bodymap { position: sticky; top: 18px; }',
+      P + '.bodymap svg { width: 100%; height: auto; }',
+      P + '.painmap-legend { margin-top: 12px; font-size: 12.5px; }',
+      P + '.painmap-legend div { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: #1E2D3D; }',
+      P + '.painmap-legend .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }',
+      P + '.painzones { display: flex; flex-direction: column; gap: 16px; }',
+      P + '.pz { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 12px; padding: 16px 18px; border-left: 5px solid #7A8FA6; }',
+      P + '.pz.r5 { border-left-color: #B23B3B; }',
+      P + '.pz.r4 { border-left-color: #CC6B3A; }',
+      P + '.pz.r3 { border-left-color: #C98A2B; }',
+      P + '.pz-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }',
+      P + '.pz-head h4 { margin: 0; font-size: 16.5px; font-family: "Raleway", sans-serif; font-weight: 700; color: #0D1B2A; }',
+      P + '.eva { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; color: #fff; background: #7A8FA6; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }',
+      P + '.eva.r5 { background: #B23B3B; }',
+      P + '.eva.r4 { background: #CC6B3A; }',
+      P + '.eva.r3 { background: #C98A2B; }',
+      P + '.pz dl { margin: 10px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13.5px; }',
+      P + '.pz dt { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: #B8954A; padding-top: 3px; }',
+      P + '.pz dd { margin: 0; color: #1E2D3D; }',
+      P + '.painmap-synth { margin-top: 22px; background: #0D1B2A; color: #fff; border-radius: 12px; padding: 22px 24px; }',
+      P + '.painmap-synth h4 { color: #B8954A; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; font-family: "IBM Plex Mono", monospace; margin-bottom: 10px; }',
+      P + '.painmap-synth p { margin: 0; color: rgba(255,255,255,.9); font-size: 15px; line-height: 1.6; }',
+      P + '.ai-pill { display: inline-block; background: #FFF6E5; color: #9c7a32; border: 1px solid #E0C681; padding: 2px 10px; border-radius: 999px; font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; letter-spacing: .06em; vertical-align: middle; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function pauloPainZone(cls, titleEn, titlePt, evaEn, evaPt, rows) {
+    var dl = rows.map(function (r) {
+      return '<dt>' + t(r[0], r[1]) + '</dt><dd>' + t(r[2], r[3]) + '</dd>';
+    }).join('');
+    return (
+      '<div class="pz ' + cls + '">' +
+        '<div class="pz-head">' +
+          '<h4>' + t(titleEn, titlePt) + '</h4>' +
+          '<span class="eva ' + cls + '">' + t(evaEn, evaPt) + '</span>' +
+        '</div>' +
+        '<dl>' + dl + '</dl>' +
+      '</div>'
+    );
+  }
+
+  function renderPauloPainMap() {
+    injectPauloPainMapStyles();
+
+    var bodymap =
+      '<div class="bodymap">' +
+        '<svg viewBox="0 0 200 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Body pain map (posterior view)">' +
+          '<defs>' +
+            '<radialGradient id="pm-red"><stop offset="0%" stop-color="#B23B3B" stop-opacity=".85"/><stop offset="100%" stop-color="#B23B3B" stop-opacity="0"/></radialGradient>' +
+            '<radialGradient id="pm-org"><stop offset="0%" stop-color="#CC6B3A" stop-opacity=".8"/><stop offset="100%" stop-color="#CC6B3A" stop-opacity="0"/></radialGradient>' +
+            '<radialGradient id="pm-amb"><stop offset="0%" stop-color="#C98A2B" stop-opacity=".8"/><stop offset="100%" stop-color="#C98A2B" stop-opacity="0"/></radialGradient>' +
+          '</defs>' +
+          '<g fill="#DfDAD0" stroke="#C9C2B4" stroke-width="1.5">' +
+            '<circle cx="100" cy="34" r="20"/>' +
+            '<rect x="90" y="52" width="20" height="14" rx="5"/>' +
+            '<path d="M68 70 Q100 60 132 70 L140 150 Q140 175 128 200 L120 205 Q100 210 80 205 L72 200 Q60 175 60 150 Z"/>' +
+            '<path d="M68 74 Q48 86 42 130 Q40 150 46 168 L56 165 Q54 130 64 100 Z"/>' +
+            '<path d="M132 74 Q152 86 158 130 Q160 150 154 168 L144 165 Q146 130 136 100 Z"/>' +
+            '<path d="M82 205 Q80 270 86 330 Q88 372 92 408 L102 408 Q102 360 100 300 Q100 360 108 408 L118 408 Q120 360 120 300 Q124 260 118 205 Q100 212 82 205 Z"/>' +
+          '</g>' +
+          '<ellipse cx="100" cy="66" rx="26" ry="20" fill="url(#pm-org)"/>' +
+          '<ellipse cx="100" cy="178" rx="40" ry="30" fill="url(#pm-red)"/>' +
+          '<ellipse cx="92" cy="225" rx="20" ry="18" fill="url(#pm-red)"/>' +
+          '<ellipse cx="96" cy="300" rx="15" ry="34" fill="url(#pm-org)"/>' +
+          '<ellipse cx="150" cy="92" rx="16" ry="14" fill="url(#pm-amb)"/>' +
+          '<ellipse cx="118" cy="335" rx="13" ry="14" fill="url(#pm-amb)"/>' +
+          '<g font-family="IBM Plex Mono, monospace" font-size="8" fill="#1E2D3D">' +
+            '<text x="128" y="64">C5–C6</text>' +
+            '<text x="143" y="182">L3–L4 · L5–S1</text>' +
+            '<text x="2" y="300">S1 L</text>' +
+          '</g>' +
+        '</svg>' +
+        '<div class="painmap-legend">' +
+          '<div><span class="dot" style="background:#B23B3B"></span>' + t('Dominant pain (VAS 5–9)', 'Dor dominante (EVA 5–9)') + '</div>' +
+          '<div><span class="dot" style="background:#CC6B3A"></span>' + t('Major pain (VAS 4–8)', 'Dor importante (EVA 4–8)') + '</div>' +
+          '<div><span class="dot" style="background:#C98A2B"></span>' + t('Secondary pain (VAS 2–6)', 'Dor secundária (EVA 2–6)') + '</div>' +
+        '</div>' +
+      '</div>';
+
+    var zones =
+      '<div class="painzones">' +
+        pauloPainZone('r5',
+          'Lower back (axial)', 'Lombar baixa (axial)',
+          'VAS 4–7 · flare 9', 'EVA 4–7 · crise 9',
+          [
+            ['Where', 'Onde', 'Low lumbar band, “belt”-like, central / bilateral; midline points over L3–L4 and L5–S1.', 'Faixa lombar baixa, em “cinta”, central/bilateral; pontos na linha média sobre L3–L4 e L5–S1.'],
+            ['Character', 'Caráter', 'Mixed inflammatory + mechanical (active Modic I + facet joints).', 'Misto inflamatório + mecânico (Modic I ativo + facetário).'],
+            ['How it behaves', 'Como se comporta', 'Morning stiffness; worse sitting for long, bending, lifting and standing; eases lying down.', 'Rigidez matinal; piora sentado por muito tempo, ao inclinar, levantar peso e em pé; alivia deitado.'],
+          ]) +
+        pauloPainZone('r5',
+          'Left-leg sciatica (S1 root)', 'Ciática na perna esquerda (raiz S1)',
+          'VAS 5–8', 'EVA 5–8',
+          [
+            ['Where', 'Onde', 'Left buttock → back of the thigh → calf → lateral border of the foot (S1 dermatome).', 'Glúteo esquerdo → posterior da coxa → panturrilha → borda lateral do pé (dermátomo S1).'],
+            ['Character', 'Caráter', 'Neuropathic — burning, electric shocks, stabbing; possible numbness / weakness rising on the toes.', 'Neuropático — queimação, choque, fisgada; possível dormência/fraqueza para ficar na ponta do pé.'],
+            ['How it behaves', 'Como se comporta', 'Worse sitting, coughing / sneezing, straining and bending forward.', 'Piora ao sentar, tossir/espirrar, fazer força e inclinar para frente.'],
+          ]) +
+        pauloPainZone('r4',
+          'Neurogenic claudication (L3–L4 stenosis)', 'Claudicação neurogênica (estenose L3–L4)',
+          'VAS 3–6', 'EVA 3–6',
+          [
+            ['Where', 'Onde', 'Both legs — heaviness / fatigue / cramping on walking.', 'Ambas as pernas — peso/cansaço/câimbra ao caminhar.'],
+            ['Character', 'Caráter', 'Load- and posture-dependent.', 'Dependente de carga e postura.'],
+            ['How it behaves', 'Como se comporta', 'Worse standing and walking upright; <strong>eases sitting or leaning forward</strong> (“shopping-cart sign”).', 'Piora em pé e andando ereto; <strong>alivia ao sentar ou inclinar para frente</strong> (“sinal do carrinho de supermercado”).'],
+          ]) +
+        pauloPainZone('r4',
+          'Neck + arm (C5–C6 radiculopathy)', 'Cervical + braço (radiculopatia C5–C6)',
+          'VAS 3–6', 'EVA 3–6',
+          [
+            ['Where', 'Onde', 'Nape / posterior neck, shoulder blade; if radicular, runs down the arm to thumb / index finger (C6).', 'Nuca/cervical posterior, escápula; se radicular, desce o braço até polegar/indicador (C6).'],
+            ['Character', 'Caráter', 'Mechanical + possible neuropathic (tingling / burning in the arm).', 'Mecânico + possível neuropático (formigamento/queimação no braço).'],
+            ['How it behaves', 'Como se comporta', 'Worse with extension / rotation and sustained postures (“tech-neck”).', 'Piora com extensão/rotação e posturas mantidas (“tech-neck”).'],
+          ]) +
+        pauloPainZone('r3',
+          'Right shoulder (AC arthrosis)', 'Ombro direito (artrose AC)',
+          'VAS 2–5', 'EVA 2–5',
+          [
+            ['Where', 'Onde', 'Top of the shoulder, over the AC joint, tender to palpation.', 'Topo do ombro, sobre a articulação AC, dor à palpação.'],
+            ['How it behaves', 'Como se comporta', 'Worse crossing the arm in front, reaching overhead and lying on that side.', 'Piora ao cruzar o braço à frente, elevar acima da cabeça e deitar sobre o lado.'],
+          ]) +
+        pauloPainZone('r3',
+          'Right knee (chondropathy)', 'Joelho direito (condropatia)',
+          'VAS 2–5', 'EVA 2–5',
+          [
+            ['Where', 'Onde', 'Front of the knee ± medial line.', 'Face anterior do joelho ± linha medial.'],
+            ['How it behaves', 'Como se comporta', 'Worse going down stairs, squatting, kneeling; intermittent swelling.', 'Piora ao descer escadas, agachar, ajoelhar; inchaço intermitente.'],
+          ]) +
+      '</div>';
+
+    var synth =
+      '<div class="painmap-synth">' +
+        '<h4>' + t('Synthesis', 'Síntese') + '</h4>' +
+        '<p class="lang-en">A state of <strong>chronic, fluctuating and multifocal</strong> pain, dominated by <strong>low-back pain + left-sided sciatica</strong>, with episodes of claudication on walking, layered over neck pain and peripheral joint pain. Functionally: lower tolerance for walking / standing, disturbed sleep and activity avoidance — consistent with the muscle atrophy seen on imaging. On a bad day this is someone significantly limited by pain — but nearly every one of these pain generators has a targeted, validated treatment.</p>' +
+        '<p class="lang-pt">Um estado de dor <strong>crônica, flutuante e multifocal</strong>, dominado por <strong>lombalgia + ciática à esquerda</strong>, com episódios de claudicação ao caminhar, somado a dor cervical e a dor articular periférica. Funcionalmente: menor tolerância para caminhar/ficar em pé, sono perturbado e evitação de atividades — coerente com a atrofia muscular vista nas imagens. Num dia ruim, é alguém significativamente limitado pela dor — mas quase todos esses geradores de dor têm tratamento dirigido e validado.</p>' +
+      '</div>';
+
+    return (
+      '<div class="container">' +
+        '<div class="section-label">' + t('04 · AI inference — symptoms, pain level &amp; where', '04 · Inferência da IA — sintomas, nível de dor e onde') + ' <span class="ai-pill">AI</span></div>' +
+        '<h2 class="section-title">' + t('What Paulo’s body most likely feels', 'O que o corpo do Paulo provavelmente sente') + '</h2>' +
+        '<p class="section-desc">' +
+          t('There is no record of symptoms, pain scores or medication in the chart. <strong>Everything below is inferred from the imaging</strong> — the anatomy explains the pain but does not measure it. Even so, taken together the studies confidently sketch the profile of someone living with chronic, fluctuating, multi-region pain.',
+            'Não há registro de sintomas, escala de dor ou medicação no prontuário. <strong>Tudo abaixo é inferência a partir das imagens</strong> — a anatomia explica a dor, mas não a mede. Ainda assim, o conjunto desenha, com segurança, o perfil de alguém que convive com dor crônica, flutuante e em várias regiões.') +
+        '</p>' +
+        '<div class="painwrap">' +
+          '<p class="painmap-disclaimer">' +
+            t('<strong>Important:</strong> an educational estimate based on imaging alone. Not a diagnosis. The VAS scale (0–10) is presumed. Confirmation requires a consultation with a neurological exam.',
+              '<strong>Importante:</strong> estimativa educativa baseada apenas em imagem. Não é diagnóstico. A escala EVA (0–10) é presumida. A confirmação depende de consulta com exame neurológico.') +
+          '</p>' +
+          '<div class="painlayout">' +
+            bodymap +
+            zones +
+          '</div>' +
+          synth +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  // Dock the pain-map section on the Summary page directly below the
+  // AI-authored summary card. That card is inserted asynchronously by
+  // decorateWithDashboard('home'), so poll briefly for it; if it never
+  // shows (no overview dashboard row), fall back to placing the section
+  // just above the Reports block — still at the top of the Summary.
+  function injectPauloPainMap() {
+    injectPauloPainMapStyles();
+    var tries = 0;
+    (function place() {
+      var home = document.querySelector('main.jc-home');
+      if (!home) { if (tries++ < 40) setTimeout(place, 80); return; }
+      if (document.getElementById('paulo-painmap')) return;
+      var sec = document.createElement('section');
+      sec.id = 'paulo-painmap';
+      sec.className = 'report-section paulo-painmap-section';
+      sec.innerHTML = renderPauloPainMap();
+      var dash = home.querySelector('.jc-home-dash-wrap');
+      if (dash) { dash.parentNode.insertBefore(sec, dash.nextSibling); return; }
+      if (tries++ < 25) { setTimeout(place, 80); return; }
+      var reports = home.querySelector('.report-section');
+      if (reports) home.insertBefore(sec, reports); else home.appendChild(sec);
+    })();
+  }
+
   function fmtLabNum(n) {
     if (n == null || !isFinite(n)) return '';
     var abs = Math.abs(Number(n));
@@ -2408,6 +2611,9 @@
           // headline + cross-domain links on the landing. No-ops when the
           // patient has no insights row (docks next to the danger zone).
           decorateWithAiInsights('home');
+          // Paulo Silotto: bespoke AI pain-map / symptom-inference section,
+          // docked on the Summary page directly below the AI summary card.
+          if (patient === PAULO_SILOTTO) injectPauloPainMap();
         })
         .catch(function () {
           renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente'));
