@@ -656,6 +656,41 @@ async function handleEcgObject(request, env) {
   }
 }
 
+// GET /api/lab-source?clerk=&file=
+// Streams one ORIGINAL lab-report PDF from R2 (key `lab/<clerk>/<file>`) via the
+// binding (no S3 token). Used by bespoke lab pages (Paulo) whose scanned source
+// PDFs are too large to ship as static assets. Gated by the `labs` scope on
+// <clerk>; the clerk namespaces the key so a labs-scoped viewer of one patient
+// can't guess another patient's key.
+async function handleLabSource(request, env) {
+  if (!env.R2_BUCKET) return jsonError(500, "r2_bucket_not_bound");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  const file = url.searchParams.get("file") || "";
+  if (!clerk) return jsonError(400, "clerk_required");
+  if (!/^[A-Za-z0-9._-]+\.pdf$/.test(file)) return jsonError(400, "bad_file"); // basename only, no traversal
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !grant.scopes.has("labs")) {
+      return jsonError(viewerClerk ? 403 : 401, "labs_scope_required");
+    }
+    const key = `lab/${clerk}/${file}`;
+    const obj = await env.R2_BUCKET.get(key);
+    if (!obj) return jsonError(404, "object_missing");
+    auditScopedRead(sql, grant, "lab_source_read", "/api/lab-source", ["labs"]);
+    const headers = new Headers();
+    headers.set("Content-Type", (obj.httpMetadata && obj.httpMetadata.contentType) || "application/pdf");
+    headers.set("Cache-Control", "private, max-age=300");
+    headers.set("Content-Disposition", `attachment; filename="${file.replace(/["\\\r\n]/g, "_")}"`);
+    return new Response(obj.body, { headers });
+  } catch (e) {
+    return jsonError(500, `Lab source failed: ${e.message}`);
+  }
+}
+
 /* ── /api/vitals-range ─────────────────────────────────────────────
  * GET /api/vitals-range?clerk=&from=YYYY-MM-DD&to=YYYY-MM-DD
  *
@@ -3505,6 +3540,9 @@ export default {
     }
     if (url.pathname === "/api/patient-ecg-object") {
       return handleEcgObject(request, env);
+    }
+    if (url.pathname === "/api/lab-source") {
+      return handleLabSource(request, env);
     }
     if (url.pathname === "/api/vitals-range") {
       return handleVitalsRange(request, env);
