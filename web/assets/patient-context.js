@@ -2448,6 +2448,15 @@
       return;
     }
 
+    // Paulo's Mental section is the verbatim collateral family account
+    // (window.PAULO_MENTAL_NARRATIVE) rendered as a primary-source document,
+    // not the DB metric grid. AI insights dock beneath once they exist.
+    if (patient === PAULO_SILOTTO && section === 'mental') {
+      renderPauloMental();
+      decorateWithAiInsights('mental');
+      return;
+    }
+
     // Cristina's only physical data is the bespoke thyroid-antibody panel,
     // so the Physical overview short-circuits to the exams page — otherwise
     // the DB-driven "0 lab markers" metric grid hides the actual content.
@@ -4755,9 +4764,6 @@
       P + '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
       P + '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
       P + '.paulo-labs-panels { margin-top: 8px; }',
-      P + '.lab-panel-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 28px; row-gap: 0; align-items: start; }',
-      P + '.lab-panel-body .lab-test { padding: 14px 0 12px; }',
-      '@media (max-width: 760px) { ' + P + '.lab-panel-body { grid-template-columns: 1fr; } }',
       P + '.paulo-labs-docs-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 28px 0 12px; }',
       P + '.silv-docs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }',
       P + '.silv-doc-link { display: block; padding: 12px 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; color: #0D1B2A; text-decoration: none; transition: border-color 0.12s, transform 0.06s; }',
@@ -4804,6 +4810,110 @@
     );
   }
 
+  /* ── Paulo Silotto · bespoke Mental page ────────────────────────────
+     Renders the verbatim collateral family account (window.PAULO_MENTAL_
+     NARRATIVE, loaded via assets/paulo-mental.js) as a primary-source
+     document — NOT an AI interpretation. The ~20-min spoken account by
+     Paulo's son is reproduced word-for-word; only the page chrome is
+     bilingual. This is the source text the later cross-domain synthesis
+     reads (also mirrored to Postgres writings). */
+  function injectPauloMentalStyles() {
+    if (document.getElementById('paulo-mental-styles')) return;
+    var css = [
+      'main.jc-paulo-mental { display: block; }',
+      'main.jc-paulo-mental .pm-source-note { max-width: 820px; margin: -8px auto 0; padding: 16px 20px; background: #F4F1EB; border: 1px solid #E3DDD0; border-left: 3px solid #7A8FA6; border-radius: 8px; }',
+      'main.jc-paulo-mental .pm-source-note .pm-source-pill { display: inline-block; font-family: "Raleway", sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: #1E2D3D; padding: 3px 9px; border-radius: 999px; margin-right: 8px; vertical-align: middle; }',
+      'main.jc-paulo-mental .pm-source-note p { margin: 8px 0 0; font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.6; color: #4A5868; }',
+      'main.jc-paulo-mental .pm-transcript-wrap { padding: 36px 0 8px; }',
+      'main.jc-paulo-mental .pm-transcript { max-width: 760px; margin: 0 auto; padding: 8px 28px; border-left: 3px solid #B8954A; }',
+      'main.jc-paulo-mental .pm-transcript p { font-family: "Mulish", sans-serif; font-size: 17px; line-height: 1.75; color: #24323F; margin: 0 0 20px; }',
+      'main.jc-paulo-mental .pm-transcript p.pm-lead { font-size: 18px; }',
+      'main.jc-paulo-mental .pm-transcript p.pm-lead::first-letter { font-family: "Raleway", sans-serif; font-weight: 800; font-size: 52px; line-height: 0.8; float: left; margin: 6px 10px 0 0; color: #B8954A; }',
+      'main.jc-paulo-mental .pm-provenance { max-width: 760px; margin: 8px auto 0; padding-top: 18px; border-top: 1px solid #E3DDD0; display: flex; flex-wrap: wrap; gap: 18px 32px; }',
+      'main.jc-paulo-mental .pm-prov-item { display: flex; flex-direction: column; gap: 2px; }',
+      'main.jc-paulo-mental .pm-prov-item span:first-child { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
+      'main.jc-paulo-mental .pm-prov-item span:last-child { font-family: "Mulish", sans-serif; font-size: 14px; color: #24323F; }',
+      '@media (max-width: 720px) { main.jc-paulo-mental .pm-transcript { padding: 8px 16px; } main.jc-paulo-mental .pm-transcript p { font-size: 16px; } }'
+    ].join('\n');
+    var st = document.createElement('style');
+    st.id = 'paulo-mental-styles';
+    st.textContent = css;
+    document.head.appendChild(st);
+  }
+
+  function renderPauloMental() {
+    injectPauloMentalStyles();
+    document.title = 'Lumen Health — Mental · Collateral account · Paulo Silotto Souza';
+
+    var N = window.PAULO_MENTAL_NARRATIVE;
+    var acct = (N && N.account) || {};
+    var paras = acct.paragraphs || [];
+
+    var hero =
+      '<section class="hero">' +
+        '<div class="container">' +
+          '<div class="hero-eyebrow">' + t('Mental → Collateral account', 'Mental → Relato de familiar') + '</div>' +
+          '<h1 class="hero-title">' +
+            t('A son&apos;s account · Paulo Silotto Souza', 'O relato de um filho · Paulo Silotto Souza') +
+          '</h1>' +
+          '<p class="hero-sub">' +
+            t('A ~20-minute spoken account given by Paulo&apos;s son about his father — family history, the back injury at 16, the lifelong caretaking role, the marital separation and what the family reads as a deepening depression. Reproduced here word-for-word as a primary source; it is the narrative the cross-domain (mental ↔ physical) synthesis will draw on.',
+              'Um relato falado de ~20 minutos dado pelo filho de Paulo sobre o pai — a história da família, a lesão nas costas aos 16 anos, o papel de cuidador por toda a vida, a separação conjugal e o que a família lê como uma depressão que se aprofunda. Reproduzido aqui palavra por palavra como fonte primária; é a narrativa de que a síntese entre domínios (mental ↔ físico) vai partir.') +
+          '</p>' +
+          '<div class="hero-meta">' +
+            '<div class="hero-meta-item"><span>' + t('Patient', 'Paciente') + '</span><span>Paulo Silotto Souza</span></div>' +
+            '<div class="hero-meta-item"><span>' + t('DOB · age', 'Nasc. · idade') + '</span><span>' + t('14 Jul 1961 · 64', '14 jul 1961 · 64') + '</span></div>' +
+            '<div class="hero-meta-item"><span>' + t('Account by', 'Relato de') + '</span><span>' + t('Son · João Victor Creste', 'Filho · João Victor Creste') + '</span></div>' +
+            '<div class="hero-meta-item"><span>' + t('Recorded', 'Registrado') + '</span><span>' + t('19 Jun 2026', '19 jun 2026') + '</span></div>' +
+            '<div class="hero-meta-item"><span>' + t('Length', 'Duração') + '</span><span>' + t('~20 min · verbatim', '~20 min · íntegra') + '</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    var sourceNote =
+      '<section class="report-section">' +
+        '<div class="container">' +
+          '<div class="pm-source-note">' +
+            '<span class="pm-source-pill">' + t('Source document', 'Documento-fonte') + '</span>' +
+            '<span class="lang-en" style="font-family:Mulish,sans-serif;font-size:13px;color:#4A5868;">Collateral information — a third-party narrative about the patient, not the patient&apos;s own words and not an AI interpretation.</span>' +
+            '<span class="lang-pt" style="font-family:Mulish,sans-serif;font-size:13px;color:#4A5868;">Informação colateral — narrativa de terceiro sobre o paciente, não as palavras do próprio paciente nem uma interpretação de IA.</span>' +
+            '<p class="lang-en">Original account recorded in English and reproduced in full, exactly as spoken — including names as pronounced. The text below shows in both language modes because it is the primary source.</p>' +
+            '<p class="lang-pt">Relato original gravado em inglês e reproduzido na íntegra, exatamente como foi falado — inclusive os nomes como pronunciados. O texto abaixo aparece nos dois idiomas por ser a fonte primária.</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
+    var transcriptInner = paras.map(function (p, i) {
+      return '<p' + (i === 0 ? ' class="pm-lead"' : '') + '>' + escapeHtml(p) + '</p>';
+    }).join('');
+
+    var provenance =
+      '<div class="pm-provenance">' +
+        '<div class="pm-prov-item"><span>' + t('Author', 'Autor') + '</span><span>' + t('Son (João Victor Creste)', 'Filho (João Victor Creste)') + '</span></div>' +
+        '<div class="pm-prov-item"><span>' + t('Subject', 'Sujeito') + '</span><span>' + t('Paulo (father, patient)', 'Paulo (pai, paciente)') + '</span></div>' +
+        '<div class="pm-prov-item"><span>' + t('Type', 'Tipo') + '</span><span>' + t('Collateral family account', 'Relato de familiar') + '</span></div>' +
+        '<div class="pm-prov-item"><span>' + t('Recorded', 'Registrado') + '</span><span>' + t('19 Jun 2026 · English', '19 jun 2026 · inglês') + '</span></div>' +
+        '<div class="pm-prov-item"><span>' + t('Extent', 'Extensão') + '</span><span>' + t(paras.length + ' paragraphs · verbatim', paras.length + ' parágrafos · íntegra') + '</span></div>' +
+      '</div>';
+
+    var transcript =
+      '<section class="report-section pm-transcript-wrap">' +
+        '<div class="container">' +
+          '<div class="section-label">' + t('Verbatim account', 'Relato na íntegra') + '</div>' +
+          '<h2 class="section-title">' + t('In his son&apos;s words', 'Nas palavras de seu filho') + '</h2>' +
+          '<div class="pm-transcript">' + transcriptInner + '</div>' +
+          provenance +
+        '</div>' +
+      '</section>';
+
+    var main = document.createElement('main');
+    main.className = 'jc-paulo-mental';
+    main.innerHTML = hero + sourceNote + transcript;
+    document.body.appendChild(main);
+
+    injectDangerZone(main);
+  }
+
   function renderPauloLabsSection() {
     var L = window.PAULO_LABS;
     if (!L || !L.panels || !L.panels.length) return '';
@@ -4833,7 +4943,7 @@
       '<section class="report-section" id="labs">' +
         head +
         '<div class="container paulo-labs-panels">' +
-          panelsHtml +
+          '<div class="lab-panel-grid">' + panelsHtml + '</div>' +
           comparison +
           docsHead +
           docsHtml +
