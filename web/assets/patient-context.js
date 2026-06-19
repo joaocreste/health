@@ -4410,6 +4410,119 @@
       });
   }
 
+  /* ── Paulo Silotto · laboratory history ─────────────────────────────
+     Reads window.PAULO_LABS (assets/paulo-labs.js): 13 years of blood &
+     urine panels reconciled from 26 scanned PDFs. Reuses the generic lab
+     helpers (silvanaPanelDetails / silvanaHistoricalComparison /
+     silvanaDocsList) — the core .lab-* classes are global in styles.css;
+     only the silv-* helper classes need re-scoping under jc-paulo-exams. */
+  function injectPauloLabsStyles() {
+    if (document.getElementById('paulo-labs-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'paulo-labs-styles';
+    var P = 'main.jc-paulo-exams ';
+    s.textContent = [
+      P + '.silv-hist { margin-top: 10px; }',
+      P + '.silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
+      P + '.silv-hist summary::-webkit-details-marker { display: none; }',
+      P + '.silv-hist summary::before { content: "\\25B8"; display: inline-block; width: 12px; margin-right: 4px; transition: transform 0.15s; }',
+      P + '.silv-hist[open] summary::before { transform: rotate(90deg); }',
+      P + '.silv-hist-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      P + '.silv-hist-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
+      P + '.silv-hist-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: top; color: #1E2D3D; }',
+      P + '.silv-hist-row-latest td { background: rgba(184, 149, 74, 0.06); font-weight: 500; }',
+      P + '.silv-hist-row-flag .silv-hist-val { color: #7A2E22; }',
+      P + '.silv-hist-date { font-family: "IBM Plex Mono", monospace; color: #7A8FA6; white-space: nowrap; }',
+      P + '.silv-hist-val { font-family: "IBM Plex Mono", monospace; }',
+      P + '.silv-hist-note { font-size: 11px; color: #7A8FA6; }',
+      P + '.silv-latest-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      P + '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
+      P + '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
+      P + '.paulo-labs-panels { margin-top: 8px; }',
+      P + '.paulo-labs-docs-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 28px 0 12px; }',
+      P + '.silv-docs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }',
+      P + '.silv-doc-link { display: block; padding: 12px 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; color: #0D1B2A; text-decoration: none; transition: border-color 0.12s, transform 0.06s; }',
+      P + '.silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
+      P + '.silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
+      P + '.silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function buildPauloLabsAiCard() {
+    return (
+      '<section class="paulo-ai-summary-wrap">' +
+        '<div class="container">' +
+          '<div class="paulo-ai-summary">' +
+            '<header class="paulo-ai-summary-head">' +
+              '<h2>' + t('3 · AI synthesis · Lab history', '3 · Síntese da IA · Histórico laboratorial') + '</h2>' +
+              '<span class="ai-pill">AI</span>' +
+            '</header>' +
+            '<div class="paulo-ai-summary-meta">' +
+              t('Synthesised from 26 blood & urine panels · 11+ laboratories · 2011 to 2024',
+                'Sintetizado a partir de 26 painéis de sangue e urina · 11+ laboratórios · 2011 a 2024') +
+            '</div>' +
+            '<div class="paulo-ai-subhead">' +
+              t('Most recent draws · April 2024', 'Coletas mais recentes · abril de 2024') +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-en">' +
+              '<p>The two April 2024 blood counts tell a short, self-limited story. The <strong>15 Apr (Biolabor) CBC shows transient leukopenia</strong> (WBC 3,190), borderline anaemia and lymphopenia with a reactive monocytosis — set against a <strong>non-reactive dengue NS1 and a negative COVID-19 antigen</strong>, this reads as an acute viral / inflammatory episode, not a chronic cytopenia. The Behring CBC two days earlier (13 Apr) was near-normal, so a single repeat count once recovered would confirm the values have returned to baseline.</p>' +
+              '<p>Across thirteen years the durable signal is a <strong>mild cardiometabolic cluster</strong>. <strong>Total cholesterol has sat in the 208–245 mg/dL band on virtually every panel since 2011</strong>, with LDL repeatedly above the 130 mg/dL target (138 mg/dL in 2022) — partly offset by a protective HDL (frequently 60–90 mg/dL). In parallel, <strong>fasting glucose has drifted into the impaired-fasting band (100–115 mg/dL)</strong> from 2017 onward while HbA1c stays sub-diabetic (5.5–5.6%) — a prediabetic trajectory tracking the lipid pattern. <strong>Vitamin D was insufficient</strong> (16.4 ng/mL, 2022).</p>' +
+              '<p><strong>Reassuring elsewhere, and consistently so:</strong> renal function (creatinine ~0.9–1.1 mg/dL, eGFR &gt; 60), liver enzymes (AST/ALT/GGT) and thyroid (TSH 2–3 µUI/mL) have stayed in range throughout, and <strong>total PSA has remained under the 4 ng/mL threshold</strong> across the surveillance series. <strong>Recommended next step:</strong> a repeat fasting glucose + HbA1c and a lipid-focused review of the borderline-LDL / impaired-fasting / low-vitamin-D triad, plus one follow-up CBC to confirm the April-2024 viral dip has resolved. Read alongside the spine imaging, the modifiable lever is the same one: cardiometabolic and muscular conditioning.</p>' +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-pt">' +
+              '<p>Os dois hemogramas de abril de 2024 contam uma história curta e autolimitada. O <strong>hemograma de 15 abr (Biolabor) mostra leucopenia transitória</strong> (leucócitos 3.190), anemia limítrofe e linfopenia com monocitose reativa — diante de um <strong>dengue NS1 não reagente e antígeno COVID-19 negativo</strong>, lê-se como episódio viral / inflamatório agudo, não uma citopenia crônica. O hemograma da Behring dois dias antes (13 abr) estava quase normal, então um único hemograma de controle após a recuperação confirmaria o retorno aos valores de base.</p>' +
+              '<p>Ao longo de treze anos, o sinal persistente é um <strong>leve agrupamento cardiometabólico</strong>. O <strong>colesterol total se mantém na faixa de 208–245 mg/dL em praticamente todos os painéis desde 2011</strong>, com LDL repetidamente acima da meta de 130 mg/dL (138 mg/dL em 2022) — parcialmente compensado por um HDL protetor (frequentemente 60–90 mg/dL). Em paralelo, a <strong>glicemia de jejum derivou para a faixa de glicemia de jejum alterada (100–115 mg/dL)</strong> a partir de 2017, enquanto a HbA1c permanece sub-diabética (5,5–5,6%) — uma trajetória pré-diabética que acompanha o padrão lipídico. A <strong>vitamina D estava insuficiente</strong> (16,4 ng/mL, 2022).</p>' +
+              '<p><strong>Tranquilizador no restante, e de forma consistente:</strong> função renal (creatinina ~0,9–1,1 mg/dL, eTFG &gt; 60), enzimas hepáticas (TGO/TGP/GGT) e tireoide (TSH 2–3 µUI/mL) permaneceram dentro da faixa ao longo do tempo, e o <strong>PSA total se manteve abaixo do limite de 4 ng/mL</strong> em toda a série de acompanhamento. <strong>Próximo passo recomendado:</strong> repetir glicemia de jejum + HbA1c e uma revisão lipídica do tripé LDL-limítrofe / glicemia-de-jejum-alterada / vitamina-D-baixa, além de um hemograma de controle para confirmar a resolução da queda viral de abril de 2024. Lido junto às imagens da coluna, a alavanca modificável é a mesma: condicionamento cardiometabólico e muscular.</p>' +
+            '</div>' +
+            '<p class="paulo-ai-arcs-cross" style="margin-top:14px;">' +
+              '<span class="lang-en"><em>AI-generated synthesis over Paulo&apos;s own lab series — for discussion with his clinician, not a diagnosis.</em></span>' +
+              '<span class="lang-pt"><em>Síntese gerada por IA sobre a própria série de exames do Paulo — para discussão com o médico, não um diagnóstico.</em></span>' +
+            '</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
+  function renderPauloLabsSection() {
+    var L = window.PAULO_LABS;
+    if (!L || !L.panels || !L.panels.length) return '';
+    injectPauloLabsStyles();
+    var nMarkers = L.panels.reduce(function (a, p) { return a + p.markers.length; }, 0);
+
+    var head =
+      '<div class="container">' +
+        '<div class="section-label">' + t('3 · Laboratory', '3 · Laboratorial') + '</div>' +
+        '<h2 class="section-title">' + t('Laboratory exams', 'Exames laboratoriais') + '</h2>' +
+        '<p class="section-desc">' +
+          t('Thirteen years of blood and urine work (2011-2024), reconciled from 26 scanned reports across 11+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. Original reports are linked beneath.',
+            'Treze anos de exames de sangue e urina (2011-2024), reconciliados de 26 laudos digitalizados de 11+ laboratórios em ' + nMarkers + ' marcadores agrupados por painel. Cada cartão mostra o valor mais recente com sua barra de referência e um histórico por marcador expansível; a comparação completa lado a lado fica ao final, mais recente à esquerda. Os laudos originais estão linkados abaixo.') +
+        '</p>' +
+      '</div>';
+
+    var panelsHtml = L.panels.map(silvanaPanelDetails).join('');
+    var comparison = silvanaHistoricalComparison(L.panels, L.documents);
+    var docsHead =
+      '<div class="paulo-labs-docs-head">' +
+        t('Source reports', 'Laudos de origem') + ' · ' + L.documents.length +
+      '</div>';
+    var docsHtml = silvanaDocsList(L.documents);
+
+    return (
+      buildPauloLabsAiCard() +
+      '<section class="report-section" id="labs">' +
+        head +
+        '<div class="container paulo-labs-panels">' +
+          panelsHtml +
+          comparison +
+          docsHead +
+          docsHtml +
+        '</div>' +
+      '</section>'
+    );
+  }
+
   function renderPauloPhysicalExams() {
     injectPauloExamsStyles();
 
@@ -4420,8 +4533,8 @@
         '<div class="container">' +
           '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
           '<h1 class="hero-title">' +
-            t('Imaging exams · Paulo Silotto Souza',
-              'Exames de imagem · Paulo Silotto Souza') +
+            t('Imaging & laboratory exams · Paulo Silotto Souza',
+              'Exames de imagem e laboratoriais · Paulo Silotto Souza') +
           '</h1>' +
           '<p class="hero-sub">' +
             t('Eleven years of spine imaging — three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. The latest pair (15 May 2026, Dr. Marco Antonio de Carvalho · CRM-99607) loads in the unified viewer below; each repeated study is commented by AI in the longitudinal section, with the radiologists&apos; original reports rendered in full underneath.',
@@ -4438,6 +4551,10 @@
             '<div class="hero-meta-item">' +
               '<span>' + t('Imaging arc', 'Arco de imagens') + '</span>' +
               '<span>' + t('2015 → 2026 · 5 MRIs', '2015 → 2026 · 5 RMs') + '</span>' +
+            '</div>' +
+            '<div class="hero-meta-item">' +
+              '<span>' + t('Lab arc', 'Arco laboratorial') + '</span>' +
+              '<span>' + t('2011 → 2024 · 26 panels', '2011 → 2024 · 26 painéis') + '</span>' +
             '</div>' +
             '<div class="hero-meta-item">' +
               '<span>' + t('Latest exam', 'Exame mais recente') + '</span>' +
@@ -4550,10 +4667,11 @@
     var history      = buildPauloHistorySection();
     var otherStudies = buildPauloOtherStudiesSection();
     var overall      = buildPauloOverallEvolution();
+    var labs         = renderPauloLabsSection();
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall;
+    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs;
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
@@ -4736,7 +4854,7 @@
     );
   }
 
-  function silvanaHistoricalComparison(panels) {
+  function silvanaHistoricalComparison(panels, docs) {
     // Build union of (date, lab, doctor) samples
     var sampleMap = {};
     panels.forEach(function (pn) {
@@ -4755,7 +4873,7 @@
 
     // Decorate each sample with doc / lab from the document list when present
     var docByDate = {};
-    (window.SILVANA_LABS.documents || []).forEach(function (d) { docByDate[d.date] = d; });
+    (docs || (window.SILVANA_LABS && window.SILVANA_LABS.documents) || []).forEach(function (d) { docByDate[d.date] = d; });
     samples.forEach(function (s) {
       var d = docByDate[s.date];
       if (d) { s.lab = d.laboratory; s.doctor = d.doctor; }
@@ -4838,9 +4956,10 @@
 
   function silvanaDocsList(docs) {
     var items = docs.map(function (d) {
+      var href = /^(https?:|\/)/.test(d.pdf) ? d.pdf : 'scans/' + d.pdf;
       return (
         '<li class="silv-doc">' +
-          '<a href="scans/' + escapeHtml(d.pdf) + '" download class="silv-doc-link">' +
+          '<a href="' + escapeHtml(href) + '" download class="silv-doc-link">' +
             '<span class="silv-doc-title">' +
               '<span class="lang-en">' + escapeHtml(d.title_en) + '</span>' +
               '<span class="lang-pt">' + escapeHtml(d.title_pt) + '</span>' +
