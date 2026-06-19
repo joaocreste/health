@@ -4755,7 +4755,7 @@
       P + '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
       P + '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
       P + '.paulo-labs-panels { margin-top: 8px; }',
-      P + '.lab-panel-body { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; row-gap: 0; }',
+      P + '.lab-panel-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 28px; row-gap: 0; align-items: start; }',
       P + '.lab-panel-body .lab-test { padding: 14px 0 12px; }',
       '@media (max-width: 760px) { ' + P + '.lab-panel-body { grid-template-columns: 1fr; } }',
       P + '.paulo-labs-docs-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; margin: 28px 0 12px; }',
