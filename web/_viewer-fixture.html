@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Standardized imagery viewer — fixture</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body{background:#eef1f3;padding:34px 20px;font-family:'IBM Plex Sans',sans-serif}
+  h1{font-family:'Raleway';font-size:18px;color:#0D1B2A;text-align:center}
+  .note{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#7A8FA6;text-align:center;margin-bottom:26px}
+  /* a fake MRI frame so the stage shows something without real scans */
+  .demo-frame{width:100%;height:100%;object-fit:contain;background:
+    radial-gradient(circle at 50% 42%, #3a3f52 0 18%, #23263400 60%),
+    repeating-linear-gradient(0deg,#0c0e14 0 7px,#13161f 7px 14px);}
+</style>
+</head>
+<body>
+<h1>Standardized imagery viewer</h1>
+<div class="note">centered · view dropdown (COR/AXI/SAG) · scrub slider on the bottom — markup as produced by buildWays(), styled by styles.css</div>
+
+<!-- Exact structure app.js builds: head → controls(view dropdown) → stage → slider(bottom) -->
+<div class="ct-viewer" style="--demo:1">
+  <div class="ct-viewer-head">
+    <div class="ct-viewer-title">Brain MRI</div>
+    <div class="ct-viewer-meta">Image <span class="ct-idx">12</span> / <span class="ct-total">24</span></div>
+  </div>
+  <div class="ct-controls">
+    <div class="ct-control-row">
+      <span class="ct-control-label">View</span>
+      <select class="ct-control-select">
+        <option>Axial (AXI)</option>
+        <option selected>Coronal (COR)</option>
+        <option>Sagittal (SAG)</option>
+      </select>
+    </div>
+  </div>
+  <div class="ct-stage"><div class="demo-frame" role="img" aria-label="demo frame"></div></div>
+  <input class="ct-slider" type="range" min="0" max="23" value="11" aria-label="slice">
+</div>
+
+<p class="note" style="margin-top:26px">Single-image study (no sequence): slider hidden via <code>.ct-single</code>, no view control.</p>
+<div class="ct-viewer ct-single">
+  <div class="ct-viewer-head">
+    <div class="ct-viewer-title">Face ultrasound</div>
+    <div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">1</span></div>
+  </div>
+  <div class="ct-controls"></div>
+  <div class="ct-stage"><div class="demo-frame"></div></div>
+  <input class="ct-slider" type="range" min="0" max="0" value="0">
+</div>
+
+</body>
+</html>

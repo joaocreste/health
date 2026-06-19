@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A1428;--fg:#F0F4F8;--muted:#8FA3BC;--gold:#B8954A;--petrol:#7A8FA6;--bd:#283655}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:0} html,body{background:var(--bg);color:var(--fg);font-family:'Raleway',sans-serif}
+.cover{position:relative;width:210mm;min-height:297mm;padding:24mm 22mm;display:flex;flex-direction:column;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background-image:linear-gradient(to right,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.025) 1px,transparent 1px);background-size:64px 64px}
+.cover::after{content:'';position:absolute;left:0;right:0;bottom:0;height:6mm;background:var(--gold)}
+.cover>*{position:relative;z-index:1}
+.top{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9pt;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.brandline{font-family:'IBM Plex Mono',monospace;font-size:9pt;letter-spacing:.34em;text-transform:uppercase;color:var(--petrol);margin-top:2mm}
+.center{margin:auto 0;padding:14mm 0}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:10pt;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.title{font-family:'Raleway',sans-serif;font-weight:200;font-size:40pt;color:var(--fg);line-height:1.08}.title strong{font-weight:700}
+.sub{font-size:13pt;color:var(--muted);margin-top:14px;max-width:150mm;line-height:1.5}
+.meta{display:grid;grid-template-columns:max-content 1fr;gap:7px 22px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:16px 0;margin-bottom:18px}
+.k{font-family:'IBM Plex Mono',monospace;font-size:9pt;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);align-self:center}.v{font-size:12pt}
+.inc-l{font-family:'IBM Plex Mono',monospace;font-size:9pt;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.chip{font-family:'IBM Plex Mono',monospace;font-size:9pt;padding:4px 10px;border-radius:999px;background:rgba(122,143,166,.12);color:var(--petrol);border:1px solid rgba(122,143,166,.4)}
+.disc{font-size:8.5pt;line-height:1.55;color:var(--muted);border-left:2px solid var(--gold);padding-left:12px;margin-top:auto}
+.foot{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:8pt;letter-spacing:.1em;color:var(--muted);margin-top:14px}
+</style></head><body><section class="cover">
+  <div class="top"><span>Confidencial · Comunicação clínica</span><span>Cardiologia</span></div>
+  <div class="brandline">Lumen Health</div>
+  <div class="center">
+    <div class="tag">Relatório clínico</div>
+    <div class="title">Avaliação<br><strong>cardiológica</strong></div>
+    <div class="sub">Saúde cardiovascular, pressão arterial, composição corporal, angio-TC de coronárias, ECG e laboratório — consolidados para a consulta.</div>
+  </div>
+  <div class="meta">
+    <div class="k">Paciente</div><div class="v">Joao Victor Creste Dias de Souza</div>
+    <div class="k">Nascimento</div><div class="v">17 de outubro de 1992</div>
+    <div class="k">Sexo</div><div class="v">Masculino</div>
+    <div class="k">Gerado em</div><div class="v">12 de junho de 2026</div>
+    <div class="k">Idioma</div><div class="v">Português</div>
+  </div>
+  <div class="inc-l">Inclui</div>
+  <div class="chips">
+    <span class="chip">Saúde cardiovascular</span><span class="chip">Pressão arterial</span><span class="chip">Composição corporal</span>
+    <span class="chip">InBody</span><span class="chip">Angio-TC de coronárias</span><span class="chip">ECG</span><span class="chip">Sangue e urina</span><span class="chip">Medicações e suplementos</span>
+  </div>
+  <p class="disc">Estritamente confidencial. Documento gerado a partir do registro clínico do paciente. As seções marcadas como IA são interpretações por modelo de linguagem, destinadas à discussão clínica — não constituem diagnóstico nem prescrição.</p>
+  <div class="foot"><span>Lumen Health · Documento confidencial</span><span>12-06-2026</span></div>
+</section></body></html>

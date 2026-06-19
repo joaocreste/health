@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen Health — Card Catalog (Tier 0 + Tier 1 standard)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Mulish:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- THE design system. Every card below is styled ONLY by this file. If a card looks
+     wrong here, the canon is wrong — this page is the visual spec + regression reference. -->
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  /* Gallery chrome ONLY — never card styling. Cards must come from styles.css. */
+  body { background:#eef1f3; }
+  .cat-top { background:linear-gradient(135deg,#0e2530,#143a40 60%,#0e7c86); color:#eaf6f6; padding:40px 26px; }
+  .cat-top h1 { font-family:'Raleway',sans-serif; font-weight:800; font-size:26px; margin:0 0 8px; color:#fff; }
+  .cat-top p { margin:0; max-width:760px; color:#cfe6e7; font-size:15px; }
+  .cat-top .tiers { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .cat-top .tiers span { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:6px; padding:5px 10px; }
+  .cat-wrap { max-width:1080px; margin:0 auto; padding:0 26px 100px; }
+  .cat-group { margin:44px 0 0; }
+  .cat-group > h2 { font-family:'Raleway',sans-serif; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:#0e7c86; border-bottom:2px solid #cfe0e3; padding-bottom:8px; margin:0 0 4px; }
+  .cat-group > .cat-grouphint { font-family:'IBM Plex Mono',monospace; font-size:12px; color:#5b6b78; margin:0 0 18px; }
+  .cat-item { background:#fff; border:1px solid #dde4e8; border-radius:12px; margin:18px 0; overflow:hidden; }
+  .cat-item-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding:13px 18px; border-bottom:1px solid #eef1f3; background:#f8fafb; }
+  .cat-item-head h3 { font-family:'Raleway',sans-serif; font-size:15px; margin:0; color:#10202b; }
+  .cat-item-head code { font-family:'IBM Plex Mono',monospace; font-size:11.5px; background:#eef2f3; color:#14424a; padding:2px 7px; border-radius:5px; }
+  .cat-item-head .cat-purpose { font-size:12.5px; color:#5b6b78; flex:1; min-width:200px; }
+  .cat-item-head .cat-from { font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#9aa7b4; }
+  .cat-render { padding:22px 18px; }
+  .cat-render.dark { background:#0D1B2A; }
+  .cat-flag { background:#fff7ed; border:1px solid #f4dcae; border-radius:10px; padding:14px 18px; margin:18px 0; font-size:13.5px; color:#7a5a1e; }
+  .cat-flag b { font-family:'Raleway'; }
+  .cat-row { display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start; }
+  .cat-row > * { flex:1; min-width:240px; }
+</style>
+</head>
+<body>
+
+<div class="cat-top">
+  <h1>Lumen Health — Card Catalog</h1>
+  <p>The standard card set derived from Patient Zero (Joao). Tier 0 atoms + Tier 1 core cards, each rendered live from <code>assets/styles.css</code>. This is the visual spec the generic renderer and the <code>cards_json</code> schema must reproduce — and the regression reference when either changes.</p>
+  <div class="tiers">
+    <span>Tier 0 · atoms (consistent everywhere)</span>
+    <span>Tier 1 · core cards (data-driven, standard)</span>
+    <span>Tier 2/3 · deferred</span>
+  </div>
+</div>
+
+<div class="cat-wrap">
+
+<!-- ======================= TIER 0 — ATOMS ======================= -->
+<div class="cat-group">
+  <h2>Tier 0 · Atoms</h2>
+  <p class="cat-grouphint">Shared primitives. Already identical across all of Joao's pages — the proof a canon exists. Do not fork these.</p>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Status pill</h3><code>.pill .pill-ok/watch/flag/info</code><span class="cat-purpose">Inline severity badge.</span></div>
+    <div class="cat-render">
+      <span class="pill pill-ok">Normal</span>
+      <span class="pill pill-watch">Watch</span>
+      <span class="pill pill-flag">Flagged</span>
+      <span class="pill pill-info">Informational</span>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>AI provenance badge</h3><code>.ai-pill (.ai-pill--inverse)</code><span class="cat-purpose">Marks AI-generated content. Required on every interpretive block.</span></div>
+    <div class="cat-render"><span class="ai-pill">AI summary</span> &nbsp; <span class="ai-pill">AI inference</span></div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Alert / callout</h3><code>.alert .alert-info/watch/flag/ok</code><span class="cat-purpose">Full-width contextual note, severity-coloured.</span></div>
+    <div class="cat-render">
+      <div class="alert alert-info" style="margin-bottom:10px;"><strong>Info.</strong> A neutral clinical note for context.</div>
+      <div class="alert alert-watch" style="margin-bottom:10px;"><strong>Watch.</strong> Something trending that is worth keeping an eye on.</div>
+      <div class="alert alert-flag"><strong>Flag.</strong> A finding that needs attention.</div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Titled list card</h3><code>.list-card</code><span class="cat-purpose">The workhorse: a titled bullet list. Use in two-col / three-col.</span></div>
+    <div class="cat-render">
+      <div class="two-col">
+        <div class="list-card"><h4>Wearables &amp; devices</h4><ul><li><strong>Oura Ring</strong> — sleep + HRV</li><li><strong>Withings</strong> — body composition</li></ul></div>
+        <div class="list-card"><h4>Clinical sources</h4><ul><li>Hospital lab panels</li><li>Imaging studies</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Data table</h3><code>.data-table</code><span class="cat-purpose">Tabular records; cells may carry pills.</span></div>
+    <div class="cat-render">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Item</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>2026-06-08</td><td>Lipid panel</td><td><span class="pill pill-watch">1 watch</span></td></tr>
+          <tr><td>2026-04-02</td><td>CBC</td><td><span class="pill pill-ok">Normal</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Section frame</h3><code>.report-section .section-label/.section-title</code><span class="cat-purpose">Page structure: eyebrow + heading + description.</span></div>
+    <div class="cat-render">
+      <section class="report-section" style="padding:0;"><div class="section-label">1.2 · Exams</div><h2 class="section-title">Blood &amp; urine</h2><p class="section-desc">All panels with longitudinal history.</p></section>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= TIER 1 — CORE CARDS ======================= -->
+<div class="cat-group">
+  <h2>Tier 1 · Core cards</h2>
+  <p class="cat-grouphint">Data-driven, generalize to any patient. This finite set is the standard the cards_json schema must cover.</p>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Metric tile</h3><code>.metric-grid .metric-card</code><span class="cat-purpose">Single KPI: label / value+unit / note+pill.</span><span class="cat-from">home, vitals</span></div>
+    <div class="cat-render">
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-label">Body weight</div><div class="metric-value">81.9<small>kg</small></div><div class="metric-note">Target 69–70 · <span class="pill pill-flag">Above</span></div></div>
+        <div class="metric-card"><div class="metric-label">HRV median</div><div class="metric-value">16<small>ms</small></div><div class="metric-note"><span class="pill pill-watch">Low</span></div></div>
+        <div class="metric-card"><div class="metric-label">Within reference</div><div class="metric-value">74<small>/81</small></div><div class="metric-note">Normal results</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Report / nav entry card</h3><code>.entry-card .entry-card-overview</code><span class="cat-purpose">Clickable section tile: icon / title / status / bullets / CTA.</span><span class="cat-from">home, physical</span></div>
+    <div class="cat-render">
+      <div class="entry-grid entry-grid-overview">
+        <a class="entry-card entry-card-overview" href="#"><div class="entry-title">Vitals</div><div class="entry-status"><span class="pill pill-flag">2 flagged</span><span class="pill pill-watch">3 watch</span></div><ul class="entry-bullets"><li>Body composition · sleep · cardiovascular</li></ul><span class="entry-cta">Open</span></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Lab test row + reference bar</h3><code>.lab-test + .lab-bar</code><span class="cat-purpose">Single analyte: value, status pill, range bar with positioned dot. Most-reused clinical component.</span><span class="cat-from">exams, vitals(InBody)</span></div>
+    <div class="cat-render">
+      <div class="lab-test lab-test-normal">
+        <div class="lab-test-head"><div class="lab-test-name">Red Blood Cells (RBC)</div><div class="lab-test-meta"><span class="lab-test-val"><span class="lab-val-num">4.85</span> <span class="lab-val-unit">mil/mm³</span></span><span class="pill pill-ok">Normal</span></div></div>
+        <div class="lab-bar-wrap"><div class="lab-bar"><div class="lab-bar-bg"></div><div class="lab-bar-range"></div><div class="lab-bar-marker lab-bar-marker-normal" style="left:43%;"><div class="lab-bar-dot"></div></div></div><div class="lab-bar-labels"><span>4.16</span><span>5.82</span></div></div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Reference: 4.16–5.82</div></div>
+      </div>
+      <div class="lab-test lab-test-watch">
+        <div class="lab-test-head"><div class="lab-test-name">Estradiol (E2)</div><div class="lab-test-meta"><span class="lab-test-val"><span class="lab-val-num">64</span> <span class="lab-val-unit">pg/mL</span></span><span class="pill pill-watch">Watch</span></div></div>
+        <div class="lab-bar-wrap"><div class="lab-bar"><div class="lab-bar-bg"></div><div class="lab-bar-range"></div><div class="lab-bar-marker lab-bar-marker-watch" style="left:92%;"><div class="lab-bar-dot"></div></div></div><div class="lab-bar-labels"><span>11</span><span>43</span></div></div>
+        <div class="lab-test-foot"><div class="lab-test-ref">Reference: ≤ 43</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Lab panel group</h3><code>.lab-panel (&lt;details&gt;)</code><span class="cat-purpose">Collapsible grouping of lab tests with a count badge.</span><span class="cat-from">exams</span></div>
+    <div class="cat-render">
+      <details class="lab-panel" open>
+        <summary class="lab-panel-head"><span class="lab-panel-title">Complete Blood Count — Erythrogram</span><span class="lab-panel-sub">Red blood cells and oxygenation</span><span class="lab-panel-count">7 markers</span></summary>
+        <div class="lab-panel-body">
+          <div class="lab-test lab-test-normal"><div class="lab-test-head"><div class="lab-test-name">Hemoglobin</div><div class="lab-test-meta"><span class="lab-test-val"><span class="lab-val-num">15.1</span> <span class="lab-val-unit">g/dL</span></span><span class="pill pill-ok">Normal</span></div></div></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Lab highlight / flagged card</h3><code>.lab-hl-card .lab-hl-card-watch/flag</code><span class="cat-purpose">Out-of-range result surfaced with an AI clinical note.</span><span class="cat-from">exams</span></div>
+    <div class="cat-render">
+      <div class="lab-hl-grid">
+        <div class="lab-hl-card lab-hl-card-watch"><div class="lab-hl-name">Estradiol (E2)</div><div class="lab-hl-value">64 <span class="lab-hl-unit">pg/mL</span></div><div class="lab-hl-meta"><span class="pill pill-watch">Watch</span><span class="lab-hl-panel">Sex &amp; Adrenal Hormones</span></div><div class="lab-hl-ref">≤ 43 pg/mL</div><div class="lab-hl-note">Above the male range and up from April — worth correlating with current medications.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Longitudinal lab comparison grid</h3><code>.lab-cmp-table</code><span class="cat-purpose">Same markers across many dates; latest column bold. Horizontally scrollable.</span><span class="cat-from">exams</span></div>
+    <div class="cat-render" style="overflow-x:auto;">
+      <table class="lab-cmp-table">
+        <thead><tr><th class="lab-cmp-marker-head">Marker</th><th class="lab-cmp-col-head lab-cmp-col-latest"><div class="lab-cmp-date">8 Jun 2026</div><div class="lab-cmp-lab">Sírio-Libanês</div></th><th class="lab-cmp-col-head"><div class="lab-cmp-date">2 Apr 2026</div><div class="lab-cmp-lab">Fleury</div></th><th class="lab-cmp-col-head"><div class="lab-cmp-date">2019</div><div class="lab-cmp-lab">—</div></th></tr></thead>
+        <tbody>
+          <tr class="lab-cmp-section"><th colspan="4">Erythrogram</th></tr>
+          <tr><th class="lab-cmp-marker">RBC <small class="lab-cmp-unit">(mil/mm³)</small></th><td class="lab-cmp-val lab-cmp-latest"><strong>4.85</strong></td><td class="lab-cmp-val">4.59</td><td class="lab-cmp-val lab-cmp-empty">—</td></tr>
+          <tr><th class="lab-cmp-marker">Hemoglobin <small class="lab-cmp-unit">(g/dL)</small></th><td class="lab-cmp-val lab-cmp-latest"><strong>15.1</strong></td><td class="lab-cmp-val">14.8</td><td class="lab-cmp-val">15.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Lab actions / recommendations</h3><code>.lab-actions</code><span class="cat-purpose">Numbered follow-up actions with title + rationale.</span><span class="cat-from">exams</span></div>
+    <div class="cat-render">
+      <ol class="lab-actions">
+        <li><div class="lab-action-num">01</div><div><div class="lab-action-title">Recheck morning cortisol <span class="pill pill-watch">Watch</span></div><p>Value sits below the 7–9 a.m. range. <strong>Action:</strong> repeat fasting between 7–9 a.m.</p></div></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Chart card</h3><code>.chart-card .chart-wrap</code><span class="cat-purpose">Canonical chart shell. 6 sub-kinds: time-series · daily-pattern · boxplot · bar · dual-axis · floating-bar.</span><span class="cat-from">vitals, exams</span></div>
+    <div class="cat-render">
+      <div class="chart-card">
+        <div class="chart-card-head"><div class="chart-card-title">HRV &amp; resting HR — monthly mean</div><div class="chart-card-meta">Oura · n=222 nights</div></div>
+        <div class="chart-wrap"><svg viewBox="0 0 600 200" width="100%" height="100%" preserveAspectRatio="none" style="display:block"><rect width="600" height="200" fill="#fbfcfd"/><polyline points="20,150 140,120 260,135 380,95 500,80 580,70" fill="none" stroke="#244E6E" stroke-width="2.5"/><polyline points="20,90 140,100 260,95 380,120 500,140 580,150" fill="none" stroke="#C0392B" stroke-width="2.5"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Imaging viewer</h3><code>.ct-viewer (+ .imagery-exam)</code><span class="cat-purpose">Scrubbable multi-frame image study (MRI/CT/US).</span><span class="cat-from">exams</span></div>
+    <div class="cat-render">
+      <div class="ct-viewer" style="max-width:420px;">
+        <div class="ct-viewer-head"><div class="ct-viewer-title">Face MRI</div><div class="ct-viewer-meta">Image <span class="ct-idx">1</span> / <span class="ct-total">180</span></div></div>
+        <div class="ct-stage" style="aspect-ratio:1/1;background:#0b0f14;display:flex;align-items:center;justify-content:center;color:#3a4a5a;font-family:monospace;font-size:12px;">[ frame ]</div>
+        <input class="ct-slider" type="range" min="0" max="179" value="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Gene / variant card</h3><code>.pgx-gene</code><span class="cat-purpose">Genotype + metabolizer phenotype. ~93 instances on the genetics page.</span><span class="cat-from">genetics</span></div>
+    <div class="cat-render">
+      <div class="cat-row">
+        <div class="pgx-gene"><div class="pgx-gene-name">CYP2C9</div><div class="pgx-gene-genotype">*1/*2</div><div class="pgx-gene-pheno">Intermediate metaboliser</div></div>
+        <div class="pgx-gene"><div class="pgx-gene-name">CYP1A2</div><div class="pgx-gene-genotype">*1M/*1M</div><div class="pgx-gene-pheno">Normal (inducible)</div></div>
+        <div class="pgx-gene"><div class="pgx-gene-name">CYP3A5</div><div class="pgx-gene-genotype">*3/*3</div><div class="pgx-gene-pheno">Non-expresser</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>PGx drug-class bands</h3><code>.pgx-class .pgx-band-ok/watch/flag</code><span class="cat-purpose">Drugs grouped by class into risk bands.</span><span class="cat-from">genetics</span></div>
+    <div class="cat-render">
+      <div class="pgx-class">
+        <div class="pgx-class-name">Antidepressants</div>
+        <div class="pgx-class-bands">
+          <div class="pgx-band pgx-band-ok"><span class="pgx-band-label">Use as labelled</span><div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">Agomelatine</span><span class="pgx-drug pgx-drug-ok">Sertraline</span></div></div>
+          <div class="pgx-band pgx-band-watch"><span class="pgx-band-label">Use with attention</span><div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">Bupropion</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Timeline event</h3><code>.timeline-item .flag/ok/watch/heart</code><span class="cat-purpose">Dated life/clinical event with severity modifier.</span><span class="cat-from">mental, spiritual</span></div>
+    <div class="cat-render">
+      <div class="timeline-item flag"><div class="timeline-date">29 Apr 2026</div><div class="timeline-title">Crisis episode</div><div class="timeline-body">A flagged event with red severity styling.</div></div>
+      <div class="timeline-item ok"><div class="timeline-date">May 2026</div><div class="timeline-title">Stabilisation</div><div class="timeline-body">A positive event.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= AI CARD — THE DRIFT EXHIBIT ======================= -->
+<div class="cat-group">
+  <h2>AI card · the standardization target</h2>
+  <div class="cat-flag"><b>This is the #1 thing to unify.</b> The same concept — an amber AI interpretive card — exists in <b>5 incompatible forms</b> across Joao's pages and the dynamic renderer. The standard should be ONE component with variants (synthesis / commentary / per-result / inline). Below are the forms that share <code>styles.css</code>.</div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Form A · chart-card commentary</h3><code>.chart-card.ai-comments</code><span class="cat-from">vitals</span></div>
+    <div class="cat-render">
+      <div class="chart-card ai-comments">
+        <div class="chart-card-head"><div class="chart-card-title">AI commentary</div><div class="chart-card-meta"><span class="ai-pill">AI inference</span></div></div>
+        <p class="ai-headline">The mean is fine — the <em>slope</em> is the problem.</p>
+        <p class="ai-body">Readings stay in range but rise quickly after meals.</p>
+        <ul class="ai-list"><li><strong>Peak rate:</strong> +3.0 mg/dL/min</li></ul>
+        <p class="ai-footer"><strong>Discuss with your clinician.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Form B · list-card insight</h3><code>.list-card.ai-insight-card</code><span class="cat-from">exams / imagery</span></div>
+    <div class="cat-render">
+      <div class="list-card ai-insight-card"><h4><span class="ai-pill">AI summary</span> Plain-language read</h4><p>Both MRIs show the same thin scar-like layer; the brain itself is normal.</p><p style="font-size:11.5px;color:#7A8FA6;margin-top:10px;">AI-generated — not a diagnosis.</p></div>
+    </div>
+  </div>
+
+  <div class="cat-item">
+    <div class="cat-item-head"><h3>Form C · synthesis grid</h3><code>.ai-synthesis-card</code><span class="cat-from">vitals top, exams</span></div>
+    <div class="cat-render">
+      <div class="ai-synthesis-card">
+        <p class="ai-synthesis-lead">Three data streams below tell the same story.</p>
+        <div class="ai-synthesis-grid">
+          <div class="ai-synthesis-block"><div class="ai-synthesis-eyebrow">Vitals ↔ Exams</div><h3 class="ai-synthesis-block-title">Cardio-autonomic axis</h3><p class="ai-synthesis-block-body">HRV has slid alongside inflammatory markers.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat-flag" style="background:#f3f6f8;border-color:#d6dee4;color:#3a4a5a;">
+    Two more forms exist in JS and aren't shown here: <code>.ai-ins-block / .ai-card / .ai-sevedge</code> (the dynamic dashboard decorator) and <code>.lab-ai-cf</code> (per-result amber explanation). Both self-inject their CSS — relocating + merging them into one canonical amber-card component is the open task.
+  </div>
+</div>
+
+<!-- ======================= DEFERRED ======================= -->
+<div class="cat-group">
+  <h2>Tier 2 / 3 · deferred (decide per type later)</h2>
+  <p class="cat-grouphint">Domain specials (InBody silhouette, AUDIT bar, Wheel of Life, range selector — page-local CSS, not in styles.css) and the bespoke narrative tail (archetype, psych-dim, sp-*, letter-*). Not part of the v1 standard; triaged individually in a later pass.</p>
+</div>
+
+</div>
+</body>
+</html>

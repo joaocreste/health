@@ -831,11 +831,13 @@
     );
   }
 
-  // Dock the pain-map section on the Summary page directly below the
-  // AI-authored summary card. That card is inserted asynchronously by
-  // decorateWithDashboard('home'), so poll briefly for it; if it never
-  // shows (no overview dashboard row), fall back to placing the section
-  // just above the Reports block — still at the top of the Summary.
+  // Dock the pain-map section as the LAST content section on the Summary
+  // page — below the AI summary card and the Reports block. The danger zone /
+  // AI-insights live in the body-level bottom dock beneath main.jc-home, so
+  // appending here lands the pain map at the end of the summary content,
+  // just above that action dock. renderHome is synchronous; wait until its
+  // first .report-section exists so we append after the real content rather
+  // than racing an empty main.
   function injectPauloPainMap() {
     injectPauloPainMapStyles();
     var tries = 0;
@@ -843,15 +845,12 @@
       var home = document.querySelector('main.jc-home');
       if (!home) { if (tries++ < 40) setTimeout(place, 80); return; }
       if (document.getElementById('paulo-painmap')) return;
+      if (!home.querySelector('.report-section') && tries++ < 25) { setTimeout(place, 80); return; }
       var sec = document.createElement('section');
       sec.id = 'paulo-painmap';
       sec.className = 'report-section paulo-painmap-section';
       sec.innerHTML = renderPauloPainMap();
-      var dash = home.querySelector('.jc-home-dash-wrap');
-      if (dash) { dash.parentNode.insertBefore(sec, dash.nextSibling); return; }
-      if (tries++ < 25) { setTimeout(place, 80); return; }
-      var reports = home.querySelector('.report-section');
-      if (reports) home.insertBefore(sec, reports); else home.appendChild(sec);
+      home.appendChild(sec); // last content section on the Summary page
     })();
   }
 
