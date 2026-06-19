@@ -1176,6 +1176,7 @@
     // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
     if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
     hydrateEcgCharts(view, p.clerk_user_id); // inject the Lumen ECG SVG(s) inline
+    wireEcgSwitcher(view, ecg, p.clerk_user_id); // date pill + version dropdown
 
     function amberCardHtml(label, bodyHtml) {
       return '<div class="ov-ai-inner">' +
@@ -2132,7 +2133,29 @@
       '.ecg-chart .ecg-svg{display:block;width:100%;height:auto;}' +
       '.ecg-chart-loading{color:#8895AC;font-family:"IBM Plex Mono",monospace;font-size:13px;padding:28px;text-align:center;}' +
       '.ecg-fidelity{color:#4A5B73;font-family:"IBM Plex Mono",monospace;font-size:12px;margin:6px 2px 0;letter-spacing:.04em;}' +
-      '.ecg-sep{border:none;border-top:1px solid #EFEAE0;margin:2rem 0;}';
+      '.ecg-sep{border:none;border-top:1px solid #EFEAE0;margin:2rem 0;}' +
+      /* version-switcher: small date pill + dropdown of every study */
+      '.ecg-switcher{margin:0 0 1rem;}' +
+      '.ecg-pill-wrap{position:relative;display:inline-block;margin:0 0 1rem;}' +
+      '.ecg-pill{display:inline-flex;align-items:center;gap:8px;background:#F7F8FA;border:1px solid #E4E9F0;' +
+        'border-radius:999px;padding:5px 14px;font-family:"IBM Plex Mono",monospace;font-size:13px;' +
+        'color:#4A5B73;cursor:pointer;line-height:1.4;}' +
+      '.ecg-pill:hover{background:#EEF1F6;border-color:#D3DAE6;}' +
+      '.ecg-pill[aria-expanded="true"]{background:#EEF1F6;border-color:#C9D2E0;}' +
+      '.ecg-pill-caret{width:9px;height:9px;flex:none;transition:transform .15s ease;color:#8895AC;}' +
+      '.ecg-pill[aria-expanded="true"] .ecg-pill-caret{transform:rotate(180deg);}' +
+      '.ecg-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:240px;max-height:320px;' +
+        'overflow:auto;background:#FFFFFF;border:1px solid #E4E9F0;border-radius:12px;' +
+        'box-shadow:0 8px 28px rgba(13,27,42,.12);padding:6px;display:none;}' +
+      '.ecg-pill-wrap.open .ecg-menu{display:block;}' +
+      '.ecg-menu-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;' +
+        'border:none;border-radius:8px;padding:8px 10px;cursor:pointer;font:inherit;color:#1E2D3D;}' +
+      '.ecg-menu-item:hover{background:#F2F5FA;}' +
+      '.ecg-menu-item[aria-current="true"]{background:#F2F5FA;font-weight:600;}' +
+      '.ecg-menu-date{font-family:"IBM Plex Mono",monospace;font-size:13px;}' +
+      '.ecg-menu-sub{display:block;font-size:11px;color:#8895AC;margin-top:1px;}' +
+      '.ecg-menu-check{margin-left:auto;color:#9B3535;width:14px;height:14px;flex:none;visibility:hidden;}' +
+      '.ecg-menu-item[aria-current="true"] .ecg-menu-check{visibility:visible;}';
     document.head.appendChild(s);
   }
 
@@ -2211,11 +2234,98 @@
         '</div></div></section>';
   }
 
+  // Caret + check glyphs for the switcher pill/menu.
+  function ecgCaretSvg() {
+    return '<svg class="ecg-pill-caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2 4 6 8 10 4"/></svg>';
+  }
+  function ecgCheckSvg() {
+    return '<svg class="ecg-menu-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 8.5 6.5 12 13 4"/></svg>';
+  }
+  // Bilingual "ECG · <date>" label used on the pill for the selected study.
+  function ecgPillLabel(s) {
+    var dn = ecgDateNice(s.study_date);
+    return '<span class="lang-en">ECG · ' + dn.en + '</span><span class="lang-pt">ECG · ' + dn.pt + '</span>';
+  }
+  // Secondary line in the dropdown to disambiguate same-day / repeat studies.
+  function ecgMenuSub(s) {
+    var bits = [s.modality, s.lead_layout, s.clinic].filter(Boolean);
+    return bits.length ? escapeHtml(bits.join(' · ')) : '';
+  }
+
+  // ONE ECG block per patient. Shows the LATEST study by default with a small
+  // date pill; the dropdown lists every study (newest first) and selecting an
+  // older one swaps the chart/report/amber card in place (wireEcgSwitcher).
+  // The `studies` array arrives ordered study_date DESC from /api/patient-exams,
+  // so index 0 is the latest — that is what renders first, with no flicker.
   function buildEcgSectionHtml(studies, clerk) {
     if (!studies || !studies.length) return '';
-    return studies.map(function (s) {
-      return '<div class="ecg-study">' + buildEcgStudyHtml(s, clerk) + '</div>';
-    }).join('<hr class="ecg-sep">');
+    var current = studies[0];
+    var menuItems = studies.map(function (s, i) {
+      var dn = ecgDateNice(s.study_date);
+      var sub = ecgMenuSub(s);
+      return '<button type="button" class="ecg-menu-item" role="option" data-ecg-idx="' + i + '"' +
+        (i === 0 ? ' aria-current="true"' : '') + '>' +
+        '<span>' +
+          '<span class="ecg-menu-date"><span class="lang-en">' + dn.en + '</span><span class="lang-pt">' + dn.pt + '</span></span>' +
+          (sub ? ('<span class="ecg-menu-sub">' + sub + '</span>') : '') +
+        '</span>' + ecgCheckSvg() +
+      '</button>';
+    }).join('');
+    return '<div class="ecg-switcher" data-clerk="' + escapeHtml(String(clerk)) + '">' +
+      '<div class="ecg-pill-wrap">' +
+        '<button type="button" class="ecg-pill" aria-haspopup="listbox" aria-expanded="false">' +
+          '<span class="ecg-pill-label">' + ecgPillLabel(current) + '</span>' + ecgCaretSvg() +
+        '</button>' +
+        '<div class="ecg-menu" role="listbox">' + menuItems + '</div>' +
+      '</div>' +
+      '<div class="ecg-current">' + buildEcgStudyHtml(current, clerk) + '</div>' +
+    '</div>';
+  }
+
+  // Wire the date pill + dropdown for every .ecg-switcher under `root`. Selecting
+  // a study re-renders the .ecg-current block to that study and re-hydrates its
+  // SVG. Must be called AFTER the switcher markup is in the DOM; `studies` is the
+  // same array (study_date DESC) used to build it.
+  function wireEcgSwitcher(root, studies, clerk) {
+    if (!root || !studies || !studies.length) return;
+    var sw = root.querySelector('.ecg-switcher');
+    if (!sw || sw.__ecgWired) return;
+    sw.__ecgWired = true;
+    var wrap = sw.querySelector('.ecg-pill-wrap');
+    var pill = sw.querySelector('.ecg-pill');
+    var menu = sw.querySelector('.ecg-menu');
+    var current = sw.querySelector('.ecg-current');
+    if (!wrap || !pill || !menu || !current) return;
+
+    function close() { wrap.classList.remove('open'); pill.setAttribute('aria-expanded', 'false'); }
+    function open() { wrap.classList.add('open'); pill.setAttribute('aria-expanded', 'true'); }
+
+    pill.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (wrap.classList.contains('open')) close(); else open();
+    });
+    // Click-away closes the menu.
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) close();
+    });
+
+    menu.addEventListener('click', function (e) {
+      var item = e.target.closest ? e.target.closest('.ecg-menu-item') : null;
+      if (!item) return;
+      var idx = parseInt(item.getAttribute('data-ecg-idx'), 10);
+      var s = studies[idx];
+      if (!s) { close(); return; }
+      // Swap the displayed study, update pill + selected mark, re-hydrate SVG.
+      current.innerHTML = buildEcgStudyHtml(s, clerk);
+      var label = sw.querySelector('.ecg-pill-label');
+      if (label) label.innerHTML = ecgPillLabel(s);
+      Array.prototype.forEach.call(menu.querySelectorAll('.ecg-menu-item'), function (it) {
+        if (it === item) it.setAttribute('aria-current', 'true');
+        else it.removeAttribute('aria-current');
+      });
+      close();
+      hydrateEcgCharts(current, clerk);
+    });
   }
 
   function hydrateEcgCharts(root, clerk) {
@@ -2245,6 +2355,7 @@
         mount.innerHTML = buildEcgSectionHtml(studies, clerk);
         section.style.display = '';
         hydrateEcgCharts(mount, clerk);
+        wireEcgSwitcher(mount, studies, clerk);
       })
       .catch(function () { section.style.display = 'none'; });
   }
@@ -4728,6 +4839,220 @@
     );
   }
 
+  /* ── Paulo Silotto · ergometric (exercise stress test) series ─────────
+     Reads window.PAULO_ERGOMETRIC (assets/paulo-ergometric.js): 4 stress
+     tests 2011 -> 2023 reconciled from scanned reports. Renders a gold AI
+     card (reusing .paulo-ai-summary), the latest-exam highlight, and two
+     collapsibles (comparison table + per-exam detail). */
+  function injectPauloErgoStyles() {
+    if (document.getElementById('paulo-ergo-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'paulo-ergo-styles';
+    var P = 'main.jc-paulo-exams ';
+    s.textContent = [
+      P + '.pl-ergo-latest { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 3px solid #244E6E; border-radius: 10px; padding: 20px 22px; margin-top: 8px; }',
+      P + '.pl-ergo-latest-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }',
+      P + '.pl-ergo-latest-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 0; }',
+      P + '.pl-ergo-latest-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; letter-spacing: 0.04em; }',
+      P + '.pl-ergo-badge { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }',
+      P + '.pl-ergo-badge.is-neg { background: rgba(45, 122, 78, 0.12); color: #1F6E45; }',
+      P + '.pl-ergo-badge.is-max { background: rgba(36, 78, 110, 0.10); color: #244E6E; }',
+      P + '.pl-ergo-concl { font-size: 14px; line-height: 1.55; color: #1E2D3D; margin: 8px 0 16px; }',
+      P + '.pl-ergo-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }',
+      P + '.pl-ergo-chip { background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 8px; padding: 9px 11px; }',
+      P + '.pl-ergo-chip-k { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 3px; }',
+      P + '.pl-ergo-chip-v { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 15px; font-weight: 600; color: #0D1B2A; }',
+      P + '.pl-ergo-cmp { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      P + '.pl-ergo-cmp th, ' + P + '.pl-ergo-cmp td { padding: 7px 9px; border-bottom: 1px solid #EFEBE3; text-align: right; white-space: nowrap; }',
+      P + '.pl-ergo-cmp th:first-child, ' + P + '.pl-ergo-cmp td:first-child { text-align: left; }',
+      P + '.pl-ergo-cmp thead th { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: #7A8FA6; border-bottom: 1px solid #E5E2DC; }',
+      P + '.pl-ergo-cmp thead th.is-latest { color: #244E6E; }',
+      P + '.pl-ergo-cmp .pl-ergo-cmp-proto { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: #B8954A; }',
+      P + '.pl-ergo-cmp td:last-child { background: rgba(36, 78, 110, 0.05); font-weight: 500; }',
+      P + '.pl-ergo-cmp-metric { font-weight: 500; color: #1E2D3D; }',
+      P + '.pl-ergo-cmp-ps { color: #B8954A; }',
+      P + '.pl-ergo-cmp-num { font-family: "IBM Plex Mono", monospace; color: #1E2D3D; }',
+      P + '.pl-ergo-exam { border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; margin-top: 10px; background: #FFFFFF; }',
+      P + '.pl-ergo-exam-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 6px; }',
+      P + '.pl-ergo-exam-date { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0D1B2A; }',
+      P + '.pl-ergo-exam-sub { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+      P + '.pl-ergo-exam-concl { font-size: 13px; line-height: 1.5; color: #1E2D3D; margin: 4px 0 0; }',
+      P + '.pl-ergo-bundled { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E2DC; }',
+      P + '.pl-ergo-bundled-item { font-size: 12px; color: #1E2D3D; margin-top: 4px; }',
+      P + '.pl-ergo-bundled-tag { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: #7A8FA6; }',
+      P + '.pl-ergo-trends { list-style: none; padding: 0; margin: 10px 0 0; }',
+      P + '.pl-ergo-trends li { position: relative; padding-left: 16px; font-size: 13px; line-height: 1.5; color: #1E2D3D; margin-bottom: 7px; }',
+      P + '.pl-ergo-trends li::before { content: "\\2014"; position: absolute; left: 0; color: #B8954A; }',
+      P + '.pl-ergo-revisar { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8862B; background: rgba(184, 149, 74, 0.12); border: 1px solid rgba(184, 149, 74, 0.3); border-radius: 999px; padding: 3px 9px; margin-left: 8px; }',
+      P + '#ergometric .silv-hist { margin-top: 18px; }'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function buildPauloErgoAiCard(E) {
+    var A = E.ai_card;
+    var trends = A.trends.map(function (x) {
+      return '<li><span class="lang-en">' + x.en + '</span><span class="lang-pt">' + x.pt + '</span></li>';
+    }).join('');
+    var watch = A.watch.map(function (x) {
+      return '<li><span class="lang-en">' + x.en + '</span><span class="lang-pt">' + x.pt + '</span></li>';
+    }).join('');
+    var notes = A.notes.map(function (x) {
+      return '<li><span class="lang-en">' + x.en + '</span><span class="lang-pt">' + x.pt + '</span></li>';
+    }).join('');
+    return (
+      '<section class="paulo-ai-summary-wrap">' +
+        '<div class="container">' +
+          '<div class="paulo-ai-summary">' +
+            '<header class="paulo-ai-summary-head">' +
+              '<h2>' + t('4 · AI synthesis · Ergometric series', '4 · Síntese da IA · Série ergométrica') + '</h2>' +
+              '<span class="ai-pill">AI</span>' +
+            '</header>' +
+            '<div class="paulo-ai-summary-meta">' +
+              t('Synthesised from 4 exercise stress tests · 4 cardiologists · 2011 to 2023',
+                'Sintetizado a partir de 4 testes ergométricos · 4 cardiologistas · 2011 a 2023') +
+            '</div>' +
+            '<div class="paulo-ai-subhead">' +
+              '<span class="lang-en">' + A.headlineEn + '</span>' +
+              '<span class="lang-pt">' + A.headlinePt + '</span>' +
+            '</div>' +
+            '<div class="paulo-ai-summary-body lang-en"><p>' + A.summaryEn + '</p></div>' +
+            '<div class="paulo-ai-summary-body lang-pt"><p>' + A.summaryPt + '</p></div>' +
+            '<div class="paulo-ai-arcs-block">' +
+              '<div class="paulo-ai-subhead">' + t('Trends across the series', 'Tendências ao longo da série') + '</div>' +
+              '<ul class="pl-ergo-trends">' + trends + '</ul>' +
+            '</div>' +
+            '<div class="paulo-ai-arcs-block">' +
+              '<div class="paulo-ai-subhead">' + t('Watch items', 'Pontos de atenção') + '</div>' +
+              '<ul class="pl-ergo-trends">' + watch + '</ul>' +
+            '</div>' +
+            '<details class="silv-hist">' +
+              '<summary>' + t('Data-quality notes', 'Notas de qualidade dos dados') +
+                '<span class="pl-ergo-revisar">' + t('review', 'revisar') + ' · ' + A.notes.length + '</span>' +
+              '</summary>' +
+              '<ul class="pl-ergo-trends">' + notes + '</ul>' +
+            '</details>' +
+            '<p class="paulo-ai-arcs-cross" style="margin-top:14px;">' +
+              '<span class="lang-en"><em>' + A.disclaimerEn + '</em></span>' +
+              '<span class="lang-pt"><em>' + A.disclaimerPt + '</em></span>' +
+            '</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>'
+    );
+  }
+
+  function renderPauloErgoSection() {
+    var E = window.PAULO_ERGOMETRIC;
+    if (!E || !E.exams || !E.exams.length) return '';
+    injectPauloErgoStyles();
+    var fmt = function (v) { return (v === null || v === undefined) ? '—' : v; };
+    var latest = E.exams[E.exams.length - 1];
+
+    // Latest-exam highlight
+    var chip = function (k, v) {
+      return '<div class="pl-ergo-chip"><span class="pl-ergo-chip-k">' + k + '</span><span class="pl-ergo-chip-v">' + v + '</span></div>';
+    };
+    var chips =
+      chip(t('Peak HR', 'FC máx'), latest.fc_max_bpm + ' <small>(' + latest.fc_max_pct_predicted + '%)</small>') +
+      chip('VO₂ ' + t('max', 'máx'), latest.vo2_max + ' <small>ml/kg/min</small>') +
+      chip('METs', latest.met_max) +
+      chip(t('Peak SBP', 'PAS máx'), latest.pas_max + ' <small>mmHg</small>') +
+      chip(t('Duration', 'Duração'), latest.duration_hms.replace(/^00:/, '')) +
+      chip(t('Weight', 'Peso'), latest.weight_kg + ' <small>kg</small>');
+    var latestCard =
+      '<div class="pl-ergo-latest">' +
+        '<div class="pl-ergo-latest-head">' +
+          '<h3 class="pl-ergo-latest-title">' + t('Latest test', 'Prova mais recente') + ' · ' +
+            '<span class="lang-en">' + latest.dateLabelEn + '</span><span class="lang-pt">' + latest.dateLabelPt + '</span>' +
+          '</h3>' +
+          '<span class="pl-ergo-latest-meta">' + latest.protocol + ' · ' + (latest.performing_doctor || '') + '</span>' +
+          '<span class="pl-ergo-badge is-neg">' + t('ST negative', 'ST negativo') + '</span>' +
+          '<span class="pl-ergo-badge is-max">' + t('maximal', 'máximo') + '</span>' +
+        '</div>' +
+        '<p class="pl-ergo-concl"><span class="lang-en">' + latest.conclusionEn + '</span><span class="lang-pt">' + latest.conclusionPt + '</span></p>' +
+        '<div class="pl-ergo-chips">' + chips + '</div>' +
+      '</div>';
+
+    // Comparison table
+    var dates = E.comparison.exam_dates;
+    var protoByDate = {};
+    E.exams.forEach(function (x) { protoByDate[x.date] = x.protocol; });
+    var head = '<th>' + t('Metric', 'Métrica') + '</th>' + dates.map(function (d, i) {
+      var isLatest = (i === dates.length - 1);
+      var yr = d.slice(0, 4);
+      return '<th class="' + (isLatest ? 'is-latest' : '') + '">' + yr +
+        '<br><span class="pl-ergo-cmp-proto">' + protoByDate[d] + '</span></th>';
+    }).join('');
+    var rows = E.comparison.metrics.map(function (m) {
+      var label = '<span class="pl-ergo-cmp-metric">' +
+        '<span class="lang-en">' + m.labelEn + '</span><span class="lang-pt">' + m.labelPt + '</span>' +
+        (m.unit ? ' <small>' + m.unit + '</small>' : '') +
+        (m.protocol_sensitive ? ' <span class="pl-ergo-cmp-ps" title="' + t('protocol-sensitive', 'sensível ao protocolo') + '">‡</span>' : '') +
+        '</span>';
+      var cells = m.values.map(function (v) { return '<td class="pl-ergo-cmp-num">' + fmt(v) + '</td>'; }).join('');
+      return '<tr><td>' + label + '</td>' + cells + '</tr>';
+    }).join('');
+    var cmpTable =
+      '<details class="silv-hist">' +
+        '<summary>' + t('Comparison table · all metrics × dates', 'Tabela comparativa · todas as métricas × datas') + '</summary>' +
+        '<table class="pl-ergo-cmp"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="silv-hist-note" style="margin-top:8px;">' +
+          t('‡ protocol-sensitive — VO₂, METs and duration are estimates that vary with the test protocol; cross-protocol comparison is indicative only.',
+            '‡ sensível ao protocolo — VO₂, METs e duração são estimativas que variam conforme o protocolo; a comparação entre protocolos é apenas indicativa.') +
+        '</p>' +
+      '</details>';
+
+    // Per-exam detail (most recent first)
+    var examItems = E.exams.slice().reverse().map(function (x) {
+      var bundled = (x.bundled && x.bundled.length)
+        ? '<div class="pl-ergo-bundled">' + x.bundled.map(function (b) {
+            return '<div class="pl-ergo-bundled-item"><span class="pl-ergo-bundled-tag">' +
+              '<span class="lang-en">' + b.labelEn + '</span><span class="lang-pt">' + b.labelPt + '</span></span> · ' +
+              '<span class="lang-en">' + b.textEn + '</span><span class="lang-pt">' + b.textPt + '</span></div>';
+          }).join('') + '</div>'
+        : '';
+      var loc = [x.lab, x.city].filter(Boolean).join(' · ') || t('lab not stated', 'laboratório não informado');
+      return '<div class="pl-ergo-exam">' +
+        '<div class="pl-ergo-exam-head">' +
+          '<span class="pl-ergo-exam-date"><span class="lang-en">' + x.dateLabelEn + '</span><span class="lang-pt">' + x.dateLabelPt + '</span></span>' +
+          '<span class="pl-ergo-exam-sub">' + x.protocol + ' · ' + x.ergometer + ' · ' + t('age', 'idade') + ' ' + x.age + '</span>' +
+          '<span class="pl-ergo-badge is-neg">' + t('ST negative', 'ST negativo') + '</span>' +
+        '</div>' +
+        '<div class="pl-ergo-exam-sub">' + loc + ' · ' + (x.performing_doctor || '') + (x.crm ? ' · ' + x.crm : '') + '</div>' +
+        '<p class="pl-ergo-exam-concl"><span class="lang-en">' + x.conclusionEn + '</span><span class="lang-pt">' + x.conclusionPt + '</span></p>' +
+        bundled +
+      '</div>';
+    }).join('');
+    var examList =
+      '<details class="silv-hist">' +
+        '<summary>' + t('Per-exam detail · 4 tests', 'Detalhe por exame · 4 provas') + '</summary>' +
+        examItems +
+      '</details>';
+
+    var head2 =
+      '<div class="container">' +
+        '<div class="section-label">' + t('4 · Cardiac', '4 · Cardíaco') + '</div>' +
+        '<h2 class="section-title">' + t('Ergometric stress tests', 'Testes ergométricos') + '</h2>' +
+        '<p class="section-desc">' +
+          t('Four exercise stress tests over twelve years (2011 → 2023), reconciled from scanned reports across four cardiologists and three protocols (Bruce, Rampa, Ellestad). All four were negative for ischaemia. The latest test is shown first; the comparison table and per-exam detail sit below, collapsed.',
+            'Quatro testes ergométricos em doze anos (2011 → 2023), reconciliados de laudos digitalizados de quatro cardiologistas e três protocolos (Bruce, Rampa, Ellestad). As quatro provas foram negativas para isquemia. A prova mais recente aparece primeiro; a tabela comparativa e o detalhe por exame ficam abaixo, recolhidos.') +
+        '</p>' +
+      '</div>';
+
+    return (
+      buildPauloErgoAiCard(E) +
+      '<section class="report-section" id="ergometric">' +
+        head2 +
+        '<div class="container">' +
+          latestCard +
+          cmpTable +
+          examList +
+        '</div>' +
+      '</section>'
+    );
+  }
+
   function renderPauloPhysicalExams() {
     injectPauloExamsStyles();
 
@@ -4873,10 +5198,11 @@
     var otherStudies = buildPauloOtherStudiesSection();
     var overall      = buildPauloOverallEvolution();
     var labs         = renderPauloLabsSection();
+    var ergometric   = renderPauloErgoSection();
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs;
+    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs + ergometric;
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
