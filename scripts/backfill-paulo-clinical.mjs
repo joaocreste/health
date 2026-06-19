@@ -34,6 +34,13 @@ if (!DATABASE_URL) { console.error("✗ DATABASE_URL not set"); process.exit(1);
 const sql = neon(DATABASE_URL);
 const CLERK = "pending:paulo-silotto-df3441";
 
+// NOTE: this list covers the 5 spine MRIs + 5 original "other" studies only,
+// and this script DELETEs all of Paulo's imaging_studies before re-inserting,
+// WITHOUT provenance columns. The 8 report-only studies from the 2013-2025
+// "New Exams/Imagery" drop (eyebrows 4F-4M) live in
+// scripts/ingest-paulo-imagery-wave.mjs (additive, with provenance). After any
+// full re-run of THIS script, re-run that wave script (and the provenance
+// backfill) or those 8 rows + all provenance are lost.
 const IMAGING = [
   {
     modality: "MRI", body_part: "Cervical spine", study_date: "2026-05-15",

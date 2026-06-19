@@ -3810,12 +3810,15 @@
     );
   }
 
-  /* ── Other studies on file (images coming later) ────────────────
-     Five additional reports already on file — shoulder MRI (2015),
-     right-knee MRI (2019), abdomen/pelvis CT (2022), cranium CT (2023),
-     face/sinus CT (2023). Each card carries the radiologist's key
-     findings and a link to the original PDF. Image viewers will be
-     added once DICOM exports are imported. */
+  /* ── Other studies on file (report-only) ────────────────────────
+     Thirteen report-only studies spanning 2013–2025: peripheral joints
+     (shoulder MRI 2015, knee MRI 2019, hand MRI 2025), chest (X-ray
+     2019 ×2, CT 2019), abdomen/liver + a four-study urological series
+     (abdomen US 2013, abdomen/pelvis CT 2022, abdomen+prostate US 2022,
+     kidneys US 2022, urinary+prostate US 2023), and the head/face CTs
+     (cranium 2023, face/sinus 2023). Each card carries the radiologist's
+     key findings, an AI read, and a link to the original PDF. These are
+     report-only — no source imagery to view. */
 
   function buildPauloOtherStudyCard(c) {
     var findingsHtml = (c.findingsEn || []).map(function (_, i) {
@@ -3846,7 +3849,9 @@
           '</div>' : '') +
         '<div class="po-card-foot">' +
           '<span class="po-pending">' +
-            t('Imaging not yet uploaded', 'Imagens ainda não carregadas') +
+            (c.reportOnly
+              ? t('Report only', 'Somente laudo')
+              : t('Imaging not yet uploaded', 'Imagens ainda não carregadas')) +
           '</span>' +
           '<a class="po-pdf" href="' + c.pdfHref + '" download>' +
             t('Report PDF', 'Laudo PDF') +
@@ -3993,6 +3998,206 @@
         aiEn: 'A <strong>benign, ENT-referable</strong> finding set: low-grade chronic sinus inflammation plus an anatomic septal deviation — together a plausible cause of chronic nasal obstruction / recurrent sinus symptoms, and the kind of fixable structural issue worth surfacing even though it sits well outside the spine story. The same old myelography residue seen on the cranium CT is noted again, cross-confirming it. No aggressive sinonasal disease.',
         aiPt: 'Conjunto <strong>benigno e encaminhável ao otorrino</strong>: sinusopatia crônica de baixo grau somada a um desvio anatômico do septo — juntos, causa plausível de obstrução nasal crônica / sintomas sinusais recorrentes, e um problema estrutural corrigível que vale registrar mesmo estando fora da história da coluna. O mesmo resíduo de mielografia antiga visto na TC de crânio reaparece, confirmando-o de forma cruzada. Sem doença sinonasal agressiva.',
       },
+      {
+        eyebrowEn: '4F · MRI · Right hand',
+        eyebrowPt: '4F · RM · Mão direita',
+        titleEn:   'Right hand MRI',
+        titlePt:   'RM da mão direita',
+        dateEn: '12 Jun 2025',
+        datePt: '12 jun 2025',
+        physician: 'Req. Renan Radael de Figueiredo',
+        provider:  'São Luiz · Campinas',
+        pdfHref: 'scans/paulo-right-hand-mri-2025-06-12-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          '<strong>Degenerative change at the thumb metacarpophalangeal joint</strong> — joint-space narrowing, cartilage thinning, subchondral oedema and sclerosis with a small effusion.',
+          'Carpometacarpal narrowing between the capitate and the 3rd metacarpal with a small osteophyte.',
+          '<strong>Signal change with a vascular-channel appearance in the heads of the 2nd and 3rd metacarpals</strong>; no fracture or aggressive bone lesion.',
+          '<strong>Flexor tendinopathy of the 2nd finger</strong> and <strong>flexor tenosynovitis of the 4th finger</strong> (increased fluid in the flexor sheath). Ligaments intact.',
+        ],
+        findingsPt: [
+          '<strong>Alteração degenerativa na articulação metacarpofalângica do polegar</strong> — redução do espaço articular, afilamento da cartilagem, edema e esclerose subcondrais com pequeno derrame.',
+          'Redução do espaço carpometacárpico entre o capitato e o 3º metacarpo, com pequeno osteófito.',
+          '<strong>Alteração de sinal com aspecto de canais vasculares nas cabeças dos 2º e 3º metacarpos</strong>; sem fratura ou lesão óssea agressiva.',
+          '<strong>Tendinopatia dos flexores do 2º dedo</strong> e <strong>tenossinovite do flexor do 4º dedo</strong> (aumento de líquido na bainha). Complexos ligamentares íntegros.',
+        ],
+        aiEn: 'A third joint with the same picture: degenerative metacarpophalangeal / carpometacarpal change a decade after the shoulder (2015) and knee (2019). It extends the <strong>systemic osteoarthritic thread into the hand</strong> and adds an active soft-tissue component — flexor tendinopathy plus 4th-finger tenosynovitis — that is itself treatable. As the most recent peripheral study on file (2025), it confirms the diathesis is still progressing outside the spine.',
+        aiPt: 'Uma terceira articulação com o mesmo quadro: alteração degenerativa metacarpofalângica / carpometacárpica uma década após o ombro (2015) e o joelho (2019). Estende o <strong>fio osteoartrósico sistêmico até a mão</strong> e acrescenta um componente ativo de partes moles — tendinopatia flexora e tenossinovite do 4º dedo — tratável por si só. Sendo o estudo periférico mais recente do histórico (2025), confirma que a tendência segue progredindo fora da coluna.',
+      },
+      {
+        eyebrowEn: '4G · X-ray · Chest',
+        eyebrowPt: '4G · RX · Tórax',
+        titleEn:   'Chest X-ray',
+        titlePt:   'RX de tórax',
+        dateEn: '23 Jan 2019',
+        datePt: '23 jan 2019',
+        physician: 'Dr. Auro Giorgi Ferreira Nobre · CRM 112526',
+        provider:  'Unimed Diagnóstico por Imagem',
+        pdfHref: 'scans/paulo-chest-xr-2019-01-23-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          'Normal transparency of the pleuropulmonary fields.',
+          'Cardiac area and great vessels preserved.',
+          'Soft tissues and visible bone structures intact; costophrenic sinuses clear.',
+        ],
+        findingsPt: [
+          'Transparência normal dos campos pleuropulmonares.',
+          'Área cardíaca e vasos da base conservados.',
+          'Partes moles e estruturas ósseas visíveis íntegras; seios costofrênicos livres.',
+        ],
+        aiEn: 'A <strong>radiologically normal chest</strong> — no infiltrate, effusion or cardiomegaly. Read with the chest CT eight weeks later (also benign) and a second normal chest film in March, it sets a <strong>clean cardiopulmonary baseline</strong> through early 2019: the degenerative burden elsewhere has no thoracic correlate.',
+        aiPt: 'Tórax <strong>radiologicamente normal</strong> — sem infiltrado, derrame ou cardiomegalia. Lido junto à TC de tórax oito semanas depois (também benigna) e a um segundo RX de tórax normal em março, fixa uma <strong>linha de base cardiopulmonar limpa</strong> no início de 2019: a carga degenerativa de outras regiões não tem correlato torácico.',
+      },
+      {
+        eyebrowEn: '4H · X-ray · Chest & sinuses',
+        eyebrowPt: '4H · RX · Tórax e seios da face',
+        titleEn:   'Chest & sinus X-ray',
+        titlePt:   'RX de tórax e seios da face',
+        dateEn: '05 Mar 2019',
+        datePt: '05 mar 2019',
+        physician: 'Dr. Diego Armando Effio Solis · CRM 161584',
+        provider:  'Hospital São Paulo · Ribeirão Preto',
+        pdfHref: 'scans/paulo-chest-sinus-xr-2019-03-05-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          '<strong>Chest PA + lateral (05 Mar 2019):</strong> intact ribs, normal hila and pulmonary vasculature, no opacity or consolidation, clear costophrenic sinuses, normal cardiac area — radiologically normal.',
+          '<strong>Sinus series, 3 views (bundled, 02 Feb 2019):</strong> intact regional bone, normal sinus transparency, tortuous nasal septum — <strong>no evidence of sinus disease</strong>.',
+        ],
+        findingsPt: [
+          '<strong>RX de tórax PA + perfil (05 mar 2019):</strong> arcos costais íntegros, hilos e trama vascular normais, sem opacidades ou consolidações, seios costofrênicos livres, área cardíaca normal — radiologicamente normal.',
+          '<strong>RX de seios da face, 3 incidências (anexo, 02 fev 2019):</strong> estruturas ósseas regionais íntegras, transparência normal dos seios, tortuosidade do septo nasal — <strong>sem evidências de sinusopatia</strong>.',
+        ],
+        aiEn: 'Confirms the normal-chest picture and adds an early plain-film look at the sinuses: <strong>no sinusitis, only a tortuous / deviated nasal septum</strong> — the same septal deviation the 2023 face CT later characterises in detail. The structural nasal finding therefore predates the CT by four years, while inflammatory sinus disease was absent on plain film in 2019.',
+        aiPt: 'Confirma o tórax normal e acrescenta um olhar precoce, por radiografia simples, sobre os seios da face: <strong>sem sinusite, apenas septo nasal tortuoso / desviado</strong> — o mesmo desvio que a TC de face de 2023 detalharia depois. O achado estrutural nasal antecede a TC em quatro anos, enquanto a sinusopatia inflamatória estava ausente na radiografia de 2019.',
+      },
+      {
+        eyebrowEn: '4I · CT · Chest',
+        eyebrowPt: '4I · TC · Tórax',
+        titleEn:   'Chest CT (non-contrast)',
+        titlePt:   'TC de tórax (sem contraste)',
+        dateEn: '15 Mar 2019',
+        datePt: '15 mar 2019',
+        physician: 'Dr. José Álvaro Gonçalves Júnior · CRM 38510',
+        provider:  'Instituto de Radiologia',
+        pdfHref: 'scans/paulo-chest-ct-2019-03-15-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          'Indication: cough. Fine-slice helical CT with multiplanar / 3D reconstruction, without contrast.',
+          'Lung parenchyma normal; no pleural effusion or thickening. Trachea and bronchi patent.',
+          'No adenomegaly; small paratracheal, infracarinal and aortopulmonary-window <strong>lymph nodes up to 0.7 cm</strong>. Conclusion: <strong>reactive mediastinal lymph nodes</strong>.',
+          'Thoracic aorta and mediastinal vessels normal; normal cardiac area, no pericardial effusion. <strong>Dorsal spondyloarthrosis.</strong>',
+        ],
+        findingsPt: [
+          'Indicação: tosse. TC helicoidal de cortes finos com reconstrução multiplanar / 3D, sem contraste.',
+          'Parênquima pulmonar normal; sem derrame ou espessamento pleural. Traqueia e brônquios pérvios.',
+          'Ausência de adenomegalias; pequenos linfonodos paratraqueais, infra-carinal e da janela aorto-pulmonar <strong>até 0,7 cm</strong>. Conclusão: <strong>linfonodos reacionais mediastinais</strong>.',
+          'Aorta torácica e vasos mediastinais normais; área cardíaca normal, sem derrame pericárdico. <strong>Espondiloartrose dorsal.</strong>',
+        ],
+        aiEn: 'Worked up for cough and <strong>essentially reassuring</strong>: clean lung parenchyma, only small (≤ 0.7 cm) reactive mediastinal nodes with no mass or adenomegaly. The one cross-link to the dominant story is incidental — <strong>dorsal (thoracic) spondyloarthrosis</strong>, the degenerative spine showing up even on a chest CT and bridging the cervical and lumbar disease across the thoracic segment.',
+        aiPt: 'Investigada por tosse e <strong>essencialmente tranquilizadora</strong>: parênquima pulmonar limpo, apenas pequenos linfonodos mediastinais reacionais (≤ 0,7 cm), sem massa ou adenomegalia. O único elo com a história dominante é incidental — <strong>espondiloartrose dorsal (torácica)</strong>, a coluna degenerativa aparecendo até numa TC de tórax e fazendo a ponte entre a doença cervical e a lombar no segmento torácico.',
+      },
+      {
+        eyebrowEn: '4J · Ultrasound · Abdomen',
+        eyebrowPt: '4J · US · Abdome',
+        titleEn:   'Abdominal ultrasound',
+        titlePt:   'Ultrassom de abdome total',
+        dateEn: '27 Jul 2013',
+        datePt: '27 jul 2013',
+        physician: 'Dr. Paulo Tadeu de C. Prado · CRM 04233',
+        provider:  'Instituto de Radiologia',
+        pdfHref: 'scans/paulo-abdomen-us-2013-07-27-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          '<strong>Hepatomegaly</strong> — right lobe 16.0 cm, left lobe 8.9 cm — with diffusely increased echogenicity and sound-beam attenuation. Impression: <strong>mild hepatic steatosis</strong>.',
+          'Pancreas, spleen and kidneys normal. Bile ducts, gallbladder and common duct normal.',
+          'Bladder, prostate and seminal vesicles normal. No solid or cystic abdominal mass.',
+        ],
+        findingsPt: [
+          '<strong>Hepatomegalia</strong> — lobo direito 16,0 cm, lobo esquerdo 8,9 cm — com aumento difuso da ecogenicidade e atenuação do feixe sonoro. Impressão: <strong>esteatose hepática discreta</strong>.',
+          'Pâncreas, baço e rins normais. Vias biliares, vesícula e colédoco normais.',
+          'Bexiga, próstata e vesículas seminais normais. Sem massas abdominais sólidas ou císticas.',
+        ],
+        aiEn: 'The <strong>earliest study in Paulo&apos;s entire record (2013)</strong> and the <strong>start of the fatty-liver thread</strong>: hepatomegaly with mild steatosis, still present nine years later on the 2022 abdominal ultrasound. Steatosis tracks with the borderline-atherogenic lipid pattern in his bloodwork, making the liver the clearest metabolic cross-link — and, like the muscle thread, a modifiable one. The prostate was still normal here; its enlargement appears later.',
+        aiPt: 'O estudo <strong>mais antigo de todo o histórico do Paulo (2013)</strong> e o <strong>início do fio do fígado gorduroso</strong>: hepatomegalia com esteatose discreta, ainda presente nove anos depois no ultrassom de abdome de 2022. A esteatose acompanha o padrão lipídico limítrofe-aterogênico do sangue, tornando o fígado o elo metabólico mais claro — e, como o fio muscular, modificável. A próstata ainda estava normal aqui; o aumento aparece depois.',
+      },
+      {
+        eyebrowEn: '4K · Ultrasound · Abdomen & prostate',
+        eyebrowPt: '4K · US · Abdome e próstata',
+        titleEn:   'Abdomen & prostate ultrasound',
+        titlePt:   'Ultrassom de abdome e próstata',
+        dateEn: '24 Mar 2022',
+        datePt: '24 mar 2022',
+        physician: 'Dr. Rogério Ximenes · CRM 78585',
+        provider:  'Rossetti Diagnóstico por Imagem',
+        pdfHref: 'scans/paulo-abdomen-prostate-us-2022-03-24-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          '<strong>Enlarged prostate</strong> — 4.0 × 4.4 × 4.7 cm, volume 44.2 cm³ (~48.6 g); post-void residual 62 cm³. Heterogeneous parenchyma, no discrete peripheral-zone nodule on the suprapubic view.',
+          'Liver: normal size / contour with <strong>diffusely increased echogenicity (steatosis)</strong> and focal-sparing areas near the gallbladder.',
+          '<strong>Well-defined 40 × 45 mm hypoechoic nodular area</strong> in the deep medial left lobe (segment I) — nodular lesion vs. focal sparing, to clarify.',
+          'Gallbladder, pancreas, spleen, kidneys and bladder otherwise normal. Sensitivity reduced by increased abdominal volume.',
+        ],
+        findingsPt: [
+          '<strong>Próstata aumentada</strong> — 4,0 × 4,4 × 4,7 cm, volume 44,2 cm³ (~48,6 g); resíduo pós-miccional 62 cm³. Parênquima heterogêneo, sem nódulo evidente em zona periférica na via suprapúbica.',
+          'Fígado: dimensões / contornos normais com <strong>aumento difuso da ecogenicidade (esteatose)</strong> e áreas de preservação focal junto à vesícula.',
+          '<strong>Área nodular hipoecóica bem delimitada de 40 × 45 mm</strong> no lobo esquerdo medial profundo (setor I) — lesão nodular vs. preservação focal, a esclarecer.',
+          'Vesícula, pâncreas, baço, rins e bexiga sem outras alterações. Sensibilidade reduzida pelo aumento do volume abdominal.',
+        ],
+        aiEn: 'Two threads in one study. First, it <strong>opens the urological track</strong>: benign prostatic enlargement (44 cm³) with a measurable post-void residual (62 cm³) — the same picture the abdomen / pelvis CT flagged for urology workup that same year, and that the 2023 ultrasounds follow. Second, the fatty liver persists from 2013, now with a <strong>40 × 45 mm hypoechoic area the report itself cannot call</strong> (nodule vs. focal sparing) — the one finding here that warrants dedicated follow-up imaging rather than reassurance.',
+        aiPt: 'Dois fios num só estudo. Primeiro, <strong>abre a trilha urológica</strong>: aumento prostático benigno (44 cm³) com resíduo pós-miccional mensurável (62 cm³) — o mesmo quadro que a TC de abdome / pelve encaminhou para investigação urológica no mesmo ano e que os ultrassons de 2023 acompanham. Segundo, o fígado gorduroso persiste desde 2013, agora com uma <strong>área hipoecóica de 40 × 45 mm que o próprio laudo não define</strong> (nódulo vs. preservação focal) — o único achado aqui que pede imagem de seguimento dedicada, e não tranquilização.',
+      },
+      {
+        eyebrowEn: '4L · Ultrasound · Kidneys & urinary tract',
+        eyebrowPt: '4L · US · Rins e vias urinárias',
+        titleEn:   'Kidneys & urinary tract ultrasound',
+        titlePt:   'Ultrassom de rins e vias urinárias',
+        dateEn: '25 Aug 2022',
+        datePt: '25 ago 2022',
+        physician: 'Dr. Paulo Zanello · CRM 25.363',
+        provider:  'Clínica Zanello',
+        pdfHref: 'scans/paulo-kidneys-us-2022-08-25-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          'Right kidney 12.6 × 6.0 × 6.8 cm with a <strong>small 0.7 cm exophytic cortical cyst</strong> (mid third); normal cortex.',
+          'Left kidney 12.4 × 7.1 × 5.7 cm, normal. No pelvicalyceal dilation or calculi.',
+          'Bladder normal capacity and wall, preserved ureteric jets.',
+          'Impression: <strong>small simple cyst in the right kidney</strong>; everything else within normal limits.',
+        ],
+        findingsPt: [
+          'Rim direito 12,6 × 6,0 × 6,8 cm com <strong>pequeno cisto cortical exofítico de 0,7 cm</strong> (terço médio); córtex normal.',
+          'Rim esquerdo 12,4 × 7,1 × 5,7 cm, normal. Sem dilatação pielocalicial ou cálculos.',
+          'Bexiga de capacidade e paredes normais, jatos ureterais conservados.',
+          'Impressão: <strong>pequeno cisto simples no rim direito</strong>; demais estruturas dentro da normalidade.',
+        ],
+        aiEn: 'The renal half of the urological work-up, five months after the prostate ultrasound: <strong>essentially normal upper tracts</strong>, the only finding a 0.7 cm simple cortical cyst on the right — a benign, no-action incidental. Reassuring that the bladder-outlet picture (BPH, raised residual) has <strong>not yet caused upstream renal or collecting-system damage</strong>.',
+        aiPt: 'A metade renal da investigação urológica, cinco meses após o ultrassom de próstata: <strong>vias urinárias altas essencialmente normais</strong>, com o único achado de um cisto cortical simples de 0,7 cm à direita — incidental, benigno, sem conduta. Tranquilizador que o quadro de esvaziamento vesical (HPB, resíduo elevado) <strong>ainda não causou dano renal ou do sistema coletor a montante</strong>.',
+      },
+      {
+        eyebrowEn: '4M · Ultrasound · Urinary tract & prostate',
+        eyebrowPt: '4M · US · Vias urinárias e próstata',
+        titleEn:   'Urinary tract & prostate ultrasound',
+        titlePt:   'Ultrassom de vias urinárias e próstata',
+        dateEn: '13 Feb 2023',
+        datePt: '13 fev 2023',
+        physician: 'Dr. Rafael Azevedo Maychak · CRM-SP 149339',
+        provider:  'Santa Bárbara D&apos;Oeste, SP',
+        pdfHref: 'scans/paulo-urinary-prostate-us-2023-02-13-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          'Both kidneys topical, normal size and echotexture (right 12.1 cm, left 11.4 cm). Bladder normal.',
+          'Prostate finely heterogeneous, regular contours, volume ~32.5 cm³.',
+          '<strong>Post-void residual ~76.9 cm³</strong> (pre-void ~590 cm³).',
+          'Impression: study of usual appearance.',
+        ],
+        findingsPt: [
+          'Ambos os rins tópicos, dimensões e ecotextura normais (direito 12,1 cm, esquerdo 11,4 cm). Bexiga normal.',
+          'Próstata finamente heterogênea, contornos regulares, volume ~32,5 cm³.',
+          '<strong>Resíduo pós-miccional ~76,9 cm³</strong> (pré-miccional ~590 cm³).',
+          'Impressão: estudo de aspecto habitual.',
+        ],
+        aiEn: 'The <strong>most recent urological study</strong> and the natural follow-up to the 2022 pair. Each report reads as &ldquo;usual&rdquo; in isolation, but across the year the <strong>post-void residual rose from 62 to ~77 cm³</strong> — incomplete bladder emptying trending the wrong way even as the kidneys stay normal. This is the through-line the 2022 CT predicted: a slowly-progressive benign-prostatic-obstruction picture that belongs on its own surveillance track, separate from the spine.',
+        aiPt: 'O <strong>estudo urológico mais recente</strong> e o seguimento natural do par de 2022. Cada laudo, isolado, é lido como &ldquo;habitual&rdquo;, mas ao longo do ano o <strong>resíduo pós-miccional subiu de 62 para ~77 cm³</strong> — esvaziamento vesical incompleto tendendo na direção errada, ainda que os rins permaneçam normais. É o fio que a TC de 2022 previu: um quadro de obstrução prostática benigna lentamente progressivo, que merece vigilância própria, à parte da coluna.',
+      },
     ];
 
     return (
@@ -4002,12 +4207,12 @@
             t('4 · Other studies on file', '4 · Outros exames disponíveis') +
           '</div>' +
           '<h2 class="section-title">' +
-            t('Beyond the spine — five additional reports',
-              'Além da coluna — outros cinco laudos') +
+            t('Beyond the spine — thirteen additional reports',
+              'Além da coluna — outros treze laudos') +
           '</h2>' +
           '<p class="section-desc">' +
-            t('Five additional radiology reports already on file. The full PDFs are linked from each card; image viewers will be added once the DICOM exports are imported.',
-              'Cinco laudos adicionais já no histórico. Cada cartão traz o PDF completo; os visualizadores de imagem serão acrescentados quando os exports DICOM forem importados.') +
+            t('Thirteen additional radiology reports on file, spanning 2013 to 2025 — peripheral joints (shoulder, knee, hand), chest (X-ray and CT), the abdomen / liver and a four-study urological series, plus the head and face CTs. Each card carries the radiologist&apos;s key findings, an AI read, and the full PDF; these are report-only studies, with no source imagery to view.',
+              'Treze laudos de radiologia no histórico, de 2013 a 2025 — articulações periféricas (ombro, joelho, mão), tórax (RX e TC), abdome / fígado e uma série urológica de quatro estudos, além das TCs de crânio e face. Cada cartão traz os achados-chave do radiologista, uma leitura da IA e o PDF completo; são estudos somente-laudo, sem imagens de origem para visualizar.') +
           '</p>' +
           '<div class="po-grid">' +
             cards.map(buildPauloOtherStudyCard).join('') +
@@ -4020,10 +4225,10 @@
   /* ── Overall clinical evolution · the major cross-study link ──────
      The capstone synthesis. Sections 1–4 each look at one axis (the
      current snapshot, the spine viewer, the per-region longitudinal
-     arcs, the isolated studies). This ties ALL ten studies — spine,
-     peripheral joints and systemic CT — into one eleven-year clinical
-     story, and surfaces the non-spine follow-up that the spine
-     narrative tends to bury. */
+     arcs, the isolated studies). This ties ALL eighteen studies — spine,
+     peripheral joints, chest, abdomen/urological and systemic CT — into
+     one thirteen-year clinical story, and surfaces the non-spine
+     follow-up that the spine narrative tends to bury. */
 
   function buildPauloOverallEvolution() {
     return (
@@ -4035,17 +4240,17 @@
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
-              t('The through-line across all 10 studies · spine, peripheral joints and systemic CT · 2015 → 2026 · 11 years',
-                'O fio condutor entre os 10 estudos · coluna, articulações periféricas e TC sistêmica · 2015 → 2026 · 11 anos') +
+              t('The through-line across all 18 studies · spine, peripheral joints, chest, abdomen / urological and systemic CT · 2013 → 2026 · 13 years',
+                'O fio condutor entre os 18 estudos · coluna, articulações periféricas, tórax, abdome / urológico e TC sistêmica · 2013 → 2026 · 13 anos') +
             '</div>' +
             '<div class="paulo-ai-subhead">' +
               t('The one-line read', 'A leitura em uma linha') +
             '</div>' +
             '<div class="paulo-ai-summary-body lang-en">' +
-              '<p>Across eleven years and ten studies, the picture is coherent: a <strong>single, slowly-progressive and currently-active systemic degenerative process</strong>, worst in the spine but not confined to it, carrying an unbroken <strong>left-sided radicular burden</strong> and a parallel arc of <strong>muscle deconditioning</strong>. Paulo does not have a bad back and a few unrelated incidental findings — he has a body-wide osteoarthritic diathesis whose most symptomatic site happens to be the spine.</p>' +
+              '<p>Across thirteen years and eighteen studies, the picture is coherent: a <strong>single, slowly-progressive and currently-active systemic degenerative process</strong>, worst in the spine but not confined to it, carrying an unbroken <strong>left-sided radicular burden</strong> and a parallel arc of <strong>muscle deconditioning</strong>. Paulo does not have a bad back and a few unrelated incidental findings — he has a body-wide osteoarthritic diathesis whose most symptomatic site happens to be the spine.</p>' +
             '</div>' +
             '<div class="paulo-ai-summary-body lang-pt">' +
-              '<p>Ao longo de onze anos e dez estudos, o quadro é coerente: um <strong>único processo degenerativo sistêmico, lentamente progressivo e atualmente ativo</strong>, pior na coluna mas não restrito a ela, com um <strong>encargo radicular à esquerda</strong> ininterrupto e um arco paralelo de <strong>descondicionamento muscular</strong>. O Paulo não tem uma coluna ruim mais alguns achados incidentais soltos — tem uma tendência osteoartrósica de todo o corpo cujo sítio mais sintomático é a coluna.</p>' +
+              '<p>Ao longo de treze anos e dezoito estudos, o quadro é coerente: um <strong>único processo degenerativo sistêmico, lentamente progressivo e atualmente ativo</strong>, pior na coluna mas não restrito a ela, com um <strong>encargo radicular à esquerda</strong> ininterrupto e um arco paralelo de <strong>descondicionamento muscular</strong>. O Paulo não tem uma coluna ruim mais alguns achados incidentais soltos — tem uma tendência osteoartrósica de todo o corpo cujo sítio mais sintomático é a coluna.</p>' +
             '</div>' +
 
             '<div class="paulo-ai-arcs-block">' +
@@ -4064,10 +4269,10 @@
                 '<div class="paulo-ai-arc">' +
                   '<div class="paulo-ai-arc-head">' +
                     '<h3 class="paulo-ai-arc-title">' + t('2 · Systemic, not focal', '2 · Sistêmico, não focal') + '</h3>' +
-                    '<span class="paulo-ai-arc-span">' + t('Shoulder 2015 · Knee 2019', 'Ombro 2015 · Joelho 2019') + '</span>' +
+                    '<span class="paulo-ai-arc-span">' + t('Shoulder 2015 · Knee 2019 · Hand 2025', 'Ombro 2015 · Joelho 2019 · Mão 2025') + '</span>' +
                   '</div>' +
-                  '<p class="paulo-ai-arc-body lang-en">The shoulder (intense AC arthropathy, 2015) and the knee (grade III chondropathy + meniscal degeneration, 2019) show the <strong>same degenerative diathesis in load-bearing joints</strong> — the spine is the worst-hit site, not the only one. Practically, the lower-limb disease matters to the spine: a knee-sparing, antalgic gait <strong>reloads the compromised left lumbar segments</strong>, so these are not independent problems.</p>' +
-                  '<p class="paulo-ai-arc-body lang-pt">O ombro (artropatia AC intensa, 2015) e o joelho (condropatia grau III + degeneração meniscal, 2019) mostram a <strong>mesma tendência degenerativa em articulações de carga</strong> — a coluna é o sítio mais afetado, não o único. Na prática, a doença do membro inferior importa para a coluna: uma marcha antálgica poupando o joelho <strong>sobrecarrega os segmentos lombares esquerdos comprometidos</strong>, de modo que não são problemas independentes.</p>' +
+                  '<p class="paulo-ai-arc-body lang-en">The shoulder (intense AC arthropathy, 2015), the knee (grade III chondropathy + meniscal degeneration, 2019) and now the <strong>right hand (degenerative MCP / CMC change, 2025)</strong> show the <strong>same degenerative diathesis in joint after joint</strong> — the spine is the worst-hit site, not the only one, and the hand confirms it is <strong>still spreading a decade on</strong>. Practically, the lower-limb disease also matters to the spine: a knee-sparing, antalgic gait <strong>reloads the compromised left lumbar segments</strong>, so these are not independent problems.</p>' +
+                  '<p class="paulo-ai-arc-body lang-pt">O ombro (artropatia AC intensa, 2015), o joelho (condropatia grau III + degeneração meniscal, 2019) e agora a <strong>mão direita (alteração degenerativa MCF / CMC, 2025)</strong> mostram a <strong>mesma tendência degenerativa em articulação após articulação</strong> — a coluna é o sítio mais afetado, não o único, e a mão confirma que ela <strong>segue se espalhando uma década depois</strong>. Na prática, a doença do membro inferior também importa para a coluna: uma marcha antálgica poupando o joelho <strong>sobrecarrega os segmentos lombares esquerdos comprometidos</strong>, de modo que não são problemas independentes.</p>' +
                 '</div>' +
                 '<div class="paulo-ai-arc">' +
                   '<div class="paulo-ai-arc-head">' +
@@ -4078,8 +4283,8 @@
                   '<p class="paulo-ai-arc-body lang-pt">A <strong>atrofia muscular</strong> paravertebral (e glútea, na TC de 2022) <strong>aparece em duas modalidades com quatro anos de diferença</strong> — logo, o descondicionamento é antigo, ao mesmo tempo consequência e motor da dor. É também a <strong>alavanca mais modificável</strong>: o fortalecimento direcionado é o único fio desta página que o Paulo pode mudar sem agulha nem bisturi.</p>' +
                 '</div>' +
               '</div>' +
-              '<p class="paulo-ai-arcs-cross lang-en"><strong>Beyond the musculoskeletal — don&apos;t let the spine bury these.</strong> The 2022 abdomen/pelvis CT carries a <strong>bladder-wall thickening + globose prostate that the report itself flags for urology workup</strong> — the one genuinely time-sensitive non-spine item — plus sigmoid diverticulosis. The head and face CTs are reassuring but both show <strong>residual myelography contrast</strong>, proof the spinal disease is decades-deep; the face CT adds a benign, ENT-referable chronic sinus disease with septal deviation. These belong on a <strong>separate follow-up track</strong> from the spine.</p>' +
-              '<p class="paulo-ai-arcs-cross lang-pt"><strong>Além do musculoesquelético — não deixe a coluna enterrar estes.</strong> A TC de abdome/pelve de 2022 traz um <strong>espessamento da parede vesical + próstata globosa que o próprio laudo encaminha para investigação urológica</strong> — o único item não-coluna realmente sensível ao tempo — além de diverticulose sigmoide. As TCs de crânio e face são tranquilizadoras, mas ambas mostram <strong>resíduo de mielografia</strong>, prova de que a doença da coluna é de décadas; a TC de face acrescenta uma sinusopatia crônica benigna, encaminhável ao otorrino, com desvio de septo. Estes pertencem a um <strong>acompanhamento à parte</strong> do da coluna.</p>' +
+              '<p class="paulo-ai-arcs-cross lang-en"><strong>Beyond the musculoskeletal — don&apos;t let the spine bury these.</strong> A <strong>urological thread</strong> runs through four studies: the 2022 abdomen / pelvis CT flagged a thickened bladder wall + globose prostate <em>for urology workup</em>, and the ultrasound series that followed confirms benign prostatic enlargement with a <strong>post-void residual climbing from 62 cm³ (Mar 2022) to ~77 cm³ (Feb 2023)</strong> — incomplete emptying trending the wrong way while the kidneys stay normal (only a 0.7 cm simple cyst). A parallel <strong>metabolic thread</strong>: hepatic steatosis is on record from the very first study (2013) through 2022, tracking his borderline-atherogenic lipids — and the 2022 ultrasound leaves a <strong>40 × 45 mm left-lobe area uncharacterised (nodule vs. focal sparing)</strong> that warrants dedicated follow-up. The head and face CTs are reassuring but both show <strong>residual myelography contrast</strong>, proof the spinal disease is decades-deep; the face CT adds a benign, ENT-referable chronic sinus disease with septal deviation. The chest films and CT (2019) are clean. These belong on a <strong>separate follow-up track</strong> from the spine.</p>' +
+              '<p class="paulo-ai-arcs-cross lang-pt"><strong>Além do musculoesquelético — não deixe a coluna enterrar estes.</strong> Um <strong>fio urológico</strong> percorre quatro estudos: a TC de abdome / pelve de 2022 sinalizou parede vesical espessada + próstata globosa <em>para investigação urológica</em>, e a série de ultrassons seguinte confirma aumento prostático benigno com <strong>resíduo pós-miccional subindo de 62 cm³ (mar 2022) para ~77 cm³ (fev 2023)</strong> — esvaziamento incompleto tendendo na direção errada, com rins normais (apenas um cisto simples de 0,7 cm). Um <strong>fio metabólico</strong> em paralelo: a esteatose hepática consta desde o primeiro estudo (2013) até 2022, acompanhando os lipídios limítrofe-aterogênicos — e o ultrassom de 2022 deixa uma <strong>área de 40 × 45 mm no lobo esquerdo sem caracterização (nódulo vs. preservação focal)</strong> que pede seguimento dedicado. As TCs de crânio e face são tranquilizadoras, mas ambas mostram <strong>resíduo de mielografia</strong>, prova de que a doença da coluna é de décadas; a TC de face acrescenta uma sinusopatia crônica benigna, encaminhável ao otorrino, com desvio de septo. As radiografias e a TC de tórax (2019) estão limpas. Estes pertencem a um <strong>acompanhamento à parte</strong> do da coluna.</p>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -4579,8 +4784,8 @@
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
-              t('Synthesised from 5 spine MRI reports · CETAM Diagnóstico · 2015 → 2026 · plus 5 single-occurrence studies',
-                'Sintetizado a partir de 5 laudos de RM da coluna · CETAM Diagnóstico · 2015 → 2026 · mais 5 estudos isolados') +
+              t('Synthesised from 5 spine MRI reports · CETAM Diagnóstico · 2015 → 2026 · plus 13 single-occurrence studies · 2013 → 2025',
+                'Sintetizado a partir de 5 laudos de RM da coluna · CETAM Diagnóstico · 2015 → 2026 · mais 13 estudos isolados · 2013 → 2025') +
             '</div>' +
             '<div class="paulo-ai-subhead">' +
               t('Current snapshot · 15 May 2026', 'Quadro atual · 15 de maio de 2026') +
