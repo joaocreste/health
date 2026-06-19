@@ -705,3 +705,44 @@ export const lifeEvents = pgTable("life_events", {
   index("life_events_patient_cat_idx").on(t.patientId, t.category),
   check("life_events_sig_range", sql`significance is null or (significance between 1 and 5)`),
 ]);
+
+/* ── Reflective Portrait (migration 0017) ──────────────────────────────
+   Patient-facing self-knowledge surface for patients with NO clinical
+   mental-health history. NOT a clinical record: each row is a reflective
+   item from the patient's own words (source='self'), a third-party account
+   (source='other'), or a bounded AI synthesis (source='ai_synthesis',
+   carrying confidence). Johari quadrant + bilingual content. distress_flag
+   routes crisis content away from portrait render; status gates operator
+   approval. See db/migrations/0017_reflective_portrait.sql. */
+export const reflectiveItems = pgTable("reflective_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  itemKey: text("item_key").notNull(),                 // stable slug for idempotent re-seed
+  source: text("source").notNull(),                    // self | other | ai_synthesis
+  sourceMeta: jsonb("source_meta"),                    // {author_name, relationship, known_duration, entry_date, confidence}
+  quadrant: text("quadrant").notNull(),                // open | blind | hidden | emerging
+  category: text("category").notNull(),                // strength|growth_edge|theme|value|jungian|recommendation|question|texture
+  contentEn: text("content_en").notNull(),
+  contentPt: text("content_pt").notNull(),
+  evidence: text("evidence"),                          // short attributed snippet
+  distressFlag: boolean("distress_flag").notNull().default(false),
+  sortRank: integer("sort_rank").notNull().default(0),
+  status: text("status").notNull().default("approved"), // approved | held
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("reflective_items_key_uq").on(t.patientId, t.itemKey),
+  index("reflective_items_patient_idx").on(t.patientId),
+]);
+
+export const reflectiveResponses = pgTable("reflective_responses", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  itemId: uuid("item_id").notNull().references(() => reflectiveItems.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reaction: text("reaction"),                          // resonates | doesnt | note
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("reflective_responses_item_uq").on(t.itemId),
+  index("reflective_responses_patient_idx").on(t.patientId),
+]);

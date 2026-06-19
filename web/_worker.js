@@ -429,6 +429,88 @@ async function handleMe(request, env) {
   });
 }
 
+/* Reflective Portrait (migration 0017) — GET approved reflective_items for a
+   patient, each with the patient's current right-to-respond reaction, gated by
+   the 'mental' scope. Crisis content (distress_flag) is NEVER returned as a
+   portrait item; it routes elsewhere, so it is filtered out here. */
+async function handleReflectiveItems(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!grant.scopes.has("mental")) {
+      return jsonError(viewerClerk ? 403 : 401,
+        grant.status === "expired" ? "grant_expired" : "forbidden");
+    }
+    const rows = await sql`
+      SELECT ri.id, ri.item_key, ri.source, ri.source_meta, ri.quadrant, ri.category,
+             ri.content_en, ri.content_pt, ri.evidence, ri.sort_rank,
+             rr.reaction AS response_reaction, rr.note AS response_note
+      FROM reflective_items ri
+      JOIN users u ON u.id = ri.patient_id
+      LEFT JOIN reflective_responses rr ON rr.item_id = ri.id
+      WHERE u.clerk_user_id = ${clerk}
+        AND ri.status = 'approved' AND ri.distress_flag = false
+      ORDER BY ri.category, ri.sort_rank, ri.created_at`;
+    await auditScopedRead(sql, grant, "reflective_read", "/api/reflective", ["mental"]);
+    return new Response(JSON.stringify({ items: rows, can_respond: grant.status === "self" || grant.status === "admin" }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    return jsonError(500, `Reflective read failed: ${e.message}`);
+  }
+}
+
+/* Right-to-respond: the patient (self) or an admin records a reaction
+   (resonates | doesnt | note) + optional note to one reflective item. One
+   current response per item (upsert on item_id). */
+async function handleReflectiveRespond(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient_clerk || "").trim();
+  const itemId = String(body?.item_id || "").trim();
+  const reaction = body?.reaction == null ? null : String(body.reaction).trim();
+  const note = body?.note == null ? null : String(body.note).slice(0, 4000);
+  if (!patientClerk) return jsonError(400, "patient_clerk_required");
+  if (!itemId) return jsonError(400, "item_id_required");
+  if (reaction && !["resonates", "doesnt", "note"].includes(reaction)) return jsonError(400, "bad_reaction");
+  const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
+  if (!viewerClerk) return jsonError(401, "viewer_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const [patientRows, viewerRows] = await Promise.all([
+      sql`SELECT id FROM users WHERE clerk_user_id = ${patientClerk} AND archived_at IS NULL LIMIT 1`,
+      sql`SELECT id, role FROM users WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`,
+    ]);
+    if (patientRows.length === 0) return jsonError(404, "patient_not_found");
+    if (viewerRows.length === 0) return jsonError(401, "viewer_not_found");
+    const patientId = patientRows[0].id;
+    const isSelf = viewerRows[0].id === patientId;
+    const isAdmin = viewerRows[0].role === "admin";
+    if (!isSelf && !isAdmin) return jsonError(403, "forbidden");
+    // Item must belong to this patient (no cross-patient writes).
+    const itemRows = await sql`SELECT id FROM reflective_items WHERE id = ${itemId} AND patient_id = ${patientId} LIMIT 1`;
+    if (itemRows.length === 0) return jsonError(404, "item_not_found");
+    const ins = await sql`
+      INSERT INTO reflective_responses (item_id, patient_id, reaction, note)
+      VALUES (${itemId}, ${patientId}, ${reaction}, ${note})
+      ON CONFLICT (item_id) DO UPDATE SET
+        reaction = excluded.reaction, note = excluded.note, updated_at = now()
+      RETURNING reaction, note, updated_at`;
+    return new Response(JSON.stringify({ ok: true, response: ins[0] }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    return jsonError(500, `Reflective respond failed: ${e.message}`);
+  }
+}
+
 async function handlePatientSummary(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
@@ -3534,6 +3616,12 @@ export default {
     }
     if (url.pathname === "/api/patient-summary") {
       return handlePatientSummary(request, env);
+    }
+    if (url.pathname === "/api/reflective") {
+      return handleReflectiveItems(request, env);
+    }
+    if (url.pathname === "/api/reflective-respond") {
+      return handleReflectiveRespond(request, env);
     }
     if (url.pathname === "/api/patient-exams") {
       return handlePatientExams(request, env);

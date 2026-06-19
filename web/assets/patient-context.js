@@ -336,6 +336,7 @@
           el.classList.contains('jc-exams') ||
           el.classList.contains('jc-home') ||
           el.classList.contains('jc-paulo-exams') ||
+          el.classList.contains('jc-paulo-mental') ||
           el.classList.contains('jc-silvana-exams') ||
           el.classList.contains('jc-danger-zone') ||
           el.classList.contains('jc-danger-backdrop') ||
@@ -4810,30 +4811,83 @@
     );
   }
 
-  /* ── Paulo Silotto · bespoke Mental page ────────────────────────────
-     Renders the verbatim collateral family account (window.PAULO_MENTAL_
-     NARRATIVE, loaded via assets/paulo-mental.js) as a primary-source
-     document — NOT an AI interpretation. The ~20-min spoken account by
-     Paulo's son is reproduced word-for-word; only the page chrome is
-     bilingual. This is the source text the later cross-domain synthesis
-     reads (also mirrored to Postgres writings). */
+  /* ── Paulo Silotto · bespoke Mental page — REFLECTIVE PORTRAIT ───────
+     NOT a clinical record. A reflective self-knowledge surface assembled
+     from reflective_items (migration 0017) via /api/reflective: the son's
+     attributed account (source=other) plus a bounded AI synthesis
+     (ai_synthesis), organised on a Johari spine. No diagnosis, no symptoms,
+     no risk flags. Every third-party + AI item carries a provenance chip and
+     a right-to-respond control (POST /api/reflective-respond). The verbatim
+     source account (window.PAULO_MENTAL_NARRATIVE) stays available as a
+     collapsed disclosure at the foot of the page. */
   function injectPauloMentalStyles() {
     if (document.getElementById('paulo-mental-styles')) return;
     var css = [
-      'main.jc-paulo-mental { display: block; }',
-      'main.jc-paulo-mental .pm-source-note { max-width: 820px; margin: -8px auto 0; padding: 16px 20px; background: #F4F1EB; border: 1px solid #E3DDD0; border-left: 3px solid #7A8FA6; border-radius: 8px; }',
-      'main.jc-paulo-mental .pm-source-note .pm-source-pill { display: inline-block; font-family: "Raleway", sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: #1E2D3D; padding: 3px 9px; border-radius: 999px; margin-right: 8px; vertical-align: middle; }',
-      'main.jc-paulo-mental .pm-source-note p { margin: 8px 0 0; font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.6; color: #4A5868; }',
-      'main.jc-paulo-mental .pm-transcript-wrap { padding: 36px 0 8px; }',
-      'main.jc-paulo-mental .pm-transcript { max-width: 760px; margin: 0 auto; padding: 8px 28px; border-left: 3px solid #B8954A; }',
-      'main.jc-paulo-mental .pm-transcript p { font-family: "Mulish", sans-serif; font-size: 17px; line-height: 1.75; color: #24323F; margin: 0 0 20px; }',
-      'main.jc-paulo-mental .pm-transcript p.pm-lead { font-size: 18px; }',
-      'main.jc-paulo-mental .pm-transcript p.pm-lead::first-letter { font-family: "Raleway", sans-serif; font-weight: 800; font-size: 52px; line-height: 0.8; float: left; margin: 6px 10px 0 0; color: #B8954A; }',
-      'main.jc-paulo-mental .pm-provenance { max-width: 760px; margin: 8px auto 0; padding-top: 18px; border-top: 1px solid #E3DDD0; display: flex; flex-wrap: wrap; gap: 18px 32px; }',
-      'main.jc-paulo-mental .pm-prov-item { display: flex; flex-direction: column; gap: 2px; }',
-      'main.jc-paulo-mental .pm-prov-item span:first-child { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
-      'main.jc-paulo-mental .pm-prov-item span:last-child { font-family: "Mulish", sans-serif; font-size: 14px; color: #24323F; }',
-      '@media (max-width: 720px) { main.jc-paulo-mental .pm-transcript { padding: 8px 16px; } main.jc-paulo-mental .pm-transcript p { font-size: 16px; } }'
+      'main.jc-paulo-mental { display: block; background: #F9F7F4; padding: 0 0 64px; }',
+      'main.jc-paulo-mental .hero { background: #0A1428; color: #fff; padding: 46px 0 50px; }',
+      'main.jc-paulo-mental .hero .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-mental .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(244,185,66,0.9); margin-bottom: 10px; }',
+      'main.jc-paulo-mental .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 34px; line-height: 1.12; margin: 0 0 10px; }',
+      'main.jc-paulo-mental .hero-sub { color: rgba(255,255,255,0.82); font-size: 16px; line-height: 1.6; margin: 0; max-width: 60ch; }',
+      'main.jc-paulo-mental .rp-wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
+      'main.jc-paulo-mental .rp-frame { margin: 22px auto 0; }',
+      'main.jc-paulo-mental .rp-frame-inner { background: #fff; border: 1px solid #ECE7DD; border-left: 3px solid #F4B942; border-radius: 10px; padding: 15px 19px; font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.6; color: #3A4654; }',
+      'main.jc-paulo-mental .rp-section { margin: 40px auto 0; }',
+      'main.jc-paulo-mental .rp-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
+      'main.jc-paulo-mental .rp-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 21px; color: #0A1428; margin: 0 0 4px; }',
+      'main.jc-paulo-mental .rp-sub { font-family: "Mulish", sans-serif; font-size: 14px; color: #5A6675; margin: 0 0 18px; line-height: 1.55; }',
+      'main.jc-paulo-mental .rp-johari { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }',
+      '@media (max-width: 680px) { main.jc-paulo-mental .rp-johari { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-mental .rp-jcell { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      'main.jc-paulo-mental .rp-jcell.is-empty { background: #F6F4EF; border-style: dashed; }',
+      'main.jc-paulo-mental .rp-jhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }',
+      'main.jc-paulo-mental .rp-jtitle { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0A1428; }',
+      'main.jc-paulo-mental .rp-jcount { font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 600; color: #244E6E; }',
+      'main.jc-paulo-mental .rp-jcell.is-empty .rp-jcount { color: #B6AD98; }',
+      'main.jc-paulo-mental .rp-jdesc { font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.5; color: #5A6675; margin: 0; }',
+      'main.jc-paulo-mental .rp-cards { display: flex; flex-direction: column; gap: 14px; }',
+      'main.jc-paulo-mental .rp-card { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      'main.jc-paulo-mental .rp-card.rp-card-warm { border-left: 3px solid #F4B942; }',
+      'main.jc-paulo-mental .rp-card.rp-card-care { border-left: 3px solid #6BA3C7; background: #FBFAF7; }',
+      'main.jc-paulo-mental .rp-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; flex-wrap: wrap; }',
+      'main.jc-paulo-mental .rp-body { font-family: "Mulish", sans-serif; font-size: 15.5px; line-height: 1.62; color: #24323F; margin: 0; }',
+      'main.jc-paulo-mental .rp-evidence { font-family: "Mulish", sans-serif; font-size: 13px; font-style: italic; color: #7A8694; margin: 10px 0 0; padding-left: 10px; border-left: 2px solid #E2DCCF; }',
+      'main.jc-paulo-mental .rp-chip { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }',
+      'main.jc-paulo-mental .rp-chip-other { background: #EAF2F7; color: #244E6E; border-color: #CFE0EB; }',
+      'main.jc-paulo-mental .rp-chip-self { background: #FCF3DC; color: #8A6A18; border-color: #F4DD9C; }',
+      'main.jc-paulo-mental .rp-chip-ai { background: #FDF8EC; color: #6B4FA0; border-color: #F4DD9C; }',
+      'main.jc-paulo-mental .ai-pill { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; background: #6B4FA0; color: #fff; padding: 1px 5px; border-radius: 4px; }',
+      'main.jc-paulo-mental .rp-respond { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #E7E2D8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }',
+      'main.jc-paulo-mental .rp-respond-q { font-family: "Mulish", sans-serif; font-size: 12.5px; color: #7A8694; margin-right: 2px; }',
+      'main.jc-paulo-mental .rp-btn { font-family: "Mulish", sans-serif; font-size: 13px; color: #244E6E; background: #fff; border: 1px solid #CFD8DF; border-radius: 999px; padding: 5px 12px; cursor: pointer; transition: all 0.12s; }',
+      'main.jc-paulo-mental .rp-btn:hover { border-color: #6BA3C7; }',
+      'main.jc-paulo-mental .rp-btn.is-active { background: #244E6E; color: #fff; border-color: #244E6E; }',
+      'main.jc-paulo-mental .rp-note-box { flex-basis: 100%; margin-top: 8px; display: flex; gap: 8px; }',
+      'main.jc-paulo-mental .rp-note-input { flex: 1; font-family: "Mulish", sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid #CFD8DF; border-radius: 8px; resize: vertical; min-height: 56px; }',
+      'main.jc-paulo-mental .rp-note-save { align-self: flex-start; font-family: "Mulish", sans-serif; font-size: 13px; background: #F4B942; color: #0A1428; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; }',
+      'main.jc-paulo-mental .rp-status { flex-basis: 100%; font-family: "Mulish", sans-serif; font-size: 12px; color: #3E7D5A; margin-top: 4px; min-height: 14px; }',
+      'main.jc-paulo-mental .rp-support { margin-top: 12px; background: #EAF2F7; border: 1px solid #CFE0EB; border-radius: 8px; padding: 10px 12px; font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.55; color: #244E6E; }',
+      'main.jc-paulo-mental details.rp-collapse { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; margin-top: 14px; overflow: hidden; }',
+      'main.jc-paulo-mental details.rp-collapse > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: flex; align-items: center; gap: 8px; font-family: "Raleway", sans-serif; font-weight: 600; font-size: 15px; color: #0A1428; }',
+      'main.jc-paulo-mental details.rp-collapse > summary::-webkit-details-marker { display: none; }',
+      'main.jc-paulo-mental details.rp-collapse[open] > summary { border-bottom: 1px solid #EFEADF; }',
+      'main.jc-paulo-mental .rp-collapse-body { padding: 8px 18px 18px; }',
+      'main.jc-paulo-mental .rp-dismiss { margin-left: auto; font-family: "Mulish", sans-serif; font-size: 12px; color: #9AA4B0; background: none; border: none; cursor: pointer; }',
+      'main.jc-paulo-mental .rp-reading { display: flex; flex-direction: column; gap: 12px; }',
+      'main.jc-paulo-mental .rp-q { background: #fff; border: 1px solid #E7E2D8; border-left: 3px solid #6BA3C7; border-radius: 10px; padding: 14px 18px; font-family: "Mulish", sans-serif; font-size: 16px; line-height: 1.55; color: #24323F; }',
+      'main.jc-paulo-mental .rp-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      '@media (max-width: 680px) { main.jc-paulo-mental .rp-pillars { grid-template-columns: 1fr; } }',
+      'main.jc-paulo-mental .rp-pillar { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      'main.jc-paulo-mental .rp-pillar.is-tbd { background: #F6F4EF; }',
+      'main.jc-paulo-mental .rp-pillar-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
+      'main.jc-paulo-mental .rp-pillar.is-tbd .rp-pillar-label { color: #B6AD98; }',
+      'main.jc-paulo-mental .rp-pillar-body { font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.55; color: #3A4654; margin: 0; }',
+      'main.jc-paulo-mental .rp-cta { margin: 40px auto 0; }',
+      'main.jc-paulo-mental .rp-cta-inner { background: #0A1428; color: #fff; border-radius: 12px; padding: 26px 28px; }',
+      'main.jc-paulo-mental .rp-cta-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 19px; margin: 0 0 8px; }',
+      'main.jc-paulo-mental .rp-cta-p { font-family: "Mulish", sans-serif; font-size: 14.5px; line-height: 1.6; color: rgba(255,255,255,0.85); margin: 0; }',
+      'main.jc-paulo-mental .rp-loading { margin: 40px auto; font-family: "Mulish", sans-serif; color: #7A8694; }',
+      'main.jc-paulo-mental .pm-transcript p { font-family: "Mulish", sans-serif; font-size: 15px; line-height: 1.7; color: #34414E; margin: 0 0 16px; }'
     ].join('\n');
     var st = document.createElement('style');
     st.id = 'paulo-mental-styles';
@@ -4843,75 +4897,302 @@
 
   function renderPauloMental() {
     injectPauloMentalStyles();
-    document.title = 'Lumen Health — Mental · Collateral account · Paulo Silotto Souza';
+    document.title = 'Lumen Health — Mental · Reflective portrait · Paulo Silotto Souza';
 
-    var N = window.PAULO_MENTAL_NARRATIVE;
-    var acct = (N && N.account) || {};
-    var paras = acct.paragraphs || [];
+    function heroHtml() {
+      return '<section class="hero"><div class="container">' +
+        '<div class="hero-eyebrow">' + t('Reflective Portrait · 19 June 2026', 'Retrato Reflexivo · 19 de junho de 2026') + '</div>' +
+        '<h1 class="hero-title">' + t('Paulo Silotto Souza', 'Paulo Silotto Souza') + '</h1>' +
+        '<p class="hero-sub">' + t('Drawn from your own words and the people who know you.',
+                                   'A partir das suas próprias palavras e das pessoas que conhecem você.') + '</p>' +
+        '</div></section>';
+    }
 
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' + t('Mental → Collateral account', 'Mental → Relato de familiar') + '</div>' +
-          '<h1 class="hero-title">' +
-            t('A son&apos;s account · Paulo Silotto Souza', 'O relato de um filho · Paulo Silotto Souza') +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            t('A ~20-minute spoken account given by Paulo&apos;s son about his father — family history, the back injury at 16, the lifelong caretaking role, the marital separation and what the family reads as a deepening depression. Reproduced here word-for-word as a primary source; it is the narrative the cross-domain (mental ↔ physical) synthesis will draw on.',
-              'Um relato falado de ~20 minutos dado pelo filho de Paulo sobre o pai — a história da família, a lesão nas costas aos 16 anos, o papel de cuidador por toda a vida, a separação conjugal e o que a família lê como uma depressão que se aprofunda. Reproduzido aqui palavra por palavra como fonte primária; é a narrativa de que a síntese entre domínios (mental ↔ físico) vai partir.') +
-          '</p>' +
-          '<div class="hero-meta">' +
-            '<div class="hero-meta-item"><span>' + t('Patient', 'Paciente') + '</span><span>Paulo Silotto Souza</span></div>' +
-            '<div class="hero-meta-item"><span>' + t('DOB · age', 'Nasc. · idade') + '</span><span>' + t('14 Jul 1961 · 64', '14 jul 1961 · 64') + '</span></div>' +
-            '<div class="hero-meta-item"><span>' + t('Account by', 'Relato de') + '</span><span>' + t('Son · João Victor Creste', 'Filho · João Victor Creste') + '</span></div>' +
-            '<div class="hero-meta-item"><span>' + t('Recorded', 'Registrado') + '</span><span>' + t('19 Jun 2026', '19 jun 2026') + '</span></div>' +
-            '<div class="hero-meta-item"><span>' + t('Length', 'Duração') + '</span><span>' + t('~20 min · verbatim', '~20 min · íntegra') + '</span></div>' +
-          '</div>' +
+    function confPt(c) { return c === 'high' ? 'alta' : c === 'medium' ? 'média' : c === 'low' ? 'baixa' : c; }
+    function firstName(it) {
+      var nm = (it.source_meta && it.source_meta.author_name) || '';
+      return nm.split(' ')[0] || t('someone close', 'alguém próximo');
+    }
+    function provChip(it) {
+      if (it.source === 'self')
+        return '<span class="rp-chip rp-chip-self"><span class="lang-en">From your words</span><span class="lang-pt">Das suas palavras</span></span>';
+      if (it.source === 'ai_synthesis') {
+        var c = (it.source_meta && it.source_meta.confidence) || '';
+        return '<span class="rp-chip rp-chip-ai"><span class="ai-pill">AI</span>' +
+          '<span class="lang-en">AI synthesis' + (c ? ' · ' + c + ' confidence' : '') + '</span>' +
+          '<span class="lang-pt">Síntese de IA' + (c ? ' · confiança ' + confPt(c) : '') + '</span></span>';
+      }
+      var nm = escapeHtml(firstName(it));
+      return '<span class="rp-chip rp-chip-other"><span class="lang-en">From ' + nm + '’s account</span>' +
+        '<span class="lang-pt">Do relato de ' + nm + '</span></span>';
+    }
+    function statusLabel(react) {
+      if (react === 'resonates') return t('You marked this as resonating.', 'Você marcou que isto faz sentido.');
+      if (react === 'doesnt')    return t('You marked this as not fitting.', 'Você marcou que isto não combina.');
+      if (react === 'note')      return t('Your note is saved.', 'Sua nota está salva.');
+      return '';
+    }
+    function respondHtml(it) {
+      var react = it.response_reaction || '';
+      var noteVal = it.response_note || '';
+      function btn(key, en, pt) {
+        return '<button type="button" class="rp-btn' + (react === key ? ' is-active' : '') + '" data-react="' + key + '">' +
+          '<span class="lang-en">' + en + '</span><span class="lang-pt">' + pt + '</span></button>';
+      }
+      return '<div class="rp-respond" data-item="' + escapeHtml(it.id) + '">' +
+        '<span class="rp-respond-q"><span class="lang-en">Does this land?</span><span class="lang-pt">Isto faz sentido?</span></span>' +
+        btn('resonates', 'Resonates', 'Faz sentido') +
+        btn('doesnt', 'Doesn’t fit', 'Não combina') +
+        btn('note', 'Add a note', 'Anotar') +
+        '<div class="rp-note-box"' + (noteVal ? '' : ' hidden') + '>' +
+          '<textarea class="rp-note-input" placeholder="' + t('In your own words…', 'Com suas palavras…') + '">' + escapeHtml(noteVal) + '</textarea>' +
+          '<button type="button" class="rp-note-save">' + t('Save', 'Salvar') + '</button>' +
         '</div>' +
-      '</section>';
-
-    var sourceNote =
-      '<section class="report-section">' +
-        '<div class="container">' +
-          '<div class="pm-source-note">' +
-            '<span class="pm-source-pill">' + t('Source document', 'Documento-fonte') + '</span>' +
-            '<span class="lang-en" style="font-family:Mulish,sans-serif;font-size:13px;color:#4A5868;">Collateral information — a third-party narrative about the patient, not the patient&apos;s own words and not an AI interpretation.</span>' +
-            '<span class="lang-pt" style="font-family:Mulish,sans-serif;font-size:13px;color:#4A5868;">Informação colateral — narrativa de terceiro sobre o paciente, não as palavras do próprio paciente nem uma interpretação de IA.</span>' +
-            '<p class="lang-en">Original account recorded in English and reproduced in full, exactly as spoken — including names as pronounced. The text below shows in both language modes because it is the primary source.</p>' +
-            '<p class="lang-pt">Relato original gravado em inglês e reproduzido na íntegra, exatamente como foi falado — inclusive os nomes como pronunciados. O texto abaixo aparece nos dois idiomas por ser a fonte primária.</p>' +
-          '</div>' +
-        '</div>' +
-      '</section>';
-
-    var transcriptInner = paras.map(function (p, i) {
-      return '<p' + (i === 0 ? ' class="pm-lead"' : '') + '>' + escapeHtml(p) + '</p>';
-    }).join('');
-
-    var provenance =
-      '<div class="pm-provenance">' +
-        '<div class="pm-prov-item"><span>' + t('Author', 'Autor') + '</span><span>' + t('Son (João Victor Creste)', 'Filho (João Victor Creste)') + '</span></div>' +
-        '<div class="pm-prov-item"><span>' + t('Subject', 'Sujeito') + '</span><span>' + t('Paulo (father, patient)', 'Paulo (pai, paciente)') + '</span></div>' +
-        '<div class="pm-prov-item"><span>' + t('Type', 'Tipo') + '</span><span>' + t('Collateral family account', 'Relato de familiar') + '</span></div>' +
-        '<div class="pm-prov-item"><span>' + t('Recorded', 'Registrado') + '</span><span>' + t('19 Jun 2026 · English', '19 jun 2026 · inglês') + '</span></div>' +
-        '<div class="pm-prov-item"><span>' + t('Extent', 'Extensão') + '</span><span>' + t(paras.length + ' paragraphs · verbatim', paras.length + ' parágrafos · íntegra') + '</span></div>' +
+        '<div class="rp-status">' + (react ? statusLabel(react) : '') + '</div>' +
       '</div>';
+    }
+    function supportNote() {
+      return '<div class="rp-support">' +
+        '<span class="lang-en"><strong>A gentle note.</strong> If this resonates, you don’t have to carry it alone — talking with a doctor, a counsellor, or someone you trust can help. In Brazil, CVV offers free, confidential emotional support any time at <strong>188</strong> (cvv.org.br).</span>' +
+        '<span class="lang-pt"><strong>Uma nota cuidadosa.</strong> Se isto faz sentido, você não precisa carregar sozinho — conversar com um médico, um psicólogo ou alguém de confiança pode ajudar. No Brasil, o CVV oferece apoio emocional gratuito e sigiloso a qualquer hora pelo <strong>188</strong> (cvv.org.br).</span>' +
+      '</div>';
+    }
+    function cardHtml(it, canRespond, extraClass) {
+      var support = (it.item_key === 'ge-heavy-weight');
+      var cls = 'rp-card' + (extraClass ? ' ' + extraClass : '') + (support ? ' rp-card-care' : '');
+      var h = '<div class="' + cls + '">' +
+        '<div class="rp-card-top">' + provChip(it) + '</div>' +
+        '<p class="rp-body"><span class="lang-en">' + escapeHtml(it.content_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(it.content_pt) + '</span></p>';
+      if (it.evidence)
+        h += '<p class="rp-evidence"><span class="lang-en">“' + escapeHtml(it.evidence) + '” — ' + escapeHtml(firstName(it)) + '</span>' +
+             '<span class="lang-pt">“' + escapeHtml(it.evidence) + '” — ' + escapeHtml(firstName(it)) + '</span></p>';
+      if (support) h += supportNote();
+      if (canRespond) h += respondHtml(it);
+      h += '</div>';
+      return h;
+    }
+    function block(eyebrowEn, eyebrowPt, hEn, hPt, subEn, subPt, inner) {
+      return '<section class="rp-section rp-wrap">' +
+        '<div class="rp-eyebrow"><span class="lang-en">' + eyebrowEn + '</span><span class="lang-pt">' + eyebrowPt + '</span></div>' +
+        '<h2 class="rp-h"><span class="lang-en">' + hEn + '</span><span class="lang-pt">' + hPt + '</span></h2>' +
+        (subEn ? '<p class="rp-sub"><span class="lang-en">' + subEn + '</span><span class="lang-pt">' + subPt + '</span></p>' : '') +
+        inner + '</section>';
+    }
+    function blockCards(items, eyebrowEn, eyebrowPt, hEn, hPt, subEn, subPt, canRespond, cardClass) {
+      if (!items || !items.length) return '';
+      var inner = '<div class="rp-cards">' + items.map(function (it) { return cardHtml(it, canRespond, cardClass); }).join('') + '</div>';
+      return block(eyebrowEn, eyebrowPt, hEn, hPt, subEn, subPt, inner);
+    }
 
-    var transcript =
-      '<section class="report-section pm-transcript-wrap">' +
-        '<div class="container">' +
-          '<div class="section-label">' + t('Verbatim account', 'Relato na íntegra') + '</div>' +
-          '<h2 class="section-title">' + t('In his son&apos;s words', 'Nas palavras de seu filho') + '</h2>' +
-          '<div class="pm-transcript">' + transcriptInner + '</div>' +
-          provenance +
-        '</div>' +
-      '</section>';
+    function johariHtml(items) {
+      var q = { open: 0, blind: 0, hidden: 0, emerging: 0 };
+      items.forEach(function (it) { if (q[it.quadrant] != null) q[it.quadrant]++; });
+      function cell(key, titleEn, titlePt, descEn, descPt) {
+        var n = q[key]; var empty = n === 0;
+        return '<div class="rp-jcell' + (empty ? ' is-empty' : '') + '">' +
+          '<div class="rp-jhead"><span class="rp-jtitle"><span class="lang-en">' + titleEn + '</span><span class="lang-pt">' + titlePt + '</span></span>' +
+          '<span class="rp-jcount">' + n + '</span></div>' +
+          '<p class="rp-jdesc"><span class="lang-en">' + descEn + '</span><span class="lang-pt">' + descPt + '</span></p></div>';
+      }
+      var grid = '<div class="rp-johari">' +
+        cell('open', 'Open', 'Aberto',
+          'Things both you and the people close to you see. Empty for now — it fills in when you add your own words.',
+          'Coisas que tanto você quanto as pessoas próximas enxergam. Vazio por ora — preenche quando você acrescenta suas palavras.') +
+        cell('blind', 'What others notice', 'O que os outros percebem',
+          'Things someone close to you sees that you might not have named yourself.',
+          'Coisas que alguém próximo vê e que você talvez ainda não tenha nomeado.') +
+        cell('hidden', 'What only you know', 'O que só você sabe',
+          'Things you know about yourself that others may not see yet. This is yours to add.',
+          'Coisas que você sabe sobre si e que os outros talvez ainda não vejam. Este espaço é seu para preencher.') +
+        cell('emerging', 'Emerging', 'Emergente',
+          'Patterns an AI reading proposes — starting points, not conclusions.',
+          'Padrões que uma leitura de IA propõe — pontos de partida, não conclusões.') +
+        '</div>';
+      return block('The shape of this portrait', 'O formato deste retrato',
+        'Four windows', 'Quatro janelas',
+        'A simple map of where this portrait stands today. Most of it sits in what others notice, because your own voice isn’t here yet — and that is the one thing only you can add.',
+        'Um mapa simples de onde este retrato está hoje. A maior parte está no que os outros percebem, porque a sua própria voz ainda não está aqui — e isso é o que só você pode acrescentar.',
+        grid);
+    }
+
+    function themesHtml(items, canRespond) {
+      if (!items || !items.length) return '';
+      var cards = '<div class="rp-cards">' + items.map(function (it) { return cardHtml(it, canRespond, ''); }).join('') + '</div>';
+      var inner = '<details class="rp-collapse"><summary><span class="ai-pill">AI</span>' +
+        '<span class="lang-en">Recurring themes — tap to open</span><span class="lang-pt">Temas recorrentes — toque para abrir</span></summary>' +
+        '<div class="rp-collapse-body">' +
+          '<p class="rp-sub"><span class="lang-en">Patterns an AI reading drew across the account. Starting points for reflection, not conclusions.</span>' +
+          '<span class="lang-pt">Padrões que uma leitura de IA traçou ao longo do relato. Pontos de partida para reflexão, não conclusões.</span></p>' +
+          cards +
+        '</div></details>';
+      return block('Patterns', 'Padrões', 'Recurring themes', 'Temas recorrentes', '', '', inner);
+    }
+
+    function jungianHtml(items) {
+      if (!items || !items.length) return '';
+      var it = items[0];
+      var inner = '<details class="rp-collapse" id="rp-jung"><summary><span class="ai-pill">AI</span>' +
+        '<span class="lang-en">A Jungian lens — one way to read this</span><span class="lang-pt">Uma lente junguiana — uma forma de ler isto</span>' +
+        '<button type="button" class="rp-dismiss" data-dismiss="rp-jung"><span class="lang-en">dismiss</span><span class="lang-pt">dispensar</span></button></summary>' +
+        '<div class="rp-collapse-body">' +
+          '<div class="rp-card-top">' + provChip(it) + '</div>' +
+          '<p class="rp-body"><span class="lang-en">' + escapeHtml(it.content_en) + '</span><span class="lang-pt">' + escapeHtml(it.content_pt) + '</span></p>' +
+        '</div></details>';
+      return block('A lens, not a result', 'Uma lente, não um resultado', 'A Jungian lens', 'Uma lente junguiana', '', '', inner);
+    }
+
+    function readingHtml(items) {
+      if (!items || !items.length) return '';
+      var cards = '<div class="rp-reading">' + items.map(function (it) {
+        return '<div class="rp-card"><div class="rp-card-top">' + provChip(it) + '</div>' +
+          '<p class="rp-body"><span class="lang-en">' + escapeHtml(it.content_en) + '</span><span class="lang-pt">' + escapeHtml(it.content_pt) + '</span></p></div>';
+      }).join('') + '</div>';
+      return block('Out of curiosity', 'Por curiosidade', 'Recommended reading', 'Leituras sugeridas',
+        'A few books, offered as curiosity — not prescription. Each is tied to a theme above.',
+        'Alguns livros, oferecidos por curiosidade — não por prescrição. Cada um ligado a um tema acima.', cards);
+    }
+
+    function questionsHtml(items) {
+      if (!items || !items.length) return '';
+      var qs = '<div class="rp-reading">' + items.map(function (it) {
+        return '<div class="rp-q"><span class="lang-en">' + escapeHtml(it.content_en) + '</span><span class="lang-pt">' + escapeHtml(it.content_pt) + '</span></div>';
+      }).join('') + '</div>';
+      return block('To sit with', 'Para refletir', 'Questions worth sitting with', 'Perguntas para sentar com elas',
+        'Drawn from the tensions in the account — there are no right answers.',
+        'Tiradas das tensões do relato — não há respostas certas.', qs);
+    }
+
+    function pillarsHtml() {
+      var inner = '<div class="rp-pillars">' +
+        '<div class="rp-pillar is-tbd"><div class="rp-pillar-label">' + t('Physical', 'Físico') + '</div>' +
+          '<p class="rp-pillar-body"><span class="lang-en">Imaging, labs and stress tests live in the Physical section.</span><span class="lang-pt">Imagens, exames e testes de esforço ficam na seção Físico.</span></p></div>' +
+        '<div class="rp-pillar"><div class="rp-pillar-label">' + t('Mental', 'Mental') + '</div>' +
+          '<p class="rp-pillar-body"><span class="lang-en">This reflective portrait — assembled from one account and an AI reading. It grows as you add your own words.</span><span class="lang-pt">Este retrato reflexivo — montado a partir de um relato e de uma leitura de IA. Ele cresce conforme você adiciona suas próprias palavras.</span></p></div>' +
+        '<div class="rp-pillar is-tbd"><div class="rp-pillar-label">' + t('Spiritual', 'Espiritual') + '</div>' +
+          '<p class="rp-pillar-body"><span class="lang-en">To be defined — no values-of-life data captured yet.</span><span class="lang-pt">A definir — ainda sem dados de valores de vida.</span></p></div>' +
+        '</div>';
+      return block('Three pillars', 'Três pilares', 'Physical · Mental · Spiritual', 'Físico · Mental · Espiritual', '', '', inner);
+    }
+
+    function sourceDisclosureHtml() {
+      var N = window.PAULO_MENTAL_NARRATIVE;
+      var paras = (N && N.account && N.account.paragraphs) || [];
+      if (!paras.length) return '';
+      var body = paras.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('');
+      var inner = '<details class="rp-collapse"><summary>' +
+        '<span class="rp-chip rp-chip-other"><span class="lang-en">From João’s account</span><span class="lang-pt">Do relato de João</span></span>' +
+        '<span class="lang-en">The full account, in his own words</span><span class="lang-pt">O relato completo, nas palavras dele</span></summary>' +
+        '<div class="rp-collapse-body"><p class="rp-sub"><span class="lang-en">Recorded 19 June 2026 in English, reproduced verbatim. This is the source the portrait above was drawn from.</span>' +
+        '<span class="lang-pt">Gravado em 19 de junho de 2026 em inglês, reproduzido na íntegra. Esta é a fonte de onde o retrato acima foi extraído.</span></p>' +
+        '<div class="pm-transcript">' + body + '</div></div></details>';
+      return block('The source', 'A fonte', 'Where this came from', 'De onde isto veio', '', '', inner);
+    }
+
+    function ctaHtml() {
+      return '<section class="rp-cta rp-wrap"><div class="rp-cta-inner">' +
+        '<h3 class="rp-cta-h"><span class="lang-en">This portrait grows with you</span><span class="lang-pt">Este retrato cresce com você</span></h3>' +
+        '<p class="rp-cta-p"><span class="lang-en">Right now it is built from one loving but partial view. Add a few lines of your own — a diary entry, a memory, what a good day feels like — and the empty windows above begin to fill. The people you trust can add their view too. You own all of it, and you can respond to or remove anything here.</span>' +
+        '<span class="lang-pt">Por enquanto ele é feito de uma visão amorosa, porém parcial. Acrescente algumas linhas suas — uma página de diário, uma lembrança, como é um bom dia — e as janelas vazias acima começam a se preencher. As pessoas em quem você confia também podem somar a visão delas. Tudo isto é seu, e você pode responder ou remover qualquer coisa aqui.</span></p>' +
+        '</div></section>';
+    }
+
+    function buildPortrait(data) {
+      var items = data.items || [];
+      var canRespond = !!data.can_respond;
+      var byCat = {};
+      items.forEach(function (it) { (byCat[it.category] = byCat[it.category] || []).push(it); });
+      return '<section class="rp-frame rp-wrap"><div class="rp-frame-inner">' +
+          '<span class="lang-en"><strong>A reflective portrait, not a diagnosis.</strong> Nothing here is a clinical finding. It is a mirror assembled from your own words and the people who know you — and it is yours. You can respond to anything, or ask for it to be removed.</span>' +
+          '<span class="lang-pt"><strong>Um retrato reflexivo, não um diagnóstico.</strong> Nada aqui é um achado clínico. É um espelho montado a partir das suas palavras e das pessoas que conhecem você — e é seu. Você pode responder a qualquer coisa, ou pedir que seja removida.</span>' +
+        '</div></section>' +
+        johariHtml(items) +
+        blockCards(byCat.strength, 'They see this in you', 'Eles veem isto em você',
+          'Strengths others see in you', 'Forças que os outros veem em você',
+          'What João — who has known you his whole life — sees in you.',
+          'O que João — que conhece você a vida toda — vê em você.', canRespond, 'rp-card-warm') +
+        blockCards(byCat.growth_edge, 'A perspective', 'Uma perspectiva',
+          'Growth edges', 'Pontos de crescimento',
+          'Patterns João noticed — offered as perspective, never a verdict. Push back on anything that doesn’t fit.',
+          'Padrões que João percebeu — oferecidos como perspectiva, nunca como veredito. Conteste o que não combinar.', canRespond, '') +
+        blockCards(byCat.value, 'What you live by', 'O que você vive',
+          'What matters to you', 'O que importa para você',
+          'What João sees you living by, day to day.',
+          'Aquilo que João vê você vivendo, no dia a dia.', canRespond, 'rp-card-warm') +
+        themesHtml(byCat.theme, canRespond) +
+        jungianHtml(byCat.jungian) +
+        readingHtml(byCat.recommendation) +
+        questionsHtml(byCat.question) +
+        pillarsHtml() +
+        sourceDisclosureHtml() +
+        ctaHtml();
+    }
+
+    function setActive(btns, target) {
+      btns.forEach(function (b) { b.classList.remove('is-active'); });
+      if (target) target.classList.add('is-active');
+    }
+    function postResponse(itemId, react, note, statusEl) {
+      statusEl.textContent = t('Saving…', 'Salvando…');
+      fetch('/api/reflective-respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Viewer-Clerk': viewerClerkHeader() },
+        body: JSON.stringify({ patient_clerk: patient, item_id: itemId, reaction: react, note: note })
+      })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function () { statusEl.textContent = statusLabel(react) + ' ' + t('Thank you.', 'Obrigado.'); })
+        .catch(function () { statusEl.textContent = t('Could not save — please try again.', 'Não foi possível salvar — tente novamente.'); });
+    }
+    function wireResponders(root) {
+      var groups = root.querySelectorAll('.rp-respond');
+      Array.prototype.forEach.call(groups, function (g) {
+        var itemId = g.getAttribute('data-item');
+        var statusEl = g.querySelector('.rp-status');
+        var noteBox = g.querySelector('.rp-note-box');
+        var reactBtns = g.querySelectorAll('.rp-btn');
+        Array.prototype.forEach.call(reactBtns, function (b) {
+          b.addEventListener('click', function () {
+            var react = b.getAttribute('data-react');
+            if (react === 'note') { noteBox.hidden = !noteBox.hidden; return; }
+            setActive(reactBtns, b);
+            postResponse(itemId, react, null, statusEl);
+          });
+        });
+        var saveBtn = g.querySelector('.rp-note-save');
+        if (saveBtn) saveBtn.addEventListener('click', function () {
+          var ta = g.querySelector('.rp-note-input');
+          setActive(reactBtns, g.querySelector('.rp-btn[data-react="note"]'));
+          postResponse(itemId, 'note', ta.value, statusEl);
+        });
+      });
+      var dismissers = root.querySelectorAll('.rp-dismiss');
+      Array.prototype.forEach.call(dismissers, function (d) {
+        d.addEventListener('click', function (e) {
+          e.preventDefault();
+          var el = document.getElementById(d.getAttribute('data-dismiss'));
+          if (el) el.style.display = 'none';
+        });
+      });
+    }
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-mental';
-    main.innerHTML = hero + sourceNote + transcript;
+    main.innerHTML = heroHtml() +
+      '<div class="rp-loading rp-wrap"><span class="lang-en">Assembling the portrait…</span><span class="lang-pt">Montando o retrato…</span></div>';
     document.body.appendChild(main);
 
-    injectDangerZone(main);
+    fetch('/api/reflective?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        main.innerHTML = heroHtml() + buildPortrait(data);
+        wireResponders(main);
+        injectDangerZone(main);
+      })
+      .catch(function () {
+        main.innerHTML = heroHtml() +
+          '<div class="rp-loading rp-wrap"><span class="lang-en">This portrait could not be loaded right now.</span><span class="lang-pt">Não foi possível carregar este retrato agora.</span></div>';
+        injectDangerZone(main);
+      });
   }
 
   function renderPauloLabsSection() {
