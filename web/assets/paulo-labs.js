@@ -21,6 +21,24 @@ window.PAULO_LABS = {
   },
   "documents": [
     {
+      "date": "2026-04-16",
+      "laboratory": "Pasteur Laboratório",
+      "doctor": "",
+      "pdf": "/api/lab-source?clerk=pending%3Apaulo-silotto-df3441&file=2026-04-16-tipagem-sanguinea-abo-rh-pasteur.pdf",
+      "title_en": "ABO/Rh blood typing",
+      "title_pt": "Tipagem sanguínea ABO/Rh",
+      "src": "o28"
+    },
+    {
+      "date": "2025-11-12",
+      "laboratory": "Pasteur Laboratório",
+      "doctor": "Antônio Carlos Silva Maychak",
+      "pdf": "/api/lab-source?clerk=pending%3Apaulo-silotto-df3441&file=2025-11-12-painel-completo-bioquimica-urina-pasteur.pdf",
+      "title_en": "CBC + glucose + lipids + vitamin D + B12 + PSA + urine",
+      "title_pt": "Hemograma + glicemia + lipídico + vitamina D + B12 + PSA + urina",
+      "src": "o27"
+    },
+    {
       "date": "2024-04-15",
       "laboratory": "Biolabor Laboratório",
       "doctor": "Dra. Sirlei Conceição M. Vono (CRBO 40703/01-D)",
@@ -267,11 +285,16 @@ window.PAULO_LABS = {
           "marker_en": "Red blood cells (RBC)",
           "marker_pt": "Eritrócitos (hemácias)",
           "unit": "milhões/mm³",
-          "ref_low": 4.5,
-          "ref_high": 5.5,
-          "ref_text_en": "4.5 – 5.5 milhões/mm³",
-          "ref_text_pt": "4,5 – 5,5 milhões/mm³",
+          "ref_low": 4.3,
+          "ref_high": 5.9,
+          "ref_text_en": "4.3 – 5.9 milhões/mm³",
+          "ref_text_pt": "4,3 – 5,9 milhões/mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 4.15,
+              "flag": "L"
+            },
             {
               "date": "2024-04-15",
               "value": 4.11,
@@ -341,10 +364,14 @@ window.PAULO_LABS = {
           "marker_pt": "Hemoglobina",
           "unit": "g/dL",
           "ref_low": 13.0,
-          "ref_high": 17.0,
-          "ref_text_en": "13 – 17 g/dL",
-          "ref_text_pt": "13 – 17 g/dL",
+          "ref_high": 17.5,
+          "ref_text_en": "13 – 17.5 g/dL",
+          "ref_text_pt": "13 – 17,5 g/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 13.3
+            },
             {
               "date": "2024-04-15",
               "value": 13.1
@@ -413,10 +440,14 @@ window.PAULO_LABS = {
           "marker_pt": "Hematócrito",
           "unit": "%",
           "ref_low": 40.0,
-          "ref_high": 50.0,
-          "ref_text_en": "40 – 50 %",
-          "ref_text_pt": "40 – 50 %",
+          "ref_high": 53.0,
+          "ref_text_en": "40 – 53 %",
+          "ref_text_pt": "40 – 53 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 40.3
+            },
             {
               "date": "2024-04-15",
               "value": 37.3,
@@ -486,11 +517,15 @@ window.PAULO_LABS = {
           "marker_en": "MCV",
           "marker_pt": "VCM",
           "unit": "fL",
-          "ref_low": 83.0,
-          "ref_high": 101.0,
-          "ref_text_en": "83 – 101 fL",
-          "ref_text_pt": "83 – 101 fL",
+          "ref_low": 80.0,
+          "ref_high": 100.0,
+          "ref_text_en": "80 – 100 fL",
+          "ref_text_pt": "80 – 100 fL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 97.1
+            },
             {
               "date": "2024-04-15",
               "value": 90.8
@@ -557,11 +592,15 @@ window.PAULO_LABS = {
           "marker_en": "MCH",
           "marker_pt": "HCM",
           "unit": "pg",
-          "ref_low": 27.0,
-          "ref_high": 32.0,
-          "ref_text_en": "27 – 32 pg",
-          "ref_text_pt": "27 – 32 pg",
+          "ref_low": 26.0,
+          "ref_high": 34.0,
+          "ref_text_en": "26 – 34 pg",
+          "ref_text_pt": "26 – 34 pg",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 32.1
+            },
             {
               "date": "2024-04-15",
               "value": 31.9
@@ -629,11 +668,15 @@ window.PAULO_LABS = {
           "marker_en": "MCHC",
           "marker_pt": "CHCM",
           "unit": "g/dL",
-          "ref_low": 31.5,
-          "ref_high": 34.5,
-          "ref_text_en": "31.5 – 34.5 g/dL",
-          "ref_text_pt": "31,5 – 34,5 g/dL",
+          "ref_low": 31.0,
+          "ref_high": 36.0,
+          "ref_text_en": "31 – 36 g/dL",
+          "ref_text_pt": "31 – 36 g/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 33
+            },
             {
               "date": "2024-04-15",
               "value": 35.1,
@@ -702,11 +745,15 @@ window.PAULO_LABS = {
           "marker_en": "RDW",
           "marker_pt": "RDW",
           "unit": "%",
-          "ref_low": 11.0,
-          "ref_high": 15.5,
-          "ref_text_en": "11 – 15.5 %",
-          "ref_text_pt": "11 – 15,5 %",
+          "ref_low": 11.5,
+          "ref_high": 15.1,
+          "ref_text_en": "11.5 – 15.1 %",
+          "ref_text_pt": "11,5 – 15,1 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 12.7
+            },
             {
               "date": "2024-04-15",
               "value": 12.7
@@ -799,11 +846,15 @@ window.PAULO_LABS = {
           "marker_en": "White blood cells (WBC)",
           "marker_pt": "Leucócitos",
           "unit": "/mm³",
-          "ref_low": 4000,
-          "ref_high": 11000,
-          "ref_text_en": "4000 – 11000 /mm³",
-          "ref_text_pt": "4000 – 11000 /mm³",
+          "ref_low": 3500,
+          "ref_high": 10500,
+          "ref_text_en": "3500 – 10500 /mm³",
+          "ref_text_pt": "3500 – 10500 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 4520
+            },
             {
               "date": "2024-04-15",
               "value": 3190,
@@ -878,6 +929,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "150000 – 450000 /mm³",
           "points": [
             {
+              "date": "2025-11-12",
+              "value": 222000
+            },
+            {
               "date": "2024-04-15",
               "value": 171000
             },
@@ -943,11 +998,15 @@ window.PAULO_LABS = {
           "marker_en": "Mean platelet volume (MPV)",
           "marker_pt": "Volume plaquetário médio (VPM)",
           "unit": "fL",
-          "ref_low": 7.0,
-          "ref_high": 12.0,
-          "ref_text_en": "7 – 12 fL",
-          "ref_text_pt": "7 – 12 fL",
+          "ref_low": 7.8,
+          "ref_high": 11.0,
+          "ref_text_en": "7.8 – 11 fL",
+          "ref_text_pt": "7,8 – 11 fL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 9.5
+            },
             {
               "date": "2024-04-15",
               "value": 8.4
@@ -1061,11 +1120,15 @@ window.PAULO_LABS = {
           "marker_en": "Segmented neutrophils (%)",
           "marker_pt": "Neutrófilos segmentados (relativo)",
           "unit": "%",
-          "ref_low": 40.0,
-          "ref_high": 70.0,
-          "ref_text_en": "40 – 70 %",
-          "ref_text_pt": "40 – 70 %",
+          "ref_low": 45,
+          "ref_high": 66,
+          "ref_text_en": "45 – 66 %",
+          "ref_text_pt": "45 – 66 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 51.1
+            },
             {
               "date": "2024-04-15",
               "value": 70.6,
@@ -1101,11 +1164,15 @@ window.PAULO_LABS = {
           "marker_en": "Segmented neutrophils (abs)",
           "marker_pt": "Neutrófilos segmentados (absoluto)",
           "unit": "/mm³",
-          "ref_low": 1800,
+          "ref_low": 1600,
           "ref_high": 7000,
-          "ref_text_en": "1800 – 7000 /mm³",
-          "ref_text_pt": "1800 – 7000 /mm³",
+          "ref_text_en": "1600 – 7000 /mm³",
+          "ref_text_pt": "1600 – 7000 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 2310
+            },
             {
               "date": "2024-04-13",
               "value": 3362
@@ -1315,11 +1382,15 @@ window.PAULO_LABS = {
           "marker_en": "Eosinophils (%)",
           "marker_pt": "Eosinófilos (relativo)",
           "unit": "%",
-          "ref_low": 0.0,
-          "ref_high": 4.0,
-          "ref_text_en": "0 – 4 %",
-          "ref_text_pt": "0 – 4 %",
+          "ref_low": 1,
+          "ref_high": 4,
+          "ref_text_en": "1 – 4 %",
+          "ref_text_pt": "1 – 4 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 2.5
+            },
             {
               "date": "2024-04-15",
               "value": 2.2
@@ -1360,11 +1431,15 @@ window.PAULO_LABS = {
           "marker_en": "Eosinophils (abs)",
           "marker_pt": "Eosinófilos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 0,
-          "ref_high": 600,
-          "ref_text_en": "0 – 600 /mm³",
-          "ref_text_pt": "0 – 600 /mm³",
+          "ref_low": 35,
+          "ref_high": 400,
+          "ref_text_en": "35 – 400 /mm³",
+          "ref_text_pt": "35 – 400 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 113
+            },
             {
               "date": "2024-04-13",
               "value": 63
@@ -1431,11 +1506,15 @@ window.PAULO_LABS = {
           "marker_en": "Basophils (%)",
           "marker_pt": "Basófilos (relativo)",
           "unit": "%",
-          "ref_low": 0.0,
-          "ref_high": 2.0,
-          "ref_text_en": "0 – 2 %",
-          "ref_text_pt": "0 – 2 %",
+          "ref_low": 0,
+          "ref_high": 1,
+          "ref_text_en": "0 – 1 %",
+          "ref_text_pt": "0 – 1 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 0.9
+            },
             {
               "date": "2024-04-15",
               "value": 0.1
@@ -1475,10 +1554,14 @@ window.PAULO_LABS = {
           "marker_pt": "Basófilos (absoluto)",
           "unit": "/mm³",
           "ref_low": 0,
-          "ref_high": 200,
-          "ref_text_en": "0 – 200 /mm³",
-          "ref_text_pt": "0 – 200 /mm³",
+          "ref_high": 100,
+          "ref_text_en": "0 – 100 /mm³",
+          "ref_text_pt": "0 – 100 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 41
+            },
             {
               "date": "2024-04-13",
               "value": 0
@@ -1541,11 +1624,15 @@ window.PAULO_LABS = {
           "marker_en": "Lymphocytes (%)",
           "marker_pt": "Linfócitos (relativo)",
           "unit": "%",
-          "ref_low": 20.0,
-          "ref_high": 40.0,
-          "ref_text_en": "20 – 40 %",
-          "ref_text_pt": "20 – 40 %",
+          "ref_low": 18,
+          "ref_high": 36,
+          "ref_text_en": "18 – 36 %",
+          "ref_text_pt": "18 – 36 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 34.3
+            },
             {
               "date": "2024-04-15",
               "value": 14.4,
@@ -1586,11 +1673,15 @@ window.PAULO_LABS = {
           "marker_en": "Lymphocytes (abs)",
           "marker_pt": "Linfócitos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 1000,
-          "ref_high": 5000,
-          "ref_text_en": "1000 – 5000 /mm³",
-          "ref_text_pt": "1000 – 5000 /mm³",
+          "ref_low": 810,
+          "ref_high": 3600,
+          "ref_text_en": "810 – 3600 /mm³",
+          "ref_text_pt": "810 – 3600 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 1550
+            },
             {
               "date": "2024-04-13",
               "value": 666,
@@ -1654,11 +1745,16 @@ window.PAULO_LABS = {
           "marker_en": "Monocytes (%)",
           "marker_pt": "Monócitos (relativo)",
           "unit": "%",
-          "ref_low": 0.0,
-          "ref_high": 8.0,
-          "ref_text_en": "0 – 8 %",
-          "ref_text_pt": "0 – 8 %",
+          "ref_low": 2,
+          "ref_high": 10,
+          "ref_text_en": "2 – 10 %",
+          "ref_text_pt": "2 – 10 %",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 11.2,
+              "flag": "H"
+            },
             {
               "date": "2024-04-15",
               "value": 12.7,
@@ -1701,11 +1797,15 @@ window.PAULO_LABS = {
           "marker_en": "Monocytes (abs)",
           "marker_pt": "Monócitos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 80,
-          "ref_high": 1200,
-          "ref_text_en": "80 – 1200 /mm³",
-          "ref_text_pt": "80 – 1200 /mm³",
+          "ref_low": 90,
+          "ref_high": 1000,
+          "ref_text_en": "90 – 1000 /mm³",
+          "ref_text_pt": "90 – 1000 /mm³",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 506
+            },
             {
               "date": "2024-04-13",
               "value": 405
@@ -1813,11 +1913,16 @@ window.PAULO_LABS = {
           "marker_en": "Fasting glucose",
           "marker_pt": "Glicemia de jejum",
           "unit": "mg/dL",
-          "ref_low": 65,
+          "ref_low": 70,
           "ref_high": 99,
-          "ref_text_en": "65 – 99 mg/dL",
-          "ref_text_pt": "65 – 99 mg/dL",
+          "ref_text_en": "70 – 99 mg/dL",
+          "ref_text_pt": "70 – 99 mg/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 100,
+              "flag": "H"
+            },
             {
               "date": "2023-02-24",
               "value": 100,
@@ -2110,10 +2215,15 @@ window.PAULO_LABS = {
           "marker_pt": "Colesterol total",
           "unit": "mg/dL",
           "ref_low": null,
-          "ref_high": 200,
-          "ref_text_en": "< 200 mg/dL",
-          "ref_text_pt": "< 200 mg/dL",
+          "ref_high": 190,
+          "ref_text_en": "< 190 mg/dL",
+          "ref_text_pt": "< 190 mg/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 215,
+              "flag": "H"
+            },
             {
               "date": "2023-02-24",
               "value": 241,
@@ -2180,6 +2290,10 @@ window.PAULO_LABS = {
           "ref_text_en": "> 40 mg/dL",
           "ref_text_pt": "> 40 mg/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 83
+            },
             {
               "date": "2023-02-24",
               "value": 92.8
@@ -2373,6 +2487,10 @@ window.PAULO_LABS = {
           "ref_text_en": "< 150 mg/dL",
           "ref_text_pt": "< 150 mg/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 67
+            },
             {
               "date": "2023-02-24",
               "value": 81
@@ -2918,10 +3036,14 @@ window.PAULO_LABS = {
           "marker_pt": "PSA total",
           "unit": "ng/mL",
           "ref_low": null,
-          "ref_high": 4.0,
-          "ref_text_en": "< 4 ng/mL",
-          "ref_text_pt": "< 4 ng/mL",
+          "ref_high": 2.5,
+          "ref_text_en": "< 2.5 ng/mL",
+          "ref_text_pt": "< 2,5 ng/mL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 1.218
+            },
             {
               "date": "2023-02-22",
               "value": 0.49
@@ -3165,11 +3287,16 @@ window.PAULO_LABS = {
           "marker_en": "Vitamin D (25-OH)",
           "marker_pt": "Vitamina D (25-OH)",
           "unit": "ng/mL",
-          "ref_low": 20.0,
+          "ref_low": 30.0,
           "ref_high": null,
-          "ref_text_en": "> 20 ng/mL",
-          "ref_text_pt": "> 20 ng/mL",
+          "ref_text_en": "> 30 ng/mL",
+          "ref_text_pt": "> 30 ng/mL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 22.2,
+              "flag": "L"
+            },
             {
               "date": "2022-09-22",
               "value": 16.4,
@@ -3185,11 +3312,15 @@ window.PAULO_LABS = {
           "marker_en": "Vitamin B12",
           "marker_pt": "Vitamina B12",
           "unit": "pg/mL",
-          "ref_low": 211,
-          "ref_high": 911,
-          "ref_text_en": "211 – 911 pg/mL",
-          "ref_text_pt": "211 – 911 pg/mL",
+          "ref_low": 187,
+          "ref_high": 883,
+          "ref_text_en": "187 – 883 pg/mL",
+          "ref_text_pt": "187 – 883 pg/mL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 504
+            },
             {
               "date": "2015-05-14",
               "value": 458
@@ -3384,9 +3515,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "AMARELO PALHA",
-          "ref_text_pt": "AMARELO PALHA",
+          "ref_text_en": "Não se aplica",
+          "ref_text_pt": "Não se aplica",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Amarelo citrino"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AMARELO CLARO"
@@ -3415,9 +3550,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Límpido",
-          "ref_text_pt": "Límpido",
+          "ref_text_en": "Claro",
+          "ref_text_pt": "Claro",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Opalescente"
+            },
             {
               "date": "2023-02-24",
               "value_text": "LÍMPIDO"
@@ -3436,11 +3575,16 @@ window.PAULO_LABS = {
           "marker_en": "Specific gravity",
           "marker_pt": "Densidade",
           "unit": "",
-          "ref_low": 1.015,
-          "ref_high": 1.025,
-          "ref_text_en": "1.015 – 1.025",
-          "ref_text_pt": "1,015 – 1,025",
+          "ref_low": 1.01,
+          "ref_high": 1.03,
+          "ref_text_en": "1.01 – 1.03",
+          "ref_text_pt": "1,01 – 1,03",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 1.009,
+              "flag": "L"
+            },
             {
               "date": "2023-02-24",
               "value": 1005,
@@ -3469,11 +3613,15 @@ window.PAULO_LABS = {
           "marker_en": "pH",
           "marker_pt": "pH",
           "unit": "",
-          "ref_low": 5.0,
+          "ref_low": 4.5,
           "ref_high": 7.5,
-          "ref_text_en": "5 – 7.5",
-          "ref_text_pt": "5 – 7,5",
+          "ref_text_en": "4.5 – 7.5",
+          "ref_text_pt": "4,5 – 7,5",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value": 7
+            },
             {
               "date": "2023-02-24",
               "value": 8,
@@ -3534,9 +3682,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "INSIGNIFICANTE",
-          "ref_text_pt": "INSIGNIFICANTE",
+          "ref_text_en": "Leve",
+          "ref_text_pt": "Leve",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Leve"
+            },
             {
               "date": "2022-03-11",
               "value_text": "Leve"
@@ -3553,9 +3705,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Inferior a 30 mg/dL",
+          "ref_text_pt": "Inferior a 30 mg/dL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3584,9 +3740,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Negativo",
+          "ref_text_pt": "Negativo",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3615,9 +3775,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Negativo",
+          "ref_text_pt": "Negativo",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3646,9 +3810,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Negativo",
+          "ref_text_pt": "Negativo",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3680,6 +3848,10 @@ window.PAULO_LABS = {
           "ref_text_en": "< 0.6",
           "ref_text_pt": "< 0,6",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3727,9 +3899,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Negativo",
+          "ref_text_pt": "Negativo",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Negativo"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3762,6 +3938,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "< 7000",
           "points": [
             {
+              "date": "2025-11-12",
+              "value_text": "0,7 /µL"
+            },
+            {
               "date": "2023-02-24",
               "value": 25
             },
@@ -3793,6 +3973,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "< 5000",
           "points": [
             {
+              "date": "2025-11-12",
+              "value_text": "1 /µL"
+            },
+            {
               "date": "2023-02-24",
               "value": 0
             },
@@ -3820,9 +4004,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Raras",
+          "ref_text_pt": "Raras",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Ausentes"
+            },
             {
               "date": "2023-02-24",
               "value_text": "RARAS"
@@ -3847,9 +4035,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Inferior a 1 /µL",
+          "ref_text_pt": "Inferior a 1 /µL",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "0 /µL"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3874,9 +4066,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Ausentes",
+          "ref_text_pt": "Ausentes",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Ausentes"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3901,9 +4097,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Ausentes",
+          "ref_text_pt": "Ausentes",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Ausentes"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3920,9 +4120,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Raros",
+          "ref_text_pt": "Raros",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Raros"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3947,9 +4151,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": "Ausente",
-          "ref_text_pt": "Ausente",
+          "ref_text_en": "Ausentes",
+          "ref_text_pt": "Ausentes",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Ausentes"
+            },
             {
               "date": "2023-02-24",
               "value_text": "AUSENTE"
@@ -3966,9 +4174,13 @@ window.PAULO_LABS = {
           "unit": "",
           "ref_low": null,
           "ref_high": null,
-          "ref_text_en": null,
-          "ref_text_pt": null,
+          "ref_text_en": "Ausentes",
+          "ref_text_pt": "Ausentes",
           "points": [
+            {
+              "date": "2025-11-12",
+              "value_text": "Ausentes"
+            },
             {
               "date": "2022-03-11",
               "value_text": "Ausentes"
@@ -3987,6 +4199,45 @@ window.PAULO_LABS = {
             {
               "date": "2022-03-11",
               "value_text": "Não houve proliferação de microrganismos."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "bloodtype",
+      "title_en": "Blood type (ABO / Rh)",
+      "title_pt": "Tipagem sanguínea (ABO / Rh)",
+      "subtitle_en": "ABO group & Rh(D) factor",
+      "subtitle_pt": "Grupo ABO e fator Rh(D)",
+      "markers": [
+        {
+          "marker_en": "ABO blood group",
+          "marker_pt": "Grupo sanguíneo ABO",
+          "unit": "",
+          "ref_low": null,
+          "ref_high": null,
+          "ref_text_en": "Não se aplica",
+          "ref_text_pt": "Não se aplica",
+          "points": [
+            {
+              "date": "2026-04-16",
+              "value_text": "O"
+            }
+          ]
+        },
+        {
+          "marker_en": "Rh factor (RhD)",
+          "marker_pt": "Fator Rh (RhD)",
+          "unit": "",
+          "ref_low": null,
+          "ref_high": null,
+          "ref_text_en": "Não se aplica",
+          "ref_text_pt": "Não se aplica",
+          "points": [
+            {
+              "date": "2026-04-16",
+              "value_text": "Positivo"
             }
           ]
         }

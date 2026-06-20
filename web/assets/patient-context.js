@@ -5118,7 +5118,8 @@
                 'Sintetizado a partir de 26 painéis de sangue e urina · 11+ laboratórios · 2011 a 2024') +
             '</div>' +
             '<div class="paulo-ai-subhead">' +
-              t('Most recent draws · April 2024', 'Coletas mais recentes · abril de 2024') +
+              t('Synthesis covers draws through April 2024 · newer panels (Nov 2025, Apr 2026) shown below',
+                'Síntese abrange coletas até abril de 2024 · painéis mais recentes (nov 2025, abr 2026) abaixo') +
             '</div>' +
             '<div class="paulo-ai-summary-body lang-en">' +
               '<p>The two April 2024 blood counts tell a short, self-limited story. The <strong>15 Apr (Biolabor) CBC shows transient leukopenia</strong> (WBC 3,190), borderline anaemia and lymphopenia with a reactive monocytosis — set against a <strong>non-reactive dengue NS1 and a negative COVID-19 antigen</strong>, this reads as an acute viral / inflammatory episode, not a chronic cytopenia. The Behring CBC two days earlier (13 Apr) was near-normal, so a single repeat count once recovered would confirm the values have returned to baseline.</p>' +
@@ -5538,8 +5539,8 @@
         '<div class="section-label">' + t('3 · Laboratory', '3 · Laboratorial') + '</div>' +
         '<h2 class="section-title">' + t('Laboratory exams', 'Exames laboratoriais') + '</h2>' +
         '<p class="section-desc">' +
-          t('Thirteen years of blood and urine work (2011-2024), reconciled from 26 scanned reports across 11+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. Original reports are linked beneath.',
-            'Treze anos de exames de sangue e urina (2011-2024), reconciliados de 26 laudos digitalizados de 11+ laboratórios em ' + nMarkers + ' marcadores agrupados por painel. Cada cartão mostra o valor mais recente com sua barra de referência e um histórico por marcador expansível; a comparação completa lado a lado fica ao final, mais recente à esquerda. Os laudos originais estão linkados abaixo.') +
+          t('Fifteen years of blood and urine work (2011-2026), reconciled from 28 scanned reports across 11+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. Original reports are linked beneath.',
+            'Quinze anos de exames de sangue e urina (2011-2026), reconciliados de 28 laudos digitalizados de 11+ laboratórios em ' + nMarkers + ' marcadores agrupados por painel. Cada cartão mostra o valor mais recente com sua barra de referência e um histórico por marcador expansível; a comparação completa lado a lado fica ao final, mais recente à esquerda. Os laudos originais estão linkados abaixo.') +
         '</p>' +
       '</div>';
 
