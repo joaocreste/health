@@ -46,6 +46,15 @@ export const imagingSourceFormat = pgEnum("imaging_source_format", [
 export const encounterType = pgEnum("encounter_type", [
   "in_person", "remote", "phone", "er", "admission", "lab_followup", "other",
 ]);
+// Electrodiagnostic studies (migration 0018). study_type is the typed routing
+// field; display_mode governs the future patient-facing render surface only —
+// storage + AI context are unaffected by it.
+export const electrodiagnosticStudyType = pgEnum("electrodiagnostic_study_type", [
+  "ncs_emg", "ncs", "emg", "evoked_potential", "repetitive_stimulation", "other",
+]);
+export const clinicalDisplayMode = pgEnum("clinical_display_mode", [
+  "hidden", "report_only", "tables_only", "full",
+]);
 export const taperDirection = pgEnum("taper_direction", [
   "increase", "decrease", "hold", "stop", "restart",
 ]);
@@ -249,6 +258,46 @@ export const ecgStudies = pgTable("ecg_studies", {
   svgKey: text("svg_key"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [index("ecg_studies_patient_date_idx").on(t.patientId, t.studyDate)]);
+
+/* Electrodiagnostic studies — NCS + needle EMG (ENMG). The four structured
+   blocks (motor_ncs / f_wave / sensory_ncs / needle_emg) live verbatim in
+   structuredData; the laudo lives verbatim in reportText/conclusion. Stored
+   together so Ask Lumen + AI insights see the whole picture; displayMode gates
+   only the future patient-facing surface, requiresReview the human-approval. */
+export const electrodiagnosticStudies = pgTable("electrodiagnostic_studies", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  importId: uuid("import_id").references(() => imports.id),
+  importFileId: uuid("import_file_id").references(() => importFiles.id),
+  studyType: electrodiagnosticStudyType("study_type").notNull().default("ncs_emg"),
+  studySubtype: text("study_subtype"),       // "Eletroneuromiografia de MMII (estudo completo)"
+  bodyRegion: text("body_region"),           // "lower limbs / MMII"
+  laterality: text("laterality"),            // "bilateral"
+  examDate: date("exam_date"),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+  requestingDoctor: text("requesting_doctor"),
+  performingDoctor: text("performing_doctor"),
+  lab: text("lab"),
+  city: text("city"),
+  country: text("country"),
+  conclusion: text("conclusion"),            // CONCLUSAO block, verbatim
+  reportText: text("report_text"),           // full laudo, verbatim, original language
+  structuredData: jsonb("structured_data").notNull().default({}),
+  sourceLanguage: text("source_language").default("pt-BR"),
+  r2Key: text("r2_key"),
+  sourceSha: text("source_sha"),
+  displayMode: clinicalDisplayMode("display_mode").notNull().default("hidden"),
+  deIdentified: boolean("de_identified").notNull().default(false),
+  requiresReview: boolean("requires_review").notNull().default(true),
+  severityFlags: text("severity_flags").array().default([]),
+  confidence: text("confidence"),            // alta / media / baixa
+  extractionFlags: jsonb("extraction_flags").default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("electrodiagnostic_studies_dedup").on(t.patientId, t.examDate, t.studyType),
+  index("electrodiagnostic_studies_patient_date_idx").on(t.patientId, t.examDate),
+]);
 
 export const clinicalHistory = pgTable("clinical_history", {
   id: uuid("id").defaultRandom().primaryKey(),

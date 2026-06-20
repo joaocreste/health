@@ -1108,6 +1108,28 @@ async function handlePatientExams(request, env) {
         ORDER BY study_date DESC, created_at DESC`;
     } catch { ecg_studies = []; }
 
+    // Electrodiagnostic studies (NCS + needle EMG / ENMG, migration 0018).
+    // Wrapped so a not-yet-created table degrades to [] rather than 500-ing.
+    // r2_key is NOT selected — blob keys are never exposed in this payload.
+    // The Worker is the display boundary (never gate display client-side):
+    //   - privileged viewer (admin) -> the full record, every display_mode.
+    //   - patient-facing -> only rows that are display_mode != 'hidden' AND
+    //     already cleared review (requires_review = false), then sliced to the
+    //     report/tables allowed by display_mode. A 'grave'-severity laudo that
+    //     hasn't cleared review therefore stays out of the patient payload even
+    //     when display_mode has been set to report_only/full.
+    let edx_studies = [];
+    try {
+      edx_studies = await sql`
+        SELECT id, study_type, study_subtype, body_region, laterality, exam_date,
+               ingested_at, requesting_doctor, performing_doctor, lab, city, country,
+               conclusion, report_text, structured_data, source_language,
+               display_mode, requires_review, severity_flags, confidence
+        FROM electrodiagnostic_studies
+        WHERE patient_id = ${pid}
+        ORDER BY exam_date DESC NULLS LAST, created_at DESC`;
+    } catch { edx_studies = []; }
+
     // Convert to ordered arrays with summary per marker
     const groupedPanels = Object.keys(panels).sort().map((panelName) => {
       const markers = Object.keys(panels[panelName]).sort().map((markerName) => {
@@ -1139,6 +1161,30 @@ async function handlePatientExams(request, env) {
       ? grant.filter.imaging_study_ids : null;
     if (ids && ids.length) imagingOut = imagingOut.filter((s) => ids.includes(s.id));
 
+    // Electrodiagnostic studies straddle labs/imaging; surface to either scope.
+    // Privileged sees the whole record; patient-facing is review-gated + sliced.
+    const privileged = isPrivileged(grant);
+    let edxOut = [];
+    if (privileged || has("labs") || has("imaging")) {
+      edxOut = edx_studies
+        .filter((s) => privileged || (s.display_mode !== "hidden" && s.requires_review === false))
+        .map((s) => {
+          const showReport = privileged || s.display_mode === "report_only" || s.display_mode === "full";
+          const showTables = privileged || s.display_mode === "tables_only" || s.display_mode === "full";
+          return {
+            id: s.id, study_type: s.study_type, study_subtype: s.study_subtype,
+            body_region: s.body_region, laterality: s.laterality, exam_date: s.exam_date,
+            ingested_at: s.ingested_at, requesting_doctor: s.requesting_doctor,
+            performing_doctor: s.performing_doctor, lab: s.lab, city: s.city, country: s.country,
+            source_language: s.source_language, display_mode: s.display_mode,
+            requires_review: s.requires_review, severity_flags: s.severity_flags, confidence: s.confidence,
+            conclusion: showReport ? s.conclusion : null,
+            report_text: showReport ? s.report_text : null,
+            structured_data: showTables ? s.structured_data : null,
+          };
+        });
+    }
+
     await auditScopedRead(sql, grant, "patient_exams_read", "/api/patient-exams", [...grant.scopes]);
 
     return new Response(JSON.stringify({
@@ -1149,6 +1195,7 @@ async function handlePatientExams(request, env) {
       medications: has("medications") ? medications : [],
       supplements: has("medications") ? supplements : [],
       ecg_studies: ecgOut,
+      electrodiagnostic_studies: edxOut,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   } catch (e) {
     return jsonError(500, `Exams query failed: ${e.message}`);
