@@ -6183,9 +6183,11 @@
 
     // Visibility tiers (deterministic, approved): the 2026 spine viewer and the
     // sleep studies are essential (abnormal, most-recent-of-type → both views);
-    // imaging history is historical; other-studies / overall-evolution / labs /
+    // imaging history is historical; other-studies / overall-evolution /
     // ergometric are standard (most-recent-normal or superseded → Complete only,
-    // absorbed into the Simplified overview above). hero + aiSummary card carry
+    // absorbed into the Simplified overview above). Labs are essential (the
+    // 13+yr blood/urine series is primary clinical content → both views).
+    // hero + aiSummary card carry
     // no tier — they never hide; only the inner summary register swaps.
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
@@ -6193,7 +6195,7 @@
       '<div data-tier="essential">' + imagery + '</div>' +
       '<div data-tier="historical">' + history + '</div>' +
       '<div data-tier="standard">' + otherStudies + overall + '</div>' +
-      '<div data-tier="standard">' + labs + '</div>' +
+      '<div data-tier="essential">' + labs + '</div>' +
       '<div data-tier="standard">' + ergometric + '</div>' +
       '<div data-tier="essential">' + sleep + '</div>';
     document.body.appendChild(main);
