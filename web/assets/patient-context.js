@@ -5775,6 +5775,229 @@
     );
   }
 
+  /* ── Paulo Silotto · sleep medicine (PSG + DISE) ──────────────────────
+     Reads window.PAULO_SLEEP (assets/paulo-sleep.js): a 2017 whole-night
+     polysomnogram (mild OSA) and a 2019 drug-induced sleep endoscopy. Both
+     sourced verbatim from the original reports. Renders an AHI severity
+     readout (PSG), a VOTE airway readout (DISE), AI interpretive blocks
+     (ai-pill), and verbatim PT transcripts behind collapsibles. */
+  function injectPauloSleepStyles() {
+    if (document.getElementById('paulo-sleep-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'paulo-sleep-styles';
+    var P = 'main.jc-paulo-exams ';
+    s.textContent = [
+      P + '.pl-sleep-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 3px solid #244E6E; border-radius: 10px; padding: 20px 22px; margin-top: 14px; }',
+      P + '.pl-sleep-card.is-dise { border-left-color: #7A4E9E; }',
+      P + '.pl-sleep-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }',
+      P + '.pl-sleep-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 0; }',
+      P + '.pl-sleep-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; letter-spacing: 0.04em; }',
+      P + '.pl-sleep-tag { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: rgba(36, 78, 110, 0.10); color: #244E6E; }',
+      P + '.pl-sleep-tag.is-dise { background: rgba(122, 78, 158, 0.12); color: #6A3E8E; }',
+      // AHI severity readout
+      P + '.pl-ahi { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin: 16px 0 6px; }',
+      P + '.pl-ahi-num { font-family: "Raleway", sans-serif; font-weight: 800; font-size: 40px; line-height: 1; color: #0D1B2A; }',
+      P + '.pl-ahi-num small { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500; color: #7A8FA6; }',
+      P + '.pl-ahi-verdict { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; }',
+      P + '.pl-ahi-verdict.sev-normal { background: rgba(45,122,78,0.12); color: #1F6E45; }',
+      P + '.pl-ahi-verdict.sev-mild { background: rgba(184,149,74,0.16); color: #8A6A1F; }',
+      P + '.pl-ahi-verdict.sev-moderate { background: rgba(201,123,58,0.16); color: #9A4E16; }',
+      P + '.pl-ahi-verdict.sev-severe { background: rgba(178,52,52,0.14); color: #9A2A2A; }',
+      P + '.pl-ahi-meter { position: relative; height: 30px; margin: 6px 0 18px; }',
+      P + '.pl-ahi-bands { display: flex; height: 8px; border-radius: 4px; overflow: hidden; }',
+      P + '.pl-ahi-bands span { display: block; }',
+      P + '.pl-ahi-bands .b-normal { background: #BFE0CC; }',
+      P + '.pl-ahi-bands .b-mild { background: #EBD7A6; }',
+      P + '.pl-ahi-bands .b-moderate { background: #E6BE97; }',
+      P + '.pl-ahi-bands .b-severe { background: #E2A6A6; }',
+      P + '.pl-ahi-mark { position: absolute; top: -3px; width: 2px; height: 14px; background: #0D1B2A; }',
+      P + '.pl-ahi-mark::after { content: ""; position: absolute; left: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #0D1B2A; }',
+      P + '.pl-ahi-scale { display: flex; justify-content: space-between; font-family: "IBM Plex Mono", monospace; font-size: 9px; color: #9AA7B4; margin-top: 10px; }',
+      // chips
+      P + '.pl-sleep-chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 6px; }',
+      P + '.pl-sleep-chip { background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 8px; padding: 9px 11px; }',
+      P + '.pl-sleep-chip-k { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 3px; }',
+      P + '.pl-sleep-chip-v { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 15px; font-weight: 600; color: #0D1B2A; }',
+      P + '.pl-sleep-chip-v small { font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; color: #7A8FA6; }',
+      // VOTE readout
+      P + '.pl-vote { margin: 14px 0 4px; }',
+      P + '.pl-vote-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #EFEBE3; }',
+      P + '.pl-vote-letter { flex: 0 0 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-family: "Raleway", sans-serif; font-weight: 800; font-size: 15px; color: #FFFFFF; }',
+      P + '.pl-vote-d0 .pl-vote-letter { background: #2D7A4E; }',
+      P + '.pl-vote-d1 .pl-vote-letter { background: #C97B3A; }',
+      P + '.pl-vote-d2 .pl-vote-letter { background: #B23434; }',
+      P + '.pl-vote-site { flex: 1 1 auto; }',
+      P + '.pl-vote-site-name { font-family: "IBM Plex Sans", sans-serif; font-weight: 600; font-size: 14px; color: #0D1B2A; }',
+      P + '.pl-vote-site-cfg { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      P + '.pl-vote-deg { flex: 0 0 auto; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }',
+      P + '.pl-vote-d0 .pl-vote-deg { background: rgba(45,122,78,0.12); color: #1F6E45; }',
+      P + '.pl-vote-d1 .pl-vote-deg { background: rgba(201,123,58,0.14); color: #9A4E16; }',
+      P + '.pl-vote-d2 .pl-vote-deg { background: rgba(178,52,52,0.14); color: #9A2A2A; }',
+      P + '.pl-vote-code { font-family: "IBM Plex Mono", monospace; font-weight: 700; }',
+      P + '.pl-vote-ref { font-family: "IBM Plex Mono", monospace; font-size: 9px; color: #9AA7B4; margin-top: 8px; }',
+      // maneuvers
+      P + '.pl-man { list-style: none; padding: 0; margin: 14px 0 0; }',
+      P + '.pl-man li { position: relative; padding-left: 22px; font-size: 13px; line-height: 1.5; color: #1E2D3D; margin-bottom: 8px; }',
+      P + '.pl-man li::before { position: absolute; left: 0; top: 0; font-family: "IBM Plex Mono", monospace; font-size: 13px; }',
+      P + '.pl-man li.is-good::before { content: "\\2197"; color: #1F6E45; }',
+      P + '.pl-man li.is-bad::before { content: "\\2192"; color: #9AA7B4; }',
+      // AI interpretive block
+      P + '.pl-sleep-ai { background: #FBF8F1; border: 1px solid #E8DEC6; border-radius: 9px; padding: 14px 16px; margin-top: 16px; }',
+      P + '.pl-sleep-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
+      P + '.pl-sleep-ai-head .ai-pill { font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: 0.08em; background: #B8954A; color: #FFFFFF; padding: 2px 7px; border-radius: 999px; }',
+      P + '.pl-sleep-ai-head span.k { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #8A6A1F; }',
+      P + '.pl-sleep-ai p { font-size: 13.5px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      P + '.pl-sleep-note { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #9AA7B4; margin-top: 10px; }',
+      // transcript
+      P + '.pl-sleep-card .silv-hist { margin-top: 14px; }',
+      P + '.pl-sleep-verbatim { white-space: pre-wrap; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 8px 0 4px; }',
+      P + '.pl-sleep-verbatim-h { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; margin: 12px 0 2px; }',
+      P + '.pl-sleep-pdf { display: inline-block; margin-top: 12px; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; text-decoration: none; border-bottom: 1px solid rgba(36,78,110,0.3); }',
+      '@media (prefers-reduced-motion: reduce) { ' + P + '.silv-hist { transition: none; } }'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+
+  function renderPauloSleepSection() {
+    var S = window.PAULO_SLEEP;
+    if (!S || (!S.psg && !S.dise)) return '';
+    injectPauloSleepStyles();
+    var fmt = function (v) { return (v === null || v === undefined) ? '—' : v; };
+    var chip = function (k, v) {
+      return '<div class="pl-sleep-chip"><span class="pl-sleep-chip-k">' + k + '</span><span class="pl-sleep-chip-v">' + v + '</span></div>';
+    };
+
+    // ── PSG card ──
+    var psgHtml = '';
+    if (S.psg) {
+      var p = S.psg;
+      var sevClass = 'sev-' + p.severity;
+      var markPct = Math.min(p.ahi, 40) / 40 * 100;
+      var meter =
+        '<div class="pl-ahi-meter">' +
+          '<div class="pl-ahi-bands">' +
+            '<span class="b-normal" style="width:12.5%"></span>' +
+            '<span class="b-mild" style="width:25%"></span>' +
+            '<span class="b-moderate" style="width:37.5%"></span>' +
+            '<span class="b-severe" style="width:25%"></span>' +
+          '</div>' +
+          '<div class="pl-ahi-mark" style="left:' + markPct.toFixed(1) + '%"></div>' +
+          '<div class="pl-ahi-scale"><span>0</span><span>5</span><span>15</span><span>30</span><span>40+</span></div>' +
+        '</div>';
+      var psgChips =
+        chip(t('Efficiency', 'Eficiência'), p.efficiency + '<small>%</small>') +
+        chip(t('Total sleep', 'Sono total'), p.tst_min + '<small> min</small>') +
+        chip(t('SpO₂ nadir', 'SpO₂ mínima'), p.spo2_nadir + '<small>%</small>') +
+        chip(t('Snore index', 'Índice ronco'), p.snore_index + '<small>/h</small>') +
+        chip(t('Arousal index', 'Índice despertar'), p.arousal_index + '<small>/h</small>') +
+        chip(t('Desaturations', 'Dessaturações'), p.desaturations) +
+        chip('ODI / IDO', fmt(p.odi)) +
+        chip(t('Max event', 'Evento máx'), p.max_event_s + '<small> s</small>');
+      var events = t('Events', 'Eventos') + ': ' + p.events.total + ' (' + p.events.obstructive + ' ' + t('obstructive', 'obstrutivos') + ', ' + p.events.central + ' ' + t('central', 'centrais') + ', ' + p.events.mixed + ' ' + t('mixed', 'mistos') + ', ' + p.events.hypopnea + ' ' + t('hypopnoea', 'hipopneias') + ') · ' + p.rera + ' RERA';
+      psgHtml =
+        '<div class="pl-sleep-card">' +
+          '<div class="pl-sleep-head">' +
+            '<h3 class="pl-sleep-title">' + t('Polysomnography', 'Polissonografia') + ' · ' +
+              '<span class="lang-en">' + p.dateLabelEn + '</span><span class="lang-pt">' + p.dateLabelPt + '</span></h3>' +
+            '<span class="pl-sleep-tag">PSG</span>' +
+            '<span class="pl-sleep-meta">' + p.lab + ' · ' + p.city + ' · ' + p.performing_doctor + '</span>' +
+          '</div>' +
+          '<div class="pl-ahi">' +
+            '<div class="pl-ahi-num">' + p.ahi + ' <small>' + t('AHI /h', 'IAH /h') + '</small></div>' +
+            '<div class="pl-ahi-verdict ' + sevClass + '"><span class="lang-en">' + p.severityEn + '</span><span class="lang-pt">' + p.severityPt + '</span></div>' +
+          '</div>' +
+          meter +
+          '<p class="pl-sleep-meta" style="margin:0 0 10px;">' + events + ' · ' + t('obstructive AHI', 'IAH obstrutivo') + ' ' + p.ahi_obstructive + ' · ' + t('hypopnoea AHI', 'IAH hipopneia') + ' ' + p.ahi_hypopnea + '</p>' +
+          '<div class="pl-sleep-chips">' + psgChips + '</div>' +
+          '<p class="pl-sleep-note"><span class="lang-en">' + p.stagingNoteEn + '</span><span class="lang-pt">' + p.stagingNotePt + '</span></p>' +
+          '<div class="pl-sleep-ai">' +
+            '<div class="pl-sleep-ai-head"><span class="ai-pill">AI</span><span class="k">' + t('Interpretation', 'Interpretação') + '</span></div>' +
+            '<p class="lang-en">' + p.aiEn + '</p><p class="lang-pt">' + p.aiPt + '</p>' +
+          '</div>' +
+          '<details class="silv-hist">' +
+            '<summary>' + t('Physician report · verbatim transcript', 'Laudo médico · transcrição literal') + '</summary>' +
+            '<div class="pl-sleep-verbatim-h">Comentários</div>' +
+            '<p class="pl-sleep-verbatim">' + p.verbatim.comentarios + '</p>' +
+            '<div class="pl-sleep-verbatim-h">Conclusão</div>' +
+            '<p class="pl-sleep-verbatim">' + p.verbatim.conclusao + '</p>' +
+            (p.reportHref ? '<a class="pl-sleep-pdf" href="' + p.reportHref + '" target="_blank" rel="noopener">' + t('Open original PDF ↗', 'Abrir PDF original ↗') + '</a>' : '') +
+          '</details>' +
+        '</div>';
+    }
+
+    // ── DISE card ──
+    var diseHtml = '';
+    if (S.dise) {
+      var d = S.dise;
+      var voteRows = d.vote.map(function (v) {
+        return '<div class="pl-vote-row pl-vote-d' + v.degree + '">' +
+          '<div class="pl-vote-letter">' + v.letter + '</div>' +
+          '<div class="pl-vote-site">' +
+            '<div class="pl-vote-site-name"><span class="lang-en">' + v.site_en + '</span><span class="lang-pt">' + v.site_pt + '</span>' +
+              (v.config ? ' <span class="pl-vote-code">' + v.degree + v.config + '</span>' : ' <span class="pl-vote-code">' + v.degree + '</span>') + '</div>' +
+            '<div class="pl-vote-site-cfg"><span class="lang-en">' + v.label_en + '</span><span class="lang-pt">' + v.label_pt + '</span></div>' +
+          '</div>' +
+          '<div class="pl-vote-deg">' + (v.degree === 0 ? t('none', 'ausente') : v.degree === 1 ? t('partial', 'parcial') : t('complete', 'completa')) + '</div>' +
+        '</div>';
+      }).join('');
+      var manRows = d.maneuvers.map(function (mv) {
+        return '<li class="' + (mv.good ? 'is-good' : 'is-bad') + '">' +
+          '<strong><span class="lang-en">' + mv.en + '</span><span class="lang-pt">' + mv.pt + '</span></strong> — ' +
+          '<span class="lang-en">' + mv.resultEn + '</span><span class="lang-pt">' + mv.resultPt + '</span></li>';
+      }).join('');
+      diseHtml =
+        '<div class="pl-sleep-card is-dise">' +
+          '<div class="pl-sleep-head">' +
+            '<h3 class="pl-sleep-title">' + t('Sleep endoscopy (DISE)', 'Sonoendoscopia (DISE)') + ' · ' +
+              '<span class="lang-en">' + d.dateLabelEn + '</span><span class="lang-pt">' + d.dateLabelPt + '</span></h3>' +
+            '<span class="pl-sleep-tag is-dise">DISE</span>' +
+            '<span class="pl-sleep-meta">' + d.performing_doctor + ' · ' + t('ref.', 'atend.') + ' ' + d.attendance + '</span>' +
+          '</div>' +
+          '<p class="pl-sleep-meta" style="margin:6px 0 0;">' +
+            '<span class="lang-en">' + d.route_en + '</span><span class="lang-pt">' + d.route_pt + '</span> · ' +
+            d.sedation.agent + ' ' + d.sedation.conc + ' · BIS ' + d.sedation.bis + ' · ' +
+            '<span class="lang-en">' + d.sedation.topical_en + '</span><span class="lang-pt">' + d.sedation.topical_pt + '</span></p>' +
+          '<div class="pl-vote">' + voteRows +
+            '<div class="pl-vote-ref">' + d.voteRef + '</div>' +
+          '</div>' +
+          '<ul class="pl-man">' + manRows + '</ul>' +
+          '<div class="pl-sleep-ai">' +
+            '<div class="pl-sleep-ai-head"><span class="ai-pill">AI</span><span class="k">' + t('Interpretation', 'Interpretação') + '</span></div>' +
+            '<p class="lang-en">' + d.aiEn + '</p><p class="lang-pt">' + d.aiPt + '</p>' +
+          '</div>' +
+          '<details class="silv-hist">' +
+            '<summary>' + t('Physician report · verbatim transcript', 'Laudo médico · transcrição literal') + '</summary>' +
+            '<div class="pl-sleep-verbatim-h">Endoscopia do sono induzido</div>' +
+            '<p class="pl-sleep-verbatim">' + d.verbatim.procedimento + '</p>' +
+            '<div class="pl-sleep-verbatim-h">Descrição sumária do exame</div>' +
+            '<p class="pl-sleep-verbatim">' + d.verbatim.descricao_sumaria + '</p>' +
+            '<div class="pl-sleep-verbatim-h">Manobras</div>' +
+            '<p class="pl-sleep-verbatim">' + d.verbatim.manobras + '</p>' +
+            '<div class="pl-sleep-verbatim-h">Classificação VOTE</div>' +
+            '<p class="pl-sleep-verbatim">' + d.verbatim.vote + '</p>' +
+            (d.reportHref ? '<a class="pl-sleep-pdf" href="' + d.reportHref + '" target="_blank" rel="noopener">' + t('Open original PDF ↗', 'Abrir PDF original ↗') + '</a>' : '') +
+          '</details>' +
+        '</div>';
+    }
+
+    var head =
+      '<div class="container">' +
+        '<div class="section-label">' + t('5 · Sleep medicine', '5 · Medicina do sono') + '</div>' +
+        '<h2 class="section-title">' + t('Sleep studies', 'Estudos do sono') + '</h2>' +
+        '<p class="section-desc">' +
+          t('Two studies two years apart: a 2017 whole-night polysomnogram establishing mild obstructive sleep apnoea, and a 2019 drug-induced sleep endoscopy (DISE) mapping where the airway actually collapses. Each shows an at-a-glance readout — AHI severity for the PSG, the VOTE airway grade for the DISE — with the physicians’ original reports preserved verbatim underneath.',
+            'Dois exames com dois anos de intervalo: uma polissonografia de noite inteira de 2017 que estabelece uma apneia obstrutiva do sono leve, e uma sonoendoscopia (DISE) de 2019 que mapeia onde a via aérea de fato colapsa. Cada um traz uma leitura imediata — gravidade do IAH na PSG, o grau VOTE da via aérea na DISE — com os laudos originais dos médicos preservados literalmente abaixo.') +
+        '</p>' +
+      '</div>';
+
+    return (
+      '<section class="report-section" id="sleep">' +
+        head +
+        '<div class="container">' + psgHtml + diseHtml + '</div>' +
+      '</section>'
+    );
+  }
+
   function renderPauloPhysicalExams() {
     injectPauloExamsStyles();
 
@@ -5921,10 +6144,11 @@
     var overall      = buildPauloOverallEvolution();
     var labs         = renderPauloLabsSection();
     var ergometric   = renderPauloErgoSection();
+    var sleep        = renderPauloSleepSection();
 
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs + ergometric;
+    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs + ergometric + sleep;
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
