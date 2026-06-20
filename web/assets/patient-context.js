@@ -831,27 +831,21 @@
     );
   }
 
-  // Dock the pain-map section as the LAST content section on the Summary
-  // page — below the AI summary card and the Reports block. The danger zone /
-  // AI-insights live in the body-level bottom dock beneath main.jc-home, so
-  // appending here lands the pain map at the end of the summary content,
-  // just above that action dock. renderHome is synchronous; wait until its
-  // first .report-section exists so we append after the real content rather
-  // than racing an empty main.
+  // Dock the pain-map into the bottom dock's EXTRA slot, which renders directly
+  // below the "Health Synthesis" AI block and directly above the upload / update
+  // / delete action cards (which always stay last). reflowBottomDock keeps this
+  // ordering even as the async AI block arrives.
   function injectPauloPainMap() {
     injectPauloPainMapStyles();
-    var tries = 0;
-    (function place() {
-      var home = document.querySelector('main.jc-home');
-      if (!home) { if (tries++ < 40) setTimeout(place, 80); return; }
-      if (document.getElementById('paulo-painmap')) return;
-      if (!home.querySelector('.report-section') && tries++ < 25) { setTimeout(place, 80); return; }
-      var sec = document.createElement('section');
-      sec.id = 'paulo-painmap';
-      sec.className = 'report-section paulo-painmap-section';
-      sec.innerHTML = renderPauloPainMap();
-      home.appendChild(sec); // last content section on the Summary page
-    })();
+    if (document.getElementById('paulo-painmap')) return;
+    var sec = document.createElement('section');
+    sec.id = 'paulo-painmap';
+    sec.className = 'report-section paulo-painmap-section';
+    sec.innerHTML = renderPauloPainMap();
+    var dock = ensureBottomDock();
+    var extra = dock.querySelector('[data-bottom-extra]');
+    (extra || dock).appendChild(sec);
+    reflowBottomDock();
   }
 
   function fmtLabNum(n) {
@@ -2080,14 +2074,19 @@
     s.textContent = [
       '.jc-bottom-dock { max-width: 1080px; margin: 32px auto; padding: 0 24px; }',
       // The three action cards: one row, three EQUAL columns, tops/bottoms aligned.
-      '.jc-bottom-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }',
+      // They are the LAST row of the dock so they are always the final thing on the page.
+      '.jc-bottom-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; margin-top: 24px; }',
       '.jc-bottom-actions > div:empty { display: none; }',
-      // The AI synthesis block sits full-width BELOW the action row (not an action card).
-      '.jc-bottom-ai { margin-top: 24px; }',
+      // The AI synthesis block sits full-width at the TOP of the dock.
       '.jc-bottom-ai:empty { display: none; }',
+      // Patient-specific extra block (Paulo pain map) between synthesis and actions.
+      '.jc-bottom-extra { margin-top: 24px; }',
+      '.jc-bottom-extra:empty { display: none; }',
       // neutralise each child\'s own centring/width so the columns control layout
       '.jc-bottom-dock .uc-wrap, .jc-bottom-dock .iu-wrap, .jc-bottom-dock .jc-danger-zone { max-width: none; margin: 0; padding: 0; height: 100%; }',
       '.jc-bottom-dock .ai-ins-block { max-width: none; margin: 0; padding: 0; border-top: none; }',
+      '.jc-bottom-dock .paulo-painmap-section { margin: 0; }',
+      '.jc-bottom-dock .paulo-painmap-section > .container { max-width: none; margin: 0; padding: 0; }',
       // equal-height cards so the three line up top and bottom
       '.jc-bottom-actions .uc-card, .jc-bottom-actions .iu-card, .jc-bottom-actions .jc-danger-card { height: 100%; box-sizing: border-box; }',
       '@media (max-width: 880px) { .jc-bottom-actions { grid-template-columns: 1fr; gap: 18px; } }',
@@ -2101,13 +2100,17 @@
     if (dock) return dock;
     dock = document.createElement('div');
     dock.className = 'jc-bottom-dock';
+    // Order top -> bottom: AI synthesis, then any patient-specific extra block
+    // (Paulo's pain map), then the upload / update / delete action cards LAST —
+    // the action cards must always be the last thing a patient sees on any page.
     dock.innerHTML =
+      '<div class="jc-bottom-ai" data-bottom-ai></div>' +
+      '<div class="jc-bottom-extra" data-bottom-extra></div>' +
       '<div class="jc-bottom-actions">' +
         '<div class="jc-bottom-upload" data-bottom-upload></div>' +
         '<div class="jc-bottom-aibtn" data-bottom-aibtn></div>' +
         '<div class="jc-bottom-danger" data-bottom-danger></div>' +
-      '</div>' +
-      '<div class="jc-bottom-ai" data-bottom-ai></div>';
+      '</div>';
     // Pin to the visual bottom: before a VISIBLE footer (static pages) or at the
     // end of <body> (dynamic pages hide the original footer and append content).
     var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
@@ -2121,8 +2124,9 @@
     var upload = document.querySelector('.uc-wrap[data-upload-card]');
     var iu = document.querySelector('.iu-wrap[data-insights-update]');
     var ai = document.querySelector('section[data-ai-insights]');
+    var extra = document.getElementById('paulo-painmap'); // patient-specific extra block
     var danger = document.querySelector('.jc-danger-zone');
-    if (!upload && !iu && !ai && !danger) return;
+    if (!upload && !iu && !ai && !danger && !extra) return;
     var dock = ensureBottomDock();
     // Re-pin the dock to the visual bottom on every reflow. The dock can be
     // created early (insights-update mounts on DOMContentLoaded) while the page's
@@ -2137,13 +2141,16 @@
     var uploadCol = dock.querySelector('[data-bottom-upload]');
     var aiBtnCol = dock.querySelector('[data-bottom-aibtn]');
     var aiCol = dock.querySelector('[data-bottom-ai]');
+    var extraCol = dock.querySelector('[data-bottom-extra]');
     var dangerCol = dock.querySelector('[data-bottom-danger]');
-    // Three equal action cards on one line: Upload | Update AI Insights | Delete.
+    // The AI synthesis block goes full-width at the TOP of the dock.
+    if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
+    // Patient-specific extra (Paulo's pain map) sits below the synthesis…
+    if (extra && extraCol && extra.parentNode !== extraCol) extraCol.appendChild(extra);
+    // …and the three action cards (Upload | Update AI Insights | Delete) stay LAST.
     if (upload && uploadCol && upload.parentNode !== uploadCol) uploadCol.appendChild(upload);
     if (iu && aiBtnCol && iu.parentNode !== aiBtnCol) aiBtnCol.appendChild(iu);
     if (danger && danger.parentNode !== dangerCol) dangerCol.appendChild(danger);
-    // The big AI synthesis block goes full-width BELOW the action row.
-    if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
   }
   // Exposed so assets/insights-update.js can trigger a reflow after it mounts /
   // refreshes the button + cards.
