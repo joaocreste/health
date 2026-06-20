@@ -1162,15 +1162,19 @@ async function handlePatientExams(request, env) {
     if (ids && ids.length) imagingOut = imagingOut.filter((s) => ids.includes(s.id));
 
     // Electrodiagnostic studies straddle labs/imaging; surface to either scope.
-    // Privileged sees the whole record; patient-facing is review-gated + sliced.
-    const privileged = isPrivileged(grant);
+    // Only ADMIN bypasses the review gate (the clinician/review surface). The
+    // patient viewing their own record (status 'self') and granted third parties
+    // are review-gated: nothing reaches them until display_mode is off 'hidden'
+    // AND requires_review has been cleared. isPrivileged() would wrongly include
+    // 'self' here, so key on the admin status explicitly.
+    const isAdmin = grant.status === "admin";
     let edxOut = [];
-    if (privileged || has("labs") || has("imaging")) {
+    if (isAdmin || has("labs") || has("imaging")) {
       edxOut = edx_studies
-        .filter((s) => privileged || (s.display_mode !== "hidden" && s.requires_review === false))
+        .filter((s) => isAdmin || (s.display_mode !== "hidden" && s.requires_review === false))
         .map((s) => {
-          const showReport = privileged || s.display_mode === "report_only" || s.display_mode === "full";
-          const showTables = privileged || s.display_mode === "tables_only" || s.display_mode === "full";
+          const showReport = isAdmin || s.display_mode === "report_only" || s.display_mode === "full";
+          const showTables = isAdmin || s.display_mode === "tables_only" || s.display_mode === "full";
           return {
             id: s.id, study_type: s.study_type, study_subtype: s.study_subtype,
             body_region: s.body_region, laterality: s.laterality, exam_date: s.exam_date,
