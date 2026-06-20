@@ -940,6 +940,28 @@ section.report-section.light             { background: var(--surface-base); } /*
 .chart-wrap.tall   { height: 380px; }
 .chart-wrap.short  { height: 220px; }
 
+/* Generic dashboard cards (CARD_RENDERERS in patient-context.js).
+   These reuse the canon .chart-card shell above; only the per-kind accent border,
+   the markdown body, the lab-panel body divider, the inline-SVG chart wrapper, and
+   the value pills are card-specific. Relocated here from an injected <style> block so
+   styling has a single source of truth and the generic path matches the canon look. */
+.chart-card--narrative { border-top: 3px solid var(--gold, #B8954A); }
+.chart-card--panel     { border-top: 3px solid #244E6E; }
+.chart-card--timeline  { border-top: 3px solid #3E7CA3; }
+.chart-card--flags     { border-top: 3px solid #7A2E22; }
+.chart-card .card-body p { margin: 0 0 10px; line-height: 1.55; font-size: 14px; color: #1E2D3D; }
+.chart-card .card-body p:last-child { margin-bottom: 0; }
+.chart-card .lab-panel-body { padding: 8px 0 0; border-top: 1px solid #E5E2DC; }
+.chart-card .exam-table { margin-top: 4px; }
+/* Inline SVG charts (svgLineChart) — NOT the fixed-height .chart-wrap used by canvas charts. */
+.card-chart-svg { margin-top: 6px; }
+.ov-pt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ov-pt-pill { display: inline-flex; align-items: baseline; gap: 6px; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 6px; padding: 3px 8px; font-family: var(--font-mono, "IBM Plex Mono", monospace); font-size: 11px; color: #1E2D3D; }
+.ov-pt-pill .ov-pt-date { color: #7A8FA6; }
+.ov-pt-pill .ov-pt-val { font-weight: 500; }
+/* The stack spaces cards with gap; cancel chart-card's own margin so it isn't doubled. */
+.ov-cards-stack > .chart-card { margin-bottom: 0; }
+
 .chart-legend {
   margin-top: 14px;
   display: flex; flex-wrap: wrap; gap: 16px;
@@ -1324,6 +1346,49 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   width: 100%;
   height: 100%;
 }
+
+/* ── VIEW-MODE TOGGLE (Simplified / Complete) — mirrors .lang-switch ──
+   Lives next to the language flag in the topnav. The button reads the chosen
+   mode; the actual hide/swap is the body[data-view] block further down. */
+.view-switch {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.view-btn {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.view-btn:hover { color: rgba(255, 255, 255, 0.9); }
+.view-btn[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0D1B2A;
+}
+
+/* The whole hiding mechanism. Until JS sets body[data-view] nothing is hidden,
+   so a pre-init or JS-off page is never UNDER-shown (safe failure = over-show).
+   simplified  → drop standard + historical cards, swap summary register
+   complete    → show everything, full summary register */
+.view-simplified { display: none; }            /* hidden until simplified chosen */
+body[data-view="simplified"] [data-tier="standard"],
+body[data-view="simplified"] [data-tier="historical"] { display: none !important; }
+body[data-view="simplified"] .view-complete   { display: none; }
+body[data-view="simplified"] .view-simplified { display: revert; }
+body[data-view="complete"]  .view-simplified  { display: none; }
+body[data-view="complete"]  .view-complete    { display: revert; }
 
 /* ── SIGN-OUT BUTTON (topnav) ── */
 .signout-btn {
@@ -2212,6 +2277,13 @@ body.add-data-open { overflow: hidden; }
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  /* Standard: the viewer is always centered and never stretches past a
+     comfortable width. Fills its cell inside a .ct-grid (cells are < 620);
+     centers itself when standalone or alone in a full-width container.
+     .is-fullscreen overrides max-width below. */
+  width: 100%;
+  max-width: 620px;
+  margin-inline: auto;
 }
 .ct-viewer-head {
   padding: 12px 16px;
@@ -2334,7 +2406,7 @@ body.add-data-open { overflow: hidden; }
 }
 .ct-control-select:focus-visible { outline: 2px solid var(--blue-400); outline-offset: 1px; }
 .ct-control-select option:disabled { color: var(--text-muted); }
-/* Segmented buttons (≤ 5 values) */
+/* Segmented buttons (few values, non-view ways; view/plane selectors use the dropdown above) */
 .ct-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .ct-seg-btn {
   font-family: var(--font-display);

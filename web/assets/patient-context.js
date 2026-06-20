@@ -841,6 +841,7 @@
     var sec = document.createElement('section');
     sec.id = 'paulo-painmap';
     sec.className = 'report-section paulo-painmap-section';
+    sec.setAttribute('data-tier', 'essential');   // current clinical pain picture
     sec.innerHTML = renderPauloPainMap();
     var dock = ensureBottomDock();
     var extra = dock.querySelector('[data-bottom-extra]');
@@ -5447,12 +5448,15 @@
           'What matters to you', 'O que importa para você',
           'What João sees you living by, day to day.',
           'Aquilo que João vê você vivendo, no dia a dia.', canRespond, 'rp-card-warm') +
-        themesHtml(byCat.theme, canRespond) +
-        jungianHtml(byCat.jungian) +
-        readingHtml(byCat.recommendation) +
-        questionsHtml(byCat.question) +
+        // standard tier — supporting architecture, Complete view only
+        '<div data-tier="standard">' +
+          themesHtml(byCat.theme, canRespond) +
+          jungianHtml(byCat.jungian) +
+          readingHtml(byCat.recommendation) +
+          questionsHtml(byCat.question) +
+        '</div>' +
         pillarsHtml() +
-        sourceDisclosureHtml() +
+        '<div data-tier="standard">' + sourceDisclosureHtml() + '</div>' +
         ctaHtml();
     }
 
@@ -6057,6 +6061,35 @@
               t('Synthesised from 5 spine MRI reports · CETAM Diagnóstico · 2015 → 2026 · plus 13 single-occurrence studies · 2013 → 2025',
                 'Sintetizado a partir de 5 laudos de RM da coluna · CETAM Diagnóstico · 2015 → 2026 · mais 13 estudos isolados · 2013 → 2025') +
             '</div>' +
+            // ── Simplified register: coverage-complete, depth-shallow.
+            //    Names every essential finding + acknowledges each domain.
+            '<div class="view-simplified paulo-ai-simplified">' +
+              '<div class="paulo-ai-subhead">' +
+                t('Overview · what needs attention', 'Visão geral · o que precisa de atenção') +
+              '</div>' +
+              '<div class="paulo-ai-summary-body lang-en">' +
+                '<p><strong>Spine (15 May 2026) — needs attention.</strong> Three active findings: an L5–S1 disc extrusion pressing the left S1 nerve root, L3–L4 spinal-canal narrowing, and a C5–C6 bulge now touching the spinal cord (no cord damage yet). Together these explain the current low-back, left-leg and neck symptoms.</p>' +
+                '<p><strong>Sleep — needs attention.</strong> Mild obstructive sleep apnoea (2017 study), with the airway shown collapsing at three levels on the 2019 endoscopy; a mandibular-advancement device looked promising.</p>' +
+                '<p><strong>Blood work — one flag.</strong> Latest panel (Apr 2024) shows mildly low red cells and haematocrit; everything else reviewed and within range.</p>' +
+                '<p><strong>Heart — reviewed, reassuring.</strong> Four exercise stress tests (2011 → 2023) were all negative for ischaemia.</p>' +
+                '<p><strong>Pending.</strong> A chest CT is on file awaiting review.</p>' +
+                '<p><strong>Other dimensions.</strong> Mental: see the reflective portrait. Spiritual: no data captured yet.</p>' +
+              '</div>' +
+              '<div class="paulo-ai-summary-body lang-pt">' +
+                '<p><strong>Coluna (15 de maio de 2026) — requer atenção.</strong> Três achados ativos: extrusão discal em L5–S1 comprimindo a raiz S1 à esquerda, estreitamento do canal vertebral em L3–L4 e abaulamento em C5–C6 que agora toca a medula (sem lesão medular ainda). Juntos explicam os sintomas atuais de lombar, perna esquerda e cervical.</p>' +
+                '<p><strong>Sono — requer atenção.</strong> Apneia obstrutiva do sono leve (estudo de 2017), com colapso da via aérea em três níveis na endoscopia de 2019; o avanço mandibular mostrou-se promissor.</p>' +
+                '<p><strong>Exames de sangue — um alerta.</strong> O painel mais recente (abr 2024) mostra hemácias e hematócrito levemente baixos; o restante foi revisado e está dentro do intervalo.</p>' +
+                '<p><strong>Coração — revisado, tranquilizador.</strong> Quatro testes ergométricos (2011 → 2023) foram todos negativos para isquemia.</p>' +
+                '<p><strong>Pendente.</strong> Há uma TC de tórax em arquivo aguardando revisão.</p>' +
+                '<p><strong>Outras dimensões.</strong> Mental: ver o retrato reflexivo. Espiritual: ainda sem dados.</p>' +
+              '</div>' +
+              '<div class="paulo-ai-disclaimer ai-pill-note">' +
+                t('AI interpretation of your records — not a clinical diagnosis. Switch to Complete for the full detail behind each line.',
+                  'Interpretação por IA dos seus registros — não é um diagnóstico clínico. Use a visão Completa para todo o detalhe por trás de cada linha.') +
+              '</div>' +
+            '</div>' +
+            // ── Complete register: the existing detailed narrative.
+            '<div class="view-complete">' +
             '<div class="paulo-ai-subhead">' +
               t('Current snapshot · 15 May 2026', 'Quadro atual · 15 de maio de 2026') +
             '</div>' +
@@ -6096,6 +6129,7 @@
               '<p class="paulo-ai-arcs-cross lang-en"><strong>Cross-region pattern.</strong> Sinistro-convex axis deviation appeared in the cervical only in 2023 but was already present in the lumbar 2023 baseline — consistent with whole-spine postural adaptation rather than a focal mechanical event. Paravertebral muscle hypotrophy is present in both regions (mild cervical, moderate lumbar) — a muscular dimension that constrains how far conservative management can go without targeted strengthening.</p>' +
               '<p class="paulo-ai-arcs-cross lang-pt"><strong>Padrão entre regiões.</strong> O desvio sinistro-convexo do eixo só aparece na cervical em 2023 mas já estava presente na lombar de 2023 — compatível com adaptação postural de toda a coluna, e não com evento mecânico focal. A hipotrofia paravertebral está presente nas duas regiões (discreta na cervical, moderada na lombar) — um eixo muscular que limita até onde o manejo conservador pode ir sem fortalecimento direcionado.</p>' +
             '</div>' +
+          '</div>' +                                  // close .view-complete
             '<div class="paulo-ai-insights-block">' +
               '<div class="paulo-ai-insights-head">' +
                 t('Three holistic insights', 'Três insights holísticos') +
@@ -6146,9 +6180,21 @@
     var ergometric   = renderPauloErgoSection();
     var sleep        = renderPauloSleepSection();
 
+    // Visibility tiers (deterministic, approved): the 2026 spine viewer and the
+    // sleep studies are essential (abnormal, most-recent-of-type → both views);
+    // imaging history is historical; other-studies / overall-evolution / labs /
+    // ergometric are standard (most-recent-normal or superseded → Complete only,
+    // absorbed into the Simplified overview above). hero + aiSummary card carry
+    // no tier — they never hide; only the inner summary register swaps.
     var main = document.createElement('main');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary + imagery + history + otherStudies + overall + labs + ergometric + sleep;
+    main.innerHTML = hero + aiSummary +
+      '<div data-tier="essential">' + imagery + '</div>' +
+      '<div data-tier="historical">' + history + '</div>' +
+      '<div data-tier="standard">' + otherStudies + overall + '</div>' +
+      '<div data-tier="standard">' + labs + '</div>' +
+      '<div data-tier="standard">' + ergometric + '</div>' +
+      '<div data-tier="essential">' + sleep + '</div>';
     document.body.appendChild(main);
 
     // Wire the unified viewer (handles both anatomies + orientations)
