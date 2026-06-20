@@ -4623,6 +4623,30 @@
         aiEn: 'The <strong>most recent urological study</strong> and the natural follow-up to the 2022 pair. Each report reads as &ldquo;usual&rdquo; in isolation, but across the year the <strong>post-void residual rose from 62 to ~77 cm³</strong> — incomplete bladder emptying trending the wrong way even as the kidneys stay normal. This is the through-line the 2022 CT predicted: a slowly-progressive benign-prostatic-obstruction picture that belongs on its own surveillance track, separate from the spine.',
         aiPt: 'O <strong>estudo urológico mais recente</strong> e o seguimento natural do par de 2022. Cada laudo, isolado, é lido como &ldquo;habitual&rdquo;, mas ao longo do ano o <strong>resíduo pós-miccional subiu de 62 para ~77 cm³</strong> — esvaziamento vesical incompleto tendendo na direção errada, ainda que os rins permaneçam normais. É o fio que a TC de 2022 previu: um quadro de obstrução prostática benigna lentamente progressivo, que merece vigilância própria, à parte da coluna.',
       },
+      {
+        eyebrowEn: '4N · Colonoscopy · Lower GI',
+        eyebrowPt: '4N · Colonoscopia · Trato GI baixo',
+        titleEn:   'Total colonoscopy',
+        titlePt:   'Colonoscopia total',
+        dateEn: '10 Sep 2013',
+        datePt: '10 set 2013',
+        physician: 'Dr. Marcelo de Mello Torquato · Dr. Roberto Minoru Naito',
+        provider:  'Endofasno Imagem · Ribeirão Preto',
+        pdfHref: 'scans/paulo-colonoscopy-2013-09-10-report.pdf',
+        reportOnly: true,
+        findingsEn: [
+          'Oral 20% mannitol prep (1000 ml) with good cleansing. Pentax EC-380 colonoscope; IV sedation (midazolam 2.5 mg, meperidine 50 mg). Prior digital rectal exam: normotonic sphincter, no other changes.',
+          'Ileocecal-valve mucosa normal. Cecum, ascending colon, hepatic flexure, transverse colon, splenic flexure, descending colon and sigmoid all within <strong>macroscopic normal limits</strong>. Rectal mucosa normal.',
+          'Impression: <strong>NORMAL TOTAL COLONOSCOPY</strong>. No biopsies taken.',
+        ],
+        findingsPt: [
+          'Preparo com manitol a 20% por via oral (1000 ml), com bom resultado. Colonoscópio Pentax EC-380; sedação intravenosa (midazolam 2,5 mg, meperidina 50 mg). Toque retal prévio: esfíncter normotônico, sem outras alterações.',
+          'Mucosa da válvula íleo-cecal normal. Ceco, cólon ascendente, ângulo hepático, cólon transverso, ângulo esplênico, cólon descendente e sigmoide dentro dos <strong>padrões macroscópicos da normalidade</strong>. Mucosa do reto normal.',
+          'Impressão: <strong>ESTUDO COLONOSCÓPICO TOTAL NORMAL</strong>. Sem biópsias.',
+        ],
+        aiEn: 'A <strong>normal total colonoscopy</strong> — the only endoscopic / lower-GI study on file and Paulo&apos;s clean colon baseline. Every segment from cecum to rectum was macroscopically normal and no biopsy was needed. Its value is longitudinal: the 2022 abdomen / pelvis CT later found <strong>diverticulosis of the descending and sigmoid colon</strong> — segments explicitly normal here in 2013 — dating that diverticular change to the intervening decade rather than something lifelong. Read as routine screening it carries no action of its own; it anchors the GI timeline the later CT builds on.',
+        aiPt: 'Uma <strong>colonoscopia total normal</strong> — o único estudo endoscópico / do trato gastrointestinal baixo do histórico e a linha de base limpa do cólon do Paulo. Todos os segmentos, do ceco ao reto, estavam macroscopicamente normais e não houve necessidade de biópsia. Seu valor é longitudinal: a TC de abdome / pelve de 2022 viria a encontrar <strong>diverticulose do cólon descendente e sigmoide</strong> — segmentos aqui explicitamente normais em 2013 —, datando essa alteração diverticular à década seguinte, e não a algo de toda a vida. Lida como rastreamento de rotina, não exige conduta própria; ancora a linha do tempo gastrointestinal sobre a qual a TC posterior se apoia.',
+      },
     ];
 
     return (
