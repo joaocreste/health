@@ -3753,6 +3753,20 @@ export default {
     // Returns a redirect/403 to short-circuit, or null to serve normally.
     const gated = await gateStaticRequest(request, env, url);
     if (gated) return gated;
-    return env.ASSETS.fetch(request);
+    const assetResp = await env.ASSETS.fetch(request);
+    // HTML pages carry no content hash in their URL, so a browser that caches
+    // one keeps loading whatever ?v= asset refs it was minted with — stale data
+    // survives deploys until a manual cache clear. Force HTML to revalidate every
+    // load; versioned assets (?v=, hashed files) keep their own long cache.
+    const p = url.pathname;
+    const isHtmlPage = p === "/" || p.endsWith(".html") || !/\.[a-z0-9]+$/i.test(p);
+    if (isHtmlPage && (assetResp.status === 200 || assetResp.status === 304)) {
+      const h = new Headers(assetResp.headers);
+      h.set("Cache-Control", "no-cache, must-revalidate");
+      return new Response(assetResp.body, {
+        status: assetResp.status, statusText: assetResp.statusText, headers: h,
+      });
+    }
+    return assetResp;
   },
 };
