@@ -1,9 +1,9 @@
 /* Lumen Log — service worker (offline-first app shell) */
-const CACHE = 'lumen-log-v2';
+const CACHE = 'lumen-log-v3';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=1',
+  './styles.css?v=2',
   './app.js?v=1',
   './manifest.webmanifest',
   './icons/icon.svg',
