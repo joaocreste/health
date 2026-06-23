@@ -1206,6 +1206,246 @@ async function handlePatientExams(request, env) {
   }
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   Therapy sessions (migration 0020) — read API.
+
+   Storage + read surface only; no frontend here. The Worker is the display
+   boundary — three gates, never relaxed client-side:
+
+   1. ACCESS: privileged (self/admin) OR a live grant carrying the `mental`
+      scope. Otherwise 401/403.
+   2. RISK: therapy_risk_flags are returned to CLINICIANS ONLY (viewer role
+      admin or doctor). They are never sent to the patient's own self-view, the
+      chatbot, or any digest — risk content is never auto-promoted to a
+      patient-facing surface.
+   3. REVIEW: interpretive rows (the session summary, themes, lens readings,
+      strengths/growth) are withheld from non-clinician callers until a human
+      clinician sets reviewed_at. A patient sees a session only once it has been
+      signed off.
+
+   "Clinician" = grant.viewerRole in (admin, doctor); this deliberately excludes
+   the patient's own self-view (role 'patient'), so self-access still honours
+   gates 2 and 3. */
+
+function jsonOk(obj) {
+  return new Response(JSON.stringify(obj), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+  });
+}
+
+// Resolve patient + access for the therapy endpoints. Returns either
+// { error } (a Response) or { patient, grant, isClinician }.
+async function resolveTherapyAccess(request, env, sql, clerk) {
+  const patientRows = await sql`
+    SELECT id, clerk_user_id, full_name FROM users
+    WHERE clerk_user_id = ${clerk} AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+  if (patientRows.length === 0) return { error: jsonError(404, "patient_not_found") };
+  const viewerClerk = await viewerFromRequest(request, env);
+  const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+  if (!isPrivileged(grant) && !scopeHasAny(grant, ["mental"])) {
+    return { error: jsonError(viewerClerk ? 403 : 401,
+      grant.status === "expired" ? "grant_expired" : "mental_scope_required") };
+  }
+  const isClinician = grant.viewerRole === "admin" || grant.viewerRole === "doctor";
+  return { patient: patientRows[0], grant, isClinician, viewerClerk };
+}
+
+const dateFrom = (url) => url.searchParams.get("from") || "0001-01-01";
+const dateTo   = (url) => url.searchParams.get("to")   || "9999-12-31";
+
+/* GET /api/patient-therapy-sessions?clerk=&from=&to=
+   Session list for the timeline. Non-clinicians see only reviewed sessions;
+   risk counts are clinician-only. */
+async function handleTherapySessions(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const acc = await resolveTherapyAccess(request, env, sql, clerk);
+    if (acc.error) return acc.error;
+    const pid = acc.patient.id, cl = acc.isClinician;
+    const rows = await sql`
+      SELECT s.id, s.session_date, s.session_type, s.modality, s.therapist_name,
+             s.therapist_credentials, s.language, s.session_sequence,
+             (s.reviewed_at IS NOT NULL) AS reviewed,
+             CASE WHEN ${cl} OR s.reviewed_at IS NOT NULL THEN s.session_summary END AS session_summary,
+             CASE WHEN ${cl} OR s.reviewed_at IS NOT NULL THEN s.patient_overall_affect END AS patient_overall_affect,
+             (SELECT count(*)::int FROM therapy_themes t WHERE t.session_id = s.id) AS theme_count,
+             (SELECT count(*)::int FROM therapy_lens_interpretations l WHERE l.session_id = s.id) AS lens_count,
+             CASE WHEN ${cl}
+               THEN (SELECT count(*)::int FROM therapy_risk_flags r WHERE r.session_id = s.id)
+               ELSE NULL END AS risk_count
+      FROM therapy_sessions s
+      WHERE s.patient_id = ${pid}
+        AND s.session_date BETWEEN ${dateFrom(url)} AND ${dateTo(url)}
+        AND (${cl} OR s.reviewed_at IS NOT NULL)
+      ORDER BY s.session_date DESC, s.ingested_at DESC`;
+    return jsonOk({ patient_clerk: clerk, clinician_view: cl, count: rows.length, sessions: rows });
+  } catch (e) { return jsonError(500, `therapy_sessions failed: ${e.message}`); }
+}
+
+/* GET /api/patient-therapy-session?id=
+   One session fully expanded. Patient resolved from the session row, then access
+   gated by that patient's clerk. Risk flags clinician-only; the whole record is
+   withheld from non-clinicians until reviewed. */
+async function handleTherapySession(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
+  if (!id) return jsonError(400, "id_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const sRows = await sql`
+      SELECT s.*, u.clerk_user_id AS patient_clerk
+      FROM therapy_sessions s JOIN users u ON u.id = s.patient_id
+      WHERE s.id = ${id} LIMIT 1`;
+    if (sRows.length === 0) return jsonError(404, "session_not_found");
+    const s = sRows[0];
+    const acc = await resolveTherapyAccess(request, env, sql, s.patient_clerk);
+    if (acc.error) return acc.error;
+    const cl = acc.isClinician;
+    if (!cl && !s.reviewed_at) return jsonError(403, "pending_clinician_review");
+
+    const [participants, themes, lens, strengths, interventions, quotes, risk] = await Promise.all([
+      sql`SELECT role, display_name, speaker_label, attribution_confidence, is_tracked_patient, consent_on_file
+            FROM therapy_participants WHERE session_id = ${id} ORDER BY role`,
+      sql`SELECT canonical_label, display_label_en, display_label_pt, category, salience, valence,
+                 description, evidence_anchor, psych_item_id, is_ai_inference
+            FROM therapy_themes WHERE session_id = ${id} ORDER BY salience DESC, canonical_label`,
+      sql`SELECT lens, construct, construct_label_en, construct_label_pt, observation,
+                 evidence_anchor, confidence, is_ai_inference
+            FROM therapy_lens_interpretations WHERE session_id = ${id} ORDER BY lens, confidence DESC`,
+      sql`SELECT polarity, label, description, evidence_anchor, confidence, is_ai_inference
+            FROM therapy_strengths_growth WHERE session_id = ${id} ORDER BY polarity, confidence DESC`,
+      sql`SELECT intervention_type, description, assigned_to_role, is_ai_inference
+            FROM therapy_interventions WHERE session_id = ${id}`,
+      sql`SELECT speaker_role, quote_text, context_note, is_ai_inference
+            FROM therapy_quotes WHERE session_id = ${id}`,
+      cl ? sql`SELECT risk_type, severity, description, requires_human_review, reviewed_at
+                 FROM therapy_risk_flags WHERE session_id = ${id}` : Promise.resolve(null),
+    ]);
+
+    return jsonOk({
+      clinician_view: cl,
+      session: {
+        id: s.id, session_date: s.session_date, session_time: s.session_time,
+        modality: s.modality, session_type: s.session_type, session_sequence: s.session_sequence,
+        therapist_name: s.therapist_name, therapist_credentials: s.therapist_credentials,
+        therapist_approach: s.therapist_approach, language: s.language, duration_minutes: s.duration_minutes,
+        source_format: s.source_format, un_deidentified: s.un_deidentified,
+        consent_status: s.consent_status, reviewed: !!s.reviewed_at,
+        session_summary: s.session_summary, summary_pt: s.summary_pt,
+        patient_overall_affect: s.patient_overall_affect,
+      },
+      participants, themes, lens_interpretations: lens, strengths_growth: strengths,
+      interventions, quotes,
+      // Risk only present for clinicians; null (key absent for patients) otherwise.
+      risk_flags: cl ? risk : undefined,
+      risk_withheld: cl ? undefined : "Safety flags, if any, are restricted to the clinician review surface.",
+    });
+  } catch (e) { return jsonError(500, `therapy_session failed: ${e.message}`); }
+}
+
+/* GET /api/patient-therapy-themes?clerk=&from=&to=
+   Theme-frequency aggregation — the "most recurring theme this month" endpoint.
+   GROUP BY canonical_label over the date range. */
+async function handleTherapyThemes(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const acc = await resolveTherapyAccess(request, env, sql, clerk);
+    if (acc.error) return acc.error;
+    const pid = acc.patient.id, cl = acc.isClinician;
+    const rows = await sql`
+      SELECT t.canonical_label,
+             max(t.display_label_en) AS display_label_en,
+             max(t.display_label_pt) AS display_label_pt,
+             max(t.category) AS category,
+             count(*)::int AS sessions,
+             round(avg(CASE t.salience WHEN 'high' THEN 3 WHEN 'medium' THEN 2 ELSE 1 END)::numeric, 2) AS avg_salience,
+             count(*) FILTER (WHERE t.valence = 'positive')::int   AS positive,
+             count(*) FILTER (WHERE t.valence = 'negative')::int   AS negative,
+             count(*) FILTER (WHERE t.valence = 'neutral')::int    AS neutral,
+             count(*) FILTER (WHERE t.valence = 'ambivalent')::int AS ambivalent,
+             min(t.session_date) AS first_seen,
+             max(t.session_date) AS last_seen
+      FROM therapy_themes t
+      WHERE t.patient_id = ${pid}
+        AND t.session_date BETWEEN ${dateFrom(url)} AND ${dateTo(url)}
+        AND (${cl} OR EXISTS (SELECT 1 FROM therapy_sessions s
+                              WHERE s.id = t.session_id AND s.reviewed_at IS NOT NULL))
+      GROUP BY t.canonical_label
+      ORDER BY sessions DESC, last_seen DESC`;
+    return jsonOk({
+      patient_clerk: clerk, clinician_view: cl,
+      from: url.searchParams.get("from") || null, to: url.searchParams.get("to") || null,
+      themes: rows.map((r) => ({ ...r, valence_mix: {
+        positive: r.positive, negative: r.negative, neutral: r.neutral, ambivalent: r.ambivalent,
+      } })),
+    });
+  } catch (e) { return jsonError(500, `therapy_themes failed: ${e.message}`); }
+}
+
+/* GET /api/patient-therapy-lens?clerk=&lens=&from=&to=
+   Lens-specific trajectory (e.g. all shadow/transference observations over time). */
+async function handleTherapyLens(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  const lensFilter = url.searchParams.get("lens"); // optional
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const acc = await resolveTherapyAccess(request, env, sql, clerk);
+    if (acc.error) return acc.error;
+    const pid = acc.patient.id, cl = acc.isClinician;
+    const rows = await sql`
+      SELECT l.session_date, l.lens, l.construct, l.construct_label_en, l.construct_label_pt,
+             l.observation, l.evidence_anchor, l.confidence
+      FROM therapy_lens_interpretations l
+      WHERE l.patient_id = ${pid}
+        AND l.session_date BETWEEN ${dateFrom(url)} AND ${dateTo(url)}
+        AND (${lensFilter}::text IS NULL OR l.lens::text = ${lensFilter})
+        AND (${cl} OR EXISTS (SELECT 1 FROM therapy_sessions s
+                              WHERE s.id = l.session_id AND s.reviewed_at IS NOT NULL))
+      ORDER BY l.session_date DESC, l.lens, l.confidence DESC`;
+    return jsonOk({ patient_clerk: clerk, clinician_view: cl, lens: lensFilter || "all",
+                    note: "All lens readings are AI inference — one interpretive register among several.",
+                    interpretations: rows });
+  } catch (e) { return jsonError(500, `therapy_lens failed: ${e.message}`); }
+}
+
+/* GET /api/patient-therapy-timeline?clerk=
+   Sessions + per-session theme/affect movement, for the eventual longitudinal view. */
+async function handleTherapyTimeline(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const acc = await resolveTherapyAccess(request, env, sql, clerk);
+    if (acc.error) return acc.error;
+    const pid = acc.patient.id, cl = acc.isClinician;
+    const rows = await sql`
+      SELECT s.id, s.session_date, s.session_type,
+             (s.reviewed_at IS NOT NULL) AS reviewed,
+             CASE WHEN ${cl} OR s.reviewed_at IS NOT NULL THEN s.patient_overall_affect END AS affect,
+             COALESCE((SELECT array_agg(t.canonical_label ORDER BY t.salience DESC)
+                       FROM therapy_themes t WHERE t.session_id = s.id), '{}') AS themes
+      FROM therapy_sessions s
+      WHERE s.patient_id = ${pid}
+        AND (${cl} OR s.reviewed_at IS NOT NULL)
+      ORDER BY s.session_date ASC`;
+    return jsonOk({ patient_clerk: clerk, clinician_view: cl, points: rows });
+  } catch (e) { return jsonError(500, `therapy_timeline failed: ${e.message}`); }
+}
+
 async function handleLogin(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   if (request.method !== "POST") return jsonError(405, "method_not_allowed");
@@ -3676,6 +3916,21 @@ export default {
     }
     if (url.pathname === "/api/patient-exams") {
       return handlePatientExams(request, env);
+    }
+    if (url.pathname === "/api/patient-therapy-sessions") {
+      return handleTherapySessions(request, env);
+    }
+    if (url.pathname === "/api/patient-therapy-session") {
+      return handleTherapySession(request, env);
+    }
+    if (url.pathname === "/api/patient-therapy-themes") {
+      return handleTherapyThemes(request, env);
+    }
+    if (url.pathname === "/api/patient-therapy-lens") {
+      return handleTherapyLens(request, env);
+    }
+    if (url.pathname === "/api/patient-therapy-timeline") {
+      return handleTherapyTimeline(request, env);
     }
     if (url.pathname === "/api/patient-ecg-object") {
       return handleEcgObject(request, env);

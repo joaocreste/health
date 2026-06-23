@@ -75,3 +75,6 @@ token.txt
 # ==========================================================================
 /Screenshot*.png
 /Screenshot*.jpg
+
+# PHI staging intermediates (therapy/labs extractions) — never commit
+.staging/

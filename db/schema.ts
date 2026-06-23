@@ -631,6 +631,196 @@ export const panicEvents = pgTable("panic_events", {
   check("panic_severity_range", sql`severity is null or (severity between 1 and 10)`),
 ]);
 
+/* ───── 8b. Mental health — therapy sessions (migration 0020) ─
+
+   Longitudinal psychotherapy ingestion. A session is the container; the child
+   tables carry the analytical payload (themes, lens readings, strengths/growth,
+   interventions, risk flags, quotes), each denormalising session_date for
+   rolling-window queries. patient_id -> users.id per repo convention (the
+   prompt's "-> patient_profiles" is overridden by the live schema).
+
+   is_ai_inference separates interpretation (TRUE) from extracted fact (FALSE).
+   therapy_risk_flags are clinician-gated at the Worker boundary — never the
+   patient's own view, never the chatbot. Blobs live in EU R2; the DB stores
+   the keys (source_r2_key / transcript_r2_key) only. */
+
+export const therapyModality = pgEnum("therapy_modality", [
+  "individual", "couples", "family", "group",
+]);
+export const therapySessionType = pgEnum("therapy_session_type", [
+  "intake", "routine", "crisis", "termination", "follow_up", "assessment",
+]);
+export const therapySourceFormat = pgEnum("therapy_source_format", [
+  "audio_recording", "video_recording", "transcript", "text_archive", "clinician_notes", "mixed",
+]);
+export const therapyParticipantRole = pgEnum("therapy_participant_role", [
+  "therapist", "patient", "partner", "family_member", "co_therapist", "interpreter", "other",
+]);
+export const therapyLens = pgEnum("therapy_lens", [
+  "freudian", "jungian", "lacanian", "attachment", "general_clinical",
+]);
+export const themeValence = pgEnum("theme_valence", [
+  "positive", "negative", "neutral", "ambivalent",
+]);
+export const salienceLevel = pgEnum("salience_level", ["high", "medium", "low"]);
+export const swPolarity = pgEnum("sw_polarity", ["strength", "growth_area"]);
+export const riskType = pgEnum("risk_type", [
+  "suicidality", "self_harm", "harm_to_others", "substance_use", "crisis", "safeguarding", "none",
+]);
+export const riskSeverity = pgEnum("risk_severity", [
+  "none", "low", "moderate", "high", "imminent",
+]);
+
+export const therapySessions = pgTable("therapy_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionDate: date("session_date").notNull(),         // clinical x-axis
+  sessionTime: text("session_time"),                   // 'time' column; read as text
+  sessionSequence: integer("session_sequence"),
+  modality: therapyModality("modality").default("individual").notNull(),
+  sessionType: therapySessionType("session_type").default("routine").notNull(),
+  therapistName: text("therapist_name"),
+  therapistCredentials: text("therapist_credentials"),
+  therapistApproach: text("therapist_approach"),
+  durationMinutes: integer("duration_minutes"),
+  language: text("language"),
+  sourceFormat: therapySourceFormat("source_format").notNull(),
+  sourceR2Key: text("source_r2_key"),
+  transcriptR2Key: text("transcript_r2_key"),
+  transcriptionMethod: text("transcription_method"),
+  diarizationConfidence: real("diarization_confidence"),
+  consentStatus: text("consent_status"),
+  unDeidentified: boolean("un_deidentified").default(false).notNull(),
+  sessionSummary: text("session_summary"),             // is_ai_inference TRUE
+  summaryPt: text("summary_pt"),
+  patientOverallAffect: text("patient_overall_affect"),
+  contentHash: text("content_hash"),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }),
+  sourceFileName: text("source_file_name"),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("therapy_sessions_patient_date_idx").on(t.patientId, t.sessionDate),
+  uniqueIndex("therapy_sessions_dedup").on(t.patientId, t.contentHash),
+]);
+
+export const therapyParticipants = pgTable("therapy_participants", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").references(() => users.id, { onDelete: "set null" }),
+  role: therapyParticipantRole("role").notNull(),
+  displayName: text("display_name"),
+  speakerLabel: text("speaker_label"),
+  attributionConfidence: real("attribution_confidence"),
+  isTrackedPatient: boolean("is_tracked_patient").default(false).notNull(),
+  consentOnFile: boolean("consent_on_file"),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_participants_session_idx").on(t.sessionId)]);
+
+export const therapyThemes = pgTable("therapy_themes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  canonicalLabel: text("canonical_label").notNull(),
+  displayLabelEn: text("display_label_en"),
+  displayLabelPt: text("display_label_pt"),
+  category: text("category"),
+  salience: salienceLevel("salience").default("medium").notNull(),
+  valence: themeValence("valence").default("neutral").notNull(),
+  description: text("description"),
+  evidenceAnchor: text("evidence_anchor"),
+  psychItemId: uuid("psych_item_id").references(() => psychItems.id, { onDelete: "set null" }),
+  isAiInference: boolean("is_ai_inference").default(true).notNull(),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("therapy_themes_patient_date_idx").on(t.patientId, t.sessionDate),
+  index("therapy_themes_patient_label_date_idx").on(t.patientId, t.canonicalLabel, t.sessionDate),
+]);
+
+export const therapyLensInterpretations = pgTable("therapy_lens_interpretations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  lens: therapyLens("lens").notNull(),
+  construct: text("construct").notNull(),
+  constructLabelEn: text("construct_label_en"),
+  constructLabelPt: text("construct_label_pt"),
+  observation: text("observation").notNull(),
+  evidenceAnchor: text("evidence_anchor"),
+  confidence: real("confidence"),
+  isAiInference: boolean("is_ai_inference").default(true).notNull(),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_lens_patient_lens_date_idx").on(t.patientId, t.lens, t.sessionDate)]);
+
+export const therapyStrengthsGrowth = pgTable("therapy_strengths_growth", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  polarity: swPolarity("polarity").notNull(),
+  label: text("label").notNull(),
+  description: text("description"),
+  evidenceAnchor: text("evidence_anchor"),
+  confidence: real("confidence"),
+  isAiInference: boolean("is_ai_inference").default(true).notNull(),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_strengths_patient_date_idx").on(t.patientId, t.sessionDate)]);
+
+export const therapyInterventions = pgTable("therapy_interventions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  interventionType: text("intervention_type").notNull(),
+  description: text("description").notNull(),
+  assignedToRole: therapyParticipantRole("assigned_to_role"),
+  isAiInference: boolean("is_ai_inference").default(false).notNull(),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_interventions_patient_date_idx").on(t.patientId, t.sessionDate)]);
+
+export const therapyRiskFlags = pgTable("therapy_risk_flags", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  riskType: riskType("risk_type").notNull(),
+  severity: riskSeverity("severity").notNull(),
+  description: text("description"),                    // factual; NO method/means detail
+  requiresHumanReview: boolean("requires_human_review").default(true).notNull(),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_risk_patient_date_idx").on(t.patientId, t.sessionDate)]);
+
+export const therapyQuotes = pgTable("therapy_quotes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").notNull().references(() => therapySessions.id, { onDelete: "cascade" }),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  speakerRole: therapyParticipantRole("speaker_role"),
+  quoteText: text("quote_text").notNull(),             // SHORT, de-identified
+  contextNote: text("context_note"),
+  linkedThemeId: uuid("linked_theme_id").references(() => therapyThemes.id, { onDelete: "set null" }),
+  isAiInference: boolean("is_ai_inference").default(false).notNull(),
+  sessionDate: date("session_date").notNull(),
+  ingestedAt: timestamp("ingested_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("therapy_quotes_patient_date_idx").on(t.patientId, t.sessionDate)]);
+
+export const therapyPeriodDigests = pgTable("therapy_period_digests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  topThemesJson: jsonb("top_themes_json"),
+  trajectoryNote: text("trajectory_note"),             // is_ai_inference TRUE
+  sessionsCount: integer("sessions_count"),
+  generatedAt: timestamp("generated_at", { withTimezone: true }).defaultNow().notNull(),
+  reviewedBy: text("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+}, (t) => [index("therapy_digests_patient_period_idx").on(t.patientId, t.periodStart, t.periodEnd)]);
+
 /* ───── 9. Clinical encounters & prescriptions ──────── */
 
 export const encounters = pgTable("encounters", {
