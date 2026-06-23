@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Lumen Log</title>
+  <meta name="description" content="Lumen Health — fast daily logging for Valium, alcohol, and protein intake.">
+
+  <!-- PWA / iOS home-screen -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0A1428">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lumen Log">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- ===== Header ===== -->
+    <header class="appbar">
+      <div class="appbar-brand">
+        <svg class="appbar-logo" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M 32 48 C 15 35, 12 28, 12 22 C 12 17, 16 13.5, 20.5 13.5 C 24.5 13.5, 28 17, 32 23 C 36 17, 39.5 13.5, 43.5 13.5 C 48 13.5, 52 17, 52 22 C 52 28, 49 35, 32 48 Z" fill="none" stroke="#8FB4CF" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M 5 32 L 18.5 32 L 22 35.5 L 26.5 30 L 32 18.5 L 37.5 46 L 42.5 30 L 45.5 33 L 48.5 32 L 59 32" fill="none" stroke="#EBA63A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="appbar-titles">
+          <span class="appbar-name">Lumen Log</span>
+          <span class="appbar-date" id="todayLabel">—</span>
+        </div>
+      </div>
+      <button class="icon-btn" id="exportBtn" aria-label="Export all data as CSV" title="Export CSV">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </header>
+
+    <!-- ===== Tabs ===== -->
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" id="tabTodayBtn" data-view="today" role="tab">Today</button>
+      <button class="tab" id="tabHistoryBtn" data-view="history" role="tab">History</button>
+    </nav>
+
+    <!-- ===== Today view ===== -->
+    <main class="view is-active" id="view-today">
+      <div class="cards" id="trackerCards"><!-- tracker cards injected by app.js --></div>
+      <p class="footnote">Daily totals reset at midnight. Every tap is saved to your device — nothing is sent anywhere.</p>
+    </main>
+
+    <!-- ===== History view ===== -->
+    <main class="view" id="view-history">
+      <section class="history-summary" id="historySummary"></section>
+      <h2 class="section-label">Recent entries</h2>
+      <ul class="entry-list" id="entryList"></ul>
+    </main>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js?v=1"></script>
+</body>
+</html>

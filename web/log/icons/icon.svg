@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-label="Lumen Log">
+  <rect width="512" height="512" fill="#0E1A2C"/>
+  <path d="M 256 388 C 120 286, 96 230, 96 184 C 96 146, 126 120, 162 120 C 196 120, 226 146, 256 190 C 286 146, 316 120, 350 120 C 386 120, 416 146, 416 184 C 416 230, 392 286, 256 388 Z"
+        fill="none" stroke="#8FB4CF" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M 40 262 L 150 262 L 176 290 L 212 248 L 256 150 L 300 372 L 340 248 L 364 268 L 388 262 L 476 262"
+        fill="none" stroke="#EBA63A" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

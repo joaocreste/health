@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-label="Lumen Log">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A3A55"/>
+      <stop offset="1" stop-color="#0A1428"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g transform="translate(256,256) scale(0.62) translate(-256,-256)">
+    <path d="M 256 408 C 96 280, 32 216, 96 120 C 160 56, 224 88, 256 152 C 288 88, 352 56, 416 120 C 480 216, 416 280, 256 408 Z"
+          fill="rgba(244,185,66,0.10)" stroke="#244E6E" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M 64 256 L 144 256 L 176 288 L 208 224 L 240 144 L 288 368 L 320 224 L 352 256 L 448 256"
+          fill="none" stroke="#F4B942" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
