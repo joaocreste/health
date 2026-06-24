@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-11",
+  "generated_at": "2026-06-24",
   "weight": {
     "series_recent": [
       {
@@ -142,56 +142,55 @@
     ]
   },
   "sleep": {
-    "n_nights": 222,
+    "n_nights": 238,
     "range": [
       "2025-10-18",
-      "2026-06-02"
+      "2026-06-17"
     ],
     "box": {
       "deep": {
-        "n": 222,
-        "min": 0.025,
-        "q1": 1.123,
-        "median": 1.525,
-        "q3": 1.914,
-        "max": 3.05,
-        "mean": 1.529,
+        "n": 238,
+        "min": 0.0,
+        "q1": 1.104,
+        "median": 1.508,
+        "q3": 1.869,
+        "max": 2.983,
+        "mean": 1.505,
         "items": [
+          3.042,
+          3.05,
           3.5,
           3.575
         ]
       },
       "rem": {
-        "n": 222,
+        "n": 238,
         "min": 0.108,
-        "q1": 0.898,
-        "median": 1.367,
-        "q3": 1.939,
+        "q1": 0.883,
+        "median": 1.358,
+        "q3": 1.937,
         "max": 3.475,
-        "mean": 1.446,
+        "mean": 1.436,
         "items": []
       },
       "light": {
-        "n": 222,
-        "min": 1.517,
-        "q1": 4.39,
-        "median": 5.417,
-        "q3": 6.319,
-        "max": 9.017,
-        "mean": 5.379,
-        "items": [
-          1.392,
-          9.3
-        ]
+        "n": 238,
+        "min": 1.392,
+        "q1": 4.207,
+        "median": 5.296,
+        "q3": 6.269,
+        "max": 9.3,
+        "mean": 5.275,
+        "items": []
       },
       "awake": {
-        "n": 222,
+        "n": 238,
         "min": 0.283,
-        "q1": 0.977,
-        "median": 1.331,
-        "q3": 2.0,
+        "q1": 0.95,
+        "median": 1.312,
+        "q3": 1.954,
         "max": 3.308,
-        "mean": 1.645,
+        "mean": 1.603,
         "items": [
           3.545,
           3.721,
@@ -210,22 +209,22 @@
         ]
       },
       "total": {
-        "n": 222,
+        "n": 238,
         "min": 3.267,
-        "q1": 6.908,
-        "median": 8.35,
-        "q3": 9.596,
+        "q1": 6.721,
+        "median": 8.216,
+        "q3": 9.554,
         "max": 13.342,
-        "mean": 8.354,
+        "mean": 8.217,
         "items": []
       }
     },
     "efficiency_median": 85.0,
-    "bedtime_sd_h": 2.65,
+    "bedtime_sd_h": 2.74,
     "hrv_median": 16.0,
-    "hrv_mean": 20.0,
-    "rhr_median": 67.0,
-    "rhr_mean": 68.1,
+    "hrv_mean": 19.8,
+    "rhr_median": 68.0,
+    "rhr_mean": 68.4,
     "hrv_below20_pct": 64,
     "hrv_above60_n": 2,
     "hrv_by_month": {
@@ -237,7 +236,7 @@
       "2026-03": 23.7,
       "2026-04": 15.8,
       "2026-05": 13.9,
-      "2026-06": 17.0
+      "2026-06": 15.9
     },
     "rhr_by_month": {
       "2025-10": 64.4,
@@ -248,7 +247,7 @@
       "2026-03": 64.9,
       "2026-04": 73.5,
       "2026-05": 76.5,
-      "2026-06": 66.5
+      "2026-06": 72.3
     },
     "series": [
       {
@@ -1360,26 +1359,106 @@
         "d": "2026-06-02",
         "hrv": 19.0,
         "rhr": 62.0
+      },
+      {
+        "d": "2026-06-03",
+        "hrv": 8.0,
+        "rhr": 81.0
+      },
+      {
+        "d": "2026-06-04",
+        "hrv": 12.0,
+        "rhr": 78.0
+      },
+      {
+        "d": "2026-06-05",
+        "hrv": 19.0,
+        "rhr": 71.0
+      },
+      {
+        "d": "2026-06-06",
+        "hrv": 12.0,
+        "rhr": 77.0
+      },
+      {
+        "d": "2026-06-07",
+        "hrv": 8.0,
+        "rhr": 92.0
+      },
+      {
+        "d": "2026-06-07",
+        "hrv": 21.0,
+        "rhr": 71.0
+      },
+      {
+        "d": "2026-06-08",
+        "hrv": 15.0,
+        "rhr": 70.0
+      },
+      {
+        "d": "2026-06-09",
+        "hrv": 13.0,
+        "rhr": 74.0
+      },
+      {
+        "d": "2026-06-10",
+        "hrv": 15.0,
+        "rhr": 74.0
+      },
+      {
+        "d": "2026-06-11",
+        "hrv": 18.0,
+        "rhr": 76.0
+      },
+      {
+        "d": "2026-06-12",
+        "hrv": 17.0,
+        "rhr": 67.0
+      },
+      {
+        "d": "2026-06-13",
+        "hrv": 21.0,
+        "rhr": 68.0
+      },
+      {
+        "d": "2026-06-14",
+        "hrv": 15.0,
+        "rhr": 74.0
+      },
+      {
+        "d": "2026-06-14",
+        "hrv": 22.0,
+        "rhr": 64.0
+      },
+      {
+        "d": "2026-06-15",
+        "hrv": 23.0,
+        "rhr": 60.0
+      },
+      {
+        "d": "2026-06-17",
+        "hrv": 14.0,
+        "rhr": 72.0
       }
     ]
   },
   "sleep_score": {
-    "n": 219,
+    "n": 233,
     "median": 81,
-    "mean": 79.0,
+    "mean": 78.8,
     "iqr": [
-      75,
+      74,
       87
     ]
   },
   "readiness": {
-    "n": 219,
+    "n": 233,
     "median": 76,
-    "mean": 72.7
+    "mean": 72.5
   },
   "spo2": {
-    "n": 216,
-    "median": 96.0,
+    "n": 229,
+    "median": 95.9,
     "min": 89.4
   },
   "stress": {
@@ -3195,14 +3274,14 @@
       {
         "d": "2026-05-31",
         "stress": 120.0,
-        "recovery": 30.0,
+        "recovery": 15.0,
         "score": null,
         "level": null,
         "summary": "stressful"
       },
       {
         "d": "2026-06-01",
-        "stress": 60.0,
+        "stress": 45.0,
         "recovery": 165.0,
         "score": 36.8,
         "level": "limited",
@@ -3211,36 +3290,156 @@
       {
         "d": "2026-06-02",
         "stress": 0.0,
-        "recovery": 15.0,
+        "recovery": 195.0,
         "score": 37.5,
         "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-03",
+        "stress": 45.0,
+        "recovery": 30.0,
+        "score": 37.5,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-04",
+        "stress": 15.0,
+        "recovery": 90.0,
+        "score": 37.6,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-05",
+        "stress": 30.0,
+        "recovery": 165.0,
+        "score": 38.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-06",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": 37.4,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-07",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": 39.3,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-08",
+        "stress": 15.0,
+        "recovery": 165.0,
+        "score": 39.6,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-09",
+        "stress": 0.0,
+        "recovery": 150.0,
+        "score": 40.0,
+        "level": "limited",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-10",
+        "stress": 0.0,
+        "recovery": 135.0,
+        "score": 41.5,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-11",
+        "stress": 0.0,
+        "recovery": 240.0,
+        "score": 41.5,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-12",
+        "stress": 15.0,
+        "recovery": 465.0,
+        "score": 42.5,
+        "level": "adequate",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-13",
+        "stress": 15.0,
+        "recovery": 60.0,
+        "score": 44.9,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-14",
+        "stress": 30.0,
+        "recovery": 120.0,
+        "score": 45.8,
+        "level": "adequate",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-15",
+        "stress": 0.0,
+        "recovery": 120.0,
+        "score": 46.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-16",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": null,
+        "level": null,
+        "summary": null
+      },
+      {
+        "d": "2026-06-17",
+        "stress": 0.0,
+        "recovery": 0.0,
+        "score": 47.2,
+        "level": "solid",
         "summary": null
       }
     ],
-    "n_stress_days": 229,
-    "n_resilience_days": 204,
-    "stress_median_min": 60.0,
-    "stress_mean_min": 86.9,
+    "n_stress_days": 244,
+    "n_resilience_days": 218,
+    "stress_median_min": 45.0,
+    "stress_mean_min": 82.2,
     "stress_peak": {
       "d": "2026-04-06",
       "stress_min": 525.0
     },
-    "score_median": 47.6,
-    "score_mean": 45.7,
+    "score_median": 47.2,
+    "score_mean": 45.4,
     "level_counts": {
-      "solid": 118,
-      "adequate": 36,
+      "solid": 120,
+      "adequate": 41,
       "strong": 3,
-      "limited": 47
+      "limited": 54
     },
     "summary_counts": {
-      "normal": 116,
-      "restored": 49,
+      "normal": 127,
+      "restored": 52,
       "stressful": 46
     },
     "range": [
       "2025-10-17",
-      "2026-06-02"
+      "2026-06-17"
     ]
   },
   "bp": {
@@ -3699,24 +3898,24 @@
     }
   },
   "activity": {
-    "n": 229,
+    "n": 243,
     "range": [
       "2025-10-17",
-      "2026-06-02"
+      "2026-06-17"
     ],
-    "steps_median": 5976,
-    "steps_mean": 6226,
+    "steps_median": 5936,
+    "steps_mean": 6197,
     "steps_iqr": [
-      3820,
-      8137
+      3891,
+      7994
     ],
     "days_10k": 31,
-    "days_7k": 89,
-    "days_5k": 139,
-    "days_total": 228,
-    "sed_h_mean": 8.16,
-    "active_cal_mean": 343,
-    "zone2_min_per_day_mean": 34.2,
+    "days_7k": 90,
+    "days_5k": 149,
+    "days_total": 242,
+    "sed_h_mean": 8.21,
+    "active_cal_mean": 345,
+    "zone2_min_per_day_mean": 33.3,
     "series": [
       {
         "d": "2025-10-17",
@@ -4632,17 +4831,73 @@
       },
       {
         "d": "2026-06-02",
-        "steps": 549
+        "steps": 4007
+      },
+      {
+        "d": "2026-06-03",
+        "steps": 8748
+      },
+      {
+        "d": "2026-06-04",
+        "steps": 6369
+      },
+      {
+        "d": "2026-06-05",
+        "steps": 5176
+      },
+      {
+        "d": "2026-06-06",
+        "steps": 5560
+      },
+      {
+        "d": "2026-06-07",
+        "steps": 6685
+      },
+      {
+        "d": "2026-06-08",
+        "steps": 5998
+      },
+      {
+        "d": "2026-06-09",
+        "steps": 5991
+      },
+      {
+        "d": "2026-06-10",
+        "steps": 4992
+      },
+      {
+        "d": "2026-06-11",
+        "steps": 5895
+      },
+      {
+        "d": "2026-06-12",
+        "steps": 6656
+      },
+      {
+        "d": "2026-06-13",
+        "steps": 2874
+      },
+      {
+        "d": "2026-06-14",
+        "steps": 4827
+      },
+      {
+        "d": "2026-06-15",
+        "steps": 5893
+      },
+      {
+        "d": "2026-06-17",
+        "steps": 1005
       }
     ]
   },
   "workouts": {
-    "n_total": 197,
+    "n_total": 203,
     "by_activity": {
       "walking": {
-        "n": 159,
-        "minutes": 3119,
-        "cal": 9922
+        "n": 164,
+        "minutes": 3278,
+        "cal": 10406
       },
       "cycling": {
         "n": 33,
@@ -4655,13 +4910,13 @@
         "cal": 625
       },
       "swimming": {
-        "n": 2,
-        "minutes": 100,
-        "cal": 218
+        "n": 3,
+        "minutes": 123,
+        "cal": 252
       }
     },
     "by_intensity": {
-      "moderate": 197
+      "moderate": 203
     }
   },
   "tags": {
@@ -5189,6 +5444,13 @@
     {
       "name": "Valium",
       "dose": "32.5mg/day",
+      "class": "",
+      "status": "",
+      "note": ""
+    },
+    {
+      "name": "Revia (Naltrexone)",
+      "dose": "50mg/day",
       "class": "",
       "status": "",
       "note": ""
