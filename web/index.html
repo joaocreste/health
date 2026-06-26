@@ -275,7 +275,7 @@
 
 </main>
 
-<script src="assets/app.js?v=33"></script>
+<script src="assets/app.js?v=34"></script>
 <script>
   (function () {
     'use strict';
@@ -307,6 +307,12 @@
           sessionStorage.setItem('jc_authed', 'true');
           sessionStorage.setItem('jc_viewer_clerk', res.data.clerk_user_id);
           sessionStorage.setItem('jc_viewer_username', res.data.username || u);
+          sessionStorage.setItem('jc_viewer_name', res.data.full_name || '');
+          sessionStorage.setItem('jc_viewer_role', res.data.role || '');
+          // Honour the account's preferred language as the UI default.
+          if (res.data.locale === 'en' || res.data.locale === 'pt') {
+            localStorage.setItem('jc_lang', res.data.locale);
+          }
           sessionStorage.removeItem('jc_current_patient');
           location.href = 'patients.html';
         })

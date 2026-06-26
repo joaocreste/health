@@ -30,9 +30,99 @@
     sessionStorage.removeItem('jc_authed');
     sessionStorage.removeItem('jc_viewer_clerk');
     sessionStorage.removeItem('jc_viewer_username');
+    sessionStorage.removeItem('jc_viewer_name');
+    sessionStorage.removeItem('jc_viewer_role');
     sessionStorage.removeItem('jc_current_patient');
     location.replace('index.html');
   };
+
+  /* ── ACCOUNT AVATAR (topnav, top-right) ──
+   * Injects a round initials button into every protected page's .topnav,
+   * just before the sign-out button. Clicking it lands on account.html where
+   * the user edits their name, location, preferred language and password.
+   * Styled inline so it works on every page without a styles.css version bump.
+   */
+  (function initAccountAvatar() {
+    if (window.JC_PUBLIC === true) return;
+    var here = location.pathname.split('/').pop().toLowerCase();
+    if (here === '' || here === 'index.html') return;
+
+    function computeInitials(name, username) {
+      name = (name || '').trim();
+      if (name) {
+        var parts = name.split(/\s+/).filter(Boolean);
+        var a = parts[0] ? parts[0].charAt(0) : '';
+        var b = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+        return (a + b).toUpperCase() || '?';
+      }
+      username = (username || '').trim();
+      return username ? username.slice(0, 2).toUpperCase() : '?';
+    }
+
+    function build() {
+      var nav = document.querySelector('.topnav');
+      if (!nav || nav.querySelector('.account-avatar')) return null;
+      var host = nav.querySelector('.lang-switch') || nav;
+      var a = document.createElement('a');
+      a.className = 'account-avatar';
+      a.href = 'account.html';
+      a.title = 'Account settings';
+      a.setAttribute('aria-label', 'Account settings');
+      a.style.cssText = [
+        'display:inline-flex', 'align-items:center', 'justify-content:center',
+        'width:32px', 'height:32px', 'border-radius:50%', 'margin-left:12px',
+        'background:rgba(255,255,255,0.08)',
+        'border:1.5px solid rgba(255,255,255,0.22)',
+        'color:#fff', "font-family:'IBM Plex Mono',monospace", 'font-size:11px',
+        'font-weight:600', 'letter-spacing:0.04em', 'text-decoration:none',
+        'cursor:pointer', 'flex:0 0 auto',
+        'transition:border-color 0.15s, background 0.15s'
+      ].join(';');
+      a.addEventListener('mouseenter', function () {
+        a.style.borderColor = '#fff';
+        a.style.background = 'rgba(255,255,255,0.16)';
+      });
+      a.addEventListener('mouseleave', function () {
+        a.style.borderColor = 'rgba(255,255,255,0.22)';
+        a.style.background = 'rgba(255,255,255,0.08)';
+      });
+      a.textContent = computeInitials(
+        sessionStorage.getItem('jc_viewer_name'),
+        sessionStorage.getItem('jc_viewer_username')
+      );
+      var signout = host.querySelector('.signout-btn');
+      if (signout) host.insertBefore(a, signout);
+      else host.appendChild(a);
+      return a;
+    }
+
+    function inject() {
+      var el = build();
+      // Backfill the name for sessions that logged in before this field existed,
+      // so the initials are correct (the identity comes from the session cookie).
+      if (el && !sessionStorage.getItem('jc_viewer_name')) {
+        var clerk = sessionStorage.getItem('jc_viewer_clerk') || '';
+        fetch('/api/profile', {
+          headers: clerk ? { 'X-Viewer-Clerk': clerk } : {},
+        })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (d && d.profile) {
+              sessionStorage.setItem('jc_viewer_name', d.profile.full_name || '');
+              sessionStorage.setItem('jc_viewer_role', d.profile.role || '');
+              el.textContent = computeInitials(d.profile.full_name, d.profile.username);
+            }
+          })
+          .catch(function () {});
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inject);
+    } else {
+      inject();
+    }
+  })();
 
   /* Return to the patient picker without signing out. */
   window.jcChangePatient = function () {

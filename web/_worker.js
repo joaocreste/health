@@ -1457,7 +1457,7 @@ async function handleLogin(request, env) {
   try {
     const sql = neon(env.DATABASE_URL);
     const rows = await sql`
-      SELECT clerk_user_id, role, full_name, demo_password
+      SELECT clerk_user_id, role, full_name, locale, demo_password
       FROM users
       WHERE demo_username = ${username} AND archived_at IS NULL
       LIMIT 1
@@ -1472,6 +1472,7 @@ async function handleLogin(request, env) {
       clerk_user_id: rows[0].clerk_user_id,
       role: rows[0].role,
       full_name: rows[0].full_name,
+      locale: rows[0].locale || "en",
       username,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
     const cookie = await makeSessionCookie(env, rows[0].clerk_user_id);
@@ -2658,6 +2659,115 @@ async function promoteUploadToImport(sql, uploadId, adminId) {
     importId, fileCount: objs.length,
     alreadyPromoted: !!existingImportId, empty: objs.length === 0, upload: uploadRow,
   };
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+ * Patient self-service profile — name, location, preferred language, password.
+ *
+ * Identity is ALWAYS the logged-in viewer (signed session cookie, or the
+ * X-Viewer-Clerk header / ?viewer= fallback). A user can only ever read and
+ * mutate their OWN record — no target user id is accepted from the body, so a
+ * patient cannot touch anyone else. Password change requires the current
+ * password. Passwords stay plaintext in users.demo_password (demo phase); the
+ * admin console reads that same column, so a self-changed password is visible
+ * to the admin by design — exactly what was asked for.
+ *
+ *   GET  /api/profile           -> current values for the settings form
+ *   POST /api/profile/update    -> { full_name, location, locale }
+ *   POST /api/profile/password  -> { old_password, new_password, confirm_password }
+ * ════════════════════════════════════════════════════════════════════════════ */
+async function handleProfile(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const sql = neon(env.DATABASE_URL);
+
+  const viewerClerk = await viewerFromRequest(request, env);
+  if (!viewerClerk) return jsonError(401, "viewer_required");
+
+  const rows = await sql`
+    SELECT u.id, u.clerk_user_id, u.role, u.full_name, u.email, u.locale,
+           u.demo_username, u.demo_password,
+           pp.country_of_residence, pp.native_language
+    FROM users u
+    LEFT JOIN patient_profiles pp ON pp.user_id = u.id
+    WHERE u.clerk_user_id = ${viewerClerk} AND u.archived_at IS NULL
+    LIMIT 1
+  `;
+  if (rows.length === 0) return jsonError(404, "user_not_found");
+  const me = rows[0];
+
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  // GET /api/profile — populate the settings form
+  if (path === "/api/profile" && request.method === "GET") {
+    return jsonOk({
+      profile: {
+        clerk_user_id:   me.clerk_user_id,
+        role:            me.role,
+        full_name:       me.full_name || "",
+        username:        me.demo_username || "",
+        locale:          me.locale || "en",
+        location:        me.country_of_residence || "",
+        native_language: me.native_language || "",
+        has_password:    !!me.demo_password,
+      },
+    });
+  }
+
+  // POST /api/profile/update — name, location, preferred language
+  if (path === "/api/profile/update" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const trim = (v) => String(v ?? "").trim();
+    const fullName = trim(body.full_name);
+    const location = trim(body.location);
+    const locale   = body.locale === "pt" ? "pt" : body.locale === "en" ? "en" : null;
+    if (!fullName) return jsonError(400, "full_name_required");
+    if (!locale)   return jsonError(400, "locale_must_be_en_or_pt");
+
+    try {
+      await sql`
+        UPDATE users SET full_name = ${fullName}, locale = ${locale}, updated_at = now()
+        WHERE id = ${me.id}
+      `;
+      // Location lives on patient_profiles; only patients have that row.
+      if (me.role === "patient") {
+        await sql`
+          INSERT INTO patient_profiles (user_id, country_of_residence)
+          VALUES (${me.id}, ${location || null})
+          ON CONFLICT (user_id) DO UPDATE SET
+            country_of_residence = ${location || null}, updated_at = now()
+        `;
+      }
+      return jsonOk({ ok: true, full_name: fullName, locale, location });
+    } catch (e) {
+      return jsonError(500, `profile_update_failed: ${e.message}`);
+    }
+  }
+
+  // POST /api/profile/password — old verified, new == confirm, plaintext swap
+  if (path === "/api/profile/password" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const oldPw     = String(body.old_password ?? "");
+    const newPw     = String(body.new_password ?? "");
+    const confirmPw = String(body.confirm_password ?? "");
+    if (!oldPw || !newPw || !confirmPw) return jsonError(400, "all_password_fields_required");
+    if (newPw !== confirmPw)            return jsonError(400, "passwords_do_not_match");
+    if (newPw.length < 6)               return jsonError(400, "password_too_short");
+    if (!me.demo_password)              return jsonError(409, "no_password_set");
+    if (me.demo_password !== oldPw)     return jsonError(403, "old_password_incorrect");
+    if (newPw === oldPw)                return jsonError(400, "new_password_same_as_old");
+
+    try {
+      await sql`UPDATE users SET demo_password = ${newPw}, updated_at = now() WHERE id = ${me.id}`;
+      return jsonOk({ ok: true });
+    } catch (e) {
+      return jsonError(500, `password_update_failed: ${e.message}`);
+    }
+  }
+
+  return jsonError(404, "not_found");
 }
 
 async function handleAdmin(request, env) {
@@ -3991,6 +4101,9 @@ export default {
     }
     if (url.pathname === "/api/patients") {
       return handlePatients(request, env);
+    }
+    if (url.pathname === "/api/profile" || url.pathname.startsWith("/api/profile/")) {
+      return handleProfile(request, env);
     }
     if (url.pathname.startsWith("/api/admin/")) {
       return handleAdmin(request, env);

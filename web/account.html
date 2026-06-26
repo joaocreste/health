@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Health — Account settings</title>
+<meta name="description" content="Manage your account — name, location, preferred language and password.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=55">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  .acct-wrap { max-width: 640px; margin: 2.5rem auto 4rem; padding: 0 1.25rem; }
+  .acct-eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--blue-600); margin-bottom: 0.4rem;
+  }
+  .acct-title {
+    font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 28px;
+    color: var(--blue-800); margin: 0 0 0.4rem; letter-spacing: -0.01em;
+  }
+  .acct-sub { color: var(--ink-soft, #6E7B8A); font-size: 14px; margin: 0 0 2rem; }
+  .acct-card {
+    background: var(--surface-pure, #fff); border: 1px solid var(--surface-cool, #EEF3F6);
+    border-radius: 14px; padding: 1.6rem 1.6rem 1.8rem; margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(16, 42, 67, 0.05);
+  }
+  .acct-card h2 {
+    font-family: 'Raleway', sans-serif; font-weight: 700; font-size: 17px;
+    color: var(--blue-800); margin: 0 0 0.3rem;
+  }
+  .acct-card-note { font-size: 12.5px; color: var(--ink-soft, #6E7B8A); margin: 0 0 1.3rem; }
+  .acct-field { display: block; margin-bottom: 1.1rem; }
+  .acct-field > span {
+    display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--blue-700); margin-bottom: 0.4rem;
+  }
+  .acct-field input, .acct-field select {
+    width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 14px;
+    font-family: 'IBM Plex Sans', sans-serif; color: var(--blue-900, #122A3D);
+    background: var(--surface-base, #F8FAFC);
+    border: 1.5px solid var(--surface-cool, #E2EAF0); border-radius: 8px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .acct-field input:focus, .acct-field select:focus {
+    outline: none; border-color: var(--blue-500, #3E7CA3); background: #fff;
+  }
+  .acct-field input[readonly] { background: #EEF3F6; color: #6E7B8A; cursor: not-allowed; }
+  .acct-btn {
+    appearance: none; border: none; cursor: pointer;
+    background: var(--blue-700, #244E6E); color: #fff;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13.5px; font-weight: 600;
+    padding: 11px 22px; border-radius: 8px; letter-spacing: 0.02em;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .acct-btn:hover { background: var(--blue-800, #1B3B54); }
+  .acct-btn:disabled { opacity: 0.55; cursor: default; }
+  .acct-msg {
+    display: none; margin-top: 1rem; padding: 9px 13px; border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+  }
+  .acct-msg.ok  { display: block; background: var(--green-50, #EEF8F1); color: var(--green-700, #245F3C); border: 1px solid var(--green-200, #B0DEBE); }
+  .acct-msg.err { display: block; background: #FCEDED; color: #B23B3B; border: 1px solid #F2C7C7; }
+  .acct-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .acct-backlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 1.4rem;
+    font-size: 13px; color: var(--blue-600); text-decoration: none;
+  }
+  .acct-backlink:hover { color: var(--blue-800); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>Lumen Health<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+    <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+    <li><a href="assessment.html"><span class="lang-en">AI-based overview</span><span class="lang-pt">Visão por IA</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</nav>
+
+<main class="acct-wrap">
+  <a class="acct-backlink" href="home.html">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span class="lang-en">Back to summary</span><span class="lang-pt">Voltar ao resumo</span>
+  </a>
+
+  <div class="acct-eyebrow"><span class="lang-en">Account</span><span class="lang-pt">Conta</span></div>
+  <h1 class="acct-title"><span class="lang-en">Account settings</span><span class="lang-pt">Configurações da conta</span></h1>
+  <p class="acct-sub">
+    <span class="lang-en">Update your personal details and password. Signed in as <strong id="acct-username">—</strong>.</span>
+    <span class="lang-pt">Atualize seus dados pessoais e sua senha. Conectado como <strong id="acct-username-pt">—</strong>.</span>
+  </p>
+
+  <!-- PROFILE -->
+  <form class="acct-card" id="profile-form" autocomplete="off">
+    <h2><span class="lang-en">Personal details</span><span class="lang-pt">Dados pessoais</span></h2>
+    <p class="acct-card-note"><span class="lang-en">Your name, location and the language the app is shown in.</span><span class="lang-pt">Seu nome, localização e o idioma em que o aplicativo é exibido.</span></p>
+
+    <label class="acct-field">
+      <span><span class="lang-en">Full name</span><span class="lang-pt">Nome completo</span></span>
+      <input type="text" id="full_name" name="full_name" required>
+    </label>
+
+    <label class="acct-field">
+      <span><span class="lang-en">Location</span><span class="lang-pt">Localização</span></span>
+      <input type="text" id="location" name="location" placeholder="—">
+    </label>
+
+    <label class="acct-field">
+      <span><span class="lang-en">Preferred language</span><span class="lang-pt">Idioma preferido</span></span>
+      <select id="locale" name="locale">
+        <option value="en">English</option>
+        <option value="pt">Português (Brasil)</option>
+      </select>
+    </label>
+
+    <div class="acct-row">
+      <button type="submit" class="acct-btn" id="profile-save">
+        <span class="lang-en">Save changes</span><span class="lang-pt">Salvar alterações</span>
+      </button>
+    </div>
+    <div class="acct-msg" id="profile-msg" role="status"></div>
+  </form>
+
+  <!-- PASSWORD -->
+  <form class="acct-card" id="password-form" autocomplete="off">
+    <h2><span class="lang-en">Change password</span><span class="lang-pt">Alterar senha</span></h2>
+    <p class="acct-card-note"><span class="lang-en">Enter your current password, then choose a new one (at least 6 characters).</span><span class="lang-pt">Digite sua senha atual e escolha uma nova (pelo menos 6 caracteres).</span></p>
+
+    <label class="acct-field">
+      <span><span class="lang-en">Current password</span><span class="lang-pt">Senha atual</span></span>
+      <input type="password" id="old_password" name="old_password" autocomplete="current-password" required>
+    </label>
+
+    <label class="acct-field">
+      <span><span class="lang-en">New password</span><span class="lang-pt">Nova senha</span></span>
+      <input type="password" id="new_password" name="new_password" autocomplete="new-password" required>
+    </label>
+
+    <label class="acct-field">
+      <span><span class="lang-en">Confirm new password</span><span class="lang-pt">Confirmar nova senha</span></span>
+      <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" required>
+    </label>
+
+    <div class="acct-row">
+      <button type="submit" class="acct-btn" id="password-save">
+        <span class="lang-en">Update password</span><span class="lang-pt">Atualizar senha</span>
+      </button>
+    </div>
+    <div class="acct-msg" id="password-msg" role="status"></div>
+  </form>
+</main>
+
+<script src="assets/app.js?v=34"></script>
+<script>
+(function () {
+  'use strict';
+
+  function lang() { return document.documentElement.lang === 'pt' ? 'pt' : 'en'; }
+  function viewerHeader() {
+    var clerk = sessionStorage.getItem('jc_viewer_clerk') || '';
+    return clerk ? { 'X-Viewer-Clerk': clerk } : {};
+  }
+
+  // Bilingual error copy keyed by the server's machine codes.
+  var ERR = {
+    full_name_required:        { en: 'Please enter your name.', pt: 'Por favor, informe seu nome.' },
+    locale_must_be_en_or_pt:   { en: 'Please choose a language.', pt: 'Por favor, escolha um idioma.' },
+    all_password_fields_required: { en: 'Please fill in all three password fields.', pt: 'Preencha os três campos de senha.' },
+    passwords_do_not_match:    { en: 'The new passwords do not match.', pt: 'As novas senhas não coincidem.' },
+    password_too_short:        { en: 'New password must be at least 6 characters.', pt: 'A nova senha deve ter pelo menos 6 caracteres.' },
+    old_password_incorrect:    { en: 'Your current password is incorrect.', pt: 'Sua senha atual está incorreta.' },
+    new_password_same_as_old:  { en: 'The new password must be different from the current one.', pt: 'A nova senha deve ser diferente da atual.' },
+    no_password_set:           { en: 'No password is set on this account. Contact your administrator.', pt: 'Nenhuma senha definida nesta conta. Contate o administrador.' },
+    viewer_required:           { en: 'Your session has expired. Please sign in again.', pt: 'Sua sessão expirou. Entre novamente.' },
+    user_not_found:            { en: 'Account not found.', pt: 'Conta não encontrada.' },
+    _default:                  { en: 'Something went wrong. Please try again.', pt: 'Algo deu errado. Tente novamente.' },
+  };
+  function errText(code) { return (ERR[code] || ERR._default)[lang()]; }
+
+  function show(el, kind, text) {
+    el.className = 'acct-msg ' + kind;
+    el.textContent = text;
+  }
+  function clear(el) { el.className = 'acct-msg'; el.textContent = ''; }
+
+  // ── Load current profile ──
+  fetch('/api/profile', { headers: viewerHeader() })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (res) {
+      if (!res.ok || !res.d || !res.d.profile) {
+        show(document.getElementById('profile-msg'), 'err', errText(res.d && res.d.error));
+        return;
+      }
+      var p = res.d.profile;
+      document.getElementById('full_name').value = p.full_name || '';
+      document.getElementById('location').value = p.location || '';
+      document.getElementById('locale').value = (p.locale === 'pt') ? 'pt' : 'en';
+      var uname = p.username || p.full_name || '—';
+      document.getElementById('acct-username').textContent = uname;
+      document.getElementById('acct-username-pt').textContent = uname;
+      // Keep the avatar fresh.
+      sessionStorage.setItem('jc_viewer_name', p.full_name || '');
+      sessionStorage.setItem('jc_viewer_role', p.role || '');
+      // Location-only accounts (e.g. doctors) hide the location field.
+      if (p.role !== 'patient') {
+        var loc = document.getElementById('location').closest('.acct-field');
+        if (loc) loc.style.display = 'none';
+      }
+    })
+    .catch(function () {
+      show(document.getElementById('profile-msg'), 'err', errText());
+    });
+
+  // ── Save profile ──
+  document.getElementById('profile-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('profile-msg');
+    var btn = document.getElementById('profile-save');
+    clear(msg); btn.disabled = true;
+    var payload = {
+      full_name: document.getElementById('full_name').value,
+      location: document.getElementById('location').value,
+      locale: document.getElementById('locale').value,
+    };
+    fetch('/api/profile/update', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, viewerHeader()),
+      body: JSON.stringify(payload),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok || !res.d || !res.d.ok) {
+          show(msg, 'err', errText(res.d && res.d.error));
+          return;
+        }
+        // Reflect the new name + preferred language immediately.
+        sessionStorage.setItem('jc_viewer_name', payload.full_name);
+        localStorage.setItem('jc_lang', payload.locale);
+        var av = document.querySelector('.account-avatar');
+        if (av) {
+          var parts = payload.full_name.trim().split(/\s+/).filter(Boolean);
+          av.textContent = ((parts[0] ? parts[0][0] : '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase() || '?';
+        }
+        // Apply the language switch live.
+        var btnLang = document.querySelector('.lang-btn[data-lang="' + payload.locale + '"]');
+        if (btnLang) btnLang.click();
+        show(msg, 'ok', lang() === 'pt' ? 'Alterações salvas.' : 'Changes saved.');
+      })
+      .catch(function () { btn.disabled = false; show(msg, 'err', errText()); });
+  });
+
+  // ── Change password ──
+  document.getElementById('password-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('password-msg');
+    var btn = document.getElementById('password-save');
+    clear(msg);
+    var oldP = document.getElementById('old_password').value;
+    var newP = document.getElementById('new_password').value;
+    var confP = document.getElementById('confirm_password').value;
+    if (newP !== confP) { show(msg, 'err', errText('passwords_do_not_match')); return; }
+    btn.disabled = true;
+    fetch('/api/profile/password', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, viewerHeader()),
+      body: JSON.stringify({ old_password: oldP, new_password: newP, confirm_password: confP }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        if (!res.ok || !res.d || !res.d.ok) {
+          show(msg, 'err', errText(res.d && res.d.error));
+          return;
+        }
+        document.getElementById('password-form').reset();
+        show(msg, 'ok', lang() === 'pt' ? 'Senha atualizada.' : 'Password updated.');
+      })
+      .catch(function () { btn.disabled = false; show(msg, 'err', errText()); });
+  });
+})();
+</script>
+</body>
+</html>
