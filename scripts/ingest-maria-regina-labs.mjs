@@ -72,6 +72,32 @@ const TAX = loadTaxonomy();
 const PANEL_EN = {}; // panelKey -> EN title
 for (const p of TAX.PANELS) PANEL_EN[p.key] = p.en;
 
+// Route analytes the taxonomy doesn't recognize (rarer markers carried by the
+// historical backfill: autoimmune, serology, cardiac, coagulation factors, etc.)
+// into the SAME canonical panel buckets the mapped markers use, by category
+// keyword. Without this they land under their raw category string and render as
+// duplicate panels ("Lipid Profile" vs "Lipid Profile / Cardiovascular Risk")
+// plus per-agent spelling drift. Falls back to the 'other' panel.
+function categoryPanel(category) {
+  const c = String(category || "").toLowerCase();
+  if (/lipid/.test(c)) return PANEL_EN.lipids;
+  if (/glucose|glyc|glic|diabet/.test(c)) return PANEL_EN.glycemia;
+  if (/kidney|renal/.test(c)) return PANEL_EN.kidney;
+  if (/liver|hepat/.test(c)) return PANEL_EN.liver;
+  if (/electrolyt|mineral/.test(c)) return PANEL_EN.minerals;
+  if (/iron|anemia/.test(c)) return PANEL_EN.iron;
+  if (/thyroid/.test(c)) return PANEL_EN.thyroid;
+  if (/hormon|endocrine/.test(c)) return PANEL_EN.hormonal;
+  if (/inflammation|immune/.test(c)) return PANEL_EN.inflammation;
+  if (/serology|infectious/.test(c)) return PANEL_EN.serology;
+  if (/tumor/.test(c)) return PANEL_EN.tumor;
+  if (/coagulation|clotting/.test(c)) return PANEL_EN.platelets;
+  if (/urinalysis|urine/.test(c)) return PANEL_EN.urine;
+  if (/vitamin|nutritional/.test(c)) return PANEL_EN.vitamins;
+  if (/hematology|cbc/.test(c)) return PANEL_EN.cbc_leuko;
+  return PANEL_EN.other;
+}
+
 const payload = JSON.parse(fs.readFileSync(PAYLOAD_PATH, "utf8"));
 const results = payload.results || [];
 
@@ -86,7 +112,7 @@ function buildRows() {
     const marker = TAX.canonicalMarker(r.canonical_analyte, r.unit_reported, r.category);
     const meta = TAX.MARKERS[marker];
     if (!meta) unmapped++;
-    const panel = meta ? PANEL_EN[meta.panel] : (r.category ?? null);
+    const panel = meta ? PANEL_EN[meta.panel] : categoryPanel(r.category);
     const key = marker + "|" + r.collection_date;
     if (seen.has(key)) continue;
     seen.add(key);
