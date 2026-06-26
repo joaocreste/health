@@ -345,6 +345,33 @@
     }
   }
 
+  /* Canon: a pillar with no data shows no nav entry (and no home pillar card).
+     The topnav (Physical / Mental / Spiritual) is static HTML shared by every
+     page, so gate it here from the patient's real pillar totals. Fail-open:
+     hides a pillar ONLY when the summary explicitly reports total === 0, so a
+     missing/errored summary never strips a populated nav. Not called for the
+     static-HTML patients (Joao / Leo) — their curated nav is left intact. */
+  function gatePillarNav(clerkId) {
+    if (!clerkId) return;
+    fetch('/api/patient-summary?clerk=' + encodeURIComponent(clerkId), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (s) {
+        var P = s && s.pillars;
+        if (!P) return;
+        ['physical', 'mental', 'spiritual'].forEach(function (k) {
+          if (!P[k] || P[k].total > 0) return; // unknown or has data -> keep
+          var href = k + '.html';
+          document.querySelectorAll('.topnav-links a[href="' + href + '"]').forEach(function (a) {
+            var li = a.closest('li'); if (li) li.style.display = 'none';
+          });
+          document.querySelectorAll('.entry-card[href="' + href + '"]').forEach(function (c) {
+            c.style.display = 'none';
+          });
+        });
+      })
+      .catch(function () {});
+  }
+
   // ─── Renderers ──────────────────────────────────────────────────
   function renderPatientHeader(p) {
     var profileBits = [];
@@ -608,13 +635,14 @@
         '</div>' +
       '</section>';
 
-    // ── Reports — three pillar cards (identical to Patient Zero) ─
-    var reports =
-      '<section class="report-section">' +
-        '<div class="container">' +
-          '<div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>' +
-          '<h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>' +
-          '<div class="entry-grid entry-grid-visual">' +
+    // ── Reports — pillar cards, one per pillar THAT HAS DATA ─────────
+    // Canon: a pillar with no data shows no pillar card (and no nav entry —
+    // see gatePillarNav). Gate each card on summary.pillars[x].total so a
+    // labs-only patient (e.g. Hercio) shows only Physical, never empty
+    // Mental/Spiritual cards that lead to blank pages.
+    var PILLARS = (summary && summary.pillars) || {};
+    function pillarHasData(k) { return !!(PILLARS[k] && PILLARS[k].total > 0); }
+    var physicalCard = !pillarHasData('physical') ? '' :
             '<a class="entry-card entry-card-visual" href="physical.html">' +
               '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
                 '<path d="M32 54 L13 36 C7 30 7 22 13 18 C18 13 25 13 29 18 L32 21 L35 18 C39 13 46 13 51 18 C57 22 57 30 51 36 L32 54 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
@@ -622,7 +650,8 @@
               '</svg>' +
               '<div class="entry-title"><span class="lang-en">Physical Health Overview</span><span class="lang-pt">Visão geral da saúde física</span></div>' +
               '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
-            '</a>' +
+            '</a>';
+    var mentalCard = !pillarHasData('mental') ? '' :
             '<a class="entry-card entry-card-visual" href="mental.html">' +
               '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
                 '<path d="M32 14 C22 14 14 20 14 30 C14 40 22 50 32 50 V14 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
@@ -632,7 +661,8 @@
               '</svg>' +
               '<div class="entry-title"><span class="lang-en">Mental Health Overview</span><span class="lang-pt">Visão geral da saúde mental</span></div>' +
               '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
-            '</a>' +
+            '</a>';
+    var spiritualCard = !pillarHasData('spiritual') ? '' :
             '<a class="entry-card entry-card-visual" href="spiritual.html">' +
               '<svg class="entry-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
                 '<path d="M27 8 L37 8 L37 22 L50 22 L50 32 L37 32 L37 56 L27 56 L27 32 L14 32 L14 22 L27 22 Z" fill="#D8E8F2" stroke="#244E6E" stroke-width="2" stroke-linejoin="round"/>' +
@@ -641,7 +671,15 @@
               '</svg>' +
               '<div class="entry-title"><span class="lang-en">Spiritual Health Overview</span><span class="lang-pt">Visão geral da saúde espiritual</span></div>' +
               '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
-            '</a>' +
+            '</a>';
+    var pillarCards = physicalCard + mentalCard + spiritualCard;
+    var reports = !pillarCards ? '' :
+      '<section class="report-section">' +
+        '<div class="container">' +
+          '<div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>' +
+          '<h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>' +
+          '<div class="entry-grid entry-grid-visual">' +
+            pillarCards +
           '</div>' +
         '</div>' +
       '</section>';
@@ -2601,6 +2639,7 @@
 
     injectStyles();
     hidePageBody();
+    gatePillarNav(patient); // canon: hide nav entries + home cards for pillars with no data
 
     var section = currentSection();
 
@@ -3419,7 +3458,15 @@
           if (card.querySelector('.lab-ai-explain')) continue;
           var nameEl = card.querySelector('.lab-test-name');
           if (!nameEl) continue;
-          var x = byKey[normAnalyte(nameEl.textContent)];
+          // Bilingual cards (Silvana/Paulo reuse silvanaMarkerCard) put BOTH
+          // .lang-en and .lang-pt spans inside .lab-test-name, so textContent
+          // concatenates EN+PT ("Total cholesterolColesterol total") and never
+          // matches the model's single-language analyte key. Prefer the English
+          // span (the language the model emits analyte names in) when present;
+          // fall back to full textContent for plain single-language markup.
+          var enSpan = nameEl.querySelector('.lang-en');
+          var nameText = enSpan ? enSpan.textContent : nameEl.textContent;
+          var x = byKey[normAnalyte(nameText)];
           if (!x) continue;
           var html = aiOutlierExplainHtml(x);
           if (!html) continue;
