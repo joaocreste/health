@@ -36,7 +36,11 @@
     { id: 'medication',     en: 'Medication intake',   pt: 'Uso de medicação' },
     { id: 'prescription',   en: 'Prescription / meds', pt: 'Receita / medicamentos' },
     { id: 'other_wearable', en: 'Other wearables',     pt: 'Outros dispositivos' },
-    { id: 'other',          en: 'Other',               pt: 'Outro' }
+    { id: 'other',          en: 'Other',               pt: 'Outro' },
+    // Catch-all for a single upload that spans many things (a PDF or folder full
+    // of mixed records). Rendered as a standalone "doesn't fit one box" pill after
+    // the four groups, and meant to be treated differently downstream at ingestion.
+    { id: 'mixed',          en: 'Mixed / other data',  pt: 'Misto / outros dados' }
   ];
 
   // Four main categories the upload picker renders under small labelled dividers.
@@ -69,5 +73,6 @@
   window.EXAM_TAGS = TAGS;
   window.EXAM_TAGS_BY_ID = BY_ID;
   window.EXAM_TAG_GROUPS = GROUPS;
+  window.EXAM_TAG_MIXED = 'mixed'; // standalone catch-all, rendered outside the groups
   window.examTagLabel = label;
 })();

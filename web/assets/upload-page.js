@@ -141,19 +141,29 @@
     // dividers) so the patient scans by area instead of one scattered list.
     var groups = window.EXAM_TAG_GROUPS ||
       [{ tags: window.EXAM_TAGS.map(function (t) { return t.id; }) }];
-    function chip(id) {
+    function chip(id, extra) {
       var on = sel.indexOf(id) !== -1;
-      return '<button type="button" class="up-tag' + (on ? ' on' : '') +
+      return '<button type="button" class="up-tag' + (on ? ' on' : '') + (extra ? ' ' + extra : '') +
         '" data-tag="' + esc(id) + '" data-tag-item="' + it.id + '">' +
         esc(window.examTagLabel(id, l)) + '</button>';
     }
     var groupsHtml = groups.map(function (g) {
       var glabel = g.en ? '<div class="up-tag-group-label">' + esc(l === 'pt' ? g.pt : g.en) + '</div>' : '';
       return '<div class="up-tag-group">' + glabel +
-        '<div class="up-row-tags">' + g.tags.map(chip).join('') + '</div></div>';
+        '<div class="up-row-tags">' + g.tags.map(function (id) { return chip(id); }).join('') + '</div></div>';
     }).join('');
+    // Standalone catch-all after the groups — for a single upload that's a grab-bag
+    // of many things. Dashed styling marks it as the open "doesn't fit a box" option.
+    var mixedId = window.EXAM_TAG_MIXED;
+    var openHtml = '';
+    if (mixedId) {
+      var openHint = l === 'pt' ? 'Não é nenhum dos acima? (opcional)' : 'Not one of the above? (optional)';
+      openHtml = '<div class="up-tag-group up-tag-open">' +
+        '<div class="up-tag-group-label">' + esc(openHint) + '</div>' +
+        '<div class="up-row-tags">' + chip(mixedId, 'up-tag-open-chip') + '</div></div>';
+    }
     return '<div class="up-tags-label">' + esc(label) + '</div>' +
-      '<div class="up-tag-groups">' + groupsHtml + '</div>';
+      '<div class="up-tag-groups">' + groupsHtml + openHtml + '</div>';
   }
 
   function renderStaged() {
