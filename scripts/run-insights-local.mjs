@@ -45,7 +45,9 @@ if (!DATABASE_URL) { console.error("✗ DATABASE_URL not set"); process.exit(1);
 if (!ANTHROPIC_API_KEY) { console.error("✗ ANTHROPIC_API_KEY not set (env or .env)"); process.exit(1); }
 
 const sql = neon(DATABASE_URL);
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 2 });
+// maxRetries 4 (not 2): large-record runs are long Opus streams that occasionally
+// hit a mid-stream socket drop (undici "terminated"); 2 retries wasn't enough, 4 is.
+const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 4 });
 
 (async () => {
   const u = await sql`SELECT id, full_name FROM users WHERE clerk_user_id = ${CLERK} AND role='patient' AND archived_at IS NULL LIMIT 1`;
