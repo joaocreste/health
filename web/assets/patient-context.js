@@ -7057,6 +7057,9 @@
       '<section id="silv-content">' +
         '<div class="container">' +
           ai +
+          // Medications & Supplements — DB-driven (/api/patient-summary), filled
+          // async below so it docks directly under the AI summary card.
+          '<div id="silv-meds-mount"></div>' +
           '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
           '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
           '<p class="section-desc">' +
@@ -7092,6 +7095,33 @@
     document.body.appendChild(main);
 
     injectDangerZone(main);
+
+    // Medications & Supplements: this page is hand-curated from SILVANA_LABS and
+    // has no summary object, so pull meds/supps from the DB (/api/patient-summary)
+    // and dock them under the AI summary card. Silent no-op if she has none or the
+    // call fails — never blocks the lab render above.
+    fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (summary) {
+        var mount = document.getElementById('silv-meds-mount');
+        if (!mount || !summary) return;
+        var inner = medsTablesInner(summary);
+        if (!inner) return;
+        mount.innerHTML =
+          '<div class="section-label" style="margin-top:32px;">' +
+            '<span class="lang-en">02 · Treatment</span><span class="lang-pt">02 · Tratamento</span>' +
+          '</div>' +
+          '<h2 class="section-title">' +
+            '<span class="lang-en">Medications &amp; Supplements</span>' +
+            '<span class="lang-pt">Medicações e Suplementos</span>' +
+          '</h2>' +
+          '<p class="section-desc">' +
+            '<span class="lang-en">Current regimen on file. Daily dose is computed (strength × units per dose × doses per day); informational, not a prescription.</span>' +
+            '<span class="lang-pt">Regime atual em registro. A dose diária é calculada (concentração × unidades por tomada × tomadas por dia); informativo, não é uma prescrição.</span>' +
+          '</p>' +
+          inner;
+      })
+      .catch(function () { /* meds are additive — never break the labs page */ });
   }
 
   /* Cristina imaging studies — full report text (verbatim PT + EN), the
