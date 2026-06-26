@@ -2417,7 +2417,18 @@
     return { en: d + ' ' + en[mo] + ' ' + m[1], pt: d + ' de ' + pt[mo] + ' de ' + m[1] };
   }
 
+  // A study is "validated" only when a clinician signed it (validating_doctor).
+  // Studies with no signed report — e.g. an AI reading of a digitized printout —
+  // must never be framed as a doctor's validated reading. Keyed on data, not on
+  // the patient, so it generalizes to every record.
+  function ecgIsValidated(s) { return !!(s && s.validating_doctor); }
+
   function ecgFriendlyLine(s) {
+    if (!ecgIsValidated(s)) {
+      return t(
+        'An ECG records your heart’s electrical rhythm. There is no signed medical report on file for this tracing — the reading shown is an automated (AI) interpretation of a digitized image, not a diagnosis, and precise measurements could not be taken from it. Please review the original ECG with a cardiologist, who can measure it properly and tell you what it means for you.',
+        'O ECG registra o ritmo elétrico do coração. Não há laudo médico assinado em arquivo para este traçado — a leitura exibida é uma interpretação automatizada (IA) de uma imagem digitalizada, não um diagnóstico, e medidas precisas não puderam ser extraídas dela. Leve o ECG original a um(a) cardiologista, que poderá medi-lo corretamente e explicar o que significa para você.');
+    }
     var interp = (s.interpretation || s.report_text || '').toLowerCase();
     var abnormal = /(abnormal|anormal|fibrill|flutter|\bblock\b|bloqueio|isch|isquem|infarct|infart|eleva|prolong|ectop|taquic|bradic|hypertroph|hipertrof)/.test(interp);
     var normal = /(within normal|dentro dos limites normais|normal ecg|ecg normal|sinus rhythm|ritmo sinusal)/.test(interp) && !abnormal;
@@ -2433,6 +2444,22 @@
 
   function ecgLi(label, val) {
     return val ? ('<li><strong>' + label + '.</strong> ' + escapeHtml(String(val)) + '</li>') : '';
+  }
+
+  // Fidelity label, bilingual. The DB stores a canonical English technical
+  // string (e.g. "Vector reconstruction…" / "Source image (not vectorized)…");
+  // map the known kinds to bilingual patient-facing copy, else show it raw.
+  function ecgFidelityHtml(s) {
+    var f = s.fidelity || '';
+    if (/not vectoriz/i.test(f)) {
+      return t('Source image (not vectorized) — a visual rendering of the original tracing, not a diagnostic instrument.',
+               'Imagem de origem (não vetorizada) — representação visual do traçado original, não é um instrumento diagnóstico.');
+    }
+    if (/vector reconstruction/i.test(f)) {
+      return t('Vector reconstruction from the source signal — a visual rendering, not a diagnostic instrument.',
+               'Reconstrução vetorial a partir do sinal de origem — representação visual, não é um instrumento diagnóstico.');
+    }
+    return escapeHtml(f);
   }
 
   function buildEcgStudyHtml(s, clerk) {
@@ -2456,8 +2483,15 @@
       ecgLi('QT', s.qt_ms ? (s.qt_ms + ' ms') : null),
       ecgLi('QTcF', s.qtc_ms ? (s.qtc_ms + ' ms') : null),
     ].join('');
+    // Validated studies show the clinician's conclusion as "Conclusion". An
+    // unsigned/AI-inferred reading is labelled honestly so it is never mistaken
+    // for a doctor's validated finding.
+    var conclLabel = ecgIsValidated(s)
+      ? t('Conclusion', 'Conclusão')
+      : t('AI impression (from image — not validated)', 'Impressão por IA (da imagem — não validada)');
+    var conclClass = ecgIsValidated(s) ? 'alert alert-info' : 'alert alert-warn';
     var concl = s.interpretation
-      ? ('<div class="alert alert-info"><strong>' + t('Conclusion', 'Conclusão') + ':</strong> ' + escapeHtml(s.interpretation) + '</div>')
+      ? ('<div class="' + conclClass + '"><strong>' + conclLabel + ':</strong> ' + escapeHtml(s.interpretation) + '</div>')
       : '';
     return '' +
       '<h2 class="section-title"><span class="lang-en">Electrocardiogram (ECG) · ' + dn.en + '</span>' +
@@ -2467,7 +2501,7 @@
         : '') +
       '<div class="ecg-chart" data-ecg-id="' + escapeHtml(String(s.id)) + '" data-clerk="' + escapeHtml(String(clerk)) + '">' +
         '<div class="ecg-chart-loading">' + t('Loading chart…', 'Carregando traçado…') + '</div></div>' +
-      (s.fidelity ? ('<p class="ecg-fidelity">' + escapeHtml(s.fidelity) + '</p>') : '') +
+      (s.fidelity ? ('<p class="ecg-fidelity">' + ecgFidelityHtml(s) + '</p>') : '') +
       (reportBtn ? ('<div class="report-export-row" style="margin-top:1rem;">' + reportBtn + '</div>') : '') +
       '<div class="two-col mb-3" style="margin-top:1.25rem;">' +
         '<div class="list-card"><h4>' + t('Study', 'Estudo') + '</h4><ul>' + ids + '</ul></div>' +
