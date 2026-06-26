@@ -137,13 +137,23 @@
       }).join('') + '</div>';
     }
     var label = l === 'pt' ? 'O que é isto? (opcional)' : 'What is this? (optional)';
+    // Render chips grouped under the four main categories (small labelled
+    // dividers) so the patient scans by area instead of one scattered list.
+    var groups = window.EXAM_TAG_GROUPS ||
+      [{ tags: window.EXAM_TAGS.map(function (t) { return t.id; }) }];
+    function chip(id) {
+      var on = sel.indexOf(id) !== -1;
+      return '<button type="button" class="up-tag' + (on ? ' on' : '') +
+        '" data-tag="' + esc(id) + '" data-tag-item="' + it.id + '">' +
+        esc(window.examTagLabel(id, l)) + '</button>';
+    }
+    var groupsHtml = groups.map(function (g) {
+      var glabel = g.en ? '<div class="up-tag-group-label">' + esc(l === 'pt' ? g.pt : g.en) + '</div>' : '';
+      return '<div class="up-tag-group">' + glabel +
+        '<div class="up-row-tags">' + g.tags.map(chip).join('') + '</div></div>';
+    }).join('');
     return '<div class="up-tags-label">' + esc(label) + '</div>' +
-      '<div class="up-row-tags">' + window.EXAM_TAGS.map(function (t) {
-        var on = sel.indexOf(t.id) !== -1;
-        return '<button type="button" class="up-tag' + (on ? ' on' : '') +
-          '" data-tag="' + esc(t.id) + '" data-tag-item="' + it.id + '">' +
-          esc(l === 'pt' ? t.pt : t.en) + '</button>';
-      }).join('') + '</div>';
+      '<div class="up-tag-groups">' + groupsHtml + '</div>';
   }
 
   function renderStaged() {

@@ -37,6 +37,21 @@
     { id: 'other',          en: 'Other',               pt: 'Outro' }
   ];
 
+  // Four main categories the upload picker renders under small labelled dividers.
+  // Every tag id above belongs to exactly one group; order within a group matches
+  // the flat list. Keep coverage total — a tag missing from every group would be
+  // unpickable.
+  var GROUPS = [
+    { id: 'labs',      en: 'Labs & genetics',      pt: 'Laboratório e genética',
+      tags: ['blood', 'urine', 'genetics'] },
+    { id: 'cardiac',   en: 'Cardiac & vitals',     pt: 'Cardíaco e sinais vitais',
+      tags: ['ecg', 'stress_test', 'echocardiogram', 'blood_pressure'] },
+    { id: 'imaging',   en: 'Imaging & scopes',     pt: 'Imagem e endoscopia',
+      tags: ['mri', 'ct', 'xray', 'ultrasound', 'endoscopy', 'colonoscopy'] },
+    { id: 'lifestyle', en: 'Wearables & lifestyle', pt: 'Dispositivos e estilo de vida',
+      tags: ['apple_watch', 'oura', 'withings', 'sleep_study', 'alcohol', 'prescription', 'other'] }
+  ];
+
   var BY_ID = {};
   TAGS.forEach(function (t) { BY_ID[t.id] = t; });
 
@@ -50,5 +65,6 @@
 
   window.EXAM_TAGS = TAGS;
   window.EXAM_TAGS_BY_ID = BY_ID;
+  window.EXAM_TAG_GROUPS = GROUPS;
   window.examTagLabel = label;
 })();
