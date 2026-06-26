@@ -1973,6 +1973,26 @@ async function handlePatientWipeData(request, env) {
 // Idempotent DDL applied on first use — same pattern as ensureInsightJobsTable,
 // because the live DB is only reachable through the deployed Worker's secret.
 // Mirrors db/migrations/0009_uploads.sql exactly.
+// Exam-type tags the patient self-applies at upload time (one upload row can carry
+// several). Stored on uploads.tags (text[]); the admin review queue surfaces them so
+// ingestion can pick the right prompt without re-classifying. IDs are the stable
+// contract — keep this set in sync with web/assets/exam-tags.js.
+const ALLOWED_UPLOAD_TAGS = new Set([
+  "blood", "urine", "ecg", "stress_test", "echocardiogram", "mri", "ct", "xray",
+  "ultrasound", "endoscopy", "colonoscopy", "genetics", "sleep_study", "apple_watch",
+  "oura", "withings", "blood_pressure", "alcohol", "prescription", "other",
+]);
+function sanitizeUploadTags(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const t of raw) {
+    const id = String(t || "").trim();
+    if (ALLOWED_UPLOAD_TAGS.has(id) && !out.includes(id)) out.push(id);
+    if (out.length >= 12) break;
+  }
+  return out;
+}
+
 let _uploadsReady = null;
 function ensureUploadsTables(sql) {
   if (_uploadsReady) return _uploadsReady;
@@ -1997,6 +2017,8 @@ function ensureUploadsTables(sql) {
       reviewed_at      timestamptz,
       reviewed_by      uuid REFERENCES users(id) ON DELETE SET NULL
     )`;
+    // Patient-applied exam-type tags (added after 0009; idempotent for live DBs).
+    await sql`ALTER TABLE uploads ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}'`;
     await sql`CREATE TABLE IF NOT EXISTS upload_objects (
       id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       upload_id     uuid NOT NULL REFERENCES uploads(id) ON DELETE CASCADE,
@@ -2236,14 +2258,15 @@ async function handleUploadsComplete(request, env) {
       }
       const totalBytes = okFiles.reduce((a, f) => a + (Number(f.bytes) || 0), 0);
       const contentType = kind === "file" ? (okFiles[0].content_type || null) : null;
+      const tags = sanitizeUploadTags(item?.tags);
       const uploadId = crypto.randomUUID();
       const docRef = genDocRef();
 
       stmts.push(sql`
         INSERT INTO uploads (id, doc_ref, patient_id, uploader_user_id, original_name, kind,
-                             r2_prefix, file_count, total_bytes, content_type, status)
+                             r2_prefix, file_count, total_bytes, content_type, status, tags)
         VALUES (${uploadId}, ${docRef}, ${patientId}, ${access.viewerId}, ${name}, ${kind},
-                ${r2Prefix}, ${okFiles.length}, ${totalBytes}, ${contentType}, 'pending_review')`);
+                ${r2Prefix}, ${okFiles.length}, ${totalBytes}, ${contentType}, 'pending_review', ${tags}::text[])`);
       for (const f of okFiles) {
         stmts.push(sql`
           INSERT INTO upload_objects (upload_id, r2_key, relative_path, bytes, content_type)
@@ -2253,10 +2276,10 @@ async function handleUploadsComplete(request, env) {
       stmts.push(sql`
         INSERT INTO audit_log (actor_user_id, action, target_table, target_id, patient_context, metadata)
         VALUES (${access.viewerId}, 'upload_created', 'uploads', ${uploadId}, ${patientId},
-                ${JSON.stringify({ doc_ref: docRef, kind, file_count: okFiles.length, total_bytes: totalBytes })}::jsonb)`);
+                ${JSON.stringify({ doc_ref: docRef, kind, file_count: okFiles.length, total_bytes: totalBytes, tags })}::jsonb)`);
       created.push({
         id: uploadId, doc_ref: docRef, original_name: name, kind,
-        file_count: okFiles.length, total_bytes: totalBytes, status: "pending_review",
+        file_count: okFiles.length, total_bytes: totalBytes, status: "pending_review", tags,
       });
     }
     if (stmts.length) await runChunked(sql, stmts, 500); // 500 statements/transaction = 1 subrequest each
@@ -2297,7 +2320,7 @@ async function handleUploadsList(request, env) {
     if (!access.ok) return jsonError(access.status, access.reason);
     const rows = await sql`
       SELECT id, doc_ref, original_name, kind, file_count, total_bytes, content_type,
-             status, error_note, created_at, reviewed_at
+             status, error_note, created_at, reviewed_at, tags
       FROM uploads WHERE patient_id = ${patientId}
       ORDER BY created_at DESC`;
     return new Response(JSON.stringify({ uploads: rows }), { headers: JSON_HEADERS });
@@ -3305,7 +3328,7 @@ async function handleAdmin(request, env) {
       await ensureUploadsTables(sql);
       const rows = await sql`
         SELECT up.id, up.doc_ref, up.original_name, up.kind, up.file_count, up.total_bytes,
-               up.content_type, up.status, up.error_note, up.created_at, up.reviewed_at,
+               up.content_type, up.status, up.error_note, up.created_at, up.reviewed_at, up.tags,
                up.patient_id, p.clerk_user_id AS patient_clerk, p.full_name AS patient_name,
                r.full_name AS reviewer_name, uploader.full_name AS uploader_name
         FROM uploads up

@@ -53,14 +53,14 @@
     if (slash === -1) {
       // loose file -> its own top-level item
       items.push({ id: ++counter, kind: 'file', name: relPath, groupKey: '__f' + counter,
-        files: [{ file: file, relPath: relPath }], status: 'staged', loaded: 0, total: file.size || 0, error: null });
+        files: [{ file: file, relPath: relPath }], status: 'staged', loaded: 0, total: file.size || 0, error: null, tags: [] });
     } else {
       // file inside a folder -> group under the top-level folder name
       var top = relPath.slice(0, slash);
       var item = folderIndex[top];
       if (!item) {
         item = { id: ++counter, kind: 'folder', name: top, groupKey: top,
-          files: [], status: 'staged', loaded: 0, total: 0, error: null };
+          files: [], status: 'staged', loaded: 0, total: 0, error: null, tags: [] };
         folderIndex[top] = item;
         items.push(item);
       }
@@ -124,6 +124,28 @@
     if (item.status === 'failed')   return lang() === 'pt' ? 'Falhou' : 'Failed';
     return lang() === 'pt' ? 'Em fila' : 'Queued';
   }
+  // Per-item exam-type tags. Editable (toggle chips) while the item is still
+  // staged; once it starts uploading the chosen tags render as static pills.
+  function tagChipsHtml(it) {
+    if (!window.EXAM_TAGS) return '';
+    var l = lang();
+    var sel = it.tags || [];
+    if (it.status !== 'staged') {
+      if (!sel.length) return '';
+      return '<div class="up-row-tags">' + sel.map(function (id) {
+        return '<span class="up-tag on static">' + esc(window.examTagLabel(id, l)) + '</span>';
+      }).join('') + '</div>';
+    }
+    var label = l === 'pt' ? 'O que é isto? (opcional)' : 'What is this? (optional)';
+    return '<div class="up-tags-label">' + esc(label) + '</div>' +
+      '<div class="up-row-tags">' + window.EXAM_TAGS.map(function (t) {
+        var on = sel.indexOf(t.id) !== -1;
+        return '<button type="button" class="up-tag' + (on ? ' on' : '') +
+          '" data-tag="' + esc(t.id) + '" data-tag-item="' + it.id + '">' +
+          esc(l === 'pt' ? t.pt : t.en) + '</button>';
+      }).join('') + '</div>';
+  }
+
   function renderStaged() {
     if (items.length === 0) { listEl.innerHTML = ''; goBtn.disabled = true; return; }
     var fileIcon = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
@@ -140,11 +162,25 @@
           '<div class="up-row-name">' + esc(it.name) + '</div>' +
           '<div class="up-row-meta">' + meta + '</div>' +
           '<div class="up-row-prog"><div class="up-row-prog-fill" style="width:' + pct + '%"></div></div>' +
+          tagChipsHtml(it) +
         '</div>' +
         '<span class="up-row-state">' + esc(stateLabel(it)) + '</span>' +
         (removable ? '<button type="button" class="up-row-x" data-remove="' + it.id + '" aria-label="Remove">&times;</button>' : '') +
       '</li>';
     }).join('');
+    // Toggle a tag on/off without a full re-render (keeps scroll + the chip's focus).
+    listEl.querySelectorAll('[data-tag]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var itemId = parseInt(b.getAttribute('data-tag-item'), 10);
+        var tagId = b.getAttribute('data-tag');
+        var it = items.filter(function (x) { return x.id === itemId; })[0];
+        if (!it) return;
+        it.tags = it.tags || [];
+        var idx = it.tags.indexOf(tagId);
+        if (idx === -1) it.tags.push(tagId); else it.tags.splice(idx, 1);
+        b.classList.toggle('on');
+      });
+    });
     listEl.querySelectorAll('[data-remove]').forEach(function (b) {
       b.addEventListener('click', function () {
         var id = parseInt(b.getAttribute('data-remove'), 10);
@@ -268,6 +304,7 @@
       renderStaged();
       if (okResults.length > 0) {
         completeItems.push({ upload_id: p.upload_id, kind: p.kind, original_name: p.original_name, r2_prefix: p.r2_prefix,
+          tags: (it.tags || []),
           files: okResults.map(function (r) { return { relative_path: r.relative_path, r2_key: r.r2_key, bytes: r.bytes, content_type: r.content_type, ok: true }; }) });
       }
     }
@@ -316,8 +353,12 @@
             ? ' <span class="up-row-meta">(' + u.file_count + (lang() === 'pt' ? ' arquivos' : ' files') + ')</span>' : '';
           var note = (u.status === 'data_error' && u.error_note)
             ? '<div class="up-row-meta" style="color:var(--red-700,#8a2b2b)">' + esc(u.error_note) + '</div>' : '';
+          var tags = (u.tags && u.tags.length)
+            ? '<div class="up-row-tags">' + u.tags.map(function (id) {
+                return '<span class="up-tag on static">' + esc(window.examTagLabel(id, lang())) + '</span>'; }).join('') + '</div>'
+            : '';
           return '<tr>' +
-            '<td>' + esc(u.original_name) + nameMeta + note + '</td>' +
+            '<td>' + esc(u.original_name) + nameMeta + tags + note + '</td>' +
             '<td class="up-docref">' + esc(u.doc_ref) + '</td>' +
             '<td>' + esc(fmtDate(u.created_at)) + '</td>' +
             '<td>' + statusPill(u.status) + '</td>' +

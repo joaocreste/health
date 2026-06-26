@@ -68,6 +68,10 @@
         : '<span class="lang-en">File</span><span class="lang-pt">Arquivo</span>';
       var meta = kindLabel + ' · ' + (u.kind === 'folder' ? (u.file_count + (lang() === 'pt' ? ' arquivos · ' : ' files · ')) : '') +
         humanSize(u.total_bytes) + ' · ' + esc(u.doc_ref);
+      var tagsHtml = (u.tags && u.tags.length)
+        ? '<div class="ur-tags">' + u.tags.map(function (id) {
+            return '<span class="ur-tag">' + esc(window.examTagLabel ? window.examTagLabel(id, lang()) : id) + '</span>'; }).join('') + '</div>'
+        : '<div class="ur-tags"><span class="ur-tags-empty"><span class="lang-en">No tags</span><span class="lang-pt">Sem tags</span></span></div>';
       var noteCurrent = (u.status === 'data_error' && u.error_note) ? esc(u.error_note) : '';
       var sel = '<select class="ur-status-sel status-' + esc(u.status) + '" data-id="' + esc(u.id) + '">' +
         STATUS_OPTS.map(function (o) {
@@ -86,6 +90,7 @@
         '<td>' +
           '<div><strong>' + esc(u.original_name) + '</strong></div>' +
           '<div class="ur-row-meta">' + meta + ' · ' + esc(fmtDate(u.created_at)) + '</div>' +
+          tagsHtml +
           '<div style="margin-top:6px;"><button type="button" class="ur-dl" data-dl="' + esc(u.id) + '" data-kind="' + esc(u.kind) + '">' +
             '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
             '<span class="lang-en">Download</span><span class="lang-pt">Baixar</span></button></div>' +
