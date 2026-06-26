@@ -102,7 +102,10 @@ function buildRows() {
       flag: r.flag in FLAG_MAP ? FLAG_MAP[r.flag] : null,
       taken_at: r.collection_date,
       laboratory: r.lab_name || null,
+      lab_city: r.lab_city || null,
+      lab_country: r.lab_country || null,
       requesting_doctor: r.requesting_doctor || null,
+      performing_doctor: r.performing_doctor || null,
     });
   }
   rows._unmapped = unmapped;
@@ -141,10 +144,10 @@ async function apply() {
     sql`DELETE FROM lab_results WHERE patient_id=${pid}`,
     ...rows.map((r) => sql`
       INSERT INTO lab_results
-        (patient_id, panel, marker, value, value_text, unit, ref_low, ref_high, flag, taken_at, laboratory, requesting_doctor)
+        (patient_id, panel, marker, value, value_text, unit, ref_low, ref_high, flag, taken_at, laboratory, lab_city, lab_country, requesting_doctor, performing_doctor)
       VALUES
         (${pid}, ${r.panel}, ${r.marker}, ${r.value}, ${r.value_text}, ${r.unit}, ${r.ref_low}, ${r.ref_high}, ${r.flag},
-         ${r.taken_at}::date, ${r.laboratory}, ${r.requesting_doctor})`),
+         ${r.taken_at}::date, ${r.laboratory}, ${r.lab_city}, ${r.lab_country}, ${r.requesting_doctor}, ${r.performing_doctor})`),
   ];
   await sql.transaction(queries);
   const after = await sql`SELECT count(*)::int n, count(DISTINCT marker)::int markers, min(taken_at) mn, max(taken_at) mx FROM lab_results WHERE patient_id=${pid}`;
