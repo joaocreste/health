@@ -47,7 +47,11 @@ if (!ANTHROPIC_API_KEY) { console.error("✗ ANTHROPIC_API_KEY not set (env or .
 const sql = neon(DATABASE_URL);
 // maxRetries 4 (not 2): large-record runs are long Opus streams that occasionally
 // hit a mid-stream socket drop (undici "terminated"); 2 retries wasn't enough, 4 is.
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 4 });
+// timeout 30 min: the REAL fix for the recurring "terminated" — large records
+// (e.g. Silvana ~6.5 min / 700+ stream events) exceed the SDK's default
+// per-request timeout, which killed the stream before completion regardless of
+// retries. An explicit long timeout lets the full generation land.
+const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY, maxRetries: 4, timeout: 1_800_000 });
 
 (async () => {
   const u = await sql`SELECT id, full_name FROM users WHERE clerk_user_id = ${CLERK} AND role='patient' AND archived_at IS NULL LIMIT 1`;
