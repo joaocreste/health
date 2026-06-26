@@ -1980,7 +1980,8 @@ async function handlePatientWipeData(request, env) {
 const ALLOWED_UPLOAD_TAGS = new Set([
   "blood", "urine", "ecg", "stress_test", "echocardiogram", "mri", "ct", "xray",
   "ultrasound", "endoscopy", "colonoscopy", "genetics", "sleep_study", "apple_watch",
-  "oura", "withings", "blood_pressure", "alcohol", "prescription", "other",
+  "oura", "withings", "blood_pressure", "alcohol", "medication", "prescription",
+  "other_wearable", "other",
 ]);
 function sanitizeUploadTags(raw) {
   if (!Array.isArray(raw)) return [];

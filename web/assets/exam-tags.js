@@ -33,14 +33,17 @@
     { id: 'withings',       en: 'Withings data',       pt: 'Dados Withings' },
     { id: 'blood_pressure', en: 'Blood pressure',      pt: 'Pressão arterial' },
     { id: 'alcohol',        en: 'Alcohol patterns',    pt: 'Padrões de álcool' },
+    { id: 'medication',     en: 'Medication intake',   pt: 'Uso de medicação' },
     { id: 'prescription',   en: 'Prescription / meds', pt: 'Receita / medicamentos' },
+    { id: 'other_wearable', en: 'Other wearables',     pt: 'Outros dispositivos' },
     { id: 'other',          en: 'Other',               pt: 'Outro' }
   ];
 
   // Four main categories the upload picker renders under small labelled dividers.
-  // Every tag id above belongs to exactly one group; order within a group matches
-  // the flat list. Keep coverage total — a tag missing from every group would be
-  // unpickable.
+  // Order within a group is the display order. A tag id present in TAGS but absent
+  // from every group is intentionally NOT offered in the picker — it stays in TAGS
+  // only so examTagLabel() can still resolve it for historical uploads already
+  // carrying it (e.g. 'sleep_study', 'alcohol', 'prescription', 'other').
   var GROUPS = [
     { id: 'labs',      en: 'Labs & genetics',      pt: 'Laboratório e genética',
       tags: ['blood', 'urine', 'genetics'] },
@@ -48,8 +51,8 @@
       tags: ['ecg', 'stress_test', 'echocardiogram', 'blood_pressure'] },
     { id: 'imaging',   en: 'Imaging & scopes',     pt: 'Imagem e endoscopia',
       tags: ['mri', 'ct', 'xray', 'ultrasound', 'endoscopy', 'colonoscopy'] },
-    { id: 'lifestyle', en: 'Wearables & lifestyle', pt: 'Dispositivos e estilo de vida',
-      tags: ['apple_watch', 'oura', 'withings', 'sleep_study', 'alcohol', 'prescription', 'other'] }
+    { id: 'devices',   en: 'Wearables & medication', pt: 'Dispositivos e medicação',
+      tags: ['medication', 'apple_watch', 'oura', 'withings', 'other_wearable'] }
   ];
 
   var BY_ID = {};
