@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  Lumen Health — CANONICAL PATIENT FRONT-END TEMPLATE (data-less)
+  ============================================================================
+  Extracted from Patient Zero (Joao Victor Creste). This single file renders the
+  whole canonical layout with NO personal data — neutral [placeholders] only.
+  Companion written spec: docs/frontend-canon.md.
+
+  HOW TO READ THIS FILE
+  - The data HIERARCHY is literal in the DOM nesting and labelled in comments:
+      1. Physical  > 1.1 Vitals / 1.2 Exams (> 1.2.1 AI Summary / 1.2.2 Blood &
+      Urine / 1.2.3 Imagery) / 1.3 Genetics ; 2. Mental ; 3. Spiritual.
+  - Bilingual pattern everywhere: <span class="lang-en">…</span><span class="lang-pt">…</span>
+  - Conditional rendering: blocks marked "omit if no data" disappear entirely for
+    a patient who lacks that data — never render a zero/empty grid.
+  - [ADDITION] marks a pattern the canon requires that Joao's current pages don't
+    yet literally show; built here in his exact tokens + amber-card style.
+  - Colours: full token palette is declared in :root below (commented by role);
+    component styles come from the linked styles.css for exact visual fidelity.
+
+  This template normally drives several real pages (home / physical /
+  physical-vitals / physical-exams / physical-genetics / mental / spiritual).
+  They are shown here STACKED in one document so the full component library and
+  every amber-card placement are visible at once. Section banners mark page splits.
+  ============================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="[Canonical Lumen Health patient front-end template — data-less]">
+  <title>Lumen Health — Canonical Patient Template</title>
+
+  <!-- Exact font stack: Raleway (display) · IBM Plex Sans (body) · IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Full component styles (authoritative). Relative path from web/templates/. -->
+  <link rel="stylesheet" href="../assets/styles.css?v=54">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+
+  <!--
+    DESIGN TOKENS — the authoritative palette, re-declared here with role comments
+    so the template documents the colour system inline (values match styles.css
+    exactly). Charts also read these via a JS palette object `C`.
+  -->
+  <style>
+  :root {
+    /* ── Surfaces · light ── */
+    --surface-canvas: #F4F7FA;   /* page background (body), footer */
+    --surface-base:   #F8FAFC;   /* odd report-section background */
+    --surface-raised: #FCFDFE;   /* cards: metric / chart / list / lab / viewer */
+    --surface-warm:   #FAF8F4;   /* warm surface variant */
+    --surface-cool:   #EEF3F6;   /* even report-section background; table hover */
+    --surface-pure:   #FFFFFF;   /* pure white */
+
+    /* ── Surfaces · dark (midnight stack: nav, hero, header bands) ── */
+    --surface-dark-intro:    #060D1C;  /* hero background */
+    --surface-dark-canvas:   #050C1A;  /* deepest midnight */
+    --surface-dark-base:     #0A1428;  /* TOPNAV band (Lumen midnight base) */
+    --surface-dark-raised:   #131F37;
+    --surface-dark-warm:     #1A2230;
+    --surface-dark-cool:     #0F1B30;
+    --surface-dark-elevated: #1A2542;  /* nav/hero hairline border */
+
+    /* ── Blue (primary; single-metric chart ramp 400->600->800) ── */
+    --blue-50:#EEF5FA; --blue-100:#D8E8F2; --blue-200:#B5D2E5; --blue-300:#8BB8D2;
+    --blue-400:#5E97BC; --blue-500:#3E7CA3; --blue-600:#2F6489; --blue-700:#244E6E; /* links / active */
+    --blue-800:#1B3B54; /* section titles */ --blue-900:#122A3D; --blue-950:#0B1A28;
+
+    /* ── Green (in-range / "Normal" pill / success) ── */
+    --green-50:#EEF8F1; --green-100:#D6EEDD; --green-200:#B0DEBE; --green-300:#84C99D;
+    --green-400:#5BAF7C; --green-500:#3D9460; /* in-range dot */ --green-600:#2D7A4C;
+    --green-700:#245F3C; --green-800:#1B4730; --green-900:#143524;
+
+    /* ── Amber (watch + AI cards) ── */
+    --amber-50:#FDF8EC; --amber-100:#FAEFCD; --amber-200:#F4DD9C; --amber-300:#ECC662;
+    --amber-400:#DDAD3C; --amber-500:#C29327; /* watch dot / lab-causes border */
+    --amber-600:#9E761C; --amber-700:#785818; /* watch pill text */
+    --amber-800:#574014; --amber-900:#3B2C0E;
+    --ai-insight-bg:     #FDF8EC;  /* AMBER AI-CARD background */
+    --ai-insight-stroke: #F4DD9C;  /* AMBER AI-CARD stroke/border */
+
+    /* ── Red (out-of-range flag / two-metric split half) ── */
+    --red-50:#FDF1F1; --red-100:#FADBDB; --red-200:#F4B3B3; --red-300:#EB8585;
+    --red-400:#DC5959; --red-500:#C73E3E; /* flag dot */ --red-600:#A53030;
+    --red-700:#802626; --red-800:#5E1D1D; --red-900:#3F1414;
+
+    /* ── Neutral (text + borders) ── */
+    --neutral-50:#F6F8FA; --neutral-100:#ECEFF3; --neutral-200:#D8DDE4; --neutral-300:#BBC3CD;
+    --neutral-400:#94A0AE; --neutral-500:#6E7B8A; --neutral-600:#54616F; --neutral-700:#3E4956;
+    --neutral-800:#2A333D; --neutral-900:#1A2129;
+
+    /* ── Lumen brand accents ── */
+    --accent-petrol:       #244E6E;  /* PETROL TEAL — primary action / links (light) */
+    --accent-petrol-light: #4D7BA0;  /* hover step / dark-theme primary */
+    --accent-petrol-dark:  #6BA3C7;  /* primary on dark backgrounds */
+    --petrol-fill:         rgba(36,78,110,0.10);
+    --petrol-fill-dark:    rgba(107,163,199,0.10);
+    --accent-gold:         #B8860B;  /* HONEY-GOLD (light theme) */
+    --accent-gold-dark:    #F4B942;  /* HONEY-GOLD (dark theme) — active nav link */
+    --accent-gold-soft:    rgba(184,134,11,0.10);
+    --brand-ink:           #0D1B33;  /* brand textual primary */
+
+    /* ── Semantic text/border mappings ── */
+    --text-primary:var(--neutral-900); --text-secondary:var(--neutral-700);
+    --text-muted:var(--neutral-500); --text-faint:var(--neutral-400);
+    --text-on-brand:#FFFFFF; --text-link:var(--accent-petrol);
+    --border-subtle:var(--neutral-200); --border-default:var(--neutral-300);
+    --border-strong:var(--neutral-500); --border-focus:var(--accent-petrol);
+
+    /* ── Fonts ── */
+    --font-display:'Raleway',system-ui,sans-serif;
+    --font-body:'IBM Plex Sans',system-ui,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+
+    /* The purple .ai-pill (inference badge) is NOT amber:
+       background linear-gradient(135deg,#f4ecff,#ede2ff); text #6b3fb5; border #d9c6f5.
+       .ai-disclaimer block: bg #faf6ff; dashed #d9c6f5; text #4a3275.  (see styles.css) */
+  }
+
+  /* Minimal helpers for placeholder viewer art so the template is viewable
+     standalone (real viewer images come from app.js + a scans/ manifest). */
+  .tpl-banner{background:linear-gradient(90deg,#0A1428,#244E6E);color:#fff;
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    padding:10px 2rem;border-top:2px solid var(--accent-gold-dark);}
+  .ct-stage.tpl-placeholder{background:repeating-linear-gradient(45deg,#0c0c0c,#0c0c0c 14px,#161616 14px,#161616 28px);
+    color:#7A8FA6;font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;}
+  .tpl-chart{height:100%;display:flex;align-items:center;justify-content:center;
+    background:var(--surface-cool);border-radius:8px;color:var(--text-muted);
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-align:center;}
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     GLOBAL FRAME — TOP NAV (shared by every page, midnight band)
+     ════════════════════════════════════════════════════════════════════════ -->
+<nav class="topnav">
+  <a class="brand" href="home.html">
+    <img src="../assets/logo-on-dark.svg" alt="">
+    <span>Lumen Health<small><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small></span>
+  </a>
+  <ul class="topnav-links">
+    <li><a href="home.html" class="active"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a></li>
+    <li><a href="physical.html"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></a></li>
+    <li><a href="mental.html"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></a></li>
+    <li><a href="spiritual.html"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></a></li>
+  </ul>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button type="button" class="export-btn" data-export-btn aria-label="Export to PDF" title="Export to PDF">
+      <span class="export-label"><span class="lang-en">Export</span><span class="lang-pt">Exportar</span></span>
+    </button>
+    <!-- UK / BR rectangular flag buttons; aria-pressed tracks the active locale -->
+    <button class="lang-btn" data-lang="en" aria-pressed="true"  aria-label="English"></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"></button>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out">
+      <span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span>
+    </button>
+  </div>
+</nav>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     PAGE: home.html — LANDING. Always opens with the HERO.
+     AI cards are injected BELOW the Reports section, NEVER above the hero.
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tpl-banner">Page · home.html — Landing / Health Summary</div>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow"><span class="lang-en">Health Summary · [DD Month YYYY]</span><span class="lang-pt">Resumo de saúde · [DD de mês de YYYY]</span></div>
+    <!-- Fixed canonical hero line: -->
+    <h1 class="hero-title"><span class="lang-en">From scattered data to a clinical picture.</span><span class="lang-pt">Dos dados dispersos a um quadro clínico.</span></h1>
+    <p class="hero-sub"><span class="lang-en">A single, structured view of [Patient name]'s physical, mental and spiritual health.</span><span class="lang-pt">Uma visão única e estruturada da saúde física, mental e espiritual de [Patient name].</span></p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="lang-en">Patient</span><span class="lang-pt">Paciente</span><span>[Patient name]</span></div>
+      <div class="hero-meta-item"><span class="lang-en">Date of birth</span><span class="lang-pt">Data de nascimento</span><span>[DD Month YYYY · age NN]</span></div>
+      <div class="hero-meta-item"><span class="lang-en">Residence</span><span class="lang-pt">Residência</span><span>[City, Country]</span></div>
+      <div class="hero-meta-item"><span class="lang-en">Prepared</span><span class="lang-pt">Preparado em</span><span>[DD Month YYYY]</span></div>
+      <div class="hero-meta-item"><span class="lang-en">Classification</span><span class="lang-pt">Classificação</span><span><span class="lang-en">Strictly confidential</span><span class="lang-pt">Estritamente confidencial</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 · Browse / Reports — three pillar entry cards (Physical / Mental / Spiritual) -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>
+    <h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>
+    <div class="entry-grid entry-grid-visual">
+      <a class="entry-card entry-card-visual" href="physical.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="var(--petrol-fill)" stroke="#244E6E" stroke-width="1.5"/></svg>
+        <div class="entry-title"><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></div>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+      <a class="entry-card entry-card-visual" href="mental.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="var(--petrol-fill)" stroke="#244E6E" stroke-width="1.5"/></svg>
+        <div class="entry-title"><span class="lang-en">Mental</span><span class="lang-pt">Mental</span></div>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+      <a class="entry-card entry-card-visual" href="spiritual.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="var(--petrol-fill)" stroke="#244E6E" stroke-width="1.5"/></svg>
+        <div class="entry-title"><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></div>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · At a glance — metric grid (omit whole section if no summary metrics) -->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">02 · At a glance</span><span class="lang-pt">02 · Visão geral</span></div>
+    <h2 class="section-title"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></h2>
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label"><span class="lang-en">[Metric]</span><span class="lang-pt">[Métrica]</span></div>
+        <div class="metric-value">[value]<small>[unit]</small></div>
+        <div class="metric-note"><span class="lang-en">[one-line note]</span><span class="lang-pt">[nota]</span></div>
+      </div>
+      <!-- repeat .metric-card per metric -->
+    </div>
+  </div>
+</section>
+
+<!--
+  HOME AI CARDS — injected by the renderer BELOW the Reports section (never above
+  the hero). One consolidated health-synthesis amber card. [Placement is the home
+  "Health synthesis" header card.]
+-->
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">03 · AI synthesis</span><span class="lang-pt">03 · Síntese por IA</span><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+    <h2 class="section-title"><span class="lang-en">Health synthesis</span><span class="lang-pt">Síntese de saúde</span></h2>
+    <!-- Joao's authentic amber AI card = .chart-card.ai-comments (fully styled by styles.css) -->
+    <div class="chart-card ai-comments">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">What the record says, in one read</span><span class="lang-pt">O que o prontuário diz, em uma leitura</span></div>
+        <div class="chart-card-meta"><span class="lang-en">AI-generated synthesis over your record</span><span class="lang-pt">Síntese gerada por IA sobre o prontuário</span></div>
+      </div>
+      <p class="ai-headline"><span class="lang-en">[AI: one-line headline across physical, mental and spiritual data.]</span><span class="lang-pt">[IA: manchete em uma linha …]</span></p>
+      <p class="ai-body"><span class="lang-en">[AI: one-paragraph plain-language read of the headline items — possible, not definitive.]</span><span class="lang-pt">[IA: leitura em linguagem simples …]</span></p>
+      <ul class="ai-list">
+        <li><span class="lang-en">[AI: a connection between two domains, e.g. how a vital relates to an exam finding.]</span><span class="lang-pt">[IA: conexão entre dois domínios.]</span></li>
+      </ul>
+      <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong> AI-generated synthesis over your record — for discussion, not a diagnosis.</span><span class="lang-pt"><strong>Converse com seu médico.</strong> Síntese gerada por IA — para discussão, não um diagnóstico.</span></p>
+    </div>
+  </div>
+</section>
+
+<footer class="doc-footer">
+  <div class="footer-brand"><img src="../assets/logo.svg" alt=""><span>Lumen Health · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span></div>
+  <div><span class="lang-en">Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</span><span class="lang-pt">Estritamente confidencial · Apenas para comunicação clínica · Não substitui aconselhamento médico licenciado.</span></div>
+</footer>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     1. PHYSICAL HEALTH (pillar) — page: physical.html — the 3-option hub
+     Inside Physical sit 1.1 Vitals, 1.2 Exams, 1.3 Genetics as siblings.
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tpl-banner">Page · physical.html — Physical Health hub (1. Physical)</div>
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-eyebrow"><span class="lang-en">Section I · Physical health</span><span class="lang-pt">Seção I · Saúde física</span></div>
+    <h1 class="page-title"><span class="lang-en">Physical Health Overview</span><span class="lang-pt">Visão geral · Saúde física</span></h1>
+    <p class="page-desc"><span class="lang-en">[Patient name] · [age] · [city] · prepared [date]. The clinical picture is split into three views — daily biometrics (Vitals), point-in-time exams &amp; lab results (Exams), and the inherited genetic profile (Genetics).</span><span class="lang-pt">[Nome] · [idade] · [cidade] · preparado em [data]. O quadro clínico é dividido em três visões — biometria diária (Sinais vitais), exames e resultados (Exames), e o perfil genético (Genética).</span></p>
+  </div>
+</header>
+
+<section class="report-section" id="browse">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">Browse</span><span class="lang-pt">Navegar</span></div>
+    <h2 class="section-title"><span class="lang-en">Vitals · Exams · Genetics</span><span class="lang-pt">Sinais vitais · Exames · Genética</span></h2>
+    <p class="section-desc"><span class="lang-en">Three views of the same patient.</span><span class="lang-pt">Três visões do mesmo paciente.</span></p>
+
+    <div class="entry-grid entry-grid-overview">
+      <!-- 1.1 Vitals -->
+      <a class="entry-card entry-card-overview" href="physical-vitals.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle cx="32" cy="32" r="22" fill="rgba(36,78,110,0.10)" stroke="#244E6E" stroke-width="1.5"/>
+          <polyline points="14,32 22,32 26,22 30,42 34,28 38,36 42,32 50,32" stroke="#B8860B" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="entry-title"><span class="lang-en">Vitals</span><span class="lang-pt">Sinais vitais</span></div>
+        <div class="entry-status"><!-- omit pills with no flags -->
+          <span class="pill pill-flag">[N] flagged</span>
+          <span class="pill pill-watch">[N] watch</span>
+        </div>
+        <ul class="entry-bullets">
+          <li><span class="lang-en">[Body composition · sleep · cardiovascular]</span><span class="lang-pt">[Composição corporal · sono · cardiovascular]</span></li>
+          <li><span class="lang-en">[Blood pressure · movement · exercise]</span><span class="lang-pt">[Pressão · movimento · exercício]</span></li>
+        </ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+      <!-- 1.2 Exams -->
+      <a class="entry-card entry-card-overview" href="physical-exams.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="rgba(36,78,110,0.10)" stroke="#244E6E" stroke-width="1.5"/></svg>
+        <div class="entry-title"><span class="lang-en">Exams</span><span class="lang-pt">Exames</span></div>
+        <div class="entry-status"><span class="pill pill-flag">[N] flagged</span><span class="pill pill-watch">[N] watch</span></div>
+        <ul class="entry-bullets"><li><span class="lang-en">[Imaging · blood &amp; urine · gut · alcohol]</span><span class="lang-pt">[Imagem · sangue e urina · …]</span></li></ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+      <!-- 1.3 Genetics -->
+      <a class="entry-card entry-card-overview" href="physical-genetics.html">
+        <svg class="entry-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="rgba(36,78,110,0.10)" stroke="#244E6E" stroke-width="1.5"/></svg>
+        <div class="entry-title"><span class="lang-en">Genetics</span><span class="lang-pt">Genética</span></div>
+        <div class="entry-status"><span class="pill pill-watch">[N] PGx flags</span></div>
+        <ul class="entry-bullets"><li><span class="lang-en">[Pharmacogenetic profile · drug response]</span><span class="lang-pt">[Perfil farmacogenético]</span></li></ul>
+        <span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+<!-- omit any further physical.html sections (clinical history / meds / insights) when no data -->
+
+
+<!-- ────────────────────────────────────────────────────────────────────────
+     1.1 VITALS — page: physical-vitals.html  (child of Physical)
+     ──────────────────────────────────────────────────────────────────────── -->
+<div class="tpl-banner">Page · physical-vitals.html — 1.1 Vitals</div>
+
+<header class="page-header">
+  <div class="container">
+    <a href="physical.html" class="back-link"><span class="lang-en">← Physical Health</span><span class="lang-pt">← Saúde física</span></a>
+    <div class="page-eyebrow">Physical · Vitals</div>
+    <h1 class="page-title"><span class="lang-en">Vitals</span><span class="lang-pt">Sinais vitais</span></h1>
+    <p class="page-desc"><span class="lang-en">[Daily and continuous biometrics — scale, ring, BP cuff, ECG — plus the latest physician read.]</span><span class="lang-pt">[Biometria diária e contínua …]</span></p>
+  </div>
+</header>
+
+<!-- in-page anchor nav — list ONLY the sections this patient actually has -->
+<div class="section-nav"><div class="section-nav-inner">
+  <a href="#vit-ai">AI synthesis</a>
+  <a href="#vit-body">Body composition</a>
+  <a href="#vit-cardio">Cardiovascular</a>
+  <a href="#vit-bp">Blood pressure</a>
+</div></div>
+
+<!-- AMBER CARD · PLACEMENT 4 (Vitals): the synthesis card opens the page -->
+<section class="report-section" id="vit-ai">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · AI vitals synthesis</span><span class="lang-pt">01 · Síntese dos sinais vitais</span><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+    <h2 class="section-title"><span class="lang-en">Read the data below with this in mind</span><span class="lang-pt">Leia os dados abaixo com isto em mente</span></h2>
+    <div class="chart-card ai-comments">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">Read the data below with this in mind</span><span class="lang-pt">Leia os dados abaixo com isto em mente</span></div>
+        <div class="chart-card-meta"><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+      </div>
+      <p class="ai-body"><span class="lang-en">[AI: a calm, plain-language synthesis tying the vitals below to the patient's exams / mental record. Possible, not definitive.]</span><span class="lang-pt">[IA: síntese em linguagem simples …]</span></p>
+      <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong> [why it is worth raising]</span><span class="lang-pt"><strong>Converse com seu médico.</strong> [por quê]</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- A metric section — repeat per available metric; OMIT entirely if no readings -->
+<section class="report-section" id="vit-body">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">02 · Body composition</span><span class="lang-pt">02 · Composição corporal</span></div>
+    <h2 class="section-title"><span class="lang-en">Body composition</span><span class="lang-pt">Composição corporal</span></h2>
+    <p class="section-desc"><span class="lang-en">[source · n=… readings · date range]</span><span class="lang-pt">[fonte · n=… · período]</span></p>
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">[Chart title]</span><span class="lang-pt">[Título]</span></div>
+        <div class="chart-card-meta">[source · n=…]</div>
+      </div>
+      <div class="chart-wrap"><div class="tpl-chart">[Chart.js / Plotly canvas — two-metric charts use the blue + red split]</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- A metric SUSTAINED OUTSIDE THRESHOLD gets an amber card adjacent to its chart -->
+<section class="report-section" id="vit-cardio">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">07 · Cardiovascular &amp; recovery</span><span class="lang-pt">07 · Cardiovascular e recuperação</span></div>
+    <h2 class="section-title"><span class="lang-en">Cardiovascular health</span><span class="lang-pt">Saúde cardiovascular</span></h2>
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">Daily patterns — by time of day</span><span class="lang-pt">Padrões diários — por hora</span></div>
+          <div class="chart-card-meta"><span class="lang-en">[median curve · ±1 SD · ±2 SD]</span><span class="lang-pt">[curva mediana · ±1 DP · ±2 DP]</span></div>
+        </div>
+        <!-- THE VALIDATED VARIABILITY RECIPE: ±2 SD band, ±1 SD band, median spline,
+             clinical reference lines (Plotly). -->
+        <div class="chart-wrap tall"><div class="tpl-chart">[Plotly · ±2 SD / ±1 SD bands + median spline + reference lines]</div></div>
+      </div>
+      <!-- AMBER CARD · PLACEMENT 4: metric outside its clinical threshold -->
+      <div class="chart-card ai-comments">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">[Metric] running [above/below] its usual range</span><span class="lang-pt">[Métrica] [acima/abaixo] do habitual</span></div>
+          <div class="chart-card-meta"><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+        </div>
+        <p class="ai-body"><span class="lang-en">[AI: in plain language, what this metric is and what a sustained out-of-threshold value can mean — possible, not definitive.]</span><span class="lang-pt">[IA: o que é esta métrica …]</span></p>
+        <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong></span><span class="lang-pt"><strong>Converse com seu médico.</strong></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ────────────────────────────────────────────────────────────────────────
+     1.2 EXAMS (category) — page: physical-exams.html  (child of Physical)
+     "Exams" is NOT a leaf: it holds 1.2.1 AI Summary, 1.2.2 Blood & Urine,
+     1.2.3 Imagery. Canonical order: AI Summary -> Blood & Urine -> Imagery.
+     ──────────────────────────────────────────────────────────────────────── -->
+<div class="tpl-banner">Page · physical-exams.html — 1.2 Exams (category)</div>
+
+<header class="page-header">
+  <div class="container">
+    <a href="physical.html" class="back-link"><span class="lang-en">← Physical Health</span><span class="lang-pt">← Saúde física</span></a>
+    <div class="page-eyebrow">Physical · Exams</div>
+    <h1 class="page-title"><span class="lang-en">Exams</span><span class="lang-pt">Exames</span></h1>
+    <p class="page-desc"><span class="lang-en">[Point-in-time clinical exams and lab results — radiology, full blood &amp; urine panel, and more.]</span><span class="lang-pt">[Exames clínicos pontuais e resultados …]</span></p>
+  </div>
+</header>
+
+<div class="section-nav"><div class="section-nav-inner">
+  <a href="#exams-ai">AI summary</a>
+  <a href="#labs">Blood &amp; urine</a>
+  <a href="#imagery">Imagery</a>
+</div></div>
+
+<!-- ░░░ 1.2.1 AI SUMMARY (top of Exams) ░░░
+     AMBER CARD · PLACEMENT 1 — one consolidated card summarizing the headline
+     items across Blood & Urine and Imagery, linking DOWN to them.
+     [ADDITION] Joao's current Exams page opens at Imagery; the canon requires
+     this consolidated summary first, built in his amber .ai-synthesis-card style. -->
+<section class="report-section" id="exams-ai">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">1.2.1 · AI exam summary</span><span class="lang-pt">1.2.1 · Resumo dos exames por IA</span><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+    <h2 class="section-title"><span class="lang-en">What these exams say, in plain language</span><span class="lang-pt">O que estes exames dizem, em linguagem simples</span></h2>
+    <div class="chart-card ai-comments">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">The headline, before the numbers</span><span class="lang-pt">O essencial, antes dos números</span></div>
+        <div class="chart-card-meta"><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+      </div>
+      <p class="ai-body"><span class="lang-en">[AI: a calm, plain-language summary that LEADS with the explanation (not just numbers), covering the headline findings across blood &amp; urine and imagery — framed as possible, not definitive.]</span><span class="lang-pt">[IA: resumo em linguagem simples …]</span></p>
+      <ul class="ai-list">
+        <li><span class="lang-en">[Headline blood finding] — <a href="#labs">see Blood &amp; urine ↓</a></span><span class="lang-pt">[Achado de sangue] — <a href="#labs">ver Sangue e urina ↓</a></span></li>
+        <li><span class="lang-en">[Headline imaging finding] — <a href="#imagery">see Imagery ↓</a></span><span class="lang-pt">[Achado de imagem] — <a href="#imagery">ver Imagem ↓</a></span></li>
+      </ul>
+      <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong> [Worth discussing at the next visit.]</span><span class="lang-pt"><strong>Converse com seu médico.</strong> [Vale levantar na próxima consulta.]</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ 1.2.2 BLOOD & URINE (exam type) ░░░ -->
+<section class="report-section" id="labs">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">1.2.2 · Laboratory</span><span class="lang-pt">1.2.2 · Laboratório</span></div>
+    <h2 class="section-title"><span class="lang-en">Blood &amp; urine — full panel</span><span class="lang-pt">Sangue e urina — painel completo</span></h2>
+
+    <!-- "Highlights worth discussing" — flagged/watch summary tiles -->
+    <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2rem 0 1rem;">
+      <span class="lang-en">Highlights worth discussing</span><span class="lang-pt">Pontos a discutir</span></h3>
+    <div class="lab-hl-grid">
+      <div class="lab-hl-card lab-hl-card-flag">
+        <div class="lab-hl-name">[Analyte]</div>
+        <div class="lab-hl-value">[value] <span class="lab-hl-unit">[unit]</span></div>
+        <div class="lab-hl-meta">
+          <span class="pill pill-flag"><span class="lang-en">Flagged</span><span class="lang-pt">Sinalizado</span></span>
+          <span class="lab-hl-panel"><span class="lang-en">[Panel]</span><span class="lang-pt">[Painel]</span></span>
+        </div>
+        <div class="lab-hl-ref"><span class="lang-en">Reference:</span><span class="lang-pt">Referência:</span> [reference range]</div>
+        <div class="lab-hl-note"><span class="lang-en">[AI: one-line plain-language note on why this is worth discussing.]</span><span class="lang-pt">[IA: nota de uma linha …]</span></div>
+      </div>
+      <!-- repeat per flagged/watch analyte -->
+    </div>
+
+    <!-- Panels grouped by the canonical lab taxonomy. Each panel is collapsible. -->
+    <div class="lab-panel-grid">
+      <details class="lab-panel" open>
+        <summary class="lab-panel-head">
+          <span class="lab-panel-title"><span class="lang-en">[Panel name, e.g. Complete Blood Count — Erythrogram]</span><span class="lang-pt">[Nome do painel]</span></span>
+          <span class="lab-panel-sub"><span class="lang-en">[what the panel measures]</span><span class="lang-pt">[o que o painel mede]</span></span>
+          <span class="lab-panel-count"><span class="lang-en">[N] markers</span><span class="lang-pt">[N] marcadores</span></span>
+        </summary>
+        <div class="lab-panel-body">
+
+          <!-- LAB SLIDER CARD — IN RANGE (green dot, "Normal" pill, NO amber card) -->
+          <div class="lab-test lab-test-normal">
+            <div class="lab-test-head">
+              <div class="lab-test-name">[Analyte] <span class="lab-name-pt">([nome PT])</span></div>
+              <div class="lab-test-meta">
+                <span class="lab-test-val"><span class="lab-val-num">[value]</span> <span class="lab-val-unit">[unit]</span></span>
+                <span class="pill pill-ok"><span class="lang-en">Normal</span><span class="lang-pt">Normal</span></span>
+              </div>
+            </div>
+            <div class="lab-bar-wrap">
+              <div class="lab-bar">
+                <div class="lab-bar-bg"></div><div class="lab-bar-range"></div>
+                <div class="lab-bar-tick lab-bar-tick-min"></div><div class="lab-bar-tick lab-bar-tick-max"></div>
+                <div class="lab-bar-marker lab-bar-marker-normal" style="left:[%];"><div class="lab-bar-dot"></div></div>
+              </div>
+              <div class="lab-bar-labels"><span>min [min]</span><span>max [max]</span></div>
+            </div>
+            <div class="lab-test-foot"><div class="lab-test-ref"><span class="lang-en">Reference:</span><span class="lang-pt">Referência:</span> [reference range]</div></div>
+          </div>
+
+          <!-- LAB SLIDER CARD — OUT OF RANGE (red dot, "Flagged" pill) + AMBER CARD -->
+          <div class="lab-test lab-test-flag">
+            <div class="lab-test-head">
+              <div class="lab-test-name">[Analyte] <span class="lab-name-pt">([nome PT])</span></div>
+              <div class="lab-test-meta">
+                <span class="lab-test-val"><span class="lab-val-num">[value]</span> <span class="lab-val-unit">[unit]</span></span>
+                <span class="pill pill-flag"><span class="lang-en">Flagged</span><span class="lang-pt">Sinalizado</span></span>
+              </div>
+            </div>
+            <div class="lab-bar-wrap">
+              <div class="lab-bar">
+                <div class="lab-bar-bg"></div><div class="lab-bar-range"></div>
+                <div class="lab-bar-tick lab-bar-tick-min"></div><div class="lab-bar-tick lab-bar-tick-max"></div>
+                <div class="lab-bar-marker lab-bar-marker-flag" style="left:[%];"><div class="lab-bar-dot"></div></div>
+              </div>
+              <div class="lab-bar-labels"><span>min [min]</span><span>max [max]</span></div>
+            </div>
+            <div class="lab-test-foot"><div class="lab-test-ref"><span class="lang-en">Reference:</span><span class="lang-pt">Referência:</span> [reference range]</div></div>
+
+            <!-- AMBER CARD · PLACEMENT 3 — one per OUT-OF-RANGE blood value.
+                 Reasons drawn SOLELY from this patient's own record. In-range = none. -->
+            <div class="lab-causes">
+              <div class="lab-causes-title">
+                <span class="lang-en">Possible contributing factors</span><span class="lang-pt">Possíveis fatores contribuintes</span>
+                <span class="lab-causes-disclaimer"><span class="lang-en">— suggestive only, based on current medication and history. Does not replace clinical evaluation.</span><span class="lang-pt">— apenas sugestivo, com base na medicação atual e histórico. Não substitui avaliação clínica.</span></span>
+              </div>
+              <ul class="lab-causes-list">
+                <li><span class="lang-en">[AI: a possible reason grounded ONLY in this patient's meds / other &amp; past labs / history / genetics.]</span><span class="lang-pt">[IA: razão possível, apenas do prontuário do paciente.]</span></li>
+                <li><span class="lang-en">[AI: another grounded reason.]</span><span class="lang-pt">[IA: outra razão fundamentada.]</span></li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </details>
+      <!-- repeat <details.lab-panel> per panel -->
+    </div>
+
+    <!-- LAB HISTORY / TREND TABLE — longitudinal, behind repeated panels.
+         Latest column is leftmost + bold-highlighted; marker column is sticky. -->
+    <p class="lab-cmp-intro"><span class="lang-en">[The leftmost (bold) column is the most recent panel. Drag horizontally to scroll older samples into view.]</span><span class="lang-pt">[A coluna mais à esquerda (negrito) é o painel mais recente. Arraste horizontalmente …]</span></p>
+    <div class="lab-cmp-wrap">
+      <table class="lab-cmp-table">
+        <thead><tr>
+          <th class="lab-cmp-marker-head"><span class="lang-en">Marker</span><span class="lang-pt">Marcador</span></th>
+          <th class="lab-cmp-col-head lab-cmp-col-latest">
+            <div class="lab-cmp-date">[latest date]</div>
+            <div class="lab-cmp-lab">[lab name]</div>
+            <div class="lab-cmp-md">[ordering MD]</div>
+          </th>
+          <th class="lab-cmp-col-head"><div class="lab-cmp-date">[older date]</div><div class="lab-cmp-lab">[lab]</div><div class="lab-cmp-md">[MD]</div></th>
+        </tr></thead>
+        <tbody>
+          <tr class="lab-cmp-section"><th colspan="3">[Panel section name]</th></tr>
+          <tr>
+            <th class="lab-cmp-marker">[Analyte] <small class="lab-cmp-unit">([unit])</small></th>
+            <td class="lab-cmp-val lab-cmp-latest"><strong>[value]</strong></td>
+            <td class="lab-cmp-val">[value]</td>
+          </tr>
+          <!-- repeat per analyte -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ 1.2.3 IMAGERY (exam type) — ONE card per exam ░░░
+     Each study: title -> export PDF -> VIEWER (on top) -> REPORT (beneath)
+     -> per-exam AMBER AI card (under the report). Present for EVERY exam. -->
+<section class="report-section" id="imagery">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">1.2.3 · Imagery</span><span class="lang-pt">1.2.3 · Imagem</span></div>
+    <h2 class="section-title"><span class="lang-en">Imaging exams</span><span class="lang-pt">Exames de imagem</span></h2>
+
+    <!-- ONE IMAGERY EXAM (repeat .imagery-exam per study; omit section if none) -->
+    <div class="imagery-exam" id="exam-1"><div class="container">
+      <div class="section-label"><span class="lang-en">1.a · Imaging</span><span class="lang-pt">1.a · Imagem</span></div>
+      <h2 class="section-title"><span class="lang-en">[Study type] · [DD Month YYYY]</span><span class="lang-pt">[Tipo de exame] · [data]</span></h2>
+      <p class="section-desc"><span class="lang-en">[Indication, technique, frame count, and the navigation hint — scrub the slider, scroll over the image, drag vertically, or use arrow keys.]</span><span class="lang-pt">[Indicação, técnica, número de imagens, e dica de navegação …]</span></p>
+
+      <div class="report-export-row">
+        <a class="export-btn-primary" href="scans/[study]-report.pdf" download><span class="lang-en">Export report (PDF)</span><span class="lang-pt">Exportar laudo (PDF)</span></a>
+      </div>
+
+      <!-- (1) THE VIEWER — ON TOP -->
+      <div class="ct-grid ct-grid-single">
+        <div class="ct-viewer" data-prefix="scans/[study]/" data-manifest="scans/[study]-manifest.json">
+          <div class="ct-viewer-head">
+            <div class="ct-viewer-title"><span class="lang-en">Multi-sequence viewer</span><span class="lang-pt">Visualizador por série</span></div>
+            <div class="ct-viewer-meta"><span class="lang-en">Image</span><span class="lang-pt">Imagem</span> <span class="ct-idx">1</span> / <span class="ct-total">[N]</span></div>
+          </div>
+          <!-- manifest "ways"/stacks render here as .ct-control-select or .ct-seg buttons -->
+          <div class="ct-controls"></div>
+          <!-- .ct-img has no src in the static template (app.js sets it from the manifest);
+               the striped placeholder stands in for the rendered frame. -->
+          <div class="ct-stage tpl-placeholder">[ Imaging viewer frame — scrub with the slider below ]</div>
+          <input class="ct-slider" type="range" min="0" max="[N-1]" value="[mid]" aria-label="[study] image">
+        </div>
+      </div>
+
+      <!-- (2) THE DOCTOR'S REPORT — BENEATH the viewer -->
+      <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">
+        <span class="lang-en">Radiologist's report</span><span class="lang-pt">Laudo do radiologista</span></h3>
+      <div class="two-col mb-3">
+        <div class="list-card">
+          <h4><span class="lang-en">Identifiers</span><span class="lang-pt">Identificadores</span></h4>
+          <ul>
+            <li><strong><span class="lang-en">Patient.</span><span class="lang-pt">Paciente.</span></strong> [Patient name]</li>
+            <li><strong><span class="lang-en">Exam date.</span><span class="lang-pt">Data do exame.</span></strong> [DD Month YYYY]</li>
+            <li><strong><span class="lang-en">Reported by.</span><span class="lang-pt">Laudado por.</span></strong> [Radiologist · registration]</li>
+          </ul>
+        </div>
+        <div class="list-card">
+          <h4><span class="lang-en">Clinical information &amp; technique</span><span class="lang-pt">Informações clínicas e técnica</span></h4>
+          <ul><li><span class="lang-en">[Report text — findings &amp; conclusion.]</span><span class="lang-pt">[Texto do laudo — achados e conclusão.]</span></li></ul>
+        </div>
+      </div>
+
+      <!-- (3) AMBER CARD · PLACEMENT 2 — one per imagery exam, UNDER the report.
+           Present for EVERY exam, even a clean one. -->
+      <div class="chart-card ai-comments">
+        <div class="chart-card-head">
+          <div class="chart-card-title"><span class="lang-en">What this report means</span><span class="lang-pt">O que este laudo significa</span></div>
+          <div class="chart-card-meta"><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+        </div>
+        <p class="ai-body"><span class="lang-en">[AI: the radiologist's report in plain language — what was looked at and what it shows. Possible, not definitive; reassuring when the study is clean.]</span><span class="lang-pt">[IA: o laudo em linguagem simples …]</span></p>
+        <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong></span><span class="lang-pt"><strong>Converse com seu médico.</strong></span></p>
+      </div>
+    </div></div>
+    <!-- repeat .imagery-exam per study -->
+  </div>
+</section>
+
+
+<!-- ────────────────────────────────────────────────────────────────────────
+     1.3 GENETICS — page: physical-genetics.html  (child of Physical)
+     ──────────────────────────────────────────────────────────────────────── -->
+<div class="tpl-banner">Page · physical-genetics.html — 1.3 Genetics</div>
+
+<header class="page-header">
+  <div class="container">
+    <a href="physical.html" class="back-link"><span class="lang-en">← Physical Health</span><span class="lang-pt">← Saúde física</span></a>
+    <div class="page-eyebrow">Physical · Genetics</div>
+    <h1 class="page-title"><span class="lang-en">Genetics</span><span class="lang-pt">Genética</span></h1>
+    <p class="page-desc"><span class="lang-en">[Pharmacogenetic profile — sub-modules cross-referenced against the patient's current medications.]</span><span class="lang-pt">[Perfil farmacogenético …]</span></p>
+  </div>
+</header>
+
+<div class="section-nav"><div class="section-nav-inner"><a href="#pgx">Pharmacogenetics</a></div></div>
+
+<section class="report-section" id="pgx">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · Pharmacogenetics</span><span class="lang-pt">01 · Farmacogenética</span></div>
+    <h2 class="section-title"><span class="lang-en">Pharmacogenetic profile — [panel] · [date]</span><span class="lang-pt">Perfil farmacogenético — [painel] · [data]</span></h2>
+
+    <!-- clinical-summary TL;DR -->
+    <div class="alert alert-info">
+      <strong><span class="lang-en">Clinical summary (TL;DR for the treating team):</span><span class="lang-pt">Resumo clínico (TL;DR para a equipe):</span></strong>
+      <ul class="pgx-summary-list"><li><span class="lang-en">[headline gene–drug finding]</span><span class="lang-pt">[achado gene-medicamento]</span></li></ul>
+    </div>
+
+    <!-- current meds × gene bands -->
+    <table class="data-table mb-3">
+      <thead><tr>
+        <th><span class="lang-en">Drug</span><span class="lang-pt">Medicamento</span></th>
+        <th><span class="lang-en">Dose</span><span class="lang-pt">Dose</span></th>
+        <th><span class="lang-en">Genes</span><span class="lang-pt">Genes</span></th>
+        <th><span class="lang-en">Risk band</span><span class="lang-pt">Faixa de risco</span></th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="strong">[Drug]</td><td>[dose]</td><td class="mono">[genes]</td><td><span class="pill pill-ok"><span class="lang-en">Use as labelled</span><span class="lang-pt">Usar conforme bula</span></span></td></tr>
+      </tbody>
+    </table>
+
+    <!-- tabbed sub-modules -->
+    <div class="pgx-tabs" role="tablist">
+      <button class="pgx-tab active" data-target="ModuleA" role="tab">[Module A]</button>
+      <button class="pgx-tab" data-target="ModuleB" role="tab">[Module B]</button>
+    </div>
+    <div class="pgx-module" data-module="ModuleA">
+      <p class="pgx-summary"><span class="lang-en">[module overview]</span><span class="lang-pt">[visão geral]</span></p>
+      <div class="pgx-class">
+        <div class="pgx-class-name">[Drug class] <span class="pgx-class-pt">([classe PT])</span></div>
+        <div class="pgx-class-bands">
+          <div class="pgx-band pgx-band-ok"><span class="pgx-band-label"><span class="lang-en">Use as labelled</span><span class="lang-pt">Usar conforme bula</span></span>
+            <div class="pgx-drug-row"><span class="pgx-drug pgx-drug-ok">[Drug]</span></div></div>
+          <div class="pgx-band pgx-band-watch"><span class="pgx-band-label"><span class="lang-en">Use with attention</span><span class="lang-pt">Usar com atenção</span></span>
+            <div class="pgx-drug-row"><span class="pgx-drug pgx-drug-watch">[Drug]</span></div></div>
+        </div>
+      </div>
+      <h4 class="pgx-block-title"><span class="lang-en">Metabolism genes</span><span class="lang-pt">Genes de metabolismo</span></h4>
+      <div class="pgx-genes-grid">
+        <div class="pgx-gene">
+          <div class="pgx-gene-name">[Gene]</div>
+          <div class="pgx-gene-genotype">[*genotype]</div>
+          <div class="pgx-gene-pheno"><span class="lang-en">[phenotype]</span><span class="lang-pt">[fenótipo]</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBER CARD · PLACEMENT 5 — one per ACTIONABLE PGx finding.
+         [ADDITION] canonical amber form of the actionable finding (Joao's page
+         surfaces these as .alert.alert-watch; the canon renders them amber). -->
+    <div class="chart-card ai-comments">
+      <div class="chart-card-head">
+        <div class="chart-card-title"><span class="lang-en">[Actionable gene–drug finding]</span><span class="lang-pt">[Achado acionável gene-medicamento]</span></div>
+        <div class="chart-card-meta"><span class="ai-pill"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span></div>
+      </div>
+      <p class="ai-body"><span class="lang-en">[AI: what this gene result means for this patient's drug response, in plain language — possible, not definitive.]</span><span class="lang-pt">[IA: o que este resultado significa …]</span></p>
+      <p class="ai-footer"><span class="lang-en"><strong>Discuss with your clinician.</strong></span><span class="lang-pt"><strong>Converse com seu médico.</strong></span></p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     2. MENTAL HEALTH (pillar) — page: mental.html
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tpl-banner">Page · mental.html — 2. Mental Health</div>
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-eyebrow"><span class="lang-en">Section II · Mental health</span><span class="lang-pt">Seção II · Saúde mental</span></div>
+    <h1 class="page-title"><span class="lang-en">Mental Health</span><span class="lang-pt">Saúde mental</span></h1>
+    <p class="page-desc"><span class="lang-en">[Synthesis from screening instruments, medication records and personal writings — supports clinical conversation; not a formal diagnosis.]</span><span class="lang-pt">[Síntese de instrumentos de triagem …]</span></p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="pt-pending-notice">[PT-only banner shown when lang="pt" for blocks not yet translated.]</div>
+  <!-- PAGE-LEVEL AI DISCLAIMER (long form — exact wording) -->
+  <div class="ai-disclaimer">
+    <span class="lang-en"><strong><span class="ai-pill">AI inference</span></strong> &nbsp;marks any block where the content is synthesised by a large language model from the patient's own writings, biometrics or clinical record — not direct testimony or measurement. Treat these as a reading offered for clinical conversation, not as ground truth. Quotes, AUDIT scores, medication tables and timeline events carry no badge: they are raw data.</span>
+    <span class="lang-pt"><strong><span class="ai-pill">Inferência por IA</span></strong> &nbsp;marca qualquer bloco cujo conteúdo foi sintetizado por um modelo de linguagem a partir dos próprios escritos do paciente, biometria ou prontuário — não é testemunho direto nem medição. Trate como uma leitura oferecida para a conversa clínica, não como verdade absoluta. Citações, escores AUDIT, tabelas de medicação e eventos da linha do tempo não recebem o selo: são dado bruto.</span>
+  </div>
+</div>
+
+<!-- Archetype card opens the page; interpretive blocks carry the inverse AI pill -->
+<section class="report-section archetype-section" id="archetype">
+  <div class="container">
+    <div class="archetype-card">
+      <div class="archetype-eyebrow">
+        <span class="lang-en">Psychological archetype · Jungian read</span><span class="lang-pt">Arquétipo psicológico · leitura junguiana</span>
+        <span class="ai-pill ai-pill--inverse"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span>
+      </div>
+      <h2 class="archetype-name"><span class="lang-en">[Archetype]</span><span class="lang-pt">[Arquétipo]</span></h2>
+      <p class="archetype-frame"><span class="lang-en">[AI: framing paragraph.]</span><span class="lang-pt">[IA: parágrafo de enquadramento.]</span></p>
+    </div>
+  </div>
+</section>
+<!-- omit further mental sections (architecture / loops / AUDIT) when no data -->
+
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     3. SPIRITUAL HEALTH (pillar) — page: spiritual.html (uses .sp-* variants)
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="tpl-banner">Page · spiritual.html — 3. Spiritual Health</div>
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-eyebrow"><span class="lang-en">Section III · Spiritual health</span><span class="lang-pt">Seção III · Saúde espiritual</span></div>
+    <h1 class="page-title"><span class="lang-en">Spiritual Health</span><span class="lang-pt">Saúde espiritual</span></h1>
+    <p class="page-desc"><span class="lang-en">[Values, meaning, and orientation — synthesised for clinical conversation.]</span><span class="lang-pt">[Valores, sentido e orientação …]</span></p>
+  </div>
+</header>
+
+<section class="report-section">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">01 · Overview</span><span class="lang-pt">01 · Visão geral</span></div>
+    <h2 class="section-title"><span class="lang-en">[Spiritual section]</span><span class="lang-pt">[Seção espiritual]</span></h2>
+    <p class="section-desc"><span class="lang-en">[content — omit the whole section if the patient has no spiritual data]</span><span class="lang-pt">[conteúdo — omitir a seção se não houver dados]</span></p>
+  </div>
+</section>
+
+
+<!-- GLOBAL FRAME — FOOTER -->
+<footer class="doc-footer">
+  <div class="footer-brand"><img src="../assets/logo.svg" alt=""><span>Lumen Health · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span></div>
+  <div><span class="lang-en">Strictly confidential · For clinical communication only · Does not replace licensed medical advice.</span><span class="lang-pt">Estritamente confidencial · Apenas para comunicação clínica · Não substitui aconselhamento médico licenciado.</span></div>
+</footer>
+
+<!--
+  SCRIPTS (before </body> on real pages). Language toggle + persistence live in
+  app.js: reads ?lang= then localStorage['jc_lang'] (default "en"); sets <html lang>,
+  persists the choice, and updates aria-pressed on each .lang-btn. Chart libraries
+  (Chart.js 4.4.4 / boxplot plugin / Plotly 2.35.2) and export-pdf.js load only on
+  the pages that need them. Omitted here so the template renders standalone.
+-->
+</body>
+</html>

@@ -20,7 +20,6 @@ const PAGES = [
   ["Genetics",        "web/physical-genetics.html"],
   ["Mental",          "web/mental.html"],
   ["Spiritual",       "web/spiritual.html"],
-  ["AI Overview",     "web/assessment.html"],
 ];
 
 const ENTITIES = {

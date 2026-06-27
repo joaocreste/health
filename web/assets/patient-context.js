@@ -2785,7 +2785,6 @@
       'mental':            t('Mental',             'Mental'),
       'spiritual':         t('Spiritual',          'Espiritual'),
       'loops':             t('Loops',              'Loops'),
-      'assessment':        t('Assessment',         'Avaliação'),
     };
     var dataRenderers = {
       'physical':          renderPhysical,
@@ -2812,21 +2811,20 @@
      sections" CTA. Building triggers the donut overlay and fires one
      POST per section sequentially.                                    */
 
-  var DASHBOARD_SECTIONS = ['home', 'physical', 'mental', 'spiritual', 'assessment'];
+  var DASHBOARD_SECTIONS = ['home', 'physical', 'mental', 'spiritual'];
   var SECTION_LABEL = {
     home:       t('Home',       'Início'),
     physical:   t('Physical',   'Físico'),
     mental:     t('Mental',     'Mental'),
     spiritual:  t('Spiritual',  'Espiritual'),
-    assessment: t('Assessment', 'Avaliação'),
   };
   var SECTION_LABEL_PLAIN_EN = {
     home: 'Home', physical: 'Physical', mental: 'Mental',
-    spiritual: 'Spiritual', assessment: 'Assessment',
+    spiritual: 'Spiritual',
   };
   var SECTION_LABEL_PLAIN_PT = {
     home: 'Início', physical: 'Físico', mental: 'Mental',
-    spiritual: 'Espiritual', assessment: 'Avaliação',
+    spiritual: 'Espiritual',
   };
   // Which dashboard section to inject onto which page slug.
   var PAGE_TO_DASHBOARD = {
@@ -2837,7 +2835,6 @@
     'physical-genetics':'physical',
     mental:             'mental',
     spiritual:          'spiritual',
-    assessment:         'assessment',
   };
 
   function viewerClerkHeader() {
@@ -3312,19 +3309,6 @@
         + (work ? '<h3 class="ai-sub">' + t('Points to work on', 'Pontos a trabalhar') + '</h3>' + work : '')
         + (lev ? '<h3 class="ai-sub">' + t('Points to leverage', 'Pontos a favor') + '</h3>' + lev : '')
         + (links ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links : '');
-    }
-    if (section === 'assessment') {
-      var links2 = (sm.cross_domain_links || []).map(aiCrossCard).join('');
-      var allInline = (p.inline_insights || []).map(aiInlineCard).join('');
-      var body = aiOverview(sm.overview)
-        + (links2 ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links2 : '');
-      [['physical', 'Physical', 'Físico'], ['mental', 'Mental', 'Mental'], ['spiritual', 'Spiritual', 'Espiritual']].forEach(function (d) {
-        var pc = aiPillarCards(pages[d[0]]);
-        if (pc) body += '<h3 class="ai-sub ai-pillar-h">' + t(d[1], d[2]) + '</h3>' + aiOverview(pages[d[0]] && pages[d[0]].overview) + pc;
-      });
-      if (allInline) body += '<h3 class="ai-sub">' + t('Specific findings', 'Achados específicos') + '</h3>' + allInline;
-      if (!headline && !body) return '';
-      return aiHeader('AI health overview', 'Visão geral por IA', headline) + body;
     }
     if (section === 'physical' || section === 'mental' || section === 'spiritual') {
       var ov = aiOverview(pages[section] && pages[section].overview);

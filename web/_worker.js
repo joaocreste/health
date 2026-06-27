@@ -206,7 +206,6 @@ const PAGE_RULES = [
   { re: /^\/physical-vitals(\.html)?$/, anyOf: ["vitals"] },
   { re: /^\/physical-genetics(\.html)?$/, anyOf: ["genetics"] },
   { re: /^\/physical(\.html)?$/, anyOf: ["imaging", "labs", "vitals"] },
-  { re: /^\/assessment(\.html)?$/, requireAll: true },   // whole-record AI synthesis
   { re: /^\/(home(\.html)?|patients(\.html)?|upload(\.html)?)$/, anyAuth: true },
   { re: /^\/(admin|uploads-review)(\.html)?$/, adminOnly: true },
 ];
