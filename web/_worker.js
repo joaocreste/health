@@ -226,7 +226,7 @@ async function gateStaticRequest(request, env, url) {
 
   const isPage = !!pageRule;
   const deny = (authed) => isPage
-    ? Response.redirect(new URL(authed ? "/home" : "/index.html", url).toString(), 302)
+    ? Response.redirect(new URL(authed ? "/home" : "/login.html", url).toString(), 302)
     : jsonError(403, "forbidden");
 
   if (!env.DATABASE_URL) return isPage ? deny(false) : jsonError(500, "DATABASE_URL not configured.");

@@ -3,320 +3,609 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Health — Sign in</title>
-<meta name="description" content="Lumen Health — secure access to a personal health summary for clinical communication.">
+<title>Lumen Health — From data to insights</title>
+<meta name="description" content="Lumen Health unifies your labs, scans, wearables and genetics into one record, then reads the whole story and writes it back in plain language — in English and Portuguese.">
 <meta name="robots" content="index,follow">
+<meta property="og:title" content="Lumen Health — From data to insights">
+<meta property="og:description" content="From scattered data to a clinical picture. One record for your labs, scans, wearables and genetics — read and explained.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lumenhealth.io/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500;600;700;800&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css?v=55">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <style>
-  /* Login-only styles. Kept inline so the page is self-contained. */
-  body.login-page {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #0F2238;
-    color: #E6EEF6;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  /* ============================================================
+     Lumen Health — public landing. Self-contained marketing page.
+     Reuses the global .lang-en/.lang-pt mechanism (app.js) so the
+     visitor's language choice persists into the authenticated app.
+     ============================================================ */
+  :root {
+    --bg:        #0A1B2E;
+    --bg-2:      #0F2238;
+    --ink:       #EAF2FA;
+    --muted:     #9DB4CB;
+    --muted-dim: #6E8499;
+    --line:      rgba(255,255,255,0.10);
+    --panel:     rgba(255,255,255,0.045);
+    --panel-2:   rgba(255,255,255,0.07);
+    --steel:     #6BA3C7;
+    --cyan:      #5FC5D8;
+    --gold:      #C99A3B;
+    --gold-lit:  #F4B942;
+    --maxw:      1160px;
   }
-  /* Subtle texture matching the hero treatment used elsewhere */
-  body.login-page::before {
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html[lang="en"] .lang-pt { display: none !important; }
+  html[lang="pt"] .lang-en { display: none !important; }
+
+  body.landing {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Ambient backdrop: fine grid + drifting radial glows (matches login) */
+  body.landing::before {
     content: '';
     position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 56px 56px;
-    pointer-events: none;
-    z-index: 0;
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, #000 35%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 20%, #000 35%, transparent 80%);
   }
-  body.login-page::after {
+  body.landing::after {
     content: '';
-    position: fixed; inset: -20%;
-    background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.07), transparent 55%);
-    pointer-events: none;
-    z-index: 0;
+    position: fixed; inset: -30%;
+    background:
+      radial-gradient(circle at 75% 12%, rgba(201,154,59,0.16), transparent 45%),
+      radial-gradient(circle at 18% 30%, rgba(95,197,216,0.12), transparent 42%),
+      radial-gradient(circle at 50% 95%, rgba(107,163,199,0.10), transparent 55%);
+    pointer-events: none; z-index: 0;
+    animation: glowDrift 22s ease-in-out infinite alternate;
   }
-  .login-shell {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-  .login-brand {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-  .login-brand img {
-    width: 84px; height: 84px;
-    margin: 0 auto 1.25rem;
-    display: block;
-  }
-  .login-brand-name {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    font-size: 38px;
-    letter-spacing: 0.06em;
-    color: #FFFFFF;
-    margin-bottom: 0.6rem;
-  }
-  .login-brand-tagline {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.20em;
-    text-transform: uppercase;
-    color: #8AA8C0;
-  }
-  .login-card {
-    width: 100%;
-    max-width: 360px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 14px;
-    padding: 2rem;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  .login-title {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: #FFFFFF;
-    margin: 0 0 0.4rem;
-    letter-spacing: 0.01em;
-  }
-  .login-sub {
-    font-size: 14px;
-    color: #98AFC4;
-    margin: 0 0 1.5rem;
-    line-height: 1.5;
-  }
-  .login-field {
-    display: block;
-    margin-bottom: 1rem;
-  }
-  .login-field label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #8AA8C0;
-    margin-bottom: 0.4rem;
-  }
-  .login-field input {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 11px 14px;
-    color: #FFFFFF;
-    font-family: inherit;
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .login-field input:focus {
-    outline: none;
-    border-color: #6BA3C7;
-    box-shadow: 0 0 0 3px rgba(107, 163, 199, 0.22);
-  }
-  .login-button {
-    width: 100%;
-    background: #B8860B;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-family: 'Raleway', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.05s;
-  }
-  .login-button:hover { background: #F4B942; color: #0A1428; }
-  .login-button:active { transform: translateY(1px); }
-  .login-error {
-    display: none;
-    margin-top: 0.85rem;
-    color: #F0A0A0;
-    font-size: 14px;
-    background: rgba(192, 57, 43, 0.12);
-    border-left: 3px solid #C0392B;
-    padding: 8px 10px;
-    border-radius: 4px;
-  }
-  .login-error.visible { display: block; }
-  .login-foot {
-    margin-top: 1.25rem;
-    font-size: 11px;
-    color: #6B819A;
-    text-align: center;
-    line-height: 1.5;
-  }
-  .login-comingsoon {
-    margin-top: 1.5rem;
-    width: 100%;
-    max-width: 360px;
-    text-align: center;
-    background: rgba(184, 134, 11, 0.08);
-    border: 1px solid rgba(184, 134, 11, 0.30);
-    border-radius: 10px;
-    padding: 14px 18px;
-    box-sizing: border-box;
-  }
-  .login-comingsoon-tag {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.20em;
-    text-transform: uppercase;
-    color: #F4B942;
-    margin-bottom: 0.45rem;
-  }
-  .login-comingsoon-text {
-    font-size: 13px;
-    color: #98AFC4;
-    line-height: 1.55;
-    margin: 0;
-  }
-  .login-disclaimer {
-    margin-top: 2rem;
-    font-size: 11px;
-    color: #5B7088;
-    text-align: center;
-    max-width: 380px;
-    line-height: 1.6;
-    font-family: 'IBM Plex Mono', monospace;
-    letter-spacing: 0.04em;
+  @keyframes glowDrift {
+    from { transform: translate3d(-2%, -1%, 0) scale(1); }
+    to   { transform: translate3d(2%, 2%, 0) scale(1.06); }
   }
 
-  /* Top-right language switcher on the login page */
-  .login-topbar {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.5rem;
-    z-index: 2;
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.5rem; position: relative; z-index: 1; }
+
+  /* ── NAV ───────────────────────────────────────────────── */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem;
+    transition: background 0.3s, backdrop-filter 0.3s, border-color 0.3s, padding 0.3s;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.scrolled {
+    background: rgba(10,27,46,0.72);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom-color: var(--line);
+    padding-top: 0.8rem; padding-bottom: 0.8rem;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+  .nav-brand img { width: 34px; height: 34px; display: block; }
+  .nav-brand span {
+    font-family: 'Raleway', sans-serif; font-weight: 300; font-size: 21px;
+    letter-spacing: 0.05em; color: #fff;
+  }
+  .nav-brand span b { font-weight: 600; }
+  .nav-right { display: flex; align-items: center; gap: 1.1rem; }
+  .nav-links { display: flex; gap: 1.6rem; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 13.5px;
+    letter-spacing: 0.02em; transition: color 0.18s;
+  }
+  .nav-links a:hover { color: #fff; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: 'Raleway', sans-serif; font-weight: 600;
+    font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
+    text-decoration: none; cursor: pointer; border: none;
+    border-radius: 9px; padding: 0.7rem 1.2rem;
+    transition: transform 0.08s, box-shadow 0.2s, background 0.2s, color 0.2s;
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold-lit), var(--gold));
+    color: #14233A; box-shadow: 0 6px 22px -8px rgba(244,185,66,0.6);
+  }
+  .btn-gold:hover { box-shadow: 0 10px 30px -8px rgba(244,185,66,0.75); transform: translateY(-1px); }
+  .btn-gold:active { transform: translateY(0); }
+  .btn-ghost {
+    background: var(--panel); color: var(--ink); border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { background: var(--panel-2); border-color: rgba(255,255,255,0.22); }
+  .btn-lg { padding: 0.9rem 1.7rem; font-size: 14px; border-radius: 11px; }
+
+  /* Language switch tucked into the nav (styled by global styles.css) */
+  .nav .lang-switch { gap: 4px; }
+
+  /* ── HERO ──────────────────────────────────────────────── */
+  .hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 1.5rem 5rem;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;
+    letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold-lit);
+    display: inline-flex; align-items: center; gap: 0.6rem;
+  }
+  .eyebrow::before, .eyebrow.center::after {
+    content: ''; width: 26px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-lit));
+  }
+  .eyebrow.center::after { background: linear-gradient(90deg, var(--gold-lit), transparent); }
+
+  .hero h1 {
+    font-family: 'Raleway', sans-serif; font-weight: 200;
+    font-size: clamp(2.6rem, 6.4vw, 5.2rem); line-height: 1.04;
+    letter-spacing: -0.015em; margin: 1.6rem 0 0; color: #fff;
+    max-width: 16ch;
+  }
+  .hero h1 .accent {
+    font-weight: 600;
+    background: linear-gradient(110deg, var(--gold-lit) 10%, #FFE3A6 50%, var(--cyan) 115%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p.lede {
+    margin: 1.6rem auto 0; max-width: 60ch;
+    font-size: clamp(1.02rem, 1.7vw, 1.28rem); color: var(--muted); font-weight: 300;
+  }
+  .hero-cta { margin-top: 2.4rem; display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; }
+
+  /* Live ECG trace behind the hero */
+  .ecg {
+    position: absolute; left: 50%; bottom: 11%; transform: translateX(-50%);
+    width: 150%; max-width: 1500px; height: 220px;
+    opacity: 0.9; pointer-events: none; z-index: 0;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  .ecg .base { stroke: rgba(107,163,199,0.18); }
+  .ecg .pulse {
+    stroke: var(--gold-lit);
+    stroke-dasharray: 130 1870;
+    filter: drop-shadow(0 0 6px rgba(244,185,66,0.85));
+    animation: ecgRun 5s linear infinite;
+  }
+  @keyframes ecgRun { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+
+  /* Drifting source chips */
+  .chips { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .chip {
+    position: absolute; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.08em; color: var(--muted);
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 13px; backdrop-filter: blur(4px);
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    animation: floaty 9s ease-in-out infinite;
+  }
+  .chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .chip.g i { background: var(--gold-lit); box-shadow: 0 0 8px var(--gold-lit); }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  .chip:nth-child(1) { top: 20%; left: 9%;  animation-delay: 0s;   }
+  .chip:nth-child(2) { top: 31%; right: 11%; animation-delay: 1.2s; }
+  .chip:nth-child(3) { top: 58%; left: 13%;  animation-delay: 2.1s; }
+  .chip:nth-child(4) { top: 67%; right: 14%; animation-delay: 0.6s; }
+  .chip:nth-child(5) { top: 44%; left: 5%;   animation-delay: 1.8s; }
+  .chip:nth-child(6) { top: 15%; right: 23%; animation-delay: 2.6s; }
+  @media (max-width: 820px) { .chips { display: none; } }
+
+  .scroll-cue {
+    position: absolute; bottom: 1.8rem; left: 50%; transform: translateX(-50%);
+    color: var(--muted-dim); font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.22em; text-transform: uppercase; display: flex; flex-direction: column;
+    align-items: center; gap: 0.5rem; z-index: 1;
+  }
+  .scroll-cue .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold-lit);
+    animation: cueDrop 1.8s ease-in-out infinite; }
+  @keyframes cueDrop { 0%,100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(8px); opacity: 1; } }
+
+  /* ── SECTIONS ──────────────────────────────────────────── */
+  section.band { padding: 6.5rem 0; position: relative; z-index: 1; }
+  .section-head { max-width: 56ch; }
+  .section-head.center { margin: 0 auto; text-align: center; }
+  .section-head h2 {
+    font-family: 'Raleway', sans-serif; font-weight: 300;
+    font-size: clamp(1.9rem, 3.8vw, 3rem); line-height: 1.1; letter-spacing: -0.01em;
+    color: #fff; margin: 1rem 0 0;
+  }
+  .section-head p { color: var(--muted); font-size: 1.08rem; margin: 1.1rem 0 0; }
+
+  /* Reveal on scroll */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.is-in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .ecg .pulse, body.landing::after, .chip, .scroll-cue .dot { animation: none; }
   }
 
-  /* Override the topnav switcher styles' default colors slightly for this page */
-  .login-topbar .lang-btn { border-color: rgba(255, 255, 255, 0.20); }
-  .login-topbar .lang-btn[aria-pressed="true"] {
-    border-color: #FFFFFF;
-    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.30);
+  /* Problem — scattered source cards */
+  .scatter { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 0.9rem; margin-top: 2.8rem; }
+  .scatter .src {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 13px;
+    padding: 1.2rem 1.1rem; transition: transform 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .scatter .src:hover { transform: translateY(-4px); border-color: rgba(107,163,199,0.4); background: var(--panel-2); }
+  .scatter .src .ico { color: var(--steel); margin-bottom: 0.7rem; display: block; }
+  .scatter .src .t { color: #fff; font-weight: 500; font-size: 0.97rem; }
+  .scatter .src .s { color: var(--muted-dim); font-size: 0.82rem; margin-top: 0.2rem; }
+
+  /* How it works — steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 3rem; }
+  .step {
+    position: relative; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 2rem 1.6rem; overflow: hidden;
+  }
+  .step::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold-lit), transparent);
+  }
+  .step .num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em;
+    color: var(--gold-lit); margin-bottom: 1rem;
+  }
+  .step h3 { font-family: 'Raleway', sans-serif; font-weight: 600; font-size: 1.25rem; color: #fff; margin: 0 0 0.6rem; }
+  .step p { color: var(--muted); font-size: 0.96rem; margin: 0; }
+  .step .arrow {
+    position: absolute; top: 50%; right: -0.85rem; transform: translateY(-50%);
+    color: var(--gold); z-index: 2;
+  }
+  .step:last-child .arrow { display: none; }
+
+  /* Feature grid */
+  .features { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 3rem; }
+  .feat {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.5rem 1.3rem; transition: transform 0.22s, border-color 0.22s, background 0.22s;
+  }
+  .feat:hover { transform: translateY(-4px); border-color: rgba(244,185,66,0.35); background: var(--panel-2); }
+  .feat .ico {
+    width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+    background: rgba(95,197,216,0.10); color: var(--cyan); margin-bottom: 1rem;
+  }
+  .feat h4 { font-family: 'Raleway', sans-serif; font-weight: 600; font-size: 1.04rem; color: #fff; margin: 0 0 0.35rem; }
+  .feat p { color: var(--muted); font-size: 0.88rem; margin: 0; line-height: 1.5; }
+
+  /* AI difference — split with mock insight card */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; }
+  .insight-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    border: 1px solid var(--line); border-radius: 18px; padding: 1.6rem;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,0.6); position: relative;
+  }
+  .insight-card .ai-pill {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold-lit);
+    background: rgba(244,185,66,0.10); border: 1px solid rgba(244,185,66,0.3);
+    border-radius: 999px; padding: 4px 10px; margin-bottom: 1rem;
+  }
+  .insight-card .ai-pill::before { content: '✦'; font-size: 11px; }
+  .insight-card h4 { font-family: 'Raleway', sans-serif; font-weight: 600; color: #fff; margin: 0 0 0.6rem; font-size: 1.1rem; }
+  .insight-card p { color: var(--muted); font-size: 0.92rem; margin: 0 0 1rem; }
+  .insight-card .links { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .insight-card .links a {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
+    color: var(--steel); text-decoration: none; background: rgba(107,163,199,0.10);
+    border: 1px solid rgba(107,163,199,0.25); border-radius: 7px; padding: 4px 9px;
+    transition: background 0.18s, color 0.18s;
+  }
+  .insight-card .links a:hover { background: rgba(107,163,199,0.2); color: #fff; }
+  .insight-card .spark { display: flex; align-items: flex-end; gap: 4px; height: 46px; margin: 0.4rem 0 1.1rem; }
+  .insight-card .spark span { flex: 1; background: linear-gradient(180deg, var(--cyan), rgba(95,197,216,0.15)); border-radius: 3px 3px 0 0; }
+
+  /* Privacy */
+  .privacy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 3rem; }
+  .priv {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 1.6rem 1.4rem;
+  }
+  .priv .ico { color: var(--gold-lit); margin-bottom: 0.9rem; }
+  .priv h4 { font-family: 'Raleway', sans-serif; font-weight: 600; color: #fff; font-size: 1.02rem; margin: 0 0 0.4rem; }
+  .priv p { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
+  /* CTA band */
+  .cta {
+    text-align: center; border-radius: 24px; padding: 4.5rem 2rem;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(244,185,66,0.14), transparent 60%),
+      linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid var(--line); position: relative; overflow: hidden;
+  }
+  .cta h2 { font-family: 'Raleway', sans-serif; font-weight: 300; font-size: clamp(1.8rem, 4vw, 2.8rem); color: #fff; margin: 1rem 0 0; }
+  .cta p { color: var(--muted); max-width: 52ch; margin: 1.1rem auto 0; font-size: 1.05rem; }
+  .cta .hero-cta { justify-content: center; margin-top: 2.2rem; }
+
+  /* Footer */
+  footer.foot {
+    border-top: 1px solid var(--line); margin-top: 5rem;
+    padding: 3rem 0 4rem; position: relative; z-index: 1;
+  }
+  .foot-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+  .foot-brand { display: flex; align-items: center; gap: 0.6rem; }
+  .foot-brand img { width: 30px; height: 30px; }
+  .foot-brand b { font-family: 'Raleway', sans-serif; font-weight: 500; color: #fff; letter-spacing: 0.04em; }
+  .foot small { color: var(--muted-dim); font-size: 0.8rem; }
+  .foot-note {
+    margin-top: 1.6rem; color: var(--muted-dim); font-size: 11.5px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.03em; max-width: 70ch; line-height: 1.6;
+  }
+
+  /* Responsive */
+  @media (max-width: 920px) {
+    .steps { grid-template-columns: 1fr; }
+    .step .arrow { display: none; }
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .split { grid-template-columns: 1fr; gap: 2.2rem; }
+    .privacy-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 480px) {
+    .features { grid-template-columns: 1fr; }
+    section.band { padding: 4.5rem 0; }
   }
 </style>
 </head>
-<body class="login-page">
+<body class="landing">
 
-<div class="login-topbar">
-  <div class="lang-switch" role="group" aria-label="Language">
-    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
-    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
-  </div>
-</div>
-
-<main class="login-shell">
-
-  <div class="login-brand">
-    <img src="assets/logo-on-dark.svg" alt="Lumen Health">
-    <div class="login-brand-name">Lumen Health</div>
-    <div class="login-brand-tagline"><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></div>
-  </div>
-
-  <form class="login-card" id="login-form" autocomplete="on">
-    <h1 class="login-title"><span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span></h1>
-    <p class="login-sub">
-      <span class="lang-en">Restricted access — clinical communication only.</span>
-      <span class="lang-pt">Acesso restrito — apenas para comunicação clínica.</span>
-    </p>
-
-    <label class="login-field">
-      <span><span class="lang-en">Username</span><span class="lang-pt">Usuário</span></span>
-      <input type="text" id="username" name="username" autocomplete="username" required>
-    </label>
-
-    <label class="login-field">
-      <span><span class="lang-en">Password</span><span class="lang-pt">Senha</span></span>
-      <input type="password" id="password" name="password" autocomplete="current-password" required>
-    </label>
-
-    <button type="submit" class="login-button">
-      <span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span>
-    </button>
-
-    <div class="login-error" id="login-error" role="alert">
-      <span class="lang-en">Invalid username or password.</span>
-      <span class="lang-pt">Usuário ou senha inválidos.</span>
+<!-- ── NAV ─────────────────────────────────────────────── -->
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="/" aria-label="Lumen Health">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>Lumen<b>Health</b></span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="#how"><span class="lang-en">How it works</span><span class="lang-pt">Como funciona</span></a>
+      <a href="#features"><span class="lang-en">What it does</span><span class="lang-pt">O que faz</span></a>
+      <a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-pt">Privacidade</span></a>
     </div>
-  </form>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+      <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    </div>
+    <a class="btn btn-ghost" id="nav-signin" href="login.html">
+      <span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span>
+    </a>
+  </div>
+</nav>
 
-  <div class="login-comingsoon">
-    <span class="login-comingsoon-tag"><span class="lang-en">Coming soon</span><span class="lang-pt">Em breve</span></span>
-    <p class="login-comingsoon-text">
-      <span class="lang-en">Lumen Health is still in private development and not yet open to new patients. Access is currently limited to invited accounts.</span>
-      <span class="lang-pt">A Lumen Health ainda está em desenvolvimento privado e não está aberta a novos pacientes. O acesso é limitado a contas convidadas.</span>
-    </p>
+<!-- ── HERO ────────────────────────────────────────────── -->
+<header class="hero">
+  <svg class="ecg" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
+    <path class="base" fill="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"
+      d="M 0 100 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90"/>
+    <path class="pulse" pathLength="2000" fill="none" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"
+      d="M 0 100 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90 h 60 l 8 -6 l 8 6 h 14 l 6 8 l 6 -60 l 6 64 l 6 -12 h 16 l 10 -10 l 10 10 h 90"/>
+  </svg>
+
+  <div class="chips" aria-hidden="true">
+    <div class="chip"><i></i>Blood panel · 2019–2026</div>
+    <div class="chip g"><i></i>MRI · lumbar</div>
+    <div class="chip"><i></i>Oura · sleep & HRV</div>
+    <div class="chip g"><i></i>ECG · 12-lead</div>
+    <div class="chip"><i></i>Genetics</div>
+    <div class="chip g"><i></i>Apple Watch</div>
   </div>
 
-  <p class="login-disclaimer">
-    <span class="lang-en">Strictly confidential. Demonstration credentials only — replace with provider-grade authentication before any external publication.</span>
-    <span class="lang-pt">Estritamente confidencial. Credenciais apenas para demonstração — substituir por autenticação de nível corporativo antes de qualquer publicação externa.</span>
-  </p>
+  <div class="wrap">
+    <span class="eyebrow center"><span class="lang-en">Personal health intelligence</span><span class="lang-pt">Inteligência de saúde pessoal</span></span>
+    <h1>
+      <span class="lang-en">From scattered data to a <span class="accent">clinical picture</span>.</span>
+      <span class="lang-pt">Dos dados dispersos a um <span class="accent">quadro clínico</span>.</span>
+    </h1>
+    <p class="lede">
+      <span class="lang-en">Lumen Health brings your labs, scans, wearables and genetics into one record — then reads the whole story and writes it back in plain language, in English and Portuguese.</span>
+      <span class="lang-pt">A Lumen Health reúne seus exames, imagens, wearables e genética em um único registro — depois lê toda a história e a reescreve em linguagem clara, em inglês e português.</span>
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-gold btn-lg" href="#cta">
+        <span class="lang-en">Request access</span><span class="lang-pt">Solicitar acesso</span>
+      </a>
+      <a class="btn btn-ghost btn-lg" href="#how">
+        <span class="lang-en">See how it works</span><span class="lang-pt">Como funciona</span>
+      </a>
+    </div>
+  </div>
 
-</main>
+  <div class="scroll-cue">
+    <span class="lang-en">Scroll</span><span class="lang-pt">Role</span>
+    <span class="dot"></span>
+  </div>
+</header>
 
+<!-- ── PROBLEM ─────────────────────────────────────────── -->
+<section class="band" id="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="lang-en">The problem</span><span class="lang-pt">O problema</span></span>
+      <h2><span class="lang-en">Your health lives in a dozen places.</span><span class="lang-pt">Sua saúde vive em uma dezena de lugares.</span></h2>
+      <p>
+        <span class="lang-en">A PDF from the lab. A disc from the imaging clinic. Years of watch data. A genetics report you opened once. None of it talks to each other — and neither do the doctors reading it.</span>
+        <span class="lang-pt">Um PDF do laboratório. Um disco da clínica de imagem. Anos de dados do relógio. Um relatório genético que você abriu uma vez. Nada disso se comunica — e nem os médicos que leem.</span>
+      </p>
+    </div>
+    <div class="scatter reveal">
+      <div class="src"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg><div class="t"><span class="lang-en">Lab PDFs</span><span class="lang-pt">PDFs de exames</span></div><div class="s"><span class="lang-en">in your email</span><span class="lang-pt">no seu e-mail</span></div></div>
+      <div class="src"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg><div class="t"><span class="lang-en">Imaging discs</span><span class="lang-pt">Discos de imagem</span></div><div class="s"><span class="lang-en">in a drawer</span><span class="lang-pt">numa gaveta</span></div></div>
+      <div class="src"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="3"/><path d="M9 7h6"/></svg><div class="t"><span class="lang-en">Wearable apps</span><span class="lang-pt">Apps de wearables</span></div><div class="s"><span class="lang-en">siloed by brand</span><span class="lang-pt">isolados por marca</span></div></div>
+      <div class="src"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 3v6a3 3 0 0 0 6 0V3M9 21v-6a3 3 0 0 1 6 0v6M8 8h8M8 16h8"/></svg><div class="t"><span class="lang-en">Genetics report</span><span class="lang-pt">Relatório genético</span></div><div class="s"><span class="lang-en">opened once</span><span class="lang-pt">aberto uma vez</span></div></div>
+      <div class="src"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12h4l2 5 4-13 2 8h6"/></svg><div class="t"><span class="lang-en">Clinic notes</span><span class="lang-pt">Notas clínicas</span></div><div class="s"><span class="lang-en">scattered</span><span class="lang-pt">espalhadas</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ────────────────────────────────────── -->
+<section class="band" id="how">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="eyebrow center"><span class="lang-en">How it works</span><span class="lang-pt">Como funciona</span></span>
+      <h2><span class="lang-en">Three steps to one clear record.</span><span class="lang-pt">Três passos para um registro claro.</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="num">01</div>
+        <h3><span class="lang-en">Bring everything in</span><span class="lang-pt">Traga tudo para dentro</span></h3>
+        <p><span class="lang-en">Upload labs, imaging, wearable exports, genetics and clinical notes. Every file is structured into one longitudinal record.</span><span class="lang-pt">Envie exames, imagens, dados de wearables, genética e notas clínicas. Cada arquivo é estruturado em um único registro longitudinal.</span></p>
+        <svg class="arrow" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="step reveal">
+        <div class="num">02</div>
+        <h3><span class="lang-en">The record reads itself</span><span class="lang-pt">O registro se lê</span></h3>
+        <p><span class="lang-en">A clinical-grade model reviews your entire history at once — connecting a lab trend to a scan finding to a symptom — and writes insights, not just numbers.</span><span class="lang-pt">Um modelo de nível clínico revisa todo o seu histórico de uma vez — conectando uma tendência de exame a um achado de imagem a um sintoma — e escreve insights, não apenas números.</span></p>
+        <svg class="arrow" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div class="step reveal">
+        <div class="num">03</div>
+        <h3><span class="lang-en">Walk in ready</span><span class="lang-pt">Chegue preparado</span></h3>
+        <p><span class="lang-en">Share a clear summary with any doctor, export a clinical PDF, and switch between English and Portuguese in one click.</span><span class="lang-pt">Compartilhe um resumo claro com qualquer médico, exporte um PDF clínico e alterne entre inglês e português com um clique.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ────────────────────────────────────────── -->
+<section class="band" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="lang-en">What it does</span><span class="lang-pt">O que faz</span></span>
+      <h2><span class="lang-en">Every kind of health data, in one place.</span><span class="lang-pt">Todo tipo de dado de saúde, em um só lugar.</span></h2>
+    </div>
+    <div class="features">
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v5l-4 7a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 15l-4-7V3M9 3h6M7.5 14h9"/></svg></div><h4><span class="lang-en">Bloodwork &amp; labs</span><span class="lang-pt">Exames de sangue</span></h4><p><span class="lang-en">Years of results, trended and explained.</span><span class="lang-pt">Anos de resultados, em tendência e explicados.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div><h4><span class="lang-en">Imaging</span><span class="lang-pt">Imagem</span></h4><p><span class="lang-en">MRI, CT, ECG and ultrasound, viewable in-browser.</span><span class="lang-pt">Ressonância, tomografia, ECG e ultrassom, no navegador.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7" y="2" width="10" height="20" rx="3"/><path d="M10 6h4"/></svg></div><h4><span class="lang-en">Wearables</span><span class="lang-pt">Wearables</span></h4><p><span class="lang-en">Oura and Apple Watch — sleep, HRV, activity.</span><span class="lang-pt">Oura e Apple Watch — sono, VFC, atividade.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v5a3 3 0 0 0 6 0V3M9 21v-5a3 3 0 0 1 6 0v5M8 8h8M8 16h8"/></svg></div><h4><span class="lang-en">Genetics</span><span class="lang-pt">Genética</span></h4><p><span class="lang-en">Your report, made readable.</span><span class="lang-pt">Seu relatório, tornado legível.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg></div><h4><span class="lang-en">Mental health</span><span class="lang-pt">Saúde mental</span></h4><p><span class="lang-en">Therapy and assessments, held with care.</span><span class="lang-pt">Terapia e avaliações, tratadas com cuidado.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l2 5 5 .5-3.8 3.3 1.2 5L12 19l-4.6 2.8 1.2-5L4.8 8.5 10 8z"/></svg></div><h4><span class="lang-en">AI insights</span><span class="lang-pt">Insights de IA</span></h4><p><span class="lang-en">Whole-record reasoning, written for you.</span><span class="lang-pt">Raciocínio sobre todo o registro, escrito para você.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18A14 14 0 0 1 12 3z"/></svg></div><h4><span class="lang-en">Bilingual</span><span class="lang-pt">Bilíngue</span></h4><p><span class="lang-en">Every page, English and Portuguese.</span><span class="lang-pt">Cada página, em inglês e português.</span></p></div>
+      <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15h6M9 18h4"/></svg></div><h4><span class="lang-en">Clinical PDF</span><span class="lang-pt">PDF clínico</span></h4><p><span class="lang-en">A doctor-ready report, on demand.</span><span class="lang-pt">Um relatório pronto para o médico, sob demanda.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── THE DIFFERENCE ──────────────────────────────────── -->
+<section class="band" id="difference">
+  <div class="wrap split">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="lang-en">The difference</span><span class="lang-pt">O diferencial</span></span>
+      <h2><span class="lang-en">Not a dashboard. A reading.</span><span class="lang-pt">Não é um painel. É uma leitura.</span></h2>
+      <p>
+        <span class="lang-en">Most health apps hand you charts and walk away. Lumen reads your entire record — every result, scan and trend — and writes back what matters, what changed, and what to ask your doctor. Each insight links to the data behind it.</span>
+        <span class="lang-pt">A maioria dos apps entrega gráficos e vai embora. A Lumen lê todo o seu registro — cada resultado, imagem e tendência — e devolve o que importa, o que mudou e o que perguntar ao seu médico. Cada insight aponta para o dado por trás dele.</span>
+      </p>
+    </div>
+    <div class="insight-card reveal" aria-hidden="true">
+      <span class="ai-pill">AI insight</span>
+      <h4><span class="lang-en">Lipid trend worth a conversation</span><span class="lang-pt">Tendência lipídica que merece conversa</span></h4>
+      <div class="spark"><span style="height:40%"></span><span style="height:55%"></span><span style="height:48%"></span><span style="height:68%"></span><span style="height:74%"></span><span style="height:90%"></span></div>
+      <p><span class="lang-en">LDL has climbed steadily across your last four panels while HRV softened in the same window. Worth raising at your next appointment.</span><span class="lang-pt">O LDL subiu de forma constante nos seus últimos quatro exames, enquanto a VFC caiu no mesmo período. Vale levantar na próxima consulta.</span></p>
+      <div class="links">
+        <a href="#"><span class="lang-en">Lipid panel ·4</span><span class="lang-pt">Perfil lipídico ·4</span></a>
+        <a href="#">HRV · Oura</a>
+        <a href="#"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRIVACY ─────────────────────────────────────────── -->
+<section class="band" id="privacy">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="lang-en">Privacy by design</span><span class="lang-pt">Privacidade por design</span></span>
+      <h2><span class="lang-en">Your record. Your boundaries.</span><span class="lang-pt">Seu registro. Seus limites.</span></h2>
+    </div>
+    <div class="privacy-grid">
+      <div class="priv reveal"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><h4><span class="lang-en">EU data residency</span><span class="lang-pt">Dados na União Europeia</span></h4><p><span class="lang-en">Stored in Frankfurt, encrypted in transit and at rest.</span><span class="lang-pt">Armazenados em Frankfurt, criptografados em trânsito e em repouso.</span></p></div>
+      <div class="priv reveal"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><h4><span class="lang-en">Scoped sharing</span><span class="lang-pt">Compartilhamento por escopo</span></h4><p><span class="lang-en">Grant a doctor access to exactly one section — and revoke it anytime.</span><span class="lang-pt">Dê a um médico acesso a exatamente uma seção — e revogue quando quiser.</span></p></div>
+      <div class="priv reveal"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V6z"/></svg><h4><span class="lang-en">Built to align with HIPAA, LGPD &amp; GDPR</span><span class="lang-pt">Alinhado a HIPAA, LGPD e GDPR</span></h4><p><span class="lang-en">Designed around the standards that govern health data.</span><span class="lang-pt">Construído em torno dos padrões que regem dados de saúde.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ─────────────────────────────────────────────── -->
+<section class="band" id="cta">
+  <div class="wrap">
+    <div class="cta reveal">
+      <span class="eyebrow center"><span class="lang-en">By invitation</span><span class="lang-pt">Por convite</span></span>
+      <h2><span class="lang-en">Lumen Health is in private development.</span><span class="lang-pt">A Lumen Health está em desenvolvimento privado.</span></h2>
+      <p><span class="lang-en">We're working with a small group of patients before opening more broadly. Have an invitation? Sign in below.</span><span class="lang-pt">Estamos trabalhando com um pequeno grupo de pacientes antes de abrir mais amplamente. Tem um convite? Entre abaixo.</span></p>
+      <div class="hero-cta">
+        <a class="btn btn-gold btn-lg" href="login.html">
+          <span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────────────── -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="foot-brand">
+        <img src="assets/logo-on-dark.svg" alt="">
+        <b>Lumen Health</b>
+        <small>· <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></small>
+      </div>
+      <small>© 2026 Lumen Health</small>
+    </div>
+    <p class="foot-note">
+      <span class="lang-en">Strictly confidential — private demonstration. Lumen Health is not a medical device and does not provide diagnosis or treatment; it organizes your records to support communication with your own clinicians.</span>
+      <span class="lang-pt">Estritamente confidencial — demonstração privada. A Lumen Health não é um dispositivo médico e não fornece diagnóstico ou tratamento; ela organiza seus registros para apoiar a comunicação com seus próprios médicos.</span>
+    </p>
+  </div>
+</footer>
+
+<!-- Public landing: opt out of the client-side auth gate; we only want
+     app.js's bilingual toggle here. -->
+<script>window.JC_PUBLIC = true;</script>
 <script src="assets/app.js?v=34"></script>
 <script>
   (function () {
     'use strict';
-    // If we're already authenticated, jump straight to the picker.
+    // Solidify the nav once the hero scrolls away.
+    var nav = document.getElementById('nav');
+    var onScroll = function () { nav.classList.toggle('scrolled', window.scrollY > 40); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // If the visitor already has a session, send them to their dashboard
+    // instead of the login form.
     if (sessionStorage.getItem('jc_authed') === 'true') {
-      location.replace('patients.html');
-      return;
+      var btn = document.getElementById('nav-signin');
+      if (btn) {
+        btn.href = 'home';
+        btn.querySelector('.lang-en').textContent = 'My dashboard';
+        btn.querySelector('.lang-pt').textContent = 'Meu painel';
+      }
     }
-    // Credentials live in the DB (users.demo_username / demo_password);
-    // POST /api/login verifies them. Replaced by Clerk + Google SSO later.
-    var form = document.getElementById('login-form');
-    var err = document.getElementById('login-error');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var u = document.getElementById('username').value.trim();
-      var p = document.getElementById('password').value;
-      err.classList.remove('visible');
-      fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p }),
-      })
-        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
-        .then(function (res) {
-          if (!res.ok || !res.data || !res.data.ok) {
-            err.classList.add('visible');
-            return;
-          }
-          sessionStorage.setItem('jc_authed', 'true');
-          sessionStorage.setItem('jc_viewer_clerk', res.data.clerk_user_id);
-          sessionStorage.setItem('jc_viewer_username', res.data.username || u);
-          sessionStorage.setItem('jc_viewer_name', res.data.full_name || '');
-          sessionStorage.setItem('jc_viewer_role', res.data.role || '');
-          // Honour the account's preferred language as the UI default.
-          if (res.data.locale === 'en' || res.data.locale === 'pt') {
-            localStorage.setItem('jc_lang', res.data.locale);
-          }
-          sessionStorage.removeItem('jc_current_patient');
-          location.href = 'patients.html';
-        })
-        .catch(function () { err.classList.add('visible'); });
+
+    // Reveal-on-scroll.
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach(function (el, i) {
+      el.style.transitionDelay = (Math.min(i % 4, 3) * 80) + 'ms';
+      io.observe(el);
     });
   })();
 </script>

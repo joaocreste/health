@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Health — Sign in</title>
+<meta name="description" content="Lumen Health — secure access to a personal health summary for clinical communication.">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=55">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<style>
+  /* Login-only styles. Kept inline so the page is self-contained. */
+  body.login-page {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0F2238;
+    color: #E6EEF6;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  /* Subtle texture matching the hero treatment used elsewhere */
+  body.login-page::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body.login-page::after {
+    content: '';
+    position: fixed; inset: -20%;
+    background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.07), transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .login-shell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .login-brand {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .login-brand img {
+    width: 84px; height: 84px;
+    margin: 0 auto 1.25rem;
+    display: block;
+  }
+  .login-brand-name {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 38px;
+    letter-spacing: 0.06em;
+    color: #FFFFFF;
+    margin-bottom: 0.6rem;
+  }
+  .login-brand-tagline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: #8AA8C0;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 360px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    padding: 2rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .login-title {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #FFFFFF;
+    margin: 0 0 0.4rem;
+    letter-spacing: 0.01em;
+  }
+  .login-sub {
+    font-size: 14px;
+    color: #98AFC4;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+  }
+  .login-field {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  .login-field label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8AA8C0;
+    margin-bottom: 0.4rem;
+  }
+  .login-field input {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .login-field input:focus {
+    outline: none;
+    border-color: #6BA3C7;
+    box-shadow: 0 0 0 3px rgba(107, 163, 199, 0.22);
+  }
+  .login-button {
+    width: 100%;
+    background: #B8860B;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .login-button:hover { background: #F4B942; color: #0A1428; }
+  .login-button:active { transform: translateY(1px); }
+  .login-error {
+    display: none;
+    margin-top: 0.85rem;
+    color: #F0A0A0;
+    font-size: 14px;
+    background: rgba(192, 57, 43, 0.12);
+    border-left: 3px solid #C0392B;
+    padding: 8px 10px;
+    border-radius: 4px;
+  }
+  .login-error.visible { display: block; }
+  .login-foot {
+    margin-top: 1.25rem;
+    font-size: 11px;
+    color: #6B819A;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .login-comingsoon {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    background: rgba(184, 134, 11, 0.08);
+    border: 1px solid rgba(184, 134, 11, 0.30);
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-sizing: border-box;
+  }
+  .login-comingsoon-tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: #F4B942;
+    margin-bottom: 0.45rem;
+  }
+  .login-comingsoon-text {
+    font-size: 13px;
+    color: #98AFC4;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .login-disclaimer {
+    margin-top: 2rem;
+    font-size: 11px;
+    color: #5B7088;
+    text-align: center;
+    max-width: 380px;
+    line-height: 1.6;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  /* Top-right language switcher on the login page */
+  .login-topbar {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    z-index: 2;
+  }
+
+  /* Override the topnav switcher styles' default colors slightly for this page */
+  .login-topbar .lang-btn { border-color: rgba(255, 255, 255, 0.20); }
+  .login-topbar .lang-btn[aria-pressed="true"] {
+    border-color: #FFFFFF;
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.30);
+  }
+</style>
+</head>
+<body class="login-page">
+
+<div class="login-topbar">
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+  </div>
+</div>
+
+<main class="login-shell">
+
+  <div class="login-brand">
+    <img src="assets/logo-on-dark.svg" alt="Lumen Health">
+    <div class="login-brand-name">Lumen Health</div>
+    <div class="login-brand-tagline"><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></div>
+  </div>
+
+  <form class="login-card" id="login-form" autocomplete="on">
+    <h1 class="login-title"><span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span></h1>
+    <p class="login-sub">
+      <span class="lang-en">Restricted access — clinical communication only.</span>
+      <span class="lang-pt">Acesso restrito — apenas para comunicação clínica.</span>
+    </p>
+
+    <label class="login-field">
+      <span><span class="lang-en">Username</span><span class="lang-pt">Usuário</span></span>
+      <input type="text" id="username" name="username" autocomplete="username" required>
+    </label>
+
+    <label class="login-field">
+      <span><span class="lang-en">Password</span><span class="lang-pt">Senha</span></span>
+      <input type="password" id="password" name="password" autocomplete="current-password" required>
+    </label>
+
+    <button type="submit" class="login-button">
+      <span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span>
+    </button>
+
+    <div class="login-error" id="login-error" role="alert">
+      <span class="lang-en">Invalid username or password.</span>
+      <span class="lang-pt">Usuário ou senha inválidos.</span>
+    </div>
+  </form>
+
+  <div class="login-comingsoon">
+    <span class="login-comingsoon-tag"><span class="lang-en">Coming soon</span><span class="lang-pt">Em breve</span></span>
+    <p class="login-comingsoon-text">
+      <span class="lang-en">Lumen Health is still in private development and not yet open to new patients. Access is currently limited to invited accounts.</span>
+      <span class="lang-pt">A Lumen Health ainda está em desenvolvimento privado e não está aberta a novos pacientes. O acesso é limitado a contas convidadas.</span>
+    </p>
+  </div>
+
+  <p class="login-disclaimer">
+    <span class="lang-en">Strictly confidential. Demonstration credentials only — replace with provider-grade authentication before any external publication.</span>
+    <span class="lang-pt">Estritamente confidencial. Credenciais apenas para demonstração — substituir por autenticação de nível corporativo antes de qualquer publicação externa.</span>
+  </p>
+
+</main>
+
+<!-- Public page: opt out of app.js's client-side auth gate (login lives at
+     /login.html now; the landing is the root /). -->
+<script>window.JC_PUBLIC = true;</script>
+<script src="assets/app.js?v=34"></script>
+<script>
+  (function () {
+    'use strict';
+    // If we're already authenticated, jump straight to the picker.
+    if (sessionStorage.getItem('jc_authed') === 'true') {
+      location.replace('patients.html');
+      return;
+    }
+    // Credentials live in the DB (users.demo_username / demo_password);
+    // POST /api/login verifies them. Replaced by Clerk + Google SSO later.
+    var form = document.getElementById('login-form');
+    var err = document.getElementById('login-error');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var u = document.getElementById('username').value.trim();
+      var p = document.getElementById('password').value;
+      err.classList.remove('visible');
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p }),
+      })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+        .then(function (res) {
+          if (!res.ok || !res.data || !res.data.ok) {
+            err.classList.add('visible');
+            return;
+          }
+          sessionStorage.setItem('jc_authed', 'true');
+          sessionStorage.setItem('jc_viewer_clerk', res.data.clerk_user_id);
+          sessionStorage.setItem('jc_viewer_username', res.data.username || u);
+          sessionStorage.setItem('jc_viewer_name', res.data.full_name || '');
+          sessionStorage.setItem('jc_viewer_role', res.data.role || '');
+          // Honour the account's preferred language as the UI default.
+          if (res.data.locale === 'en' || res.data.locale === 'pt') {
+            localStorage.setItem('jc_lang', res.data.locale);
+          }
+          sessionStorage.removeItem('jc_current_patient');
+          location.href = 'patients.html';
+        })
+        .catch(function () { err.classList.add('visible'); });
+    });
+  })();
+</script>
+</body>
+</html>
