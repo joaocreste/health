@@ -345,6 +345,48 @@
     font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.03em; max-width: 70ch; line-height: 1.6;
   }
 
+  .txt-gold { color: var(--gold-lit); font-weight: 500; }
+
+  /* The learning loop — clinician-in-the-loop / proprietary intelligence */
+  .gov {
+    background: radial-gradient(900px 480px at 25% 0%, rgba(201,154,59,0.07), transparent 60%);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .gov .quote {
+    font-family: 'Raleway', sans-serif; font-weight: 300;
+    font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.18; letter-spacing: -0.01em;
+    color: #fff; max-width: 24ch; margin: 1rem 0 1.3rem;
+  }
+  .gov .quote .accent { color: var(--gold-lit); font-weight: 500; }
+  .gov .gov-body { color: var(--muted); font-size: 1.08rem; max-width: 64ch; margin: 0 0 1.2rem; }
+  .gov .propri {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold-lit);
+    background: rgba(244,185,66,0.08); border: 1px solid rgba(244,185,66,0.28);
+    border-radius: 999px; padding: 5px 12px;
+  }
+  .gov .propri::before { content: '✦'; font-size: 11px; }
+  .loop { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 0; margin-top: 3rem; }
+  .loop-node {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    padding: 1.7rem 1.4rem; position: relative; overflow: hidden;
+  }
+  .loop-node::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold-lit), transparent);
+  }
+  .loop-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: var(--gold-lit); }
+  .loop-node h3 { font-family: 'Raleway', sans-serif; font-weight: 600; font-size: 1.1rem; color: #fff; margin: 0.9rem 0 0.5rem; line-height: 1.25; }
+  .loop-node p { color: var(--muted); font-size: 0.92rem; margin: 0; line-height: 1.5; }
+  .loop-arrow { display: grid; place-items: center; color: var(--gold); padding: 0 0.7rem; }
+  .loop-foot {
+    display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.8rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted-dim); text-align: center;
+  }
+  .loop-foot .ll, .loop-foot .lr { flex: 1; max-width: 120px; height: 1px; background: var(--line); }
+
   /* Responsive */
   @media (max-width: 920px) {
     .steps { grid-template-columns: 1fr; }
@@ -352,6 +394,9 @@
     .features { grid-template-columns: repeat(2, 1fr); }
     .split { grid-template-columns: 1fr; gap: 2.2rem; }
     .privacy-grid { grid-template-columns: 1fr; }
+    .loop { grid-template-columns: 1fr; }
+    .loop-arrow { padding: 0.7rem 0; transform: rotate(90deg); }
+    .loop-foot .ll, .loop-foot .lr { max-width: 40px; }
     .nav-links { display: none; }
   }
   @media (max-width: 480px) {
@@ -372,6 +417,7 @@
     <div class="nav-links">
       <a href="#how"><span class="lang-en">How it works</span><span class="lang-pt">Como funciona</span></a>
       <a href="#features"><span class="lang-en">What it does</span><span class="lang-pt">O que faz</span></a>
+      <a href="#intelligence"><span class="lang-en">Clinical board</span><span class="lang-pt">Conselho clínico</span></a>
       <a href="#privacy"><span class="lang-en">Privacy</span><span class="lang-pt">Privacidade</span></a>
     </div>
     <div class="lang-switch" role="group" aria-label="Language">
@@ -407,8 +453,8 @@
       <span class="lang-pt">Dos dados dispersos a um <span class="accent">quadro clínico</span>.</span>
     </h1>
     <p class="lede">
-      <span class="lang-en">Lumen Health brings your labs, scans, wearables and genetics into one record — then reads the whole story and writes it back in plain language, in English and Portuguese.</span>
-      <span class="lang-pt">A Lumen Health reúne seus exames, imagens, wearables e genética em um único registro — depois lê toda a história e a reescreve em linguagem clara, em inglês e português.</span>
+      <span class="lang-en">Lumen Health brings your labs, scans, wearables and genetics into one record — then reads the whole story and writes it back in plain language, <span class="txt-gold">your</span> plain language.</span>
+      <span class="lang-pt">A Lumen Health reúne seus exames, imagens, wearables e genética em um único registro — depois lê toda a história e a reescreve em linguagem clara, na <span class="txt-gold">sua</span> linguagem.</span>
     </p>
     <div class="hero-cta">
       <a class="btn btn-gold btn-lg" href="#cta">
@@ -431,7 +477,7 @@
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow"><span class="lang-en">The problem</span><span class="lang-pt">O problema</span></span>
-      <h2><span class="lang-en">Your health lives in a dozen places.</span><span class="lang-pt">Sua saúde vive em uma dezena de lugares.</span></h2>
+      <h2><span class="lang-en">Your health lives in a dozen places — and so much more.</span><span class="lang-pt">Sua saúde vive em uma dezena de lugares — e em muito mais.</span></h2>
       <p>
         <span class="lang-en">A PDF from the lab. A disc from the imaging clinic. Years of watch data. A genetics report you opened once. None of it talks to each other — and neither do the doctors reading it.</span>
         <span class="lang-pt">Um PDF do laboratório. Um disco da clínica de imagem. Anos de dados do relógio. Um relatório genético que você abriu uma vez. Nada disso se comunica — e nem os médicos que leem.</span>
@@ -482,6 +528,10 @@
     <div class="section-head reveal">
       <span class="eyebrow"><span class="lang-en">What it does</span><span class="lang-pt">O que faz</span></span>
       <h2><span class="lang-en">Every kind of health data, in one place.</span><span class="lang-pt">Todo tipo de dado de saúde, em um só lugar.</span></h2>
+      <p>
+        <span class="lang-en">We turn scattered records into one organized, current picture — so you and your doctors finally share the same view, with the transparency to have a better conversation.</span>
+        <span class="lang-pt">Transformamos registros dispersos em um quadro organizado e atualizado — para que você e seus médicos finalmente vejam a mesma coisa, com a transparência para uma conversa melhor.</span>
+      </p>
     </div>
     <div class="features">
       <div class="feat reveal"><div class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v5l-4 7a3 3 0 0 0 2.6 4.5h8.8A3 3 0 0 0 19 15l-4-7V3M9 3h6M7.5 14h9"/></svg></div><h4><span class="lang-en">Bloodwork &amp; labs</span><span class="lang-pt">Exames de sangue</span></h4><p><span class="lang-en">Years of results, trended and explained.</span><span class="lang-pt">Anos de resultados, em tendência e explicados.</span></p></div>
@@ -518,6 +568,45 @@
         <a href="#"><span class="lang-en">Summary</span><span class="lang-pt">Resumo</span></a>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ── THE LEARNING LOOP (proprietary intelligence) ────── -->
+<section class="band gov" id="intelligence">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="lang-en">Clinically governed</span><span class="lang-pt">Governança clínica</span></span>
+      <h2 class="quote">
+        <span class="lang-en">We don't learn from Google, or from AI alone. We learn <span class="accent">with the doctors on Lumen's board.</span></span>
+        <span class="lang-pt">Não aprendemos com o Google, nem só com IA. Aprendemos <span class="accent">com os médicos do conselho da Lumen.</span></span>
+      </h2>
+      <p class="gov-body">
+        <span class="lang-en">Every new kind of record is interpreted with a clinician in the loop before it ever reaches a patient — so the picture you see is grounded in clinical judgment, not guesswork.</span>
+        <span class="lang-pt">Cada novo tipo de registro é interpretado com um clínico no processo antes de chegar a qualquer paciente — para que o quadro que você vê seja ancorado em julgamento clínico, não em suposições.</span>
+      </p>
+      <span class="propri"><span class="lang-en">Proprietary intelligence</span><span class="lang-pt">Inteligência proprietária</span></span>
+    </div>
+
+    <div class="loop reveal" role="img" aria-label="Lumen's clinical learning cycle">
+      <div class="loop-node">
+        <div class="loop-num">01</div>
+        <h3><span class="lang-en">A new kind of record arrives</span><span class="lang-pt">Um novo tipo de registro chega</span></h3>
+        <p><span class="lang-en">Labs, imaging, wearables, genetics — any format a patient brings.</span><span class="lang-pt">Exames, imagens, wearables, genética — qualquer formato que o paciente traz.</span></p>
+      </div>
+      <div class="loop-arrow" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="loop-node">
+        <div class="loop-num">02</div>
+        <h3><span class="lang-en">A doctor on our board reads it</span><span class="lang-pt">Um médico do conselho o lê</span></h3>
+        <p><span class="lang-en">A clinician interprets it in the loop, before anything reaches a patient.</span><span class="lang-pt">Um clínico o interpreta no processo, antes de chegar a qualquer paciente.</span></p>
+      </div>
+      <div class="loop-arrow" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+      <div class="loop-node">
+        <div class="loop-num">03</div>
+        <h3><span class="lang-en">Lumen reads it for everyone</span><span class="lang-pt">A Lumen passa a lê-lo para todos</span></h3>
+        <p><span class="lang-en">That judgment is encoded once — so every future patient's picture gets sharper.</span><span class="lang-pt">Esse julgamento é codificado uma vez — e o quadro de cada paciente futuro fica mais nítido.</span></p>
+      </div>
+    </div>
+    <div class="loop-foot reveal"><span class="ll"></span><span class="lang-en">And the cycle repeats — every record makes the next one clearer</span><span class="lang-pt">E o ciclo se repete — cada registro torna o próximo mais nítido</span><span class="lr"></span></div>
   </div>
 </section>
 
