@@ -84,6 +84,12 @@
     // Residence — Joao lives in London (GB); Leo in Paris (FR).
     [/\bLondon\b/g, 'Paris'],
     [/\bLondres\b/g, 'Paris'],
+
+    // Strip the lone "AUDIT scores" example from the AI-inference legend
+    // (the alcohol assessment is removed for Leo; the timeline AUDIT
+    // entries are hidden separately by hideShowcaseExtras).
+    [/AUDIT scores, /g, ''],
+    [/escores AUDIT, /g, ''],
     // GB → FR only on word boundaries where it's clearly the country code.
     // We don't touch arbitrary GB/FR text since the static pages use
     // "GB" in only a few demographic contexts.
@@ -122,11 +128,17 @@
     '.lab-note',                       // physical-exams.html: per-marker AI notes (Joao-specific)
     '.letter-content',                 // assessment.html: the long personalised letter (if class exists)
     '#mri-head',                       // physical-exams.html: 23 Apr 2022 brain MRI + intracranial angio-MR — not relevant to Leo
-    // .ct-grid intentionally NOT hidden: per the inherit-Patient-Zero-
-    // clinical-data design, Leo keeps every DICOM viewer in #imagery
-    // (MRI cervical, CT sinuses + US-guided biopsy, lumbar MRI + CT,
-    // coronary CT angio, EEG, brain MRI). The patient-supplied
-    // forehead photo block is hidden separately by hidePatientPhotos().
+    // Imaging studies removed from Leo's showcase profile (per request):
+    '#mri-cervical',                   // physical-exams.html: MRI cervical spine · 26 Mar 2026
+    '#us-face-2026',                   // physical-exams.html: Dermatologic Ultrasound · forehead · 8 Jun 2026
+    '#imaging',                        // physical-exams.html: CT facial sinuses (12 Jan 2026) + US-guided biopsy (16 Mar 2023)
+    '#tc-heart',                       // physical-exams.html: Coronary CT angiography · 19 Jul 2023
+    // Alcohol / AUDIT assessment removed from Leo's profile:
+    '#alcohol',                        // physical-exams.html: Alcohol Pattern Assessment — AUDIT 13/40
+    // Crisis / suicidality removed from Leo's profile:
+    '#crisis-29apr',                   // mental.html: 29 Apr 2026 intentional-overdose top callout
+    '.psych-dim-panel[data-dim="risk"]', // mental.html: "Risk / protective factors" dimension (hopelessness / self-harm)
+    '.psych-dim-card[data-dim="risk"]',  // mental.html: its nav card in the dimension grid
   ];
 
   function hideSelectors() {
@@ -176,8 +188,12 @@
       'intentional benzodiazepine overdose', 'Intentional benzodiazepine overdose',
       'OD episode', 'OD now satisfies',
       'self-poisoning', 'Self-poisoning',
-      'suicidality', 'suicidal ideation', 'Suicidal ideation',
-      'suicide risk', 'Suicide risk',
+      'suicidality', 'Suicidality', 'Suicidalidade', 'suicidalidade',
+      'suicidal ideation', 'Suicidal ideation',
+      'suicidal thoughts', 'pensamentos suicidas',
+      'suicidal behaviour', 'suicidal behavior', 'comportamento suicida',
+      'suicide risk', 'Suicide risk', 'Suicide-risk', 'suicide-risk',
+      'tentativa de suicídio',
       'suicide attempt', 'Suicide attempt', 'non-fatal suicide attempt',
       'self-harm', 'Self-harm',
       'Quasi-suicidal', 'quasi-suicidal',
@@ -346,7 +362,16 @@
           s.textContent = s.textContent.replace(re, prefix);
         });
       } else {
-        lbl.textContent = lbl.textContent.replace(re, prefix);
+        // Rewrite the prefix inside the first matching text node so any child
+        // elements (e.g. an ai-pill badge on the injected Synthesis card)
+        // survive — setting lbl.textContent would flatten them away.
+        var tnode = null;
+        for (var k = 0; k < lbl.childNodes.length; k++) {
+          var cn = lbl.childNodes[k];
+          if (cn.nodeType === 3 && re.test(cn.nodeValue)) { tnode = cn; break; }
+        }
+        if (tnode) tnode.nodeValue = tnode.nodeValue.replace(re, prefix);
+        else lbl.textContent = lbl.textContent.replace(re, prefix);
       }
     });
   }
@@ -355,7 +380,8 @@
   // (Leo has no medications nav target on physical, no osteopath
   // sub-target on vitals — keep the section-nav clean.)
   function stripNavLinks() {
-    var hideHashes = ['#meds', '#assessment'];
+    var hideHashes = ['#meds', '#assessment',
+      '#mri-cervical', '#us-face-2026', '#imaging', '#tc-heart', '#alcohol', '#crisis-29apr'];
     document.querySelectorAll('.section-nav a, .topnav-links a, nav a').forEach(function (a) {
       var href = a.getAttribute('href') || '';
       if (hideHashes.indexOf(href) !== -1) a.style.display = 'none';
@@ -401,7 +427,10 @@
     // don't need to repeat them.
     var clinical = document.getElementById('clinical');
     if (clinical && clinical.parentNode) {
-      clinical.parentNode.insertBefore(card, clinical);
+      // Insert AFTER clinical history (the now-hidden #meds slot, which sits
+      // right after #clinical) so the renumber pass reads 01 Clinical history
+      // -> 02 Pharmacology rather than reversing the two.
+      clinical.parentNode.insertBefore(card, clinical.nextSibling);
     }
   }
 
@@ -443,10 +472,6 @@
               '</li>' +
               '<li style="margin-bottom:10px;">' +
                 '<strong>Elevated homocysteine (14.40 µmol/L)</strong> despite high-normal serum B12 (863) and normal folate, now explained by a <strong>confirmed MTHFR compound heterozygote</strong> on the genetics panel (C677T <em>rs1801133</em> + A1298C <em>rs1801131</em>, ~50% reduced enzyme activity) — the classic pattern where unmethylated B-vitamins fail to clear homocysteine. An independent cardiovascular risk factor that stacks with the BP axis; an L-methylfolate adjunct is the targeted, low-cost step worth discussing with your clinician.' +
-                '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
-              '</li>' +
-              '<li style="margin-bottom:10px;">' +
-                '<strong>Cervical spine MRI (26 Mar 2026)</strong> — multi-level degenerative change C3–C7 with mild bilateral foraminal narrowing and a normal cord signal. Conservative management on imaging grounds; physiotherapy if symptoms present.' +
                 '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
@@ -549,7 +574,7 @@
       note: 'Markedly above the 3 mg/L cardiovascular threshold (12.10 mg/L). At this magnitude it usually reflects an acute or recent inflammatory or infectious process at the time of the draw rather than a stable baseline.',
       factors: [
         'A transient infection, recent illness or minor injury near the collection date can push hs-CRP into double digits.',
-        'Local musculoskeletal inflammation (the cervical degenerative change on MRI) can add a smaller contribution.',
+        'Low-grade musculoskeletal or soft-tissue inflammation can add a smaller contribution.',
         'Adiposity-driven low-grade inflammation is a minor chronic contributor.',
         'Next step: repeat once fully symptom-free to separate a transient spike from a persistent elevation; if it stays above 3 mg/L it becomes relevant to the cardiovascular risk already flagged by the BP and homocysteine — discuss with your clinician.',
       ],
@@ -653,6 +678,67 @@
     });
   }
 
+  // ─── Showcase scrub ─────────────────────────────────────────────
+  // Leo is a curated demo profile. Beyond hiding the removed imaging
+  // viewers (HIDE_SELECTORS) and the AUDIT section (#alcohol), the static
+  // pages carry stray *text* references to those studies and to the
+  // alcohol assessment in summary lists, metric cards and timelines.
+  // Hide any small container that names them, and rewrite the exams-page
+  // intro so it no longer lists studies that are gone. Runs on original
+  // (pre-inject) static content, so injected Leo cards are never touched.
+  function hideShowcaseExtras() {
+    var AUDIT_TRIGGERS = [
+      'AUDIT', 'Alcohol Pattern', 'Alcohol use disorder', 'alcohol use disorder',
+      'Reactive alcohol', 'reactive alcohol',
+    ];
+    var IMG_TRIGGERS = [
+      'CT facial sinuses', 'TC dos seios da face',
+      'MRI cervical', 'cervical spine MRI', 'RM cervical', 'RM da coluna cervical',
+      'coronary CT', 'Coronary CT', 'angio-TC coronariana',
+      'Dermatologic Ultrasound', 'dermatologic ultrasound', 'ultrassom dermatológico',
+      'US-guided biopsy', 'biópsia guiada por US',
+    ];
+    var CONTAINERS = [
+      '.metric-card', '.timeline-event', '.timeline-entry', '.timeline-item',
+      '.alert', '.alert-flag', '.alert-info', '.alert-watch',
+      'li', 'tr', '.section-desc', '.callout',
+    ];
+    document.querySelectorAll(
+      '.metric-card, .timeline-event, .timeline-entry, .timeline-item, ' +
+      '.alert, .alert-flag, .alert-info, .alert-watch, li, tr, .section-desc, .callout'
+    ).forEach(function (el) {
+      var t = el.textContent || '';
+      if (!t) return;
+      var hit = false, k;
+      for (k = 0; k < AUDIT_TRIGGERS.length; k++) { if (t.indexOf(AUDIT_TRIGGERS[k]) !== -1) { hit = true; break; } }
+      if (!hit) { for (k = 0; k < IMG_TRIGGERS.length; k++) { if (t.indexOf(IMG_TRIGGERS[k]) !== -1) { hit = true; break; } } }
+      if (!hit) return;
+      var node = el, container = null;
+      while (node && node !== document.body) {
+        if (node.matches) {
+          for (var j = 0; j < CONTAINERS.length; j++) {
+            if (node.matches(CONTAINERS[j])) { container = node; break; }
+          }
+          if (container) break;
+        }
+        node = node.parentElement;
+      }
+      (container || el).style.display = 'none';
+    });
+
+    // Rewrite the exams-page intro so it doesn't list removed studies.
+    var path = location.pathname.replace(/\/+$/, '').toLowerCase();
+    var last = (path.split('/').pop() || '').replace(/\.html$/, '');
+    if (last === 'physical-exams') {
+      var pd = document.querySelector('.page-header .page-desc, .page-desc');
+      if (pd) {
+        pd.innerHTML =
+          '<span class="lang-en">Point-in-time clinical exams and lab results — radiology ' +
+          '(MRI brain, lumbar MRI + CT, EEG), a full blood &amp; urine panel and gut microbiota sequencing.</span>';
+      }
+    }
+  }
+
   // ─── Run ────────────────────────────────────────────────────────
   function run() {
     // Hide Joao-specific alerts BEFORE walking text — uses the
@@ -661,15 +747,20 @@
     hideOverdoseSuicidalAndBenzo();
     hideJoaoSpecificAlerts();
     hidePatientPhotos();
+    hideShowcaseExtras();
     walkText(document.body);
     rewriteTitle();
     hideSelectors();
-    renumberVisibleSectionLabels();
     stripNavLinks();
     rewriteHomeHeader();
     injectLeoSummary();
     injectPerindoprilCard();
     injectLeoLabExplanations();
+    // Renumber LAST: the injected cards (Synthesis on home, Pharmacology on
+    // physical) carry hardcoded prefixes and must participate in the
+    // sequential pass, otherwise they collide with the static labels that
+    // follow them (duplicate "02", out-of-order numbering).
+    renumberVisibleSectionLabels();
   }
 
   if (document.readyState === 'loading') {
