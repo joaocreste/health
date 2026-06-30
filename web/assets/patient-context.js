@@ -1800,20 +1800,10 @@
     if (hasGen) cards += card(ICON_GEN, 'physical-genetics.html', 'Genetics', 'Genética',
       statusPill(b.pgx_findings || 0, 'findings', 'achados'), 'Pharmacogenomics', 'Farmacogenômica');
 
-    // Overview leads with the AI Summary (the full consolidated review lives on Exams).
-    var leadBits = imgN
-      ? labsN + ' ' + t('lab markers across the panels and', 'marcadores nos painéis e') + ' ' + imgN + ' ' +
-        t('imaging studies, each with its report and a plain explanation.', 'exames de imagem, cada um com seu laudo e uma explicação simples.')
-      : labsN + ' ' + t('lab markers across the panels.', 'marcadores nos painéis.');
-    var lead = '<section class="ov-ai-summary"><div class="ov-ai-inner">' +
-      '<div class="ov-ai-head">' + aiPill() + ' <span class="ov-ai-label">' + t('AI Summary', 'Resumo por IA') + '</span></div>' +
-      '<div class="ov-ai-body"><p>' +
-        t('Your exams have been reviewed — ', 'Seus exames foram revisados — ') + leadBits +
-        ' <a href="physical-exams.html">' + t('Open Exams', 'Abrir Exames') + '</a></p></div>' +
-      '<div class="ov-ai-disc">' +
-        t('AI-generated summary from your data — not a diagnosis. Discuss with your doctor.',
-          'Resumo gerado por IA a partir dos seus dados — não é um diagnóstico. Converse com seu médico.') +
-      '</div></div></section>';
+    // (Removed the templated "AI Summary" lead card on the Physical hub — it
+    // merely restated exam counts behind an AI pill and isn't canonical. The
+    // canonical hub is the three entry cards; real synthesis lives on Exams and
+    // in the home AI cards.)
 
     var view = document.createElement('main');
     view.className = 'jc-overview jc-section';
@@ -1822,7 +1812,6 @@
         '<div class="ov-section-eyebrow">' + t('Physical', 'Físico') + '</div>' +
         '<h1 class="ov-title">' + t('Physical Health Overview', 'Visão Geral da Saúde Física') + '</h1>' +
         '<p class="ov-profile">' + (p.full_name ? escapeHtml(p.full_name) : '') + '</p>' +
-        lead +
         '<div class="entry-grid entry-grid-overview">' + cards + '</div>' +
         medsSectionInline(summary) +
       '</div>';
