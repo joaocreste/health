@@ -1,0 +1,436 @@
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<title>Relatório psiquiátrico — Joao Victor Creste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+<style>
+:root{
+  --bg:#ffffff; --panel:#FBFAF7; --panel2:#F6F3ED; --fg:#1E2D3D; --fg2:#42505F;
+  --navy:#0D1B2A; --muted:#7A8FA6; --gold:#B8954A; --petrol:#2F6489; --bd:#E5E2DC; --bd2:#ECE8E0;
+  --red:#C0392B; --redbg:#FBF1F0; --redbd:#E6C7C3; --redink:#9A3328; --green:#1F6E45; --blue:#2F6489;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@page{size:A4;margin:0}
+html,body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans',system-ui,sans-serif;font-weight:400}
+.sheet{position:relative;width:210mm;min-height:297mm;padding:15mm 15mm 13mm;background:#fff;page-break-after:always;overflow:hidden}
+.sheet:last-child{page-break-after:auto}
+.sheet>*{position:relative;z-index:1}
+strong{font-weight:600;color:var(--navy)}
+
+/* cover · light · Lumen branded (printable) */
+.cover{box-sizing:border-box;width:210mm;height:297mm;padding:10mm;margin:0;background:#F9F7F4;color:#0D1B2A;overflow:hidden;page-break-after:always;font-family:'Raleway',sans-serif;font-weight:400}
+.cover strong,.cover b{color:#0D1B2A;font-weight:600}
+.cv-frame{box-sizing:border-box;height:100%;width:100%;border:1.5px solid #0D1B2A;padding:14mm 14mm 12mm;display:flex;flex-direction:column}
+.cv-top{display:flex;align-items:center;justify-content:space-between}
+.cv-brand{display:flex;align-items:center;gap:13px}
+.cv-mark-svg{width:42px;height:42px;display:block}
+.cv-word{display:flex;flex-direction:column;line-height:1;letter-spacing:.30em;font-weight:500}
+.cv-word b{font-weight:600;font-size:14pt;color:#0D1B2A}
+.cv-word span{font-weight:400;font-size:9.5pt;color:#7A8FA6;margin-top:4px}
+.cv-doc{text-align:right;font-size:11pt;letter-spacing:.04em;color:#0D1B2A;font-weight:500;line-height:1.2}
+.cv-doc-sub{display:block;font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;color:#B8954A;margin-top:5px}
+.cv-rule{height:1px;background:#DAD2C2;margin:13px 0}
+.cv-rule-strong{height:2px;background:#0D1B2A;margin:16px 0 0}
+.cv-gap{flex:1 1 0;display:flex;flex-direction:column;justify-content:center}
+.cv-spacer{flex:1 1 0}
+.cv-pulse{margin:0}
+.cv-pulse-svg{width:100%;height:32px;display:block}
+.cv-eyebrow{font-size:8.5pt;letter-spacing:.2em;text-transform:uppercase;color:#B8954A;margin-bottom:10px;font-weight:500}
+.cv-name{font-size:33pt;line-height:1.1;margin:0;color:#0D1B2A;font-weight:600;border-left:3px solid #B8954A;padding-left:18px;margin-left:-21px}
+.cv-sub{font-size:11pt;color:#1E2D3D;margin-top:12px;letter-spacing:.02em}
+.cv-why{margin-top:13mm;max-width:150mm}
+.cv-why-h{font-size:9pt;letter-spacing:.16em;text-transform:uppercase;color:#0D1B2A;margin-bottom:9px;display:flex;align-items:center;gap:10px;font-weight:500}
+.cv-why-h::after{content:"";flex:1;height:1px;background:#DAD2C2}
+.cv-why-p{font-size:10.5pt;line-height:1.85;color:#1E2D3D;font-weight:400;margin:0}
+.cv-why-p b{color:#0D1B2A;font-weight:600}
+.cv-tagline{font-size:14pt;line-height:1.4;color:#B8954A;font-weight:500;font-style:italic;margin:16px 0 0}
+.cv-meta{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #DAD2C2}
+.cv-meta-item{display:flex;flex-direction:column;gap:5px;padding:14px 16px 0 0;border-right:1px solid #E3DCCC}
+.cv-meta-item:last-child{border-right:none}
+.cv-meta-item span:first-child{font-size:7.5pt;letter-spacing:.1em;text-transform:uppercase;color:#7A8FA6;font-weight:500}
+.cv-meta-item span:last-child{font-size:10pt;color:#0D1B2A;font-weight:500}
+.cv-foot{margin-top:14px}
+.cv-foot p{font-size:8.5pt;line-height:1.7;color:#7A8FA6;max-width:165mm;margin:0 0 7px}
+.cv-conf{color:#B8954A!important;font-weight:500}
+
+/* section chrome */
+.sec-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+h2.sec{font-family:'Raleway',sans-serif;font-weight:600;font-size:21px;color:var(--navy);margin-bottom:3px;line-height:1.1}
+.sec-sub{font-size:10.5px;color:var(--muted);margin-bottom:9px}
+h3.sub{font-family:'Raleway',sans-serif;font-weight:600;font-size:12.5px;color:var(--petrol);letter-spacing:.02em;margin:9px 0 7px;text-transform:uppercase}
+p{font-size:11px;line-height:1.6;color:var(--fg2);margin-bottom:8px}
+.sec-block{margin-bottom:16px;break-inside:avoid}
+
+/* exec summary */
+.es-lead{font-size:12px;line-height:1.7;color:var(--fg2);margin-bottom:11px}
+.es-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
+.es-card{background:var(--panel);border:1px solid var(--bd);border-left:3px solid var(--petrol);border-radius:8px;padding:11px 13px}
+.es-card.gold{border-left-color:var(--gold)} .es-card.red{border-left-color:var(--red)} .es-card.green{border-left-color:var(--green)}
+.es-card h4{font-family:'Raleway',sans-serif;font-weight:600;font-size:11px;color:var(--navy);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.es-card p{font-size:10px;line-height:1.55;margin:0}
+
+/* meds table */
+table{width:100%;border-collapse:collapse}
+.md-t td{padding:8px 9px;border-bottom:1px solid var(--bd2);vertical-align:top;font-size:10.5px;color:var(--fg2)}
+.md-t tr:last-child td{border-bottom:0}
+.md-n{font-weight:600;color:var(--navy);font-size:11.5px;white-space:nowrap}
+.md-g{display:block;font-weight:300;color:var(--muted);font-size:9px;font-style:italic;margin-top:1px}
+.md-d{font-family:'IBM Plex Mono',monospace;color:var(--gold);white-space:nowrap}
+.md-s{font-size:9.5px;color:var(--muted)}
+.md-disc{margin-top:9px;font-size:10px;color:var(--muted)}
+.md-disc b{color:var(--fg2);font-weight:600}
+
+/* therapy */
+.tx-meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+.tx-pill{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--bd);color:var(--fg2)}
+ul.bul{list-style:none;margin:0 0 6px}
+ul.bul li{position:relative;padding-left:15px;font-size:10.8px;line-height:1.55;color:var(--fg2);margin-bottom:6px}
+ul.bul li::before{content:'';position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:var(--petrol)}
+.risk{background:var(--redbg);border:1px solid var(--redbd);border-left:3px solid var(--red);border-radius:8px;padding:11px 13px;margin-top:10px}
+.risk h4{font-family:'Raleway',sans-serif;font-weight:600;font-size:11px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.risk p{font-size:10px;color:var(--redink);margin:0}
+
+/* blood */
+.alert-red{background:var(--redbg);border:1px solid var(--redbd);border-left:3px solid var(--red);border-radius:9px;padding:9px 13px;margin-bottom:10px}
+.alert-red .ar-h{font-family:'Raleway',sans-serif;font-weight:600;font-size:12px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ar-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;background:var(--red);color:#fff;padding:2px 7px;border-radius:999px;font-weight:500}
+.ot{width:100%;border-collapse:collapse}
+.ot td{padding:2.5px 6px;border-bottom:1px solid var(--redbd);font-size:10px;color:var(--redink)}
+.ot tr:last-child td{border-bottom:0}
+.ot-n{font-weight:600;color:var(--navy)} .ot-v{font-family:'IBM Plex Mono',monospace;white-space:nowrap} .ot-u{color:var(--muted);font-size:8.5px}
+.ot-r{color:var(--muted);font-size:9px}
+.dir{font-family:'IBM Plex Mono',monospace;font-size:8.5px;padding:2px 7px;border-radius:999px;font-weight:500}
+.dir-up{background:#F6E0DC;color:#A23527} .dir-down{background:#E2ECF4;color:#2F6489}
+.bl-grid{column-count:3;column-gap:11px}
+.bl-panel{break-inside:avoid;margin-bottom:6px;background:var(--panel);border:1px solid var(--bd);border-radius:7px;padding:6px 7px}
+.bl-h{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;border-bottom:1px solid var(--bd2);padding-bottom:3px}
+.bl-row{display:grid;grid-template-columns:1fr auto;gap:1px 6px;padding:1px 0;font-size:8.6px;line-height:1.16}
+.bl-n{color:var(--fg2)} .bl-v{font-family:'IBM Plex Mono',monospace;color:var(--navy);text-align:right;white-space:nowrap}
+.bl-u{color:var(--muted);font-size:7.5px} .bl-r{grid-column:1/-1;color:var(--muted);font-size:7.5px;margin-top:-1px}
+.bl-out{background:#FBEEEC;border-radius:4px;padding:2px 4px;margin:1px -4px}
+.bl-out .bl-n{color:var(--red);font-weight:600} .bl-out .bl-v{color:var(--red)}
+
+/* charts */
+.chart-row{display:flex;gap:12px;margin-bottom:6px}
+.chart-card{background:var(--panel);border:1px solid var(--bd);border-radius:9px;padding:11px 12px 9px;break-inside:avoid}
+.chart-card.half{flex:1;min-width:0}
+.chart-card.full{width:100%}
+.cc-h{font-family:'Raleway',sans-serif;font-weight:600;font-size:11px;color:var(--navy);margin-bottom:1px}
+.cc-m{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--muted);margin-bottom:7px}
+.chart-box{position:relative;width:100%}
+.chart-box canvas{display:block}
+.note{background:var(--panel2);border:1px solid var(--bd);border-radius:8px;padding:10px 13px;margin-top:9px}
+.note p{font-size:10.2px;margin:0;color:var(--fg2)}
+.note p+p{margin-top:6px}
+
+/* imaging + specialists */
+.img-card{background:var(--panel);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin-bottom:11px;break-inside:avoid}
+.img-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:10px}
+.img-t{font-family:'Raleway',sans-serif;font-weight:600;font-size:12px;color:var(--navy)}
+.img-d{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--gold);white-space:nowrap}
+.img-card p{font-size:10.3px;margin:0} .img-card p+p{margin-top:6px}
+.img-by{font-size:9px;color:var(--muted);margin-top:7px;font-style:italic}
+.flag{background:#FBF6EC;border:1px solid #E8D9B5;border-left:3px solid var(--gold);border-radius:8px;padding:10px 13px;margin-bottom:11px}
+.flag p{font-size:10.5px;color:#6E5A2A;margin:0}
+.flag p strong{color:#7A5E1E}
+.spec{background:var(--panel);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin-bottom:10px;break-inside:avoid}
+.spec-h{font-family:'Raleway',sans-serif;font-weight:600;font-size:12px;color:var(--navy);margin-bottom:2px}
+.spec-who{font-size:9.5px;color:var(--petrol);font-family:'IBM Plex Mono',monospace;margin-bottom:7px}
+.spec p{font-size:10.3px;margin:0} .spec ul.bul li{font-size:10.3px}
+.foot{margin-top:9px;padding-top:7px;border-top:1px solid var(--bd2);display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--muted)}
+</style></head>
+<body>
+<section class="cover">
+  <div class="cv-frame">
+    <header class="cv-top">
+      <div class="cv-brand">
+        <span class="cv-mark"><svg class="cv-mark-svg" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Lumen Health">
+  <g transform="translate(32,32) scale(1.1)">
+    <path d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z" fill="rgba(36,78,110,0.08)" stroke="#244E6E" stroke-width="0.9" stroke-linejoin="round"/>
+    <path d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0" fill="none" stroke="#B8860B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg></span>
+        <span class="cv-word"><b>LUMEN</b><span>HEALTH</span></span>
+      </div>
+      <div class="cv-doc">Relatório&nbsp;psiquiátrico<span class="cv-doc-sub">atualização clínica</span></div>
+    </header>
+
+    <div class="cv-rule cv-rule-strong"></div>
+    <div class="cv-gap"><div class="cv-pulse"><svg class="cv-pulse-svg" viewBox="0 0 1000 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M0 24 H392 l9 0 l7 5 l7 -10 l8 -17 l9 38 l9 -28 l7 12 l8 0 H560 l7 4 l6 -6 l7 2 l8 0 H1000"
+        fill="none" stroke="#B8860B" stroke-width="4.48" stroke-linecap="round" stroke-linejoin="round"/>
+</svg></div></div>
+
+    <div class="cv-hero">
+      <div class="cv-eyebrow">Paciente</div>
+      <h1 class="cv-name">Joao Victor Creste<br>Dias de Souza</h1>
+      <div class="cv-sub">17 de outubro de 1992 · 33 anos · masculino</div>
+    </div>
+
+    <div class="cv-why">
+      <div class="cv-why-h">Por que existimos</div>
+      <p class="cv-why-p">Um histórico de saúde raramente vive em um só lugar. Ele se espalha por anos, laboratórios, clínicas e especialistas — em PDFs, laudos, imagens e aparelhos que não conversam entre si. A <b>Lumen&nbsp;Health</b> reúne tudo isso e devolve um único quadro clínico: claro, contínuo e no tempo certo — um retrato que pertence ao paciente e fala a língua de quem cuida dele.</p>
+      <p class="cv-tagline">“Dos dados dispersos a um quadro clínico.”</p>
+    </div>
+
+    <div class="cv-spacer"></div>
+    <div class="cv-meta">
+      <div class="cv-meta-item"><span>Emissão</span><span>24 de junho de 2026</span></div>
+      <div class="cv-meta-item"><span>Psiquiatra</span><span>Dr. Eduardo Tisher</span></div>
+      <div class="cv-meta-item"><span>Laboratório</span><span>8 jun 2026 · 81 marcadores</span></div>
+      <div class="cv-meta-item"><span>Escopo</span><span>Medicação · sono · humor · imagem</span></div>
+    </div>
+
+    <div class="cv-rule"></div>
+    <footer class="cv-foot">
+      <p>Documento gerado pela plataforma Lumen Health, reunindo medicação, sessões de terapia, laboratório, dados de wearable e laudos do prontuário do paciente. <strong>Síntese para discussão com o psiquiatra assistente; não constitui diagnóstico. Decisões sobre benzodiazepínicos competem exclusivamente ao psiquiatra prescritor.</strong></p>
+      <p class="cv-conf">Confidencial · contém dados pessoais sensíveis de saúde</p>
+    </footer>
+  </div>
+</section>
+<section class="sheet">
+  <div class="sec-label">Síntese</div>
+  <h2 class="sec">Sumário executivo</h2>
+  <div class="sec-sub">Panorama clínico em 24 de junho de 2026 · frases-chave destacadas</div>
+  <p class="es-lead">Paciente masculino de 33 anos em <strong>regime psicofarmacológico de cinco medicações ativas</strong>, em fase de recuperação após <strong>internação por overdose intencional de benzodiazepínico em 29 de abril de 2026</strong>, com <strong>desmame de diazepam em curso (30 mg/dia)</strong>. <strong>Cirurgia de remoção de tecido fibrótico na fronte marcada para 8 de julho de 2026</strong>, decisão já consolidada com suporte de múltiplos especialistas.</p>
+  <div class="es-grid">
+    <div class="es-card red">
+      <h4>Risco e segurança</h4>
+      <p>Na sessão de terapia de 23/06, o paciente <strong>relatou episódios de desespero e pensamentos suicidas durante conflitos familiares</strong> e ele próprio indicou ser importante levar isso aos profissionais de saúde. <strong>Recomenda-se avaliação de segurança ativa.</strong></p>
+    </div>
+    <div class="es-card gold">
+      <h4>Medicação</h4>
+      <p>Depakote ER 1.000 mg, Lyrica 300 mg, Quetiapina 50 mg, Valium 30 mg (em desmame) e Revia 50 mg. <strong>Cymbalta (duloxetina) foi descontinuada em abril.</strong> Sem suplementos registrados.</p>
+    </div>
+    <div class="es-card">
+      <h4>Sono e resiliência</h4>
+      <p>Sono REM historicamente baixo (mediana ~17%), com <strong>melhora para ~21% nos últimos 30 dias</strong> — de volta à borda inferior da faixa saudável de 20–25%, possível rebote ligado ao desmame. <strong>Resiliência (Oura) caiu a um mínimo de 34.9 no fim de abril</strong> e vem se recuperando em junho (47).</p>
+    </div>
+    <div class="es-card green">
+      <h4>Exames de sangue</h4>
+      <p><strong>74 de 81 marcadores dentro do intervalo.</strong> Sete fora: colesterol total, fósforo, estradiol, B12 e homocisteína acima; <strong>cortisol matinal e densidade urinária abaixo</strong>. Função hepática, renal, tireoide e hemograma normais.</p>
+    </div>
+    <div class="es-card">
+      <h4>Imagem</h4>
+      <p><strong>Estruturas encefálicas dentro da normalidade.</strong> Alteração subgaleal frontal direita de provável componente hemático/fibrótico crônico — alvo da cirurgia. <strong>Ultrassom de abdome total sem alterações.</strong></p>
+    </div>
+    <div class="es-card">
+      <h4>Frentes especialistas</h4>
+      <p><strong>Cardiologia: ECG normal</strong>, ergometria pendente sob suspeita de síndrome vaso-vagal. <strong>Endocrinologia liberou Monjaro 2,5 mg para o pós-operatório</strong> e solicitou elastografia hepática, revisão hormonal, DEXA e RM de hipófise.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<section class="sheet">
+  <div class="sec-label">01 · Tratamento</div>
+  <h2 class="sec">Medicações e suplementação</h2>
+  <div class="sec-sub">Regime atual · prescrição psiquiátrica (Dr. Eduardo Tisher)</div>
+  <table class="md-t"><tbody><tr><td class="md-n">Depakote ER<span class="md-g">divalproato de sódio</span></td><td class="md-d">1.000 mg/dia</td><td class="md-c">Estabilizador de humor / anticonvulsante</td><td class="md-s">Ativo · ↑ de 750 mg</td></tr><tr><td class="md-n">Lyrica<span class="md-g">pregabalina</span></td><td class="md-d">300 mg/dia (2 tomadas)</td><td class="md-c">Gabapentinoide — ansiolítico / dor neuropática</td><td class="md-s">Ativo · ↑ de 225 mg</td></tr><tr><td class="md-n">Quetiapina<span class="md-g">Quetros / Seroquel</span></td><td class="md-d">50 mg/dia</td><td class="md-c">Antipsicótico atípico — suporte ao início do sono</td><td class="md-s">Ativo</td></tr><tr><td class="md-n">Valium<span class="md-g">diazepam</span></td><td class="md-d">30 mg/dia</td><td class="md-c">Benzodiazepínico — em desmame (40 → 35 → 30)</td><td class="md-s">Ativo · ajustes só pelo psiquiatra</td></tr><tr><td class="md-n">Revia<span class="md-g">naltrexona</span></td><td class="md-d">50 mg/dia</td><td class="md-c">Antagonista opioide — transtorno por uso de álcool</td><td class="md-s">Ativo</td></tr></tbody></table>
+  <p class="md-disc"><b>Descontinuada:</b> Cymbalta (duloxetina) — SNRI em desmame 120 → 30 → 0 mg, retirada em abril de 2026 em coordenação com o psiquiatra; manter atenção a sintomas tardios de descontinuação e ao humor.</p>
+  <p class="md-disc"><b>Suplementação:</b> nenhuma registrada no sistema.</p>
+  <p class="md-disc"><b>Contexto do benzodiazepínico:</b> uso contínuo desde ~2014 (alprazolam → diazepam). Em 2 de março de 2026 houve interrupção de suprimento com abstinência aguda; em 29 de abril, overdose intencional (~200 mg de diazepam) com internação. Toda alteração de dose deve passar pelo psiquiatra prescritor.</p>
+
+  <div class="sec-block" style="margin-top:18px">
+    <div class="sec-label">02 · Psicoterapia</div>
+    <h2 class="sec">Última sessão de terapia</h2>
+    <div class="sec-sub">Pontos principais · sessão individual mais recente</div>
+    <div class="tx-meta">
+      <span class="tx-pill">23 de junho de 2026</span>
+      <span class="tx-pill">Ageu Heringer Lisboa · CRP 06/9732</span>
+      <span class="tx-pill">Individual · rotina</span>
+    </div>
+    <ul class="bul">
+      <li><strong>Decisão cirúrgica.</strong> Revisou a remoção do tecido fibrótico na fronte; vários especialistas convergiram de forma independente quanto ao procedimento e à prevenção de nova fibrose. Optou por operar em Ribeirão Preto, onde se sente mais amparado para a recuperação — <strong>cirurgia em 8 de julho</strong>.</li>
+      <li><strong>Relação com o pai.</strong> Explorou padrões recorrentes de controle, autossacrifício, hiper-responsabilidade e dificuldade de delegar, com preocupação pela saúde física e emocional do pai e pelo impacto dessas dinâmicas no sistema familiar.</li>
+      <li><strong>Reações emocionais intensas em conflito familiar.</strong> Relatou períodos de desespero e pensamentos suicidas, reconhecendo ser importante levá-los aos seus profissionais de saúde.</li>
+      <li><strong>Crença de que "a vida só avança após resolver o passado".</strong> Começou a questionar se a resolução completa é mesmo pré-condição para novos relacionamentos, projetos e oportunidades.</li>
+      <li><strong>Vocação.</strong> Falou da construção de uma empresa de health-tech que transforma dados de saúde fragmentados em insights acionáveis apoiados por IA, para auxiliar — não substituir — os profissionais.</li>
+      <li><strong>Espiritualidade e ritual familiar.</strong> Encontros regulares de oração, gratidão e reflexão; foco combinado no <strong>planejamento de curto prazo até agosto</strong>.</li>
+    </ul>
+    <div class="risk">
+      <h4>Sinalização de risco · requer avaliação clínica</h4>
+      <p>Suicidalidade — gravidade moderada. Relato retrospectivo de desespero e pensamentos suicidas em conflitos familiares; sem plano, intenção ou meio declarados na fonte. Recomenda-se acompanhamento e avaliação de segurança pelo psiquiatra.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<section class="sheet">
+  <div class="sec-label">03 · Laboratório</div>
+  <h2 class="sec">Exames de sangue — panorama geral</h2>
+  <div class="sec-sub">Painel de 81 marcadores · 8 de junho de 2026 · Hospital Sírio-Libanês (São Paulo)</div>
+  <div class="alert-red">
+    <div class="ar-h"><span class="ar-tag">FORA DO INTERVALO</span> 7 marcadores exigem atenção</div>
+    <table class="ot"><tbody><tr><td class="ot-n">Colesterol total</td><td class="ot-v">214 <span class="ot-u">mg/dL</span></td><td class="ot-r">ref <190</td><td><span class="dir dir-up">Acima</span></td></tr><tr><td class="ot-n">Fósforo</td><td class="ot-v">4,6 <span class="ot-u">mg/dL</span></td><td class="ot-r">ref 2,5–4,5</td><td><span class="dir dir-up">Acima</span></td></tr><tr><td class="ot-n">Estradiol</td><td class="ot-v">6,4 <span class="ot-u">ng/dL</span></td><td class="ot-r">ref 1,1–4,3</td><td><span class="dir dir-up">Acima</span></td></tr><tr><td class="ot-n">Cortisol (manhã)</td><td class="ot-v">5,0 <span class="ot-u">µg/dL</span></td><td class="ot-r">ref 6,0–18,4</td><td><span class="dir dir-down">Abaixo</span></td></tr><tr><td class="ot-n">Vitamina B12</td><td class="ot-v">1.315 <span class="ot-u">ng/L</span></td><td class="ot-r">ref 272–1.071</td><td><span class="dir dir-up">Acima</span></td></tr><tr><td class="ot-n">Homocisteína</td><td class="ot-v">12,8 <span class="ot-u">µmol/L</span></td><td class="ot-r">ref ≤12</td><td><span class="dir dir-up">Acima</span></td></tr><tr><td class="ot-n">Densidade urinária</td><td class="ot-v">1.006 <span class="ot-u">—</span></td><td class="ot-r">ref 1.010–1.030</td><td><span class="dir dir-down">Abaixo</span></td></tr></tbody></table>
+  </div>
+  <h3 class="sub">Panorama completo · 74 de 81 dentro do intervalo</h3>
+  <div class="bl-grid"><div class="bl-panel"><div class="bl-h">Hemograma — Eritrograma</div><div class="bl-row "><span class="bl-n">Eritrócitos</span><span class="bl-v">4,85 <span class="bl-u">milhões/mm³</span></span><span class="bl-r">4,16–5,82</span></div><div class="bl-row "><span class="bl-n">Hemoglobina</span><span class="bl-v">14,3 <span class="bl-u">g/dL</span></span><span class="bl-r">12,7–16,8</span></div><div class="bl-row "><span class="bl-n">Hematócrito</span><span class="bl-v">42,9 <span class="bl-u">%</span></span><span class="bl-r">37,8–49,9</span></div><div class="bl-row "><span class="bl-n">VCM</span><span class="bl-v">88,5 <span class="bl-u">fL</span></span><span class="bl-r">80,3–95,8</span></div><div class="bl-row "><span class="bl-n">HCM</span><span class="bl-v">29,5 <span class="bl-u">pg</span></span><span class="bl-r">26,5–32,5</span></div><div class="bl-row "><span class="bl-n">CHCM</span><span class="bl-v">33,3 <span class="bl-u">g/dL</span></span><span class="bl-r">32,0–35,6</span></div><div class="bl-row "><span class="bl-n">RDW</span><span class="bl-v">13,1 <span class="bl-u">%</span></span><span class="bl-r">11,8–14,8</span></div></div><div class="bl-panel"><div class="bl-h">Hemograma — Leucograma / Plaquetas</div><div class="bl-row "><span class="bl-n">Leucócitos</span><span class="bl-v">6.260 <span class="bl-u">/mm³</span></span><span class="bl-r">3.850–9.877</span></div><div class="bl-row "><span class="bl-n">Neutrófilos (abs.)</span><span class="bl-v">3.725 <span class="bl-u">/mm³</span></span><span class="bl-r">1.729–6.439</span></div><div class="bl-row "><span class="bl-n">Linfócitos (abs.)</span><span class="bl-v">1.753 <span class="bl-u">/mm³</span></span><span class="bl-r">1.058–3.289</span></div><div class="bl-row "><span class="bl-n">Monócitos (abs.)</span><span class="bl-v">682 <span class="bl-u">/mm³</span></span><span class="bl-r">290–936</span></div><div class="bl-row "><span class="bl-n">Eosinófilos (abs.)</span><span class="bl-v">63 <span class="bl-u">/mm³</span></span><span class="bl-r">26–560</span></div><div class="bl-row "><span class="bl-n">Basófilos (abs.)</span><span class="bl-v">38 <span class="bl-u">/mm³</span></span><span class="bl-r">10–89</span></div><div class="bl-row "><span class="bl-n">Plaquetas</span><span class="bl-v">270.000 <span class="bl-u">/mm³</span></span><span class="bl-r">154.000–347.000</span></div><div class="bl-row "><span class="bl-n">VPM</span><span class="bl-v">11,8 <span class="bl-u">fL</span></span><span class="bl-r">8,8–12,0</span></div></div><div class="bl-panel"><div class="bl-h">Glicemia e diabetes</div><div class="bl-row "><span class="bl-n">Glicemia de jejum</span><span class="bl-v">80 <span class="bl-u">mg/dL</span></span><span class="bl-r">75–99</span></div><div class="bl-row "><span class="bl-n">Hemoglobina glicada</span><span class="bl-v">5,2 <span class="bl-u">%</span></span><span class="bl-r"><5,7</span></div><div class="bl-row "><span class="bl-n">Glicose média estimada</span><span class="bl-v">103 <span class="bl-u">mg/dL</span></span><span class="bl-r">—</span></div></div><div class="bl-panel"><div class="bl-h">Lipidograma</div><div class="bl-row bl-out"><span class="bl-n">Colesterol total</span><span class="bl-v">214 <span class="bl-u">mg/dL</span></span><span class="bl-r"><190</span></div><div class="bl-row "><span class="bl-n">HDL</span><span class="bl-v">70 <span class="bl-u">mg/dL</span></span><span class="bl-r">>40</span></div><div class="bl-row "><span class="bl-n">LDL</span><span class="bl-v">119 <span class="bl-u">mg/dL</span></span><span class="bl-r"><130 desejável</span></div><div class="bl-row "><span class="bl-n">Triglicérides</span><span class="bl-v">134 <span class="bl-u">mg/dL</span></span><span class="bl-r"><150</span></div></div><div class="bl-panel"><div class="bl-h">Função renal e eletrólitos</div><div class="bl-row "><span class="bl-n">Creatinina</span><span class="bl-v">1,1 <span class="bl-u">mg/dL</span></span><span class="bl-r">0,70–1,20</span></div><div class="bl-row "><span class="bl-n">TFG estimada</span><span class="bl-v">91 <span class="bl-u">mL/min</span></span><span class="bl-r">>60</span></div><div class="bl-row "><span class="bl-n">Ureia</span><span class="bl-v">25 <span class="bl-u">mg/dL</span></span><span class="bl-r">17–49</span></div><div class="bl-row "><span class="bl-n">Ácido úrico</span><span class="bl-v">6,1 <span class="bl-u">mg/dL</span></span><span class="bl-r">3,4–7,0</span></div><div class="bl-row "><span class="bl-n">Sódio</span><span class="bl-v">140 <span class="bl-u">mEq/L</span></span><span class="bl-r">136–145</span></div><div class="bl-row "><span class="bl-n">Potássio</span><span class="bl-v">4,3 <span class="bl-u">mEq/L</span></span><span class="bl-r">3,5–5,1</span></div></div><div class="bl-panel"><div class="bl-h">Função hepática</div><div class="bl-row "><span class="bl-n">TGO (AST)</span><span class="bl-v">40 <span class="bl-u">U/L</span></span><span class="bl-r">10–50</span></div><div class="bl-row "><span class="bl-n">TGP (ALT)</span><span class="bl-v">38 <span class="bl-u">U/L</span></span><span class="bl-r">12–60</span></div><div class="bl-row "><span class="bl-n">Gama-GT</span><span class="bl-v">21 <span class="bl-u">U/L</span></span><span class="bl-r">10–71</span></div><div class="bl-row "><span class="bl-n">Fosfatase alcalina</span><span class="bl-v">47 <span class="bl-u">U/L</span></span><span class="bl-r">40–129</span></div><div class="bl-row "><span class="bl-n">Proteínas totais</span><span class="bl-v">7,3 <span class="bl-u">g/dL</span></span><span class="bl-r">6,4–8,3</span></div><div class="bl-row "><span class="bl-n">Albumina</span><span class="bl-v">4,6 <span class="bl-u">g/dL</span></span><span class="bl-r">3,5–5,2</span></div><div class="bl-row "><span class="bl-n">Globulina</span><span class="bl-v">2,7 <span class="bl-u">g/dL</span></span><span class="bl-r">1,7–3,5</span></div><div class="bl-row "><span class="bl-n">Relação A/G</span><span class="bl-v">1,7 <span class="bl-u">—</span></span><span class="bl-r">0,9–2,0</span></div></div><div class="bl-panel"><div class="bl-h">Minerais</div><div class="bl-row "><span class="bl-n">Cálcio</span><span class="bl-v">9,6 <span class="bl-u">mg/dL</span></span><span class="bl-r">8,6–10,0</span></div><div class="bl-row "><span class="bl-n">Magnésio</span><span class="bl-v">2,1 <span class="bl-u">mg/dL</span></span><span class="bl-r">1,6–2,6</span></div><div class="bl-row bl-out"><span class="bl-n">Fósforo</span><span class="bl-v">4,6 <span class="bl-u">mg/dL</span></span><span class="bl-r">2,5–4,5</span></div></div><div class="bl-panel"><div class="bl-h">Metabolismo do ferro</div><div class="bl-row "><span class="bl-n">Ferritina</span><span class="bl-v">99 <span class="bl-u">µg/L</span></span><span class="bl-r">30–400</span></div><div class="bl-row "><span class="bl-n">Ferro sérico</span><span class="bl-v">68 <span class="bl-u">µg/dL</span></span><span class="bl-r">33–193</span></div><div class="bl-row "><span class="bl-n">Capac. fixação (TIBC)</span><span class="bl-v">300 <span class="bl-u">µg/dL</span></span><span class="bl-r">250–450</span></div><div class="bl-row "><span class="bl-n">Sat. transferrina</span><span class="bl-v">23 <span class="bl-u">%</span></span><span class="bl-r">15–45</span></div></div><div class="bl-panel"><div class="bl-h">Tireoide</div><div class="bl-row "><span class="bl-n">TSH</span><span class="bl-v">2,8 <span class="bl-u">mUI/L</span></span><span class="bl-r">0,50–4,50</span></div><div class="bl-row "><span class="bl-n">T4 livre</span><span class="bl-v">1,11 <span class="bl-u">ng/dL</span></span><span class="bl-r">0,9–1,7</span></div><div class="bl-row "><span class="bl-n">T4 total</span><span class="bl-v">6,3 <span class="bl-u">µg/dL</span></span><span class="bl-r">4,5–12,0</span></div><div class="bl-row "><span class="bl-n">T3 total</span><span class="bl-v">123 <span class="bl-u">ng/dL</span></span><span class="bl-r">80–200</span></div></div><div class="bl-panel"><div class="bl-h">Hormônios sexuais e adrenais</div><div class="bl-row "><span class="bl-n">Testosterona total</span><span class="bl-v">615 <span class="bl-u">ng/dL</span></span><span class="bl-r">240–816</span></div><div class="bl-row bl-out"><span class="bl-n">Estradiol</span><span class="bl-v">6,4 <span class="bl-u">ng/dL</span></span><span class="bl-r">1,1–4,3</span></div><div class="bl-row "><span class="bl-n">FSH</span><span class="bl-v">5,3 <span class="bl-u">UI/L</span></span><span class="bl-r">1,5–12,4</span></div><div class="bl-row "><span class="bl-n">LH</span><span class="bl-v">5,4 <span class="bl-u">UI/L</span></span><span class="bl-r">até 9,0</span></div><div class="bl-row "><span class="bl-n">Prolactina</span><span class="bl-v">6 <span class="bl-u">ng/mL</span></span><span class="bl-r">4–21</span></div><div class="bl-row "><span class="bl-n">Progesterona</span><span class="bl-v">11 <span class="bl-u">ng/dL</span></span><span class="bl-r">até 15</span></div><div class="bl-row "><span class="bl-n">DHEA-S</span><span class="bl-v">222 <span class="bl-u">µg/dL</span></span><span class="bl-r">160–449</span></div><div class="bl-row bl-out"><span class="bl-n">Cortisol (manhã)</span><span class="bl-v">5 <span class="bl-u">µg/dL</span></span><span class="bl-r">6,0–18,4</span></div><div class="bl-row "><span class="bl-n">PTH</span><span class="bl-v">33 <span class="bl-u">pg/mL</span></span><span class="bl-r">19–64</span></div></div><div class="bl-panel"><div class="bl-h">Inflamação, vitaminas e marcadores</div><div class="bl-row "><span class="bl-n">PCR</span><span class="bl-v">0,47 <span class="bl-u">mg/dL</span></span><span class="bl-r"><0,50</span></div><div class="bl-row "><span class="bl-n">PSA total</span><span class="bl-v">0,3 <span class="bl-u">ng/mL</span></span><span class="bl-r">até 2,50</span></div><div class="bl-row "><span class="bl-n">Vitamina D (25-OH)</span><span class="bl-v">47 <span class="bl-u">ng/mL</span></span><span class="bl-r">30–60</span></div><div class="bl-row bl-out"><span class="bl-n">Vitamina B12</span><span class="bl-v">1.315 <span class="bl-u">ng/L</span></span><span class="bl-r">272–1.071</span></div><div class="bl-row "><span class="bl-n">Ácido fólico</span><span class="bl-v">6,5 <span class="bl-u">ng/mL</span></span><span class="bl-r">>3,9</span></div><div class="bl-row bl-out"><span class="bl-n">Homocisteína</span><span class="bl-v">12,8 <span class="bl-u">µmol/L</span></span><span class="bl-r">≤12</span></div></div><div class="bl-panel"><div class="bl-h">Sumário de urina (EAS)</div><div class="bl-row "><span class="bl-n">pH</span><span class="bl-v">7 <span class="bl-u">—</span></span><span class="bl-r">5,0–8,0</span></div><div class="bl-row bl-out"><span class="bl-n">Densidade</span><span class="bl-v">1.006 <span class="bl-u">—</span></span><span class="bl-r">1.010–1.030</span></div><div class="bl-row "><span class="bl-n">Proteínas</span><span class="bl-v"><0,25 <span class="bl-u">g/L</span></span><span class="bl-r"><0,25</span></div><div class="bl-row "><span class="bl-n">Glicose</span><span class="bl-v"><0,5 <span class="bl-u">g/L</span></span><span class="bl-r"><0,5</span></div><div class="bl-row "><span class="bl-n">Nitrito</span><span class="bl-v">Negativo</span><span class="bl-r">Negativo</span></div><div class="bl-row "><span class="bl-n">Leucócitos</span><span class="bl-v"><1.000 <span class="bl-u">/mL</span></span><span class="bl-r"><20.000</span></div></div></div>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<section class="sheet">
+  <div class="sec-label">04 · Sono · Oura Ring</div>
+  <h2 class="sec">Arquitetura do sono e sono REM</h2>
+  <div class="sec-sub">Distribuição dos estágios nos últimos 30 dias · % de REM ao longo do histórico</div>
+  <div class="chart-row">
+    <div class="chart-card half">
+      <div class="cc-h">Arquitetura do sono — últimos 30 dias</div>
+      <div class="cc-m">Boxplot · 32 noites · horas por noite</div>
+      <div class="chart-box" style="height:212px"><canvas id="sleepBox"></canvas></div>
+    </div>
+    <div class="chart-card half">
+      <div class="cc-h">Sono REM — % do sono total</div>
+      <div class="cc-m">238 noites · 2025-10 → 2026-06</div>
+      <div class="chart-box" style="height:212px"><canvas id="remLine"></canvas></div>
+    </div>
+  </div>
+  <div class="note">
+    <p><strong>Leitura clínica.</strong> No histórico, a mediana de REM (17% do total) ficou <strong>abaixo do limiar saudável de 20–25%</strong> — esperado sob benzodiazepínico, potente supressor do REM, com impacto direto sobre a consolidação da memória emocional. Nos <strong>últimos 30 dias houve melhora para ~21%</strong>, retornando à borda inferior da faixa saudável — compatível com o <strong>rebote de REM</strong> esperado conforme o desmame de diazepam avança. O predomínio de sono leve mantém-se como assinatura compatível com quetiapina.</p>
+  </div>
+
+  <div class="sec-block" style="margin-top:16px">
+    <div class="sec-label">05 · Estresse · Oura Ring</div>
+    <h2 class="sec">Evolução do estresse</h2>
+    <div class="sec-sub">Minutos diários em alto estresse · média móvel de 7 dias</div>
+    <div class="chart-card full">
+      <div class="cc-h">Alto estresse — min/dia</div>
+      <div class="cc-m">Oura · 244 dias · pico 525 min em 2026-04-06</div>
+      <div class="chart-box" style="height:226px"><canvas id="stressChart"></canvas></div>
+    </div>
+    <div class="note">
+      <p><strong>Comentário.</strong> A carga de estresse concentra-se em <strong>abril–maio de 2026</strong>, coincidindo com a crise cervical, a internação de 29/04 e os ajustes medicamentosos do período. O <strong>pico de 525 minutos em 2026-04-06</strong> é o maior do registro. A partir de meados de junho, a média móvel recua de forma consistente, sinalizando estabilização.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<section class="sheet">
+  <div class="sec-label">06 · Resiliência · Oura Ring</div>
+  <h2 class="sec">Evolução da resiliência</h2>
+  <div class="sec-sub">Pontuação composta 0–100 · média móvel de 7 dias</div>
+  <div class="chart-card full">
+    <div class="cc-h">Resiliência — pontuação Oura</div>
+    <div class="cc-m">218 dias pontuados · mínimo 34.9 em 2026-04-28 · atual 47</div>
+    <div class="chart-box" style="height:214px"><canvas id="resChart"></canvas></div>
+  </div>
+  <div class="note">
+    <p><strong>Comentário.</strong> A resiliência declinou de um platô em torno de 48–50 (out 2025 – fev 2026) para a faixa <strong>"limitada"</strong>, atingindo o mínimo de <strong>34.9 em 2026-04-28</strong> — janela da internação e da maior carga de estresse. Desde então há <strong>recuperação gradual e sustentada</strong>, retornando à faixa "adequada/sólida" (47) em junho, em paralelo à queda do estresse.</p>
+  </div>
+
+  <div class="sec-block" style="margin-top:16px">
+    <div class="sec-label">07 · Imagem</div>
+    <h2 class="sec">Ressonâncias e ultrassom</h2>
+    <div class="sec-sub">Conclusões · 8 de junho de 2026</div>
+    <div class="flag"><p><strong>Cirurgia marcada para 8 de julho de 2026</strong> — remoção do tecido fibrótico/subgaleal frontal direito, em Ribeirão Preto. As ressonâncias abaixo compõem o planejamento pré-operatório.</p></div>
+    <div class="img-card">
+      <div class="img-h"><span class="img-t">RM de crânio</span><span class="img-d">08 jun 2026 · com contraste</span></div>
+      <p>Espessamento e obliteração das partes moles subgaleais frontal à direita, de aspecto laminar, com baixo sinal em todas as sequências e sem realce pelo meio de contraste, com efeito de susceptibilidade magnética — pode representar <strong>componente hemático crônico subgaleal</strong>. Não foram caracterizadas lesões nodulares com realce nesta topografia. <strong>Estruturas encefálicas dentro dos limites da normalidade.</strong></p>
+      <div class="img-by">Laudo: Dr. Luiz Ricardo Araujo Uchoa · CRM-SP 220106 · solicitação Dr. Dimas Andre Milcheski · CRM 96425</div>
+    </div>
+    <div class="img-card">
+      <div class="img-h"><span class="img-t">RM de face</span><span class="img-d">08 jun 2026 · com contraste</span></div>
+      <p>Espessamento subgaleal frontal direito (~0,3 cm), laminar, sem realce, com abaulamento das partes moles superficiais e estriações de permeio — <strong>mais provavelmente sequelar</strong>. Sinais de septoplastia e turbinectomia parcial inferior bilateral; discreto espessamento mucoso dos seios paranasais. Proeminência das paredes laterais da orofaringe e palato mole espessado, com redução da coluna aérea retropalatal. Órbitas, parótidas e submandibulares sem alterações; sem linfonodomegalias.</p>
+      <div class="img-by">Laudo: Dr. Luiz Ricardo Araujo Uchoa · CRM-SP 220106</div>
+    </div>
+    <div class="img-card">
+      <div class="img-h"><span class="img-t">Ultrassom de abdome total</span><span class="img-d">2026</span></div>
+      <p><strong>Sem alterações — dentro da normalidade</strong> (conforme avaliação da endocrinologia). Mesmo com o exame normal, foi solicitada elastografia hepática por ressonância para complementação (ver frentes especialistas).</p>
+    </div>
+  </div>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<section class="sheet">
+  <div class="sec-label">08 · Frentes especialistas</div>
+  <h2 class="sec">Demais frentes em análise</h2>
+  <div class="sec-sub">Acompanhamentos especializados em curso</div>
+  <div class="spec">
+    <div class="spec-h">Cardiologia</div>
+    <div class="spec-who">Dr. Dairo Bicudo Piai · CRM 40866</div>
+    <ul class="bul">
+      <li><strong>Eletrocardiograma normal.</strong></li>
+      <li><strong>Teste ergométrico aguardando resultado</strong>, sob suspeita de <strong>síndrome vaso-vagal</strong>.</li>
+    </ul>
+  </div>
+  <div class="spec">
+    <div class="spec-h">Endocrinologia</div>
+    <div class="spec-who">Dr. Ivan Moreira Junior · CRM 94932</div>
+    <ul class="bul">
+      <li><strong>Liberado para iniciar Monjaro 2,5 mg no pós-operatório</strong>; acredita em efeitos muito positivos não apenas para o emagrecimento.</li>
+      <li>Apesar do <strong>ultrassom de abdome normal</strong>, solicitou <strong>elastografia hepática por ressonância magnética</strong>.</li>
+      <li>Pediu <strong>revisão dos exames de sangue relacionados à parte hormonal</strong>.</li>
+      <li>Solicitou <strong>DEXA corporal</strong> e <strong>ressonância magnética de hipófise</strong>, dado o acidente de bicicleta e as alterações hormonais.</li>
+    </ul>
+  </div>
+  <p style="margin-top:14px;color:var(--muted);font-size:9.5px">As recomendações endócrinas (elastografia hepática, revisão hormonal, DEXA e RM de hipófise) dialogam com os achados laboratoriais fora do intervalo deste relatório — estradiol elevado e cortisol matinal reduzido — e merecem acompanhamento conjunto.</p>
+  <div class="foot"><span>Lumen Health · Relatório psiquiátrico · documento confidencial</span><span>Joao Victor Creste · 24-06-2026</span></div>
+</section>
+<script>
+const INK='#1E2D3D', SOFT='#5C6B7A', GRID='rgba(30,45,61,0.10)', GOLD='#B8954A',
+      PETROL='#2F6489', RED='#C0392B', GREEN='#1F6E45', BLUE='#2F6489';
+Chart.defaults.color = INK;
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.font.size = 9;
+const axis = { grid:{ color:GRID, drawBorder:false }, ticks:{ color:SOFT } };
+const hm = (h)=>{ if(h==null||isNaN(h)) return '–'; const x=Math.floor(h),m=Math.round((h-x)*60); return x+'h'+String(m).padStart(2,'0'); };
+
+const SLEEP_BOX30 = {"deep":{"min":0,"q1":0.8375,"median":1.1583333333333334,"q3":1.4895833333333333,"max":1.975,"mean":1.166666666666667,"items":[2.841666666666667],"n":32},"rem":{"min":0.45,"q1":0.7854166666666667,"median":1.2625,"q3":1.6583333333333332,"max":2.683333333333333,"mean":1.2815104166666667,"items":[],"n":32},"light":{"min":1.5166666666666666,"q1":2.6812500000000004,"median":3.6875,"q3":4.314583333333333,"max":6.266666666666667,"mean":3.7315104166666657,"items":[7.766666666666667],"n":32},"awake":{"min":0.2833333333333333,"q1":0.7284027777777777,"median":0.9448611111111112,"q3":1.2672222222222222,"max":2.0169444444444444,"mean":1.045798611111111,"items":[2.1333333333333333,2.1725,2.200833333333333],"n":32},"total":{"min":3.775,"q1":4.410416666666666,"median":5.9,"q3":6.98125,"max":10.55,"mean":6.179687500000001,"items":[12.083333333333334],"n":32}};
+const REM_PCT = [["2025-10-18",4.8],["2025-10-18",24],["2025-10-19",23.4],["2025-10-20",6.1],["2025-10-21",22.1],["2025-10-22",18.6],["2025-10-23",21.5],["2025-10-25",17.5],["2025-10-25",25.5],["2025-10-27",15.3],["2025-10-28",15.3],["2025-10-29",14.9],["2025-10-30",20.6],["2025-10-31",21],["2025-11-03",28.8],["2025-11-03",25.4],["2025-11-04",10.4],["2025-11-05",31.8],["2025-11-06",8.6],["2025-11-07",23.6],["2025-11-08",7.9],["2025-11-09",10],["2025-11-10",9.5],["2025-11-11",19.6],["2025-11-12",13.8],["2025-11-13",28.3],["2025-11-14",14.8],["2025-11-15",24.1],["2025-11-16",22.9],["2025-11-17",12.8],["2025-11-18",17.1],["2025-11-19",9.6],["2025-11-20",26],["2025-11-21",17.9],["2025-11-22",13.9],["2025-11-23",19.2],["2025-11-24",19.2],["2025-11-25",18],["2025-11-26",5.7],["2025-11-27",13.8],["2025-11-28",14.2],["2025-11-29",25.8],["2025-11-30",17.5],["2025-12-01",11.8],["2025-12-02",7.2],["2025-12-03",4.8],["2025-12-04",7.1],["2025-12-05",16],["2025-12-07",13.7],["2025-12-08",18.4],["2025-12-09",16.9],["2025-12-10",22.9],["2025-12-11",16.2],["2025-12-12",14.6],["2025-12-13",18.1],["2025-12-16",6.1],["2025-12-17",19.9],["2025-12-18",15.5],["2025-12-19",12.8],["2025-12-20",21.6],["2025-12-21",15],["2025-12-22",5.3],["2025-12-23",13.6],["2025-12-24",22.3],["2025-12-25",18],["2025-12-26",9.4],["2025-12-26",18.5],["2025-12-27",16.4],["2025-12-28",13.5],["2025-12-29",11.2],["2025-12-30",10.8],["2025-12-31",19.8],["2026-01-01",5.2],["2026-01-02",13.2],["2026-01-03",20],["2026-01-04",8.1],["2026-01-05",15.3],["2026-01-06",19.3],["2026-01-07",24.9],["2026-01-08",16.2],["2026-01-08",16.7],["2026-01-10",27.5],["2026-01-11",24.3],["2026-01-12",12],["2026-01-13",18],["2026-01-14",34.8],["2026-01-15",13.4],["2026-01-16",26.9],["2026-01-17",24.6],["2026-01-18",15.4],["2026-01-19",20.7],["2026-01-20",30.8],["2026-01-21",19.1],["2026-01-22",33.2],["2026-01-23",19],["2026-01-24",9.6],["2026-01-25",2.6],["2026-01-26",9.1],["2026-01-27",8],["2026-01-28",24],["2026-01-29",7.5],["2026-01-30",16],["2026-01-31",14.3],["2026-02-01",27.1],["2026-02-02",15.8],["2026-02-04",11.4],["2026-02-05",18],["2026-02-06",25.1],["2026-02-07",28.2],["2026-02-08",18],["2026-02-09",15.9],["2026-02-10",14.1],["2026-02-11",4.1],["2026-02-12",12.3],["2026-02-14",15],["2026-02-15",17.7],["2026-02-16",8.7],["2026-02-17",16.5],["2026-02-18",20.2],["2026-02-19",14.9],["2026-02-20",14],["2026-02-21",21.7],["2026-02-22",21.1],["2026-02-23",5.4],["2026-02-24",5.4],["2026-02-25",12.1],["2026-02-26",20.2],["2026-02-27",18.2],["2026-02-28",12.2],["2026-03-01",14.5],["2026-03-02",20.3],["2026-03-02",10.7],["2026-03-03",12.4],["2026-03-04",16.8],["2026-03-05",16.6],["2026-03-06",12.8],["2026-03-07",19.5],["2026-03-08",23.8],["2026-03-09",17.8],["2026-03-10",25.6],["2026-03-11",12.1],["2026-03-13",21.8],["2026-03-14",19.2],["2026-03-15",8.4],["2026-03-16",23.4],["2026-03-17",21.8],["2026-03-18",13.4],["2026-03-19",14.6],["2026-03-20",12.7],["2026-03-21",12.3],["2026-03-22",16.3],["2026-03-23",7.7],["2026-03-24",4.9],["2026-03-25",17.3],["2026-03-26",14.2],["2026-03-27",10],["2026-03-28",13.9],["2026-03-29",12.9],["2026-03-30",13.2],["2026-03-31",17.2],["2026-04-01",21.6],["2026-04-02",7.1],["2026-04-03",10.7],["2026-04-04",19.2],["2026-04-05",10.9],["2026-04-06",22.2],["2026-04-08",20.4],["2026-04-09",5.1],["2026-04-10",19.4],["2026-04-11",13.5],["2026-04-12",10.3],["2026-04-12",10.6],["2026-04-13",22.4],["2026-04-14",11.7],["2026-04-15",31.4],["2026-04-16",6.2],["2026-04-17",15],["2026-04-18",13.3],["2026-04-19",28.3],["2026-04-20",18.8],["2026-04-21",12.9],["2026-04-22",2],["2026-04-23",24.3],["2026-04-24",17.5],["2026-04-25",24.6],["2026-04-26",12.4],["2026-04-27",12.3],["2026-04-28",28.6],["2026-04-29",24.4],["2026-04-30",26.2],["2026-05-01",23.7],["2026-05-02",15.4],["2026-05-03",23.6],["2026-05-04",19],["2026-05-05",25.3],["2026-05-06",20.5],["2026-05-07",15.2],["2026-05-08",27.8],["2026-05-10",19.6],["2026-05-11",12.9],["2026-05-12",24.4],["2026-05-13",3.8],["2026-05-14",21.9],["2026-05-15",22.1],["2026-05-16",14.2],["2026-05-17",23.2],["2026-05-18",19.4],["2026-05-19",11.5],["2026-05-19",13],["2026-05-20",28.1],["2026-05-21",29.8],["2026-05-22",25.3],["2026-05-23",15.5],["2026-05-24",24.6],["2026-05-25",25],["2026-05-26",23.2],["2026-05-27",32.3],["2026-05-28",12],["2026-05-29",13.8],["2026-05-30",15.5],["2026-06-01",21.7],["2026-06-02",25.2],["2026-06-03",11.8],["2026-06-04",22.5],["2026-06-05",22],["2026-06-06",17.3],["2026-06-07",15.2],["2026-06-07",24.1],["2026-06-08",17.2],["2026-06-09",22.4],["2026-06-10",19.9],["2026-06-11",15.9],["2026-06-12",28.8],["2026-06-13",22.7],["2026-06-14",14.5],["2026-06-14",20.5],["2026-06-15",27.7],["2026-06-17",15.6]];
+const STRESS_RES = [["2025-10-17",0,0,null,null,null],["2025-10-18",0,0,null,null,null],["2025-10-19",0,0,null,null,null],["2025-10-20",0,0,null,null,null],["2025-10-21",0,0,null,null,null],["2025-10-22",0,0,null,null,null],["2025-10-23",90,120,null,null,"normal"],["2025-10-24",0,60,null,null,null],["2025-10-25",30,165,null,null,"restored"],["2025-10-26",180,30,null,null,"stressful"],["2025-10-27",15,195,null,null,"restored"],["2025-10-28",30,30,null,null,"normal"],["2025-10-29",45,75,null,null,"normal"],["2025-10-30",0,150,null,null,"restored"],["2025-10-31",165,165,null,null,"normal"],["2025-11-01",285,15,null,null,"stressful"],["2025-11-02",75,0,null,null,"normal"],["2025-11-03",150,195,47.1,"solid","normal"],["2025-11-04",0,285,47.2,"solid","restored"],["2025-11-05",15,225,49,"solid","restored"],["2025-11-06",45,90,47.6,"solid","normal"],["2025-11-07",30,45,48.7,"solid","normal"],["2025-11-08",255,30,47.6,"solid","stressful"],["2025-11-09",300,30,48.3,"solid","stressful"],["2025-11-10",0,510,47.3,"solid","restored"],["2025-11-11",45,45,47.8,"solid","normal"],["2025-11-12",0,210,47.8,"solid","restored"],["2025-11-13",0,180,48.6,"solid","normal"],["2025-11-14",195,270,48.6,"solid","restored"],["2025-11-15",165,45,50.4,"solid","stressful"],["2025-11-16",30,15,51.1,"solid","normal"],["2025-11-17",120,180,49.7,"solid","normal"],["2025-11-18",30,135,49.8,"solid","normal"],["2025-11-19",165,60,49.1,"solid","stressful"],["2025-11-20",15,45,49.9,"solid","normal"],["2025-11-21",60,180,49.7,"solid","normal"],["2025-11-22",60,15,49.7,"solid","normal"],["2025-11-23",45,135,49.5,"solid","restored"],["2025-11-24",0,345,48.9,"solid","restored"],["2025-11-25",15,120,48.2,"solid","normal"],["2025-11-26",105,105,49.2,"solid","normal"],["2025-11-27",45,45,48.7,"solid","normal"],["2025-11-28",105,150,48.3,"solid","normal"],["2025-11-29",0,210,47.8,"solid","restored"],["2025-11-30",0,135,47.2,"solid","restored"],["2025-12-01",15,150,48,"solid","restored"],["2025-12-02",120,150,48.8,"solid","normal"],["2025-12-03",75,150,47.6,"solid","normal"],["2025-12-04",0,135,46.6,"solid","restored"],["2025-12-05",75,165,47.1,"solid","normal"],["2025-12-06",135,0,48.3,"solid","stressful"],["2025-12-07",120,30,48.5,"solid","stressful"],["2025-12-08",120,90,48.8,"solid","stressful"],["2025-12-09",105,90,48.7,"solid","normal"],["2025-12-10",30,0,48.1,"solid",null],["2025-12-11",120,60,48.1,"solid","normal"],["2025-12-12",45,75,47.8,"solid","normal"],["2025-12-13",15,135,48.2,"solid","restored"],["2025-12-14",0,0,null,null,null],["2025-12-15",120,90,null,null,"normal"],["2025-12-16",150,15,46.3,"solid","stressful"],["2025-12-17",0,75,47.8,"solid",null],["2025-12-18",90,45,48.3,"solid","normal"],["2025-12-19",90,75,47.3,"solid","normal"],["2025-12-20",90,135,47.3,"solid","normal"],["2025-12-21",120,0,45.9,"solid","stressful"],["2025-12-22",120,60,44.4,"adequate","normal"],["2025-12-23",105,45,43.6,"adequate","normal"],["2025-12-24",195,30,43.7,"adequate","stressful"],["2025-12-25",75,120,44,"adequate","normal"],["2025-12-26",0,180,45.4,"adequate","restored"],["2025-12-27",0,150,45.8,"adequate","normal"],["2025-12-28",15,30,47,"solid","normal"],["2025-12-29",30,195,47.8,"solid","restored"],["2025-12-30",0,360,49.3,"solid","restored"],["2025-12-31",0,450,49.4,"solid","restored"],["2026-01-01",90,225,49.3,"solid","restored"],["2026-01-02",90,45,48.3,"solid","stressful"],["2026-01-03",270,75,48.8,"solid","stressful"],["2026-01-04",15,0,49.3,"solid",null],["2026-01-05",15,450,50.1,"solid","restored"],["2026-01-06",0,135,50.8,"solid","restored"],["2026-01-07",90,15,51.8,"solid",null],["2026-01-08",45,60,52.2,"strong","normal"],["2026-01-09",45,75,null,null,"restored"],["2026-01-10",150,45,51.7,"solid","normal"],["2026-01-11",165,30,50.5,"solid","stressful"],["2026-01-12",90,120,48.7,"solid","normal"],["2026-01-13",45,315,48,"solid","restored"],["2026-01-14",255,60,48.6,"solid","stressful"],["2026-01-15",120,15,49.6,"solid","normal"],["2026-01-16",30,195,51.6,"strong","normal"],["2026-01-17",30,135,51.1,"solid","normal"],["2026-01-18",135,60,50.9,"solid","normal"],["2026-01-19",60,105,49.7,"solid","normal"],["2026-01-20",210,30,49.1,"solid","stressful"],["2026-01-21",60,30,49,"solid","normal"],["2026-01-22",195,15,49.5,"solid","normal"],["2026-01-23",180,60,50,"solid","stressful"],["2026-01-24",120,75,50,"solid","normal"],["2026-01-25",30,90,49.7,"solid","normal"],["2026-01-26",270,15,49.4,"solid","stressful"],["2026-01-27",180,15,49.7,"solid","stressful"],["2026-01-28",330,0,49.3,"solid","stressful"],["2026-01-29",105,60,48,"solid","normal"],["2026-01-30",345,30,48.5,"solid","stressful"],["2026-01-31",195,15,47.7,"solid","stressful"],["2026-02-01",210,0,48.4,"solid","stressful"],["2026-02-02",105,90,48.5,"solid","normal"],["2026-02-03",30,30,null,null,"normal"],["2026-02-04",60,15,48.1,"solid","normal"],["2026-02-05",30,240,48.8,"solid","restored"],["2026-02-06",0,195,50,"solid","restored"],["2026-02-07",135,0,50.4,"solid","normal"],["2026-02-08",0,60,50.9,"strong","normal"],["2026-02-09",30,0,50.8,"solid","normal"],["2026-02-10",30,105,50,"solid","normal"],["2026-02-11",15,285,48.8,"solid","restored"],["2026-02-12",390,135,49.5,"solid","stressful"],["2026-02-13",60,405,null,null,"restored"],["2026-02-14",0,60,50.6,"solid","normal"],["2026-02-15",30,60,50.4,"solid","normal"],["2026-02-16",0,180,49.5,"solid","restored"],["2026-02-17",30,45,50.6,"solid","normal"],["2026-02-18",195,45,50.9,"solid","stressful"],["2026-02-19",30,210,49.3,"solid","normal"],["2026-02-20",150,105,47.3,"solid","normal"],["2026-02-21",165,15,46.4,"adequate","stressful"],["2026-02-22",45,0,45.9,"adequate","normal"],["2026-02-23",75,165,44.7,"adequate","normal"],["2026-02-24",30,90,44.2,"adequate","normal"],["2026-02-25",150,60,45.4,"adequate","stressful"],["2026-02-26",30,0,45.6,"adequate","normal"],["2026-02-27",45,225,47.2,"solid","restored"],["2026-02-28",210,195,45.9,"adequate","stressful"],["2026-03-01",60,0,45.6,"adequate","normal"],["2026-03-02",105,0,45.6,"adequate","stressful"],["2026-03-03",30,60,44.1,"adequate","normal"],["2026-03-04",90,75,44.6,"adequate","stressful"],["2026-03-05",75,75,45.2,"adequate","normal"],["2026-03-06",15,90,45.7,"adequate","restored"],["2026-03-07",15,135,46.4,"adequate","normal"],["2026-03-08",90,0,47.3,"solid","normal"],["2026-03-09",60,45,47.6,"solid","normal"],["2026-03-10",150,225,48.3,"solid","restored"],["2026-03-11",30,75,48.5,"solid","normal"],["2026-03-12",0,360,null,null,"restored"],["2026-03-13",150,135,48.2,"solid","normal"],["2026-03-14",60,0,48.5,"solid","normal"],["2026-03-15",0,120,47.9,"solid","restored"],["2026-03-16",165,150,47.1,"solid","normal"],["2026-03-17",30,285,48.7,"solid","restored"],["2026-03-18",15,60,48.5,"solid","normal"],["2026-03-19",105,90,49.1,"solid","normal"],["2026-03-20",120,165,48.5,"solid","normal"],["2026-03-21",0,165,48.1,"solid","restored"],["2026-03-22",15,150,47.8,"solid","restored"],["2026-03-23",0,225,48.2,"solid","normal"],["2026-03-24",45,105,47.9,"solid","normal"],["2026-03-25",0,75,46.9,"solid","normal"],["2026-03-26",120,165,47.8,"solid","restored"],["2026-03-27",30,105,46.8,"solid","normal"],["2026-03-28",120,15,46.5,"adequate","normal"],["2026-03-29",45,60,47.4,"solid","normal"],["2026-03-30",45,165,47.8,"solid","restored"],["2026-03-31",135,45,46.1,"adequate","normal"],["2026-04-01",0,195,46.4,"adequate","restored"],["2026-04-02",15,15,45,"adequate",null],["2026-04-03",0,105,45.2,"adequate","normal"],["2026-04-04",60,45,45.3,"adequate","normal"],["2026-04-05",0,135,45.7,"adequate","restored"],["2026-04-06",525,105,46.2,"adequate","stressful"],["2026-04-07",180,75,null,null,"normal"],["2026-04-08",465,0,46.1,"adequate","stressful"],["2026-04-09",105,15,44.6,"adequate","stressful"],["2026-04-10",300,75,44.9,"adequate","stressful"],["2026-04-11",465,0,43.8,"adequate","stressful"],["2026-04-12",75,45,43.3,"adequate","normal"],["2026-04-13",240,105,42.9,"adequate","stressful"],["2026-04-14",45,120,42,"adequate","normal"],["2026-04-15",105,15,41.9,"adequate","normal"],["2026-04-16",60,120,41,"limited","normal"],["2026-04-17",60,150,40.4,"limited","normal"],["2026-04-18",90,0,40.2,"limited","stressful"],["2026-04-19",0,30,39.6,"limited","normal"],["2026-04-20",60,0,37.8,"limited","normal"],["2026-04-21",0,75,37.4,"limited","restored"],["2026-04-22",0,30,37.1,"limited",null],["2026-04-23",15,75,37.1,"limited","normal"],["2026-04-24",0,195,36.2,"limited","normal"],["2026-04-25",45,30,36.6,"limited","normal"],["2026-04-26",105,15,36.4,"limited","normal"],["2026-04-27",45,0,35.4,"limited","normal"],["2026-04-28",30,360,34.9,"limited","restored"],["2026-04-29",0,165,35.1,"limited","restored"],["2026-04-30",45,135,37.5,"limited","normal"],["2026-05-01",465,15,37.2,"limited","stressful"],["2026-05-02",60,210,37.5,"limited","restored"],["2026-05-03",90,30,38.3,"limited","normal"],["2026-05-04",165,0,39.2,"limited","stressful"],["2026-05-05",60,0,41.5,"limited","normal"],["2026-05-06",75,45,41.3,"limited","normal"],["2026-05-07",30,165,40.7,"limited","restored"],["2026-05-08",360,30,40.7,"limited","stressful"],["2026-05-09",150,45,40,"limited","stressful"],["2026-05-10",45,150,41.5,"limited","restored"],["2026-05-11",90,30,41.1,"limited",null],["2026-05-12",0,375,41.6,"limited","restored"],["2026-05-13",105,75,41.1,"limited","normal"],["2026-05-14",180,60,39.3,"limited","stressful"],["2026-05-15",75,75,39.1,"limited","normal"],["2026-05-16",60,45,38.9,"limited","normal"],["2026-05-17",315,15,39.2,"limited","stressful"],["2026-05-18",90,75,39.4,"limited",null],["2026-05-19",15,15,38.4,"limited","normal"],["2026-05-20",165,0,37.4,"limited","normal"],["2026-05-21",105,60,37.2,"limited","normal"],["2026-05-22",180,60,36.9,"limited","normal"],["2026-05-23",60,150,38.4,"limited","normal"],["2026-05-24",0,165,37.6,"limited","restored"],["2026-05-25",30,180,37.7,"limited","normal"],["2026-05-26",45,120,37.2,"limited","normal"],["2026-05-27",255,15,36.9,"limited","stressful"],["2026-05-28",30,15,38,"limited","normal"],["2026-05-29",15,0,37.2,"limited","normal"],["2026-05-30",30,15,36.4,"limited",null],["2026-05-31",120,15,null,null,"stressful"],["2026-06-01",45,165,36.8,"limited","normal"],["2026-06-02",0,195,37.5,"limited","normal"],["2026-06-03",45,30,37.5,"limited","normal"],["2026-06-04",15,90,37.6,"limited","normal"],["2026-06-05",30,165,38.4,"limited","normal"],["2026-06-06",0,60,37.4,"limited","normal"],["2026-06-07",0,60,39.3,"limited","normal"],["2026-06-08",15,165,39.6,"limited","normal"],["2026-06-09",0,150,40,"limited","normal"],["2026-06-10",0,135,41.5,"adequate","restored"],["2026-06-11",0,240,41.5,"adequate","restored"],["2026-06-12",15,465,42.5,"adequate","restored"],["2026-06-13",15,60,44.9,"adequate","normal"],["2026-06-14",30,120,45.8,"adequate","normal"],["2026-06-15",0,120,46.2,"solid","normal"],["2026-06-16",0,0,null,null,null],["2026-06-17",0,0,47.2,"solid",null]];
+
+// 1 — sleep architecture boxplot (last 30d)
+new Chart(document.getElementById('sleepBox'), {
+  type:'boxplot',
+  data:{ labels:['Profundo','REM','Leve','Acordado','Total'],
+    datasets:[{ label:'Horas por noite',
+      backgroundColor:['rgba(47,100,137,.42)','rgba(184,149,74,.45)','rgba(94,151,188,.28)','rgba(122,143,166,.25)','rgba(36,78,110,.50)'],
+      borderColor:['#2F6489','#B8954A','#5E97BC','#7A8FA6','#244E6E'], borderWidth:1.25,
+      itemRadius:0, meanRadius:0, outlierRadius:2, outlierBackgroundColor:'#7A8FA6', outlierBorderColor:'#7A8FA6', medianColor:'#0D1B2A',
+      data:[SLEEP_BOX30.deep, SLEEP_BOX30.rem, SLEEP_BOX30.light, SLEEP_BOX30.awake, SLEEP_BOX30.total] }] },
+  options:{ responsive:true, maintainAspectRatio:false, animation:false, devicePixelRatio:3, plugins:{ legend:{ display:false } },
+    scales:{ x:{ ...axis, ticks:{ ...axis.ticks, font:{ size:9 } } },
+      y:{ ...axis, beginAtZero:true, title:{ display:true, text:'horas por noite', color:SOFT },
+        ticks:{ ...axis.ticks, callback:(v)=>v+'h' } } } }
+});
+
+// 2 — REM% per night + 7-night mean
+const rollingArr = (arr, w)=>{ const half=Math.floor(w/2); return arr.map((_,i)=>{ const s=arr.slice(Math.max(0,i-half),i+half+1).filter(v=>typeof v==='number'); return s.length? +(s.reduce((a,v)=>a+v,0)/s.length).toFixed(1):null; }); };
+const remVals = REM_PCT.map(r=>r[1]);
+new Chart(document.getElementById('remLine'), {
+  type:'line',
+  data:{ labels:REM_PCT.map(r=>r[0]), datasets:[
+    { label:'REM %/noite', data:remVals, borderColor:'rgba(184,149,74,.32)', backgroundColor:'transparent', borderWidth:1, tension:.25, pointRadius:0 },
+    { label:'Média 7 noites', data:rollingArr(remVals,7), borderColor:GOLD, backgroundColor:'transparent', borderWidth:2.2, tension:.35, pointRadius:0 } ]},
+  options:{ responsive:true, maintainAspectRatio:false, animation:false, devicePixelRatio:3,
+    plugins:{ legend:{ display:false },
+      annotation:false },
+    scales:{ y:{ ...axis, min:0, max:40, title:{ display:true, text:'% do sono total', color:SOFT },
+        ticks:{ ...axis.ticks, callback:(v)=>v+'%' } },
+      x:{ ...axis, ticks:{ ...axis.ticks, autoSkip:true, maxTicksLimit:6, callback(v){ const l=this.getLabelForValue(v); return l? l.slice(0,7):l; } } } } }
+});
+
+// 3 — high-stress min/day + 7d mean
+const SR = STRESS_RES;
+const stress = SR.map(r=> typeof r[1]==='number'? r[1]:null);
+new Chart(document.getElementById('stressChart'), {
+  type:'line',
+  data:{ labels:SR.map(r=>r[0]), datasets:[
+    { label:'Alto estresse (min/dia)', data:stress, borderColor:'rgba(192,57,43,.24)', backgroundColor:'rgba(192,57,43,.06)', fill:true, borderWidth:1, tension:.25, pointRadius:0 },
+    { label:'Média 7 dias', data:rollingArr(stress,7), borderColor:RED, backgroundColor:'transparent', borderWidth:2.4, tension:.35, pointRadius:0 } ]},
+  options:{ responsive:true, maintainAspectRatio:false, animation:false, devicePixelRatio:3,
+    plugins:{ legend:{ position:'bottom', labels:{ color:SOFT, boxWidth:16, font:{ size:9 } } } },
+    scales:{ y:{ ...axis, min:0, max:600, title:{ display:true, text:'min/dia', color:SOFT }, ticks:{ ...axis.ticks, stepSize:120 } },
+      x:{ ...axis, ticks:{ ...axis.ticks, autoSkip:true, maxTicksLimit:10, callback(v){ const l=this.getLabelForValue(v); return l? l.slice(0,7):l; } } } } }
+});
+
+// 4 — resilience + 7d mean
+const score = SR.map(r=> typeof r[3]==='number'? r[3]:null);
+new Chart(document.getElementById('resChart'), {
+  type:'line',
+  data:{ labels:SR.map(r=>r[0]), datasets:[
+    { label:'Resiliência (0–100)', data:score, borderColor:'rgba(31,110,69,.30)', backgroundColor:'transparent', borderWidth:1, tension:.25, pointRadius:0, spanGaps:true },
+    { label:'Média 7 dias', data:rollingArr(score,7), borderColor:GREEN, backgroundColor:'transparent', borderWidth:2.4, borderDash:[5,3], tension:.35, pointRadius:0, spanGaps:true } ]},
+  options:{ responsive:true, maintainAspectRatio:false, animation:false, devicePixelRatio:3,
+    plugins:{ legend:{ position:'bottom', labels:{ color:SOFT, boxWidth:16, font:{ size:9 } } } },
+    scales:{ y:{ ...axis, min:30, max:60, title:{ display:true, text:'pontuação', color:SOFT }, ticks:{ ...axis.ticks, stepSize:10 } },
+      x:{ ...axis, ticks:{ ...axis.ticks, autoSkip:true, maxTicksLimit:10, callback(v){ const l=this.getLabelForValue(v); return l? l.slice(0,7):l; } } } } }
+});
+</script>
+</body></html>

@@ -2636,10 +2636,12 @@
     injectChangeButton();
     // Patient Zero's home is a static page that ends in <footer> — we can
     // inject the danger zone right away, before the footer.
-    // Leo Keller migrated to an independent, DB-backed patient (2026-06-30) and
-    // now renders from the generic DB renderer below — only Patient Zero stays
-    // on the bespoke static-HTML path.
-    if (patient === PATIENT_ZERO) {
+    // Patient Zero renders from bespoke static HTML; Leo Keller inherits it via
+    // leo-mode. (Leo's backend record is independent, but the generic DB
+    // renderer's Vitals/Genetics/Mental/Spiritual are still stubs — no charts —
+    // so until those are built to canon parity, Leo stays on the bespoke path so
+    // his pages keep mirroring Patient Zero's.)
+    if (patient === PATIENT_ZERO || patient === LEO_KELLER) {
       var section0 = currentSection();
       if (section0 === 'home') {
         injectStyles();

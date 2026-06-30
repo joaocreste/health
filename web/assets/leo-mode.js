@@ -754,7 +754,7 @@
     stripNavLinks();
     rewriteHomeHeader();
     injectLeoSummary();
-    injectPerindoprilCard();
+    // injectPerindoprilCard();  // disabled: Leo's medications were deleted (no meds shown).
     injectLeoLabExplanations();
     // Renumber LAST: the injected cards (Synthesis on home, Pharmacology on
     // physical) carry hardcoded prefixes and must participate in the
