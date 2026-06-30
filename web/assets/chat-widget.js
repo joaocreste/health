@@ -66,8 +66,7 @@
     '<button class="lc-launcher" type="button" aria-label="Ask Lumen">' + MARK.replace('lc-mark', 'lc-mark-lg') + '<span class="lc-badge"></span></button>' +
     '<div class="lc-panel" role="dialog" aria-label="Ask Lumen">' +
       '<div class="lc-header">' + MARK +
-        '<div class="lc-title">Ask Lumen' + (firstName ? ' · ' + esc(firstName) : '') +
-          '<small><span class="lang-en">Prepare for your doctor</span><span class="lang-pt">Prepare-se para seu médico</span></small></div>' +
+        '<div class="lc-title">Ask Lumen' + (firstName ? ' · ' + esc(firstName) : '') + '</div>' +
         '<button class="lc-close" type="button" aria-label="Close">×</button>' +
       '</div>' +
       '<div class="lc-log"></div>' +
