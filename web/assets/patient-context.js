@@ -2647,7 +2647,10 @@
     injectChangeButton();
     // Patient Zero's home is a static page that ends in <footer> — we can
     // inject the danger zone right away, before the footer.
-    if (patient === PATIENT_ZERO || patient === LEO_KELLER) {
+    // Leo Keller migrated to an independent, DB-backed patient (2026-06-30) and
+    // now renders from the generic DB renderer below — only Patient Zero stays
+    // on the bespoke static-HTML path.
+    if (patient === PATIENT_ZERO) {
       var section0 = currentSection();
       if (section0 === 'home') {
         injectStyles();
