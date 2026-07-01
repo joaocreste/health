@@ -28,6 +28,11 @@
   // he behaves the same way Patient Zero does: skip the data-driven
   // renderer and let the static page show.
   var LEO_KELLER      = 'pending:leo-keller-a3f1c2';
+  // John Smith Jr is a FULL 1:1 mirror of Patient Zero — his DB record is an
+  // exact clone (scripts/clone-joao-to-john.mjs) and his frontend is Joao's
+  // static HTML re-skinned in place by assets/john-mode.js (name swap + force
+  // pt). Like Leo he takes Patient Zero's bespoke static path here.
+  var JOHN_SMITH_JR   = 'pending:john-smith-jr-9d4e21';
 
   var params = new URLSearchParams(location.search);
   var fromUrl = params.get('patient');
@@ -2641,7 +2646,7 @@
     // renderer's Vitals/Genetics/Mental/Spiritual are still stubs — no charts —
     // so until those are built to canon parity, Leo stays on the bespoke path so
     // his pages keep mirroring Patient Zero's.)
-    if (patient === PATIENT_ZERO || patient === LEO_KELLER) {
+    if (patient === PATIENT_ZERO || patient === LEO_KELLER || patient === JOHN_SMITH_JR) {
       var section0 = currentSection();
       if (section0 === 'home') {
         injectStyles();

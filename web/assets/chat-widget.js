@@ -14,7 +14,7 @@
   var viewerClerk = sessionStorage.getItem('jc_viewer_clerk') || patientClerk;
 
   // Best-effort first name for the header.
-  var FIRST = { 'pending:joao': 'João', 'pending:paulo-silotto-df3441': 'Paulo', 'pending:silvana-creste-18ba19': 'Silvana' };
+  var FIRST = { 'pending:joao': 'João', 'pending:paulo-silotto-df3441': 'Paulo', 'pending:silvana-creste-18ba19': 'Silvana', 'pending:john-smith-jr-9d4e21': 'John' };
   var firstName = FIRST[patientClerk] || '';
 
   function lang() {
