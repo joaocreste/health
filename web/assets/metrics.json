@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24",
+  "generated_at": "2026-07-01",
   "weight": {
     "series_recent": [
       {
@@ -142,21 +142,22 @@
     ]
   },
   "sleep": {
-    "n_nights": 238,
+    "n_nights": 251,
     "range": [
       "2025-10-18",
-      "2026-06-17"
+      "2026-07-01"
     ],
     "box": {
       "deep": {
-        "n": 238,
+        "n": 251,
         "min": 0.0,
-        "q1": 1.104,
-        "median": 1.508,
-        "q3": 1.869,
-        "max": 2.983,
-        "mean": 1.505,
+        "q1": 1.108,
+        "median": 1.475,
+        "q3": 1.85,
+        "max": 2.933,
+        "mean": 1.494,
         "items": [
+          2.983,
           3.042,
           3.05,
           3.5,
@@ -164,33 +165,33 @@
         ]
       },
       "rem": {
-        "n": 238,
+        "n": 251,
         "min": 0.108,
         "q1": 0.883,
-        "median": 1.358,
-        "q3": 1.937,
+        "median": 1.333,
+        "q3": 1.925,
         "max": 3.475,
-        "mean": 1.436,
+        "mean": 1.429,
         "items": []
       },
       "light": {
-        "n": 238,
+        "n": 251,
         "min": 1.392,
-        "q1": 4.207,
-        "median": 5.296,
-        "q3": 6.269,
+        "q1": 4.15,
+        "median": 5.208,
+        "q3": 6.25,
         "max": 9.3,
-        "mean": 5.275,
+        "mean": 5.216,
         "items": []
       },
       "awake": {
-        "n": 238,
-        "min": 0.283,
-        "q1": 0.95,
-        "median": 1.312,
-        "q3": 1.954,
-        "max": 3.308,
-        "mean": 1.603,
+        "n": 251,
+        "min": 0.258,
+        "q1": 0.934,
+        "median": 1.303,
+        "q3": 1.944,
+        "max": 3.453,
+        "mean": 1.596,
         "items": [
           3.545,
           3.721,
@@ -201,6 +202,7 @@
           4.4,
           4.466,
           4.8,
+          4.867,
           4.892,
           4.958,
           4.992,
@@ -209,22 +211,22 @@
         ]
       },
       "total": {
-        "n": 238,
+        "n": 251,
         "min": 3.267,
-        "q1": 6.721,
-        "median": 8.216,
-        "q3": 9.554,
+        "q1": 6.625,
+        "median": 8.142,
+        "q3": 9.533,
         "max": 13.342,
-        "mean": 8.217,
+        "mean": 8.138,
         "items": []
       }
     },
     "efficiency_median": 85.0,
     "bedtime_sd_h": 2.74,
     "hrv_median": 16.0,
-    "hrv_mean": 19.8,
-    "rhr_median": 68.0,
-    "rhr_mean": 68.4,
+    "hrv_mean": 19.7,
+    "rhr_median": 67.0,
+    "rhr_mean": 68.5,
     "hrv_below20_pct": 64,
     "hrv_above60_n": 2,
     "hrv_by_month": {
@@ -236,7 +238,8 @@
       "2026-03": 23.7,
       "2026-04": 15.8,
       "2026-05": 13.9,
-      "2026-06": 15.9
+      "2026-06": 17.3,
+      "2026-07": 21.0
     },
     "rhr_by_month": {
       "2025-10": 64.4,
@@ -247,7 +250,8 @@
       "2026-03": 64.9,
       "2026-04": 73.5,
       "2026-05": 76.5,
-      "2026-06": 72.3
+      "2026-06": 70.7,
+      "2026-07": 76.0
     },
     "series": [
       {
@@ -1439,27 +1443,92 @@
         "d": "2026-06-17",
         "hrv": 14.0,
         "rhr": 72.0
+      },
+      {
+        "d": "2026-06-18",
+        "hrv": 26.0,
+        "rhr": 62.0
+      },
+      {
+        "d": "2026-06-20",
+        "hrv": 38.0,
+        "rhr": 59.0
+      },
+      {
+        "d": "2026-06-21",
+        "hrv": 21.0,
+        "rhr": 65.0
+      },
+      {
+        "d": "2026-06-22",
+        "hrv": 25.0,
+        "rhr": 65.0
+      },
+      {
+        "d": "2026-06-23",
+        "hrv": 14.0,
+        "rhr": 63.0
+      },
+      {
+        "d": "2026-06-24",
+        "hrv": 19.0,
+        "rhr": 64.0
+      },
+      {
+        "d": "2026-06-25",
+        "hrv": 10.0,
+        "rhr": 82.0
+      },
+      {
+        "d": "2026-06-26",
+        "hrv": 24.0,
+        "rhr": 60.0
+      },
+      {
+        "d": "2026-06-27",
+        "hrv": 19.0,
+        "rhr": 65.0
+      },
+      {
+        "d": "2026-06-28",
+        "hrv": 8.0,
+        "rhr": 88.0
+      },
+      {
+        "d": "2026-06-29",
+        "hrv": 11.0,
+        "rhr": 77.0
+      },
+      {
+        "d": "2026-06-30",
+        "hrv": 18.0,
+        "rhr": 69.0
+      },
+      {
+        "d": "2026-07-01",
+        "hrv": 21.0,
+        "rhr": 76.0
       }
     ]
   },
   "sleep_score": {
-    "n": 233,
-    "median": 81,
-    "mean": 78.8,
+    "n": 246,
+    "median": 81.0,
+    "mean": 78.5,
     "iqr": [
       74,
       87
     ]
   },
   "readiness": {
-    "n": 233,
-    "median": 76,
-    "mean": 72.5
+    "n": 246,
+    "median": 75.5,
+    "mean": 72.3
   },
   "spo2": {
-    "n": 229,
+    "n": 241,
     "median": 95.9,
-    "min": 89.4
+    "min": 89.0
   },
   "stress": {
     "series": [
@@ -3409,37 +3478,149 @@
       },
       {
         "d": "2026-06-17",
-        "stress": 0.0,
-        "recovery": 0.0,
+        "stress": 15.0,
+        "recovery": 105.0,
         "score": 47.2,
         "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-18",
+        "stress": 0.0,
+        "recovery": 15.0,
+        "score": 48.7,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2026-06-19",
+        "stress": 0.0,
+        "recovery": 165.0,
+        "score": null,
+        "level": null,
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-20",
+        "stress": 15.0,
+        "recovery": 195.0,
+        "score": 49.7,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-21",
+        "stress": 0.0,
+        "recovery": 75.0,
+        "score": 49.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-22",
+        "stress": 150.0,
+        "recovery": 45.0,
+        "score": 49.6,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-06-23",
+        "stress": 45.0,
+        "recovery": 75.0,
+        "score": 50.3,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-24",
+        "stress": 165.0,
+        "recovery": 45.0,
+        "score": 51.0,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-06-25",
+        "stress": 30.0,
+        "recovery": 300.0,
+        "score": 49.8,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-26",
+        "stress": 0.0,
+        "recovery": 330.0,
+        "score": 49.6,
+        "level": "solid",
+        "summary": "restored"
+      },
+      {
+        "d": "2026-06-27",
+        "stress": 75.0,
+        "recovery": 15.0,
+        "score": 48.8,
+        "level": "solid",
+        "summary": null
+      },
+      {
+        "d": "2026-06-28",
+        "stress": 390.0,
+        "recovery": 15.0,
+        "score": 48.5,
+        "level": "solid",
+        "summary": "stressful"
+      },
+      {
+        "d": "2026-06-29",
+        "stress": 150.0,
+        "recovery": 60.0,
+        "score": 47.6,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-06-30",
+        "stress": 30.0,
+        "recovery": 60.0,
+        "score": 47.2,
+        "level": "solid",
+        "summary": "normal"
+      },
+      {
+        "d": "2026-07-01",
+        "stress": 0.0,
+        "recovery": 60.0,
+        "score": 45.7,
+        "level": "adequate",
         "summary": null
       }
     ],
-    "n_stress_days": 244,
-    "n_resilience_days": 218,
+    "n_stress_days": 258,
+    "n_resilience_days": 231,
     "stress_median_min": 45.0,
-    "stress_mean_min": 82.2,
+    "stress_mean_min": 81.9,
     "stress_peak": {
       "d": "2026-04-06",
       "stress_min": 525.0
     },
-    "score_median": 47.2,
-    "score_mean": 45.4,
+    "score_median": 47.3,
+    "score_mean": 45.6,
     "level_counts": {
-      "solid": 120,
-      "adequate": 41,
+      "solid": 132,
+      "adequate": 42,
       "strong": 3,
       "limited": 54
     },
     "summary_counts": {
-      "normal": 127,
-      "restored": 52,
-      "stressful": 46
+      "normal": 132,
+      "restored": 56,
+      "stressful": 49
     },
     "range": [
       "2025-10-17",
-      "2026-06-17"
+      "2026-07-01"
     ]
   },
   "bp": {
@@ -3898,24 +4079,24 @@
     }
   },
   "activity": {
-    "n": 243,
+    "n": 257,
     "range": [
       "2025-10-17",
-      "2026-06-17"
+      "2026-07-01"
     ],
-    "steps_median": 5936,
-    "steps_mean": 6197,
+    "steps_median": 5869,
+    "steps_mean": 6145,
     "steps_iqr": [
-      3891,
-      7994
+      3922,
+      7942
     ],
     "days_10k": 31,
-    "days_7k": 90,
-    "days_5k": 149,
-    "days_total": 242,
-    "sed_h_mean": 8.21,
-    "active_cal_mean": 345,
-    "zone2_min_per_day_mean": 33.3,
+    "days_7k": 93,
+    "days_5k": 157,
+    "days_total": 256,
+    "sed_h_mean": 8.18,
+    "active_cal_mean": 343,
+    "zone2_min_per_day_mean": 32.2,
     "series": [
       {
         "d": "2025-10-17",
@@ -4887,17 +5068,73 @@
       },
       {
         "d": "2026-06-17",
-        "steps": 1005
+        "steps": 4502
+      },
+      {
+        "d": "2026-06-18",
+        "steps": 1428
+      },
+      {
+        "d": "2026-06-19",
+        "steps": 1322
+      },
+      {
+        "d": "2026-06-20",
+        "steps": 7473
+      },
+      {
+        "d": "2026-06-21",
+        "steps": 6462
+      },
+      {
+        "d": "2026-06-22",
+        "steps": 6014
+      },
+      {
+        "d": "2026-06-23",
+        "steps": 4730
+      },
+      {
+        "d": "2026-06-24",
+        "steps": 4957
+      },
+      {
+        "d": "2026-06-25",
+        "steps": 7035
+      },
+      {
+        "d": "2026-06-26",
+        "steps": 4699
+      },
+      {
+        "d": "2026-06-27",
+        "steps": 5349
+      },
+      {
+        "d": "2026-06-28",
+        "steps": 8861
+      },
+      {
+        "d": "2026-06-29",
+        "steps": 5712
+      },
+      {
+        "d": "2026-06-30",
+        "steps": 5836
+      },
+      {
+        "d": "2026-07-01",
+        "steps": 222
       }
     ]
   },
   "workouts": {
-    "n_total": 203,
+    "n_total": 207,
     "by_activity": {
       "walking": {
-        "n": 164,
-        "minutes": 3278,
-        "cal": 10406
+        "n": 168,
+        "minutes": 3330,
+        "cal": 10559
       },
       "cycling": {
         "n": 33,
@@ -4916,7 +5153,7 @@
       }
     },
     "by_intensity": {
-      "moderate": 203
+      "moderate": 207
     }
   },
   "tags": {
@@ -4929,7 +5166,8 @@
       "Quetiapine": 1,
       "tag_sleep_stress": 1,
       "tag_generic_travel": 1,
-      "tag_generic_nap": 1
+      "tag_generic_nap": 1,
+      "tag_generic_airplane": 1
     },
     "alcohol_dates": [
       "2025-10-19",
