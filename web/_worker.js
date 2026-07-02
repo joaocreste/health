@@ -1085,6 +1085,72 @@ async function handleVitalsRange(request, env) {
   }
 }
 
+/* ── /api/patient-psych ────────────────────────────────────────────
+ * GET /api/patient-psych?clerk=  -> the DB-driven psychological architecture:
+ *   dimensions[] (AMPD, only those with items) each with their psych_items +
+ *   grounding evidence quotes; the Jungian archetype (identity item flagged by
+ *   title); and the life-events timeline. Feeds renderMental() for DB-default
+ *   patients so the Mental page shows the full synthesis, not a bare count grid.
+ *   Mental scope. */
+async function handlePatientPsych(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const patientRows = await sql`
+      SELECT id FROM users WHERE clerk_user_id = ${clerk} AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (!patientRows.length) return jsonError(404, "patient_not_found");
+    const pid = patientRows[0].id;
+
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !grant.scopes.has("mental")) {
+      return jsonError(viewerClerk ? 403 : 401, "mental_scope_required");
+    }
+    await auditScopedRead(sql, grant, "patient_psych_read", "/api/patient-psych", ["mental"]);
+
+    const rows = await sql`
+      SELECT d.id AS dim_id, d.rank AS dim_rank, d.name_en, d.name_pt, d.blurb,
+             pi.id AS item_id, pi.title, pi.synthesis, pi.rank AS item_rank
+      FROM psych_dimensions d
+      JOIN psych_items pi ON pi.dimension_id = d.id AND pi.patient_id = ${pid}
+      ORDER BY d.rank, pi.rank NULLS LAST, pi.title`;
+    const itemIds = rows.map((r) => r.item_id);
+    const ev = itemIds.length
+      ? await sql`SELECT psych_item_id, quote, source_filename, rank
+                  FROM psych_evidence WHERE psych_item_id = ANY(${itemIds})
+                  ORDER BY rank NULLS LAST, created_at`
+      : [];
+    const evByItem = new Map();
+    for (const e of ev) {
+      if (!evByItem.has(e.psych_item_id)) evByItem.set(e.psych_item_id, []);
+      evByItem.get(e.psych_item_id).push({ quote: e.quote, citation: e.source_filename || null });
+    }
+
+    // Group into dimensions; lift the Jungian archetype (identity item) out.
+    const dimMap = new Map();
+    let archetype = null;
+    for (const r of rows) {
+      const item = { title: r.title, synthesis: r.synthesis, evidence: evByItem.get(r.item_id) || [] };
+      if (r.dim_id === "identity" && /^jungian archetype/i.test(r.title)) { archetype = item; continue; }
+      if (!dimMap.has(r.dim_id)) dimMap.set(r.dim_id, { id: r.dim_id, name_en: r.name_en, name_pt: r.name_pt, blurb: r.blurb, items: [] });
+      dimMap.get(r.dim_id).items.push(item);
+    }
+    const dimensions = [...dimMap.values()].filter((d) => d.items.length);
+
+    const life = await sql`
+      SELECT to_char(occurred_on, 'YYYY-MM-DD') AS occurred_on, category, title, description, significance
+      FROM life_events WHERE patient_id = ${pid} ORDER BY occurred_on`;
+
+    return new Response(JSON.stringify({ archetype, dimensions, life_events: life }),
+      { headers: { "Content-Type": "application/json", "Cache-Control": "private, max-age=300" } });
+  } catch (e) {
+    return jsonError(500, `patient-psych failed: ${e.message}`);
+  }
+}
+
 async function handlePatientExams(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
@@ -4139,6 +4205,9 @@ export default {
     }
     if (url.pathname === "/api/lab-source") {
       return handleLabSource(request, env);
+    }
+    if (url.pathname === "/api/patient-psych") {
+      return handlePatientPsych(request, env);
     }
     if (url.pathname === "/api/vitals-range") {
       return handleVitalsRange(request, env);

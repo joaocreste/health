@@ -1885,25 +1885,101 @@
     });
   }
 
+  // Build the psychological-architecture HTML (archetype card + AMPD dimension
+  // panels + life-events timeline) from /api/patient-psych, reusing mental.html's
+  // existing CSS classes. Synthesis/quote text is model-authored EN — rendered in
+  // plain spans (visible under both language toggles) so there are no blank PT gaps;
+  // only the section/dimension headers are bilingual.
+  var LIFE_FLAG_CATS = { crisis: 1, hospitalization: 1, loss: 1, diagnosis: 1, divorce: 1 };
+  function buildPsychArchitecture(psych) {
+    var out = '';
+    var a = psych.archetype;
+    if (a) {
+      out +=
+        '<section class="report-section"><div class="container"><div class="archetype-card">' +
+          '<div class="archetype-eyebrow">' +
+            '<span class="lang-en">Psychological archetype · Jungian read</span>' +
+            '<span class="lang-pt">Arquétipo psicológico · leitura junguiana</span>' +
+            '<span class="ai-pill ai-pill--inverse"><span class="lang-en">AI inference</span><span class="lang-pt">Inferência por IA</span></span>' +
+          '</div>' +
+          '<h2 class="archetype-name">' + escapeHtml(a.title.replace(/^jungian archetype:\s*/i, '')) + '</h2>' +
+          '<p class="archetype-frame">' + escapeHtml(a.synthesis).replace(/\n+/g, '</p><p class="archetype-frame">') + '</p>' +
+          (a.evidence || []).slice(0, 3).map(function (e) {
+            return '<blockquote class="archetype-quote"><span>' + escapeHtml(e.quote) + '</span>' +
+              (e.citation ? '<cite>' + escapeHtml(e.citation) + '</cite>' : '') + '</blockquote>';
+          }).join('') +
+        '</div></div></section>';
+    }
+    if (psych.dimensions && psych.dimensions.length) {
+      out += '<section class="report-section"><div class="container">' +
+        '<h2 class="section-title"><span class="lang-en">Psychological architecture — synthesized from personal writings</span>' +
+        '<span class="lang-pt">Arquitetura psicológica — sintetizada a partir de escritos pessoais</span>' +
+        ' <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></h2>';
+      psych.dimensions.forEach(function (d) {
+        out += '<div class="psych-dim-panel" data-dim="' + escapeHtml(d.id) + '">' +
+          '<div class="psych-dim-panel-head">' +
+            '<h3 class="psych-dim-panel-title"><span class="lang-en">' + escapeHtml(d.name_en) + '</span>' +
+              '<span class="lang-pt">' + escapeHtml(d.name_pt || d.name_en) + '</span></h3>' +
+            (d.blurb ? '<p class="psych-dim-panel-blurb"><span>' + escapeHtml(d.blurb) + '</span></p>' : '') +
+          '</div>' +
+          d.items.map(function (it) {
+            return '<div class="psych-item">' +
+              '<h4 class="psych-item-title"><span>' + escapeHtml(it.title) + '</span></h4>' +
+              '<p class="psych-synthesis"><span>' + escapeHtml(it.synthesis) + '</span></p>' +
+              ((it.evidence && it.evidence.length) ?
+                '<ul class="psych-evidence">' + it.evidence.map(function (e) {
+                  return '<li><span class="quote">' + escapeHtml(e.quote) + '</span>' +
+                    (e.citation ? '<span class="citation">' + escapeHtml(e.citation) + '</span>' : '') + '</li>';
+                }).join('') + '</ul>' : '') +
+            '</div>';
+          }).join('') +
+        '</div>';
+      });
+      out += '</div></section>';
+    }
+    var le = psych.life_events || [];
+    if (le.length) {
+      out += '<section class="report-section"><div class="container">' +
+        '<h2 class="section-title"><span class="lang-en">A life in events</span><span class="lang-pt">Uma vida em eventos</span></h2>' +
+        '<div class="timeline">' +
+        le.map(function (e) {
+          var flag = LIFE_FLAG_CATS[e.category] ? ' flag' : '';
+          return '<div class="timeline-item' + flag + '">' +
+            '<div class="timeline-date">' + escapeHtml(e.occurred_on || '') + '</div>' +
+            '<div class="timeline-title"><span>' + escapeHtml(e.title) + '</span></div>' +
+            (e.description ? '<div class="timeline-body"><span>' + escapeHtml(e.description) + '</span></div>' : '') +
+          '</div>';
+        }).join('') +
+        '</div></div></section>';
+    }
+    return out;
+  }
+
   function renderMental(summary) {
     var b = (summary.pillars && summary.pillars.mental && summary.pillars.mental.breakdown) || {};
-    var writings = (summary.recent_documents || []).filter(function (d) { return d.kind === 'writing'; });
-    var extra = writings.length === 0 ? '' :
-      recentSection(t('Recent writings', 'Escritos recentes'), writings.length, renderDocList(writings.slice(0, 8)));
-    renderSectionView({
-      summary: summary, title: 'Mental',
-      eyebrow: t('Mental', 'Mental'),
-      metrics: [
-        { label: t('Writings',         'Escritos'),               value: b.writings         || 0 },
-        { label: t('Mood entries',     'Registros de humor'),     value: b.mood_entries     || 0 },
-        { label: t('Psych items',      'Itens psiquiátricos'),    value: b.psych_items      || 0 },
-        { label: t('Panic events',     'Eventos de pânico'),      value: b.panic_events     || 0 },
-        { label: t('Risk assessments', 'Avaliações de risco'),    value: b.risk_assessments || 0 },
-      ],
-      extra: extra,
-      emptyHint: t('No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
-                   'Sem dados de saúde mental ainda. Envie diários, registros de humor ou avaliações psiquiátricas em "Adicionar dados".'),
-    });
+    var clerk = (summary.patient && summary.patient.clerk_user_id) || patient;
+    var metrics = [
+      { label: t('Writings',         'Escritos'),               value: b.writings         || 0 },
+      { label: t('Mood entries',     'Registros de humor'),     value: b.mood_entries     || 0 },
+      { label: t('Psych items',      'Itens psiquiátricos'),    value: b.psych_items      || 0 },
+      { label: t('Panic events',     'Eventos de pânico'),      value: b.panic_events     || 0 },
+      { label: t('Risk assessments', 'Avaliações de risco'),    value: b.risk_assessments || 0 },
+    ];
+    var draw = function (extra) {
+      renderSectionView({
+        summary: summary, title: 'Mental', eyebrow: t('Mental', 'Mental'),
+        metrics: metrics, extra: extra || '',
+        emptyHint: t('No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
+                     'Sem dados de saúde mental ainda. Envie diários, registros de humor ou avaliações psiquiátricas em "Adicionar dados".'),
+      });
+    };
+    // Fetch the psych architecture; render it below the metric row. Fall back to
+    // the bare view if the endpoint is unavailable or the patient has no items.
+    if (!(b.psych_items || b.writings)) { draw(''); return; }
+    fetch('/api/patient-psych?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (psych) { draw(psych ? buildPsychArchitecture(psych) : ''); })
+      .catch(function () { draw(''); });
   }
 
   function renderSpiritual(summary) {
