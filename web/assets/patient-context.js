@@ -1871,18 +1871,867 @@
     document.body.appendChild(view);
   }
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     DB-DRIVEN VITALS RENDERER  (drop-in for patient-context.js)
+     ─────────────────────────────────────────────────────────────────────
+     Reproduces Patient Zero's hand-tuned physical-vitals.html chart
+     house-style, but driven from GET /api/vitals-range instead of a static
+     data.js. Sections render ONLY when their underlying series has real data.
+
+     In scope from patient-context.js (do NOT redeclare): t(en,pt),
+     escapeHtml(s), renderSectionView(opts), and the module-level `patient`.
+
+     Chart libs are loaded globally on physical-vitals.html:
+       Chart.js 4.4.4 (Chart) · @sgratzl boxplot (registered) · Plotly 2.35.2.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* Health-palette tokens — byte-identical to physical-vitals.html's `const C`. */
+  var C = {
+    blue50:  '#EEF5FA', blue100: '#D8E8F2', blue200: '#B5D2E5',
+    blue300: '#8BB8D2', blue400: '#5E97BC', blue500: '#3E7CA3',
+    blue600: '#2F6489', blue700: '#244E6E', blue800: '#1B3B54',
+    blue900: '#122A3D',
+    green500: '#3D9460', green700: '#245F3C',
+    amber500: '#C29327', amber700: '#785818',
+    red500:   '#C73E3E', red700:   '#802626', red300: '#EB8585',
+    ink:      '#1A2129',
+    inkMid:   '#3E4956',
+    inkSoft:  '#6E7B8A',
+    inkFaint: '#94A0AE',
+    grid:     'rgba(62,124,163,0.10)'
+  };
+
+  var vAxisCommon = {
+    grid:  { color: C.grid, drawBorder: false },
+    ticks: { color: C.inkSoft },
+  };
+
+  /* Chart-string language helper (reads html[lang] at build time). Distinct
+     from patient-context's tPlain so it can also take arrays (month names). */
+  function L(en, pt) { return (document.documentElement.lang === 'pt' ? pt : en); }
+
+  /* Chart registry + builders. runVitalsBuilders re-runs every builder; each
+     Chart.js builder destroys any prior instance on its canvas first. Plotly
+     builders re-plot in place (Plotly.newPlot replaces). */
+  var _vitalsChartInstances = [];
+  var _vitalsBuilders = [];
+  var _vitalsLangHooked = false;
+
+  function runVitalsBuilders() {
+    _vitalsBuilders.forEach(function (fn) {
+      try { fn(); } catch (e) { console.error('[vitals chart]', e); }
+    });
+  }
+
+  /* ── Small numeric helpers ────────────────────────────────────────────── */
+  function vMean(a) { return a.length ? a.reduce(function (s, v) { return s + v; }, 0) / a.length : null; }
+  function vMedian(a) {
+    if (!a.length) return null;
+    var s = a.slice().sort(function (x, y) { return x - y; });
+    var m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+  function vNums(arr, pick) {
+    var out = [];
+    for (var i = 0; i < arr.length; i++) {
+      var v = pick(arr[i]);
+      if (typeof v === 'number' && !isNaN(v)) out.push(v);
+    }
+    return out;
+  }
+  function vFmt(n, d) { return (n == null || isNaN(n)) ? '–' : Number(n).toFixed(d == null ? 1 : d); }
+  /* Hours → "Nh MMm". */
+  function vHm(h) {
+    if (h == null || isNaN(h)) return '–';
+    var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    if (mm === 60) { hh += 1; mm = 0; }
+    return hh + 'h ' + String(mm).padStart(2, '0') + 'm';
+  }
+  /* Map an ISO date to its ISO-week Monday (UTC). */
+  function vIsoMonday(s) {
+    var d = new Date(s + 'T12:00:00Z');
+    var dayIdx = (d.getUTCDay() + 6) % 7;
+    d.setUTCDate(d.getUTCDate() - dayIdx);
+    return d.toISOString().slice(0, 10);
+  }
+  /* Centered rolling mean over an array (nulls skipped). */
+  function vRolling(arr, win) {
+    var half = Math.floor(win / 2);
+    return arr.map(function (_, i) {
+      var slice = arr.slice(Math.max(0, i - half), i + half + 1)
+        .filter(function (v) { return typeof v === 'number' && !isNaN(v); });
+      if (!slice.length) return null;
+      return +(slice.reduce(function (s, v) { return s + v; }, 0) / slice.length).toFixed(1);
+    });
+  }
+  /* Circular rolling mean (wraps at midnight) — for time-of-day series. */
+  function vSmoothCirc(arr, w) {
+    var n = arr.length, out = new Array(n);
+    for (var i = 0; i < n; i++) {
+      var sum = 0, cnt = 0;
+      for (var k = -w; k <= w; k++) {
+        var j = (i + k + n) % n, v = arr[j];
+        if (v != null && !isNaN(v)) { sum += v; cnt++; }
+      }
+      out[i] = cnt ? sum / cnt : NaN;
+    }
+    return out;
+  }
+  function vMonthNames() {
+    return L(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+             ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']);
+  }
+  function vFmtMonth(m) { return vMonthNames()[parseInt(m.slice(5, 7), 10) - 1] + ' ' + m.slice(2, 4); }
+
+  /* ── Markup helpers ───────────────────────────────────────────────────── */
+  function vTiles(cards) {
+    return '<div class="metric-grid">' + cards.map(function (c) {
+      return '<div class="metric-card">' +
+        '<div class="metric-label">' + c.label + '</div>' +
+        '<div class="metric-value">' + c.value + (c.unit ? '<small>' + c.unit + '</small>' : '') + '</div>' +
+        (c.note ? '<div class="metric-note">' + c.note + '</div>' : '') +
+        '</div>';
+    }).join('') + '</div>';
+  }
+  function vCanvasCard(id, titleEn, titlePt, metaEn, metaPt, wrapCls) {
+    return '<div class="chart-card"><div class="chart-card-head">' +
+      '<div class="chart-card-title">' + t(titleEn, titlePt) + '</div>' +
+      '<div class="chart-card-meta">' + t(metaEn, metaPt) + '</div></div>' +
+      '<div class="chart-wrap' + (wrapCls ? ' ' + wrapCls : '') + '"><canvas id="' + id + '"></canvas></div></div>';
+  }
+  function vPlotCard(id, titleEn, titlePt, metaEn, metaPt) {
+    return '<div class="chart-card"><div class="chart-card-head">' +
+      '<div class="chart-card-title">' + t(titleEn, titlePt) + '</div>' +
+      '<div class="chart-card-meta">' + t(metaEn, metaPt) + '</div></div>' +
+      '<div id="' + id + '" class="chart-wrap tall"></div></div>';
+  }
+  function vSection(num, id, titleEn, titlePt, descEn, descPt, bodyHtml) {
+    var nn = String(num).padStart(2, '0');
+    return '<section class="report-section" id="' + id + '"><div class="container">' +
+      '<div class="section-label">' + nn + ' · ' + t(titleEn, titlePt) + '</div>' +
+      '<h2 class="section-title">' + t(titleEn, titlePt) + '</h2>' +
+      (descEn || descPt ? '<p class="section-desc">' + t(descEn || '', descPt || '') + '</p>' : '') +
+      bodyHtml +
+      '</div></section>';
+  }
+
+  /* ── Plotly common bits ───────────────────────────────────────────────── */
+  var VPLOT_CONFIG = {
+    displaylogo: false, responsive: true,
+    modeBarButtonsToRemove: ['select2d', 'lasso2d', 'autoScale2d', 'toggleSpikelines']
+  };
+  function vPlotLayout(extra) {
+    var base = {
+      autosize: true,
+      margin: { l: 52, r: 16, t: 12, b: 60 },
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor:  'rgba(0,0,0,0)',
+      font: { family: "'IBM Plex Sans', sans-serif", color: C.inkSoft, size: 12 },
+      hoverlabel: { bgcolor: '#FFFFFF', bordercolor: C.inkMid, font: { color: C.ink } },
+      showlegend: false
+    };
+    if (extra) for (var k in extra) base[k] = extra[k];
+    return base;
+  }
+  var V_NOLINE = { width: 0, color: 'rgba(0,0,0,0)' };
+  /* Four stacked-fill band traces (±2 SD outer, ±1 SD inner) between mean±SD. */
+  function vBandTraces(xs, mean, sd, band2, band1) {
+    var l2 = mean.map(function (m, i) { return m - 2 * sd[i]; });
+    var u2 = mean.map(function (m, i) { return m + 2 * sd[i]; });
+    var l1 = mean.map(function (m, i) { return m - sd[i]; });
+    var u1 = mean.map(function (m, i) { return m + sd[i]; });
+    return [
+      { x: xs, y: l2, type: 'scatter', mode: 'lines', line: V_NOLINE, showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: u2, type: 'scatter', mode: 'lines', line: V_NOLINE, fill: 'tonexty', fillcolor: band2, showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: l1, type: 'scatter', mode: 'lines', line: V_NOLINE, showlegend: false, hoverinfo: 'skip' },
+      { x: xs, y: u1, type: 'scatter', mode: 'lines', line: V_NOLINE, fill: 'tonexty', fillcolor: band1, showlegend: false, hoverinfo: 'skip' }
+    ];
+  }
+  /* 24h tick labels for time-of-day pattern charts. */
+  function vTodAxis() {
+    return {
+      tickmode: 'array',
+      tickvals: [0, 180, 360, 540, 720, 900, 1080, 1260, 1440],
+      ticktext: L(['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm', '12am'],
+                  ['0h', '3h', '6h', '9h', '12h', '15h', '18h', '21h', '0h']),
+      range: [0, 1440], showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft }
+    };
+  }
+  function vTodCustomData(xs) {
+    return xs.map(function (min) {
+      var h = Math.floor(min / 60), mm = min % 60;
+      if (document.documentElement.lang === 'pt') {
+        return String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+      }
+      var ampm = h < 12 ? 'am' : 'pm';
+      var h12 = (h % 12) === 0 ? 12 : (h % 12);
+      return h12 + ':' + String(mm).padStart(2, '0') + ' ' + ampm;
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     renderVitals — fetch the range, build only the sections with data,
+     mount the shell, then initialise the charts.
+     ══════════════════════════════════════════════════════════════════════ */
   function renderVitals(summary) {
     var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
+    var clerk = (summary.patient && summary.patient.clerk_user_id) || patient;
+
+    /* Fallback shell mirroring the previous stub — used on fetch failure or
+       when the range holds no vitals at all. */
+    function fallback() {
+      renderSectionView({
+        summary: summary, title: 'Vitals',
+        eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
+        metrics: [
+          { label: t('Vitals days', 'Dias de vitais'), value: b.vitals_days || 0 },
+          { label: t('ECG events', 'Eventos de ECG'), value: b.ecg_events || 0 },
+        ],
+        emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
+                     'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
+      });
+    }
+
+    var today = new Date().toISOString().slice(0, 10);
+    var viewer = '';
+    try { viewer = sessionStorage.getItem('jc_viewer_clerk') || ''; } catch (_) {}
+    var url = '/api/vitals-range?clerk=' + encodeURIComponent(clerk) + '&from=2015-01-01&to=' + today;
+
+    fetch(url, { headers: viewer ? { 'X-Viewer-Clerk': viewer, Accept: 'application/json' } : { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return fallback();
+        buildVitals(summary, b, d);
+      })
+      .catch(function (e) { console.error('[vitals-range]', e); fallback(); });
+  }
+
+  function buildVitals(summary, b, d) {
+    /* Normalise each series to an array/object we can presence-test. */
+    var weight = d.weight || [];
+    var steps = d.steps || [];
+    var hrvRhr = d.hrvRhr || [];
+    var stressRes = d.stressRes || [];
+    var bp = d.bp || [];
+    var bpByWeek = d.bpByWeek || [];
+    var rhrByWeek = d.rhrByWeek || [];
+    var sleepBox = d.sleepBox || null;
+    var sleepStagesByWeek = d.sleepStagesByWeek || [];
+    var hrByTod = d.hrByTod || [];
+
+    /* Presence tests. */
+    var stageHasData = function (s) { return s && typeof s.median === 'number' && s.n; };
+    var hasBody = weight.length > 0;
+    var hasSleep = sleepStagesByWeek.length > 0 && sleepBox &&
+      (stageHasData(sleepBox.total) || stageHasData(sleepBox.deep) || stageHasData(sleepBox.rem) ||
+       stageHasData(sleepBox.light) || stageHasData(sleepBox.awake));
+    var hasMovement = steps.length > 0;
+    var hasCardio = hrvRhr.length > 0;
+    var hasHrTod = hrByTod.length > 0 && hrByTod.some(function (r) { return r && r[0] > 0; });
+    var hasRhrWeek = rhrByWeek.length > 0 && rhrByWeek.some(function (r) { return typeof r.rhr === 'number'; });
+    var hasStress = stressRes.length > 0 && stressRes.some(function (r) { return typeof r[1] === 'number' || typeof r[3] === 'number'; });
+    var hasBp = bp.length > 0;
+    var hasBpWeek = bpByWeek.length > 0;
+
+    if (!hasBody && !hasSleep && !hasMovement && !hasCardio && !hasStress && !hasBp) {
+      /* Nothing to draw — fall back to the empty shell. */
+      renderSectionView({
+        summary: summary, title: 'Vitals',
+        eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
+        metrics: [
+          { label: t('Vitals days', 'Dias de vitais'), value: b.vitals_days || 0 },
+          { label: t('ECG events', 'Eventos de ECG'), value: b.ecg_events || 0 },
+        ],
+        emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
+                     'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
+      });
+      return;
+    }
+
+    /* Reset registries for this render. */
+    _vitalsChartInstances = [];
+    _vitalsBuilders = [];
+
+    /* Build section markup + collect nav entries + queue chart builders. */
+    var nav = [];
+    var sectionsHtml = '';
+    var num = 0;
+    function addNav(id, en, pt) { nav.push({ id: id, en: en, pt: pt }); }
+
+    /* ── 1 · Body composition ───────────────────────────────────────────── */
+    if (hasBody) {
+      num++;
+      addNav('vit-body', 'Body composition', 'Composição corporal');
+      var latest = weight[weight.length - 1];
+      var wVals = vNums(weight, function (r) { return r[1]; });
+      var fVals = vNums(weight, function (r) { return r[2]; });
+      var mVals = vNums(weight, function (r) { return r[3]; });
+      var tiles = [];
+      if (latest[1] != null) tiles.push({ label: t('Latest weight', 'Peso atual'), value: vFmt(latest[1]), unit: 'kg' });
+      if (latest[2] != null) tiles.push({ label: t('Body fat', 'Gordura corporal'), value: vFmt(latest[2]), unit: '%' });
+      if (latest[3] != null) tiles.push({ label: t('Muscle mass', 'Massa muscular'), value: vFmt(latest[3]), unit: 'kg' });
+      /* BMI omitted — height is not carried in the vitals-range API. */
+      sectionsHtml += vSection(num, 'vit-body', 'Body composition', 'Composição corporal',
+        'Weight, muscle mass and body-fat trend from connected smart-scale readings.',
+        'Tendência de peso, massa muscular e gordura corporal a partir de balanças conectadas.',
+        vTiles(tiles) +
+        vCanvasCard('vBodyChart', 'Body composition trend', 'Tendência da composição corporal',
+          'Weight + muscle (kg, left) · body fat (%, right) · n=' + wVals.length + ' readings',
+          'Peso + músculo (kg, esq.) · gordura (%, dir.) · n=' + wVals.length + ' leituras'));
+
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vBodyChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'line',
+          data: {
+            labels: weight.map(function (r) { return r[0]; }),
+            datasets: [
+              { label: L('Body weight (kg)', 'Peso corporal (kg)'), data: weight.map(function (r) { return r[1]; }),
+                borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.18)', tension: 0.3, yAxisID: 'y', fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: C.blue600 },
+              { label: L('Muscle mass (kg)', 'Massa muscular (kg)'), data: weight.map(function (r) { return r[3]; }),
+                borderColor: C.green500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.green500 },
+              { label: L('Body fat (%)', 'Gordura corporal (%)'), data: weight.map(function (r) { return r[2]; }),
+                borderColor: C.red500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.red500, borderDash: [4, 4] },
+            ]
+          },
+          options: {
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'bottom', labels: { color: C.inkSoft } } },
+            scales: {
+              y:  Object.assign({}, vAxisCommon, { position: 'left', title: { display: true, text: 'kg', color: C.inkSoft } }),
+              y1: Object.assign({}, vAxisCommon, { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '%', color: C.inkSoft } }),
+              x:  Object.assign({}, vAxisCommon, { ticks: Object.assign({}, vAxisCommon.ticks, { maxTicksLimit: 9, maxRotation: 0 }) })
+            }
+          }
+        }));
+      });
+    }
+
+    /* ── 2 · Sleep architecture ─────────────────────────────────────────── */
+    if (hasSleep) {
+      num++;
+      addNav('vit-sleep', 'Sleep architecture', 'Arquitetura do sono');
+      var sTiles = [];
+      if (stageHasData(sleepBox.total)) sTiles.push({ label: t('Median total sleep', 'Sono total (mediana)'), value: vHm(sleepBox.total.median) });
+      if (stageHasData(sleepBox.deep)) sTiles.push({ label: t('Median deep', 'Profundo (mediana)'), value: vHm(sleepBox.deep.median) });
+      if (stageHasData(sleepBox.rem)) sTiles.push({ label: t('Median REM', 'REM (mediana)'), value: vHm(sleepBox.rem.median) });
+      if (stageHasData(sleepBox.light)) sTiles.push({ label: t('Median light', 'Leve (mediana)'), value: vHm(sleepBox.light.median) });
+      var nNights = (d.meta && d.meta.nights) || (sleepBox.total && sleepBox.total.n) || 0;
+      sectionsHtml += vSection(num, 'vit-sleep', 'Sleep architecture', 'Arquitetura do sono',
+        'Per-night sleep-stage distribution and how the nightly composition drifts week to week.',
+        'Distribuição dos estágios do sono por noite e como a composição varia semana a semana.',
+        vTiles(sTiles) +
+        vCanvasCard('vSleepStageChart', 'Sleep stage distribution — boxplot (±1.5 × IQR)', 'Distribuição dos estágios do sono — boxplot (±1,5 × IIQ)',
+          'Hours per night · n=' + nNights + ' nights', 'Horas por noite · n=' + nNights + ' noites') +
+        vPlotCard('vSleepTotalChart', 'Total sleep — weekly average (hours per night)', 'Sono total — média semanal (horas por noite)',
+          '7–9 h adult-guidance band · n=' + sleepStagesByWeek.length + ' weeks', 'Faixa recomendada 7–9 h · n=' + sleepStagesByWeek.length + ' semanas') +
+        vPlotCard('vSleepCompositionChart', 'Sleep stage composition — weekly average (% of total sleep)', 'Composição dos estágios — média semanal (% do sono total)',
+          '100% stacked · deep + REM + light + awake', '100% empilhado · profundo + REM + leve + acordado'));
+
+      /* 2a — boxplot (Chart.js) */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vSleepStageChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        var order = [
+          { key: 'deep',  en: 'Deep',  pt: 'Profundo', fill: C.blue600, stroke: C.blue800 },
+          { key: 'rem',   en: 'REM',   pt: 'REM',      fill: C.blue500, stroke: C.blue700 },
+          { key: 'light', en: 'Light', pt: 'Leve',     fill: C.blue400, stroke: C.blue600 },
+          { key: 'awake', en: 'Awake', pt: 'Acordado', fill: C.blue200, stroke: C.blue400 },
+          { key: 'total', en: 'Total', pt: 'Total',    fill: C.blue900, stroke: '#0B1A28' },
+        ].filter(function (s) { return stageHasData(sleepBox[s.key]); });
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'boxplot',
+          data: {
+            labels: order.map(function (s) { return L(s.en, s.pt); }),
+            datasets: [{
+              label: L('Hours per night', 'Horas por noite'),
+              backgroundColor: order.map(function (s) { return s.fill; }),
+              borderColor: order.map(function (s) { return s.stroke; }),
+              borderWidth: 1.25, itemRadius: 0, meanRadius: 0, outlierRadius: 3,
+              outlierBackgroundColor: order.map(function (s) { return s.stroke; }),
+              outlierBorderColor: order.map(function (s) { return s.stroke; }),
+              medianColor: '#1C2B2F',
+              data: order.map(function (s) { return sleepBox[s.key]; }),
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  title: function (items) { return items[0].label + L(' sleep', ' · sono'); },
+                  label: function (ctx) {
+                    var v = ctx.parsed;
+                    return [
+                      L('Median:', 'Mediana:') + '   ' + vHm(v.median),
+                      L('IQR:', 'IIQ:') + '      ' + vHm(v.q1) + ' – ' + vHm(v.q3),
+                      L('Whiskers:', 'Hastes:') + ' ' + vHm(v.min) + ' – ' + vHm(v.max),
+                      L('Mean:', 'Média:') + '     ' + vHm(v.mean),
+                    ];
+                  }
+                }
+              }
+            },
+            scales: {
+              x: Object.assign({}, vAxisCommon, { ticks: Object.assign({}, vAxisCommon.ticks, { font: { size: 12 } }) }),
+              y: Object.assign({}, vAxisCommon, {
+                beginAtZero: true,
+                title: { display: true, text: L('hours per night', 'horas por noite'), color: C.inkSoft },
+                ticks: Object.assign({}, vAxisCommon.ticks, { callback: function (v) { return v + 'h'; } })
+              })
+            }
+          }
+        }));
+      });
+
+      /* 2b — weekly total-sleep spline (Plotly) */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vSleepTotalChart'); if (!el || typeof Plotly === 'undefined') return;
+        var xs = sleepStagesByWeek.map(function (r) { return r.week; });
+        var ys = sleepStagesByWeek.map(function (r) { return r.tst; });
+        var ns = sleepStagesByWeek.map(function (r) { return r.n; });
+        var trace = {
+          x: xs, y: ys, type: 'scatter', mode: 'lines+markers',
+          line: { color: '#0B1A28', width: 2.5, shape: 'spline' },
+          marker: { color: '#0B1A28', size: 5 },
+          fill: 'tozeroy', fillcolor: 'rgba(18,42,61,0.14)',
+          customdata: ns,
+          hovertemplate: L('Week of %{x}<br>Total sleep <b>%{y:.1f} h</b> · n=%{customdata} nights<extra></extra>',
+                           'Semana de %{x}<br>Sono total <b>%{y:.1f} h</b> · n=%{customdata} noites<extra></extra>'),
+          showlegend: false
+        };
+        var refLines = [
+          { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 7, y1: 7, line: { color: '#C29327', width: 1, dash: 'dot' } },
+          { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 9, y1: 9, line: { color: '#C29327', width: 1, dash: 'dot' } },
+        ];
+        Plotly.newPlot(el, [trace], vPlotLayout({
+          shapes: refLines,
+          xaxis: { type: 'date', showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } },
+          yaxis: { title: { text: L('hours per night', 'horas por noite'), font: { color: C.inkSoft } }, rangemode: 'tozero', showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } }
+        }), VPLOT_CONFIG);
+      });
+
+      /* 2c — weekly stage composition, 100% stacked area (Plotly) */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vSleepCompositionChart'); if (!el || typeof Plotly === 'undefined') return;
+        var xs = sleepStagesByWeek.map(function (r) { return r.week; });
+        var ns = sleepStagesByWeek.map(function (r) { return r.n; });
+        var stages = [
+          { key: 'deep',  en: 'Deep',  pt: 'Profundo', fill: 'rgba(47,100,137,0.80)',  stroke: '#1B3B54' },
+          { key: 'rem',   en: 'REM',   pt: 'REM',      fill: 'rgba(62,124,163,0.80)',  stroke: '#244E6E' },
+          { key: 'light', en: 'Light', pt: 'Leve',     fill: 'rgba(94,151,188,0.80)',  stroke: '#2F6489' },
+          { key: 'awake', en: 'Awake', pt: 'Acordado', fill: 'rgba(181,210,229,0.80)', stroke: '#5E97BC' },
+        ];
+        var traces = stages.map(function (s) {
+          return {
+            x: xs, y: sleepStagesByWeek.map(function (r) { return r[s.key]; }),
+            name: L(s.en, s.pt), type: 'scatter', mode: 'lines', stackgroup: 'one',
+            line: { color: s.stroke, width: 1.7 }, fillcolor: s.fill, customdata: ns,
+            hovertemplate: L('Week of %{x}<br>' + s.en + ' <b>%{y:.1f}%</b> · n=%{customdata} nights<extra></extra>',
+                             'Semana de %{x}<br>' + s.pt + ' <b>%{y:.1f}%</b> · n=%{customdata} noites<extra></extra>')
+          };
+        });
+        Plotly.newPlot(el, traces, vPlotLayout({
+          xaxis: { type: 'date', showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } },
+          yaxis: { title: { text: L('% of total sleep', '% do sono total'), font: { color: C.inkSoft } }, range: [0, 100], showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } }
+        }), VPLOT_CONFIG);
+      });
+    }
+
+    /* ── 3 · Movement ───────────────────────────────────────────────────── */
+    if (hasMovement) {
+      num++;
+      addNav('vit-movement', 'Movement', 'Movimento');
+      var stepVals = vNums(steps, function (r) { return r[1]; });
+      var over10k = stepVals.filter(function (v) { return v >= 10000; }).length;
+      var over5k = stepVals.filter(function (v) { return v >= 5000; }).length;
+      sectionsHtml += vSection(num, 'vit-movement', 'Movement', 'Movimento',
+        'Daily step count across every recorded day, with the weekly-median trend overlaid.',
+        'Contagem de passos em cada dia registrado, com a tendência mediana semanal sobreposta.',
+        vTiles([
+          { label: t('Median steps/day', 'Passos/dia (mediana)'), value: Math.round(vMedian(stepVals)).toLocaleString() },
+          { label: t('Mean steps/day', 'Passos/dia (média)'), value: Math.round(vMean(stepVals)).toLocaleString() },
+          { label: t('Days ≥ 10k', 'Dias ≥ 10k'), value: String(over10k) },
+          { label: t('Days ≥ 5k', 'Dias ≥ 5k'), value: String(over5k) },
+        ]) +
+        vCanvasCard('vStepsChart', 'Daily steps — every recorded day', 'Passos diários — cada dia registrado',
+          'Pale bars = daily · line = weekly median · n=' + steps.length + ' days',
+          'Barras claras = diário · linha = mediana semanal · n=' + steps.length + ' dias'));
+
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vStepsChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        var buckets = {};
+        steps.forEach(function (r) { (buckets[vIsoMonday(r[0])] = buckets[vIsoMonday(r[0])] || []).push(r[1]); });
+        var weeklyMed = {};
+        for (var w in buckets) weeklyMed[w] = Math.round(vMedian(buckets[w]));
+        var medianSeries = steps.map(function (r) { return weeklyMed[vIsoMonday(r[0])]; });
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'bar',
+          data: {
+            labels: steps.map(function (r) { return r[0]; }),
+            datasets: [
+              { type: 'bar', label: L('Steps', 'Passos'), data: steps.map(function (r) { return r[1]; }),
+                backgroundColor: 'rgba(139, 184, 210, 0.25)', borderColor: 'rgba(139, 184, 210, 0.55)',
+                borderWidth: 1, borderRadius: 1, barPercentage: 0.95, categoryPercentage: 1.0 },
+              { type: 'line', label: L('Weekly median', 'Mediana semanal'), data: medianSeries,
+                borderColor: C.blue700, borderWidth: 2, pointRadius: 0, pointHoverRadius: 0, fill: false, tension: 0, stepped: 'middle' }
+            ]
+          },
+          options: {
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: { callbacks: {
+                title: function (items) { return items[0].label; },
+                label: function (ctx) {
+                  return ctx.datasetIndex === 0
+                    ? L(ctx.parsed.y.toLocaleString() + ' steps', ctx.parsed.y.toLocaleString() + ' passos')
+                    : L('Weekly median: ' + ctx.parsed.y.toLocaleString(), 'Mediana semanal: ' + ctx.parsed.y.toLocaleString());
+                }
+              } }
+            },
+            scales: {
+              x: Object.assign({}, vAxisCommon, { ticks: Object.assign({}, vAxisCommon.ticks, { maxTicksLimit: 14, maxRotation: 0 }) }),
+              y: Object.assign({}, vAxisCommon, { beginAtZero: true,
+                title: { display: true, text: L('steps / day', 'passos / dia'), color: C.inkSoft },
+                ticks: Object.assign({}, vAxisCommon.ticks, { callback: function (v) { return (v / 1000) + 'k'; } }) })
+            }
+          }
+        }));
+      });
+    }
+
+    /* ── 4 · Cardiovascular & recovery ──────────────────────────────────── */
+    if (hasCardio) {
+      num++;
+      addNav('vit-cardio', 'Cardiovascular & recovery', 'Cardiovascular e recuperação');
+      var hrvVals = vNums(hrvRhr, function (r) { return r[1]; });
+      var rhrVals = vNums(hrvRhr, function (r) { return r[2]; });
+      var cTiles = [];
+      if (rhrVals.length) cTiles.push({ label: t('Resting HR (median)', 'FC repouso (mediana)'), value: vFmt(vMedian(rhrVals), 0), unit: 'bpm' });
+      if (hrvVals.length) cTiles.push({ label: t('HRV (median)', 'VFC (mediana)'), value: vFmt(vMedian(hrvVals), 0), unit: 'ms' });
+      if (hrvVals.length) cTiles.push({ label: t('HRV (mean)', 'VFC (média)'), value: vFmt(vMean(hrvVals), 1), unit: 'ms' });
+      var cardioBody = vTiles(cTiles) +
+        vCanvasCard('vCardioChart', 'HRV & resting HR — monthly mean', 'VFC e FC em repouso — média mensal',
+          'HRV (ms, left) · resting HR (bpm, right) · per-night source', 'VFC (ms, esq.) · FC repouso (bpm, dir.) · fonte por noite');
+      if (hasHrTod) {
+        cardioBody += vPlotCard('vHrPatternsChart', 'Daily patterns — heart rate by time of day', 'Padrões diários — frequência cardíaca por hora do dia',
+          'All readings folded onto 24 h · median · ±1 SD · ±2 SD', 'Todas as leituras dobradas em 24 h · mediana · ±1 DP · ±2 DP');
+      }
+      if (hasRhrWeek) {
+        cardioBody += vPlotCard('vRhrTimelineChart', 'Resting HR — weekly timeline', 'FC em repouso — linha do tempo semanal',
+          '50–65 bpm healthy band · gaps not bridged', 'Faixa saudável 50–65 bpm · lacunas não interligadas');
+      }
+      sectionsHtml += vSection(num, 'vit-cardio', 'Cardiovascular & recovery', 'Cardiovascular e recuperação',
+        'Heart-rate variability, resting heart rate and their daily and weekly rhythm.',
+        'Variabilidade da frequência cardíaca, FC em repouso e seu ritmo diário e semanal.',
+        cardioBody);
+
+      /* 4a — HRV/RHR monthly-mean dual axis (Chart.js) */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vCardioChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        var buckets = {};
+        hrvRhr.forEach(function (row) {
+          var m = row[0].slice(0, 7);
+          if (!buckets[m]) buckets[m] = { hrv: [], rhr: [] };
+          if (row[1] != null) buckets[m].hrv.push(row[1]);
+          if (row[2] != null) buckets[m].rhr.push(row[2]);
+        });
+        var months = Object.keys(buckets).sort();
+        var hrvSeries = months.map(function (m) { var v = vMean(buckets[m].hrv); return v == null ? null : +v.toFixed(1); });
+        var rhrSeries = months.map(function (m) { var v = vMean(buckets[m].rhr); return v == null ? null : +v.toFixed(1); });
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'line',
+          data: {
+            labels: months.map(vFmtMonth),
+            datasets: [
+              { label: L('HRV (ms)', 'VFC (ms)'), data: hrvSeries, borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.20)', tension: 0.35, yAxisID: 'y', fill: true, borderWidth: 2, pointRadius: 4, pointBackgroundColor: C.blue600, spanGaps: true },
+              { label: L('Resting HR (bpm)', 'FC em repouso (bpm)'), data: rhrSeries, borderColor: C.red500, backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y1', borderWidth: 2, borderDash: [4, 4], pointRadius: 4, pointBackgroundColor: C.red500, spanGaps: true }
+            ]
+          },
+          options: {
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'bottom', labels: { color: C.inkSoft } } },
+            scales: {
+              y:  Object.assign({}, vAxisCommon, { position: 'left', title: { display: true, text: L('HRV (ms)', 'VFC (ms)'), color: C.inkSoft } }),
+              y1: Object.assign({}, vAxisCommon, { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: L('RHR (bpm)', 'FC rep. (bpm)'), color: C.inkSoft } }),
+              x:  Object.assign({}, vAxisCommon)
+            }
+          }
+        }));
+      });
+
+      /* 4b — HR by time of day, pattern chart (Plotly, red palette) */
+      if (hasHrTod) {
+        _vitalsBuilders.push(function () {
+          var el = document.getElementById('vHrPatternsChart'); if (!el || typeof Plotly === 'undefined') return;
+          var N = hrByTod.length;
+          var W = 3;
+          var med = vSmoothCirc(hrByTod.map(function (r) { return r[1]; }), W);
+          var m1 = vSmoothCirc(hrByTod.map(function (r) { return r[2]; }), W);
+          var sd1 = vSmoothCirc(hrByTod.map(function (r) { return r[3]; }), W);
+          var xs = Array.from({ length: N }, function (_, i) { return i * 5; });
+          var traces = vBandTraces(xs, m1, sd1, 'rgba(220, 89, 89, 0.22)', 'rgba(165, 48, 48, 0.42)');
+          traces.push({
+            x: xs, y: med, type: 'scatter', mode: 'lines',
+            line: { color: '#5E1D1D', width: 2.5, shape: 'spline' },
+            customdata: vTodCustomData(xs),
+            hovertemplate: L('%{customdata}<br>Median <b>%{y:.0f} bpm</b><extra></extra>',
+                             '%{customdata}<br>Mediana <b>%{y:.0f} bpm</b><extra></extra>'),
+            showlegend: false
+          });
+          var refLines = [
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 80, y1: 80, line: { color: '#3D9460', width: 1.2 } },
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 100, y1: 100, line: { color: '#C29327', width: 1.2, dash: 'dot' } },
+          ];
+          Plotly.newPlot(el, traces, vPlotLayout({
+            shapes: refLines,
+            xaxis: vTodAxis(),
+            yaxis: { title: { text: 'bpm', font: { color: C.inkSoft } }, showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } }
+          }), VPLOT_CONFIG);
+        });
+      }
+
+      /* 4c — RHR weekly timeline (Plotly, gaps not bridged) */
+      if (hasRhrWeek) {
+        _vitalsBuilders.push(function () {
+          var el = document.getElementById('vRhrTimelineChart'); if (!el || typeof Plotly === 'undefined') return;
+          var xs = [], ys = [], ns = [];
+          var WEEK_MS = 7 * 24 * 3600 * 1000;
+          rhrByWeek.forEach(function (r, i) {
+            if (i > 0) {
+              var prev = Date.parse(rhrByWeek[i - 1].week);
+              if (Date.parse(r.week) - prev > WEEK_MS) { xs.push(r.week); ys.push(null); ns.push(null); }
+            }
+            xs.push(r.week); ys.push(r.rhr); ns.push(r.n);
+          });
+          var trace = {
+            x: xs, y: ys, type: 'scatter', mode: 'lines',
+            line: { color: '#5E1D1D', width: 2 }, connectgaps: false, customdata: ns,
+            hovertemplate: L('Week of %{x}<br>Resting HR <b>%{y:.1f} bpm</b> · n=%{customdata} days<extra></extra>',
+                             'Semana de %{x}<br>FC em repouso <b>%{y:.1f} bpm</b> · n=%{customdata} dias<extra></extra>'),
+            showlegend: false
+          };
+          var refLines = [
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 50, y1: 50, line: { color: '#C29327', width: 1, dash: 'dot' } },
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 65, y1: 65, line: { color: '#C29327', width: 1, dash: 'dot' } },
+          ];
+          Plotly.newPlot(el, [trace], vPlotLayout({
+            shapes: refLines,
+            xaxis: { type: 'date', showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } },
+            yaxis: { title: { text: 'bpm', font: { color: C.inkSoft } }, showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } }
+          }), VPLOT_CONFIG);
+        });
+      }
+    }
+
+    /* ── 5 · Stress & resilience ────────────────────────────────────────── */
+    if (hasStress) {
+      num++;
+      addNav('vit-stress', 'Stress & resilience', 'Estresse e resiliência');
+      var stressVals = vNums(stressRes, function (r) { return r[1]; });
+      var scoreVals = vNums(stressRes, function (r) { return r[3]; });
+      var stTiles = [];
+      if (stressVals.length) stTiles.push({ label: t('High-stress (median)', 'Alto estresse (mediana)'), value: vFmt(vMedian(stressVals), 0), unit: 'min/day' });
+      if (scoreVals.length) stTiles.push({ label: t('Resilience (median)', 'Resiliência (mediana)'), value: vFmt(vMedian(scoreVals), 0) });
+      if (scoreVals.length) stTiles.push({ label: t('Resilience (mean)', 'Resiliência (média)'), value: vFmt(vMean(scoreVals), 0) });
+      sectionsHtml += vSection(num, 'vit-stress', 'Stress & resilience', 'Estresse e resiliência',
+        'Daily high-stress load and the composite resilience score, each with a 7-day rolling mean.',
+        'Carga diária de alto estresse e a pontuação composta de resiliência, cada uma com média móvel de 7 dias.',
+        vTiles(stTiles) +
+        vCanvasCard('vStressChart', 'Stress load & resilience — daily with 7-day mean', 'Estresse e resiliência — diário com média de 7 dias',
+          'High-stress min/day (red, left) · resilience 0–100 (green, right)', 'Alto estresse min/dia (verm., esq.) · resiliência 0–100 (verde, dir.)'));
+
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vStressChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        var labels = stressRes.map(function (r) { return r[0]; });
+        var stress = stressRes.map(function (r) { return (typeof r[1] === 'number' ? r[1] : null); });
+        var score = stressRes.map(function (r) { return (typeof r[3] === 'number' ? r[3] : null); });
+        var stressMA = vRolling(stress, 7);
+        var scoreMA = vRolling(score, 7);
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: L('High-stress (min/day)', 'Alto estresse (min/dia)'), data: stress, borderColor: 'rgba(199,62,62,0.28)', backgroundColor: 'rgba(199,62,62,0.06)', tension: 0.25, yAxisID: 'y', fill: true, borderWidth: 1, pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.red500 },
+              { label: L('High-stress · 7-day mean', 'Alto estresse · média 7 dias'), data: stressMA, borderColor: C.red500, backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.red500 },
+              { label: L('Resilience score (0–100)', 'Pontuação de resiliência (0–100)'), data: score, borderColor: 'rgba(61,148,96,0.30)', backgroundColor: 'transparent', tension: 0.25, yAxisID: 'y1', borderWidth: 1, pointRadius: 0, pointHoverRadius: 3, pointHoverBackgroundColor: C.green500 },
+              { label: L('Resilience · 7-day mean', 'Resiliência · média 7 dias'), data: scoreMA, borderColor: C.green500, backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y1', borderWidth: 2.5, borderDash: [5, 3], pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: C.green500 }
+            ]
+          },
+          options: {
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { position: 'bottom', labels: { color: C.inkSoft, boxWidth: 18 } },
+              tooltip: { callbacks: {
+                afterBody: function (items) {
+                  var row = stressRes[items[0].dataIndex]; var bits = [];
+                  if (row[4]) bits.push(L('level:', 'nível:') + ' ' + row[4]);
+                  if (row[5]) bits.push(L('summary:', 'resumo:') + ' ' + row[5]);
+                  return bits.length ? bits.join(' · ') : '';
+                }
+              } }
+            },
+            scales: {
+              y:  Object.assign({}, vAxisCommon, { position: 'left', beginAtZero: true, title: { display: true, text: L('High-stress (min/day)', 'Alto estresse (min/dia)'), color: C.inkSoft } }),
+              y1: Object.assign({}, vAxisCommon, { position: 'right', grid: { drawOnChartArea: false }, min: 0, max: 100, title: { display: true, text: L('Resilience score', 'Pontuação de resiliência'), color: C.inkSoft }, ticks: Object.assign({}, vAxisCommon.ticks, { stepSize: 20 }) }),
+              x:  Object.assign({}, vAxisCommon, { ticks: Object.assign({}, vAxisCommon.ticks, { autoSkip: true, maxTicksLimit: 12, maxRotation: 0, callback: function (value) { var lbl = this.getLabelForValue(value); return lbl ? lbl.slice(0, 7) : lbl; } }) })
+            }
+          }
+        }));
+      });
+    }
+
+    /* ── 6 · Blood pressure ─────────────────────────────────────────────── */
+    if (hasBp) {
+      num++;
+      addNav('vit-bp', 'Blood pressure', 'Pressão arterial');
+      var sysVals = vNums(bp, function (r) { return r[1]; });
+      var diaVals = vNums(bp, function (r) { return r[2]; });
+      var last = bp[bp.length - 1];
+      var bpBody = vTiles([
+        { label: t('Systolic (mean)', 'Sistólica (média)'), value: vFmt(vMean(sysVals), 0), unit: 'mmHg' },
+        { label: t('Systolic (peak)', 'Sistólica (pico)'), value: String(Math.max.apply(null, sysVals)), unit: 'mmHg' },
+        { label: t('Diastolic (mean)', 'Diastólica (média)'), value: vFmt(vMean(diaVals), 0), unit: 'mmHg' },
+        { label: t('Diastolic (peak)', 'Diastólica (pico)'), value: String(Math.max.apply(null, diaVals)), unit: 'mmHg' },
+        { label: t('Latest', 'Última'), value: (last[1] + '/' + last[2]), unit: 'mmHg' },
+      ]) +
+        vCanvasCard('vBpChart', 'Blood pressure — monthly mean', 'Pressão arterial — média mensal',
+          'Systolic & diastolic · n=' + bp.length + ' readings', 'Sistólica e diastólica · n=' + bp.length + ' leituras');
+      if (hasBpWeek) {
+        bpBody += vPlotCard('vBpPatternsChart', 'Blood pressure — weekly variability', 'Pressão arterial — variabilidade semanal',
+          'Systolic (red) · diastolic (blue) · median ± SD · AHA stage lines', 'Sistólica (verm.) · diastólica (azul) · mediana ± DP · linhas de estágio AHA');
+      }
+      sectionsHtml += vSection(num, 'vit-bp', 'Blood pressure', 'Pressão arterial',
+        'Monthly mean systolic and diastolic pressure, with the week-to-week spread when available.',
+        'Média mensal de pressão sistólica e diastólica, com a dispersão semanal quando disponível.',
+        bpBody);
+
+      /* 6a — monthly-mean grouped bars (Chart.js) */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vBpChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        var buckets = {};
+        bp.forEach(function (row) {
+          var m = row[0].slice(0, 7);
+          if (!buckets[m]) buckets[m] = { sys: [], dia: [] };
+          buckets[m].sys.push(row[1]); buckets[m].dia.push(row[2]);
+        });
+        var months = Object.keys(buckets).sort();
+        var sysM = months.map(function (m) { return +vMean(buckets[m].sys).toFixed(1); });
+        var diaM = months.map(function (m) { return +vMean(buckets[m].dia).toFixed(1); });
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'bar',
+          data: {
+            labels: months.map(vFmtMonth),
+            datasets: [
+              { label: L('Systolic (mmHg)', 'Sistólica (mmHg)'), data: sysM, backgroundColor: C.blue300, borderColor: C.blue600, borderWidth: 1, borderRadius: 3 },
+              { label: L('Diastolic (mmHg)', 'Diastólica (mmHg)'), data: diaM, backgroundColor: C.blue700, borderColor: C.blue900, borderWidth: 1, borderRadius: 3 }
+            ]
+          },
+          options: {
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { color: C.inkSoft } },
+              tooltip: { callbacks: { afterLabel: function (ctx) { var m = months[ctx.dataIndex]; return L('n = ' + buckets[m].sys.length + ' readings', 'n = ' + buckets[m].sys.length + ' leituras'); } } }
+            },
+            scales: {
+              x: Object.assign({}, vAxisCommon),
+              y: Object.assign({}, vAxisCommon, { beginAtZero: false, suggestedMin: 60, suggestedMax: 160, title: { display: true, text: 'mmHg', color: C.inkSoft } })
+            }
+          }
+        }));
+      });
+
+      /* 6b — weekly variability pattern (Plotly, sys red / dia blue) */
+      if (hasBpWeek) {
+        _vitalsBuilders.push(function () {
+          var el = document.getElementById('vBpPatternsChart'); if (!el || typeof Plotly === 'undefined') return;
+          var xs = bpByWeek.map(function (r) { return r[0]; });
+          var sysMed = bpByWeek.map(function (r) { return r[2]; });
+          var sysMean = bpByWeek.map(function (r) { return r[3]; });
+          var sysSd = bpByWeek.map(function (r) { return r[4]; });
+          var diaMed = bpByWeek.map(function (r) { return r[5]; });
+          var diaMean = bpByWeek.map(function (r) { return r[6]; });
+          var diaSd = bpByWeek.map(function (r) { return r[7]; });
+          var ns = bpByWeek.map(function (r) { return r[1]; });
+          var traces = vBandTraces(xs, sysMean, sysSd, 'rgba(220, 89, 89, 0.20)', 'rgba(165, 48, 48, 0.38)');
+          traces.push({
+            x: xs, y: sysMed, type: 'scatter', mode: 'lines+markers',
+            line: { color: '#5E1D1D', width: 2.5, shape: 'spline' }, marker: { color: '#5E1D1D', size: 5 }, customdata: ns,
+            hovertemplate: L('Week of %{x}<br>Systolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+                             'Semana de %{x}<br>Mediana sistólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
+            showlegend: false
+          });
+          Array.prototype.push.apply(traces, vBandTraces(xs, diaMean, diaSd, 'rgba(94, 151, 188, 0.20)', 'rgba(47, 100, 137, 0.38)'));
+          traces.push({
+            x: xs, y: diaMed, type: 'scatter', mode: 'lines+markers',
+            line: { color: '#1B3B54', width: 2.5, shape: 'spline' }, marker: { color: '#1B3B54', size: 5 }, customdata: ns,
+            hovertemplate: L('Week of %{x}<br>Diastolic median <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>',
+                             'Semana de %{x}<br>Mediana diastólica <b>%{y:.0f}</b> · n=%{customdata}<extra></extra>'),
+            showlegend: false
+          });
+          var refLines = [
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 140, y1: 140, line: { color: '#A53030', width: 1, dash: 'dot' } },
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 130, y1: 130, line: { color: '#C29327', width: 1, dash: 'dot' } },
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 90,  y1: 90,  line: { color: '#A53030', width: 1, dash: 'dot' } },
+            { type: 'line', xref: 'paper', x0: 0, x1: 1, yref: 'y', y0: 80,  y1: 80,  line: { color: '#C29327', width: 1, dash: 'dot' } },
+          ];
+          Plotly.newPlot(el, traces, vPlotLayout({
+            shapes: refLines,
+            xaxis: { type: 'date', showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } },
+            yaxis: { title: { text: 'mmHg', font: { color: C.inkSoft } }, showgrid: true, gridcolor: C.grid, zeroline: false, tickfont: { color: C.inkSoft } }
+          }), VPLOT_CONFIG);
+        });
+      }
+    }
+
+    /* ── In-page section nav (one anchor per rendered section) ───────────── */
+    var navHtml = '<div class="section-nav"><div class="section-nav-inner">' +
+      nav.map(function (s) { return '<a href="#' + s.id + '">' + t(s.en, s.pt) + '</a>'; }).join('') +
+      '</div></div>';
+
+    /* ── Mount the shell, then initialise charts (canvases must be in DOM) ── */
+    /* Top metric grid — kept always-positive so renderSectionView never prints
+       its emptyHint above real charts (breakdown.vitals_days can be 0 for
+       front-end-only patients whose data lives only behind the API). */
+    var nights = (d.meta && d.meta.nights) || 0;
+    var hrReadings = (d.meta && d.meta.hrReadings) || 0;
+    var topMetrics = [
+      { label: t('Vitals days', 'Dias de vitais'), value: b.vitals_days || steps.length || num },
+      { label: t('ECG events', 'Eventos de ECG'), value: b.ecg_events || 0 },
+    ];
+    if (nights) topMetrics.push({ label: t('Sleep nights', 'Noites de sono'), value: nights });
+    if (hrReadings) topMetrics.push({ label: t('HR readings', 'Leituras de FC'), value: hrReadings });
+
     renderSectionView({
       summary: summary, title: 'Vitals',
       eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
-      metrics: [
-        { label: t('Vitals days', 'Dias de vitais'),  value: b.vitals_days || 0 },
-        { label: t('ECG events',  'Eventos de ECG'),  value: b.ecg_events  || 0 },
-      ],
-      emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
-                   'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
+      metrics: topMetrics,
+      emptyHint: t('No vitals data ingested yet.', 'Sem dados de vitais ainda.'),
+      extra: navHtml + sectionsHtml,
     });
+
+    runVitalsBuilders();
+
+    /* Re-render every chart when the language toggle flips so baked-in
+       Chart.js / Plotly strings switch language. Registered once. */
+    if (!_vitalsLangHooked) {
+      _vitalsLangHooked = true;
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest && e.target.closest('.lang-btn');
+        if (btn) setTimeout(runVitalsBuilders, 0);
+      });
+    }
   }
 
   function renderGenetics(summary) {
