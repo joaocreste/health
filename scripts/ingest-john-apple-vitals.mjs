@@ -59,7 +59,7 @@ function bucket(d) {
     sysSum: 0, sysN: 0,
     diaSum: 0, diaN: 0,
     weight: null, weightTs: null,
-    sleepMin: 0, deepMin: 0, remMin: 0, hasSleep: false,
+    sleepIv: [], deepIv: [], remIv: [], hasSleep: false,
   });
   return day.get(d);
 }
@@ -69,8 +69,12 @@ const attr = (tag, name) => {
   return m ? m[1] : null;
 };
 const dayOf = (dt) => (dt ? dt.slice(0, 10) : null);
+// Apple stamps are "YYYY-MM-DD HH:MM:SS +ZZZZ"; Date.parse needs the date/time
+// joined by T AND the space before the tz offset removed, or it returns NaN
+// (which silently zeroed every sleep duration). Same normalization the ECG loader uses.
+const fixDt = (s) => s.replace(" ", "T").replace(/\s([+-]\d{4})$/, "$1");
 const minutesBetween = (a, b) => {
-  const t0 = Date.parse(a.replace(" ", "T")), t1 = Date.parse(b.replace(" ", "T"));
+  const t0 = Date.parse(fixDt(a)), t1 = Date.parse(fixDt(b));
   return (Number.isFinite(t0) && Number.isFinite(t1)) ? (t1 - t0) / 60000 : 0;
 };
 
@@ -128,14 +132,31 @@ function handleRecord(tag) {
     case "HKCategoryTypeIdentifierSleepAnalysis": {
       const d = dayOf(end) || dayOf(start);
       const b = bucket(d);
-      const mins = minutesBetween(start, end);
-      if (ASLEEP.has(valStr)) { b.sleepMin += mins; b.hasSleep = true; used++; }
-      if (valStr === "HKCategoryValueSleepAnalysisAsleepDeep") b.deepMin += mins;
-      if (valStr === "HKCategoryValueSleepAnalysisAsleepREM") b.remMin += mins;
+      const t0 = Date.parse(fixDt(start)), t1 = Date.parse(fixDt(end));
+      if (!(Number.isFinite(t0) && Number.isFinite(t1)) || t1 <= t0) break;
+      // Collect intervals and union them at build time — Apple often has
+      // OVERLAPPING asleep records from several sources; summing raw durations
+      // double-counts (produced impossible 30h nights).
+      if (ASLEEP.has(valStr)) { b.sleepIv.push([t0, t1]); b.hasSleep = true; used++; }
+      if (valStr === "HKCategoryValueSleepAnalysisAsleepDeep") b.deepIv.push([t0, t1]);
+      if (valStr === "HKCategoryValueSleepAnalysisAsleepREM") b.remIv.push([t0, t1]);
       break;
     }
     default: break;
   }
+}
+
+function unionMinutes(ivs) {
+  if (!ivs.length) return 0;
+  const s = ivs.slice().sort((a, b) => a[0] - b[0]);
+  let total = 0, cs = s[0][0], ce = s[0][1];
+  for (let i = 1; i < s.length; i++) {
+    const [a, b] = s[i];
+    if (a > ce) { total += ce - cs; cs = a; ce = b; }
+    else if (b > ce) { ce = b; }
+  }
+  total += ce - cs;
+  return total / 60000;
 }
 
 function buildRows() {
@@ -155,9 +176,9 @@ function buildRows() {
       weight_kg: b.weight != null ? Number(b.weight.toFixed(2)) : null,
       blood_pressure_sys: b.sysN ? Math.round(b.sysSum / b.sysN) : null,
       blood_pressure_dia: b.diaN ? Math.round(b.diaSum / b.diaN) : null,
-      sleep_minutes: b.hasSleep ? Math.round(b.sleepMin) : null,
-      deep_sleep_minutes: b.hasSleep ? Math.round(b.deepMin) : null,
-      rem_sleep_minutes: b.hasSleep ? Math.round(b.remMin) : null,
+      sleep_minutes: b.hasSleep ? Math.round(unionMinutes(b.sleepIv)) : null,
+      deep_sleep_minutes: b.hasSleep ? Math.round(unionMinutes(b.deepIv)) : null,
+      rem_sleep_minutes: b.hasSleep ? Math.round(unionMinutes(b.remIv)) : null,
       extras: Object.keys(extras).length ? extras : null,
     };
     // skip wholly-empty days
