@@ -2015,6 +2015,32 @@
       '</div></section>';
   }
 
+  /* Self-contained CSS for .vit-nav — mirrors the plain (non-sidebar) look of
+     the shared .section-nav rule, deliberately under its own class names so it
+     is immune to the body.has-side-nav descendant overrides (see the comment
+     at the call site). Injected once per page load. */
+  var _vitalsNavStyleInjected = false;
+  function injectVitalsNavStyle() {
+    if (_vitalsNavStyleInjected) return;
+    _vitalsNavStyleInjected = true;
+    var css =
+      '.vit-nav{position:sticky;top:60px;z-index:40;background:rgba(252,253,254,0.95);' +
+        'backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);' +
+        'border-bottom:1px solid var(--border-subtle);padding:0.75rem 2rem;' +
+        'overflow-x:auto;white-space:nowrap;}' +
+      '.vit-nav-inner{display:flex;gap:1.5rem;max-width:1200px;margin:0 auto;}' +
+      '.vit-nav a{font-family:var(--font-mono);font-size:12px;font-weight:500;' +
+        'letter-spacing:0.10em;text-transform:uppercase;color:var(--text-muted);' +
+        'padding:0.25rem 0;border-bottom:1px solid transparent;' +
+        'transition:color 0.15s,border-color 0.15s;text-decoration:none;}' +
+      '.vit-nav a:hover,.vit-nav a.active{color:var(--blue-700);border-bottom-color:var(--blue-400);}' +
+      '@media(max-width:880px){.vit-nav{padding:0.75rem 1.25rem;}}';
+    var style = document.createElement('style');
+    style.setAttribute('data-vit-nav', '1');
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
   /* ── Plotly common bits ───────────────────────────────────────────────── */
   var VPLOT_CONFIG = {
     displaylogo: false, responsive: true,
@@ -2606,7 +2632,9 @@
         { label: t('Latest', 'Última'), value: (last[1] + '/' + last[2]), unit: 'mmHg' },
       ]) +
         vCanvasCard('vBpChart', 'Blood pressure — monthly mean', 'Pressão arterial — média mensal',
-          'Systolic & diastolic · n=' + bp.length + ' readings', 'Sistólica e diastólica · n=' + bp.length + ' leituras');
+          'Systolic & diastolic · n=' + bp.length + ' readings', 'Sistólica e diastólica · n=' + bp.length + ' leituras') +
+        vCanvasCard('vBpDailyChart', 'Daily readings — full timeline', 'Leituras diárias — linha do tempo completa',
+          'Every reading · colour-coded by ACC/AHA 2017 category', 'Cada leitura · colorida por categoria ACC/AHA 2017', 'tall');
       if (hasBpWeek) {
         bpBody += vPlotCard('vBpPatternsChart', 'Blood pressure — weekly variability', 'Pressão arterial — variabilidade semanal',
           'Systolic (red) · diastolic (blue) · median ± SD · AHA stage lines', 'Sistólica (verm.) · diastólica (azul) · mediana ± DP · linhas de estágio AHA');
@@ -2652,7 +2680,71 @@
         }));
       });
 
-      /* 6b — weekly variability pattern (Plotly, sys red / dia blue) */
+      /* 6b — daily readings, full timeline (Withings-style floating bars:
+         thin pill from diastolic to systolic with hollow circles at each
+         end, colour-coded by ACC/AHA 2017 category). One continuous chart
+         across all dates — no month navigation. */
+      _vitalsBuilders.push(function () {
+        var el = document.getElementById('vBpDailyChart'); if (!el) return;
+        if (Chart.getChart(el)) Chart.getChart(el).destroy();
+        function bpColor(sys, dia) {
+          if (sys >= 180 || dia >= 120) return '#7A1F1F'; // crisis
+          if (sys >= 140 || dia >= 90) return '#C0392B';  // Stage 2
+          if (sys >= 130 || dia >= 80) return '#D88B3A';  // Stage 1
+          if (sys >= 120) return '#E5C04A';               // Elevated
+          return '#3F8A4D';                                // Normal
+        }
+        var labels = bp.map(function (r) { return r[0]; });
+        var pts = bp.map(function (r) { return { x: r[0], y: [r[2], r[1]], sys: r[1], dia: r[2] }; });
+        var colors = bp.map(function (r) { return bpColor(r[1], r[2]); });
+        var months = vMonthNames();
+        function fmtShort(iso) { return months[parseInt(iso.slice(5, 7), 10) - 1] + ' ' + parseInt(iso.slice(8, 10), 10); }
+        function tickFormatter(value, index) {
+          var iso = labels[index]; if (!iso) return '';
+          var prev = index > 0 ? labels[index - 1] : null;
+          var isFirst = !prev || prev.slice(0, 7) !== iso.slice(0, 7);
+          return isFirst ? months[parseInt(iso.slice(5, 7), 10) - 1] + ' ' + iso.slice(2, 4) : '';
+        }
+        var endpointCirclesPlugin = {
+          id: 'vBpEndpointCircles',
+          afterDatasetsDraw: function (chart) {
+            var ds = chart.data.datasets[0]; if (!ds || !ds.data) return;
+            var ctx = chart.ctx, x = chart.scales.x, y = chart.scales.y;
+            ds.data.forEach(function (pt, i) {
+              if (!pt || !Array.isArray(pt.y)) return;
+              var xPx = x.getPixelForValue(pt.x);
+              var yLow = y.getPixelForValue(pt.y[0]), yHigh = y.getPixelForValue(pt.y[1]);
+              var color = Array.isArray(ds.borderColor) ? ds.borderColor[i] : ds.borderColor;
+              ctx.save(); ctx.lineWidth = 1.4; ctx.strokeStyle = color; ctx.fillStyle = '#FFFFFF';
+              var r = 3.4;
+              ctx.beginPath(); ctx.arc(xPx, yHigh, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              ctx.beginPath(); ctx.arc(xPx, yLow, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              ctx.restore();
+            });
+          }
+        };
+        _vitalsChartInstances.push(new Chart(el, {
+          type: 'bar',
+          data: { labels: labels, datasets: [{ label: 'BP', data: pts, borderColor: colors, backgroundColor: 'transparent', borderWidth: 1.5, borderRadius: 8, borderSkipped: false, barThickness: 5 }] },
+          options: {
+            maintainAspectRatio: false, responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: { displayColors: false, callbacks: {
+                title: function (items) { return fmtShort(items[0].label); },
+                label: function (item) { return item.raw.sys + ' / ' + item.raw.dia + ' mmHg'; }
+              } }
+            },
+            scales: {
+              x: { type: 'category', grid: { display: false }, ticks: { color: C.inkSoft, autoSkip: false, maxRotation: 0, font: { size: 11 }, callback: tickFormatter } },
+              y: Object.assign({}, vAxisCommon, { min: 50, max: 180, ticks: Object.assign({}, vAxisCommon.ticks, { stepSize: 25 }), title: { display: true, text: 'mmHg', color: C.inkSoft } })
+            }
+          },
+          plugins: [endpointCirclesPlugin]
+        }));
+      });
+
+      /* 6c — weekly variability pattern (Plotly, sys red / dia blue) */
       if (hasBpWeek) {
         _vitalsBuilders.push(function () {
           var el = document.getElementById('vBpPatternsChart'); if (!el || typeof Plotly === 'undefined') return;
@@ -2695,8 +2787,21 @@
       }
     }
 
-    /* ── In-page section nav (one anchor per rendered section) ───────────── */
-    var navHtml = '<div class="section-nav"><div class="section-nav-inner">' +
+    /* ── In-page section nav (one anchor per rendered section) ───────────── *
+     * DELIBERATELY its own classes, NOT .section-nav/.section-nav-inner: this
+     * page's <body class="has-side-nav"> restyles those exact class names via
+     * DESCENDANT selectors (body.has-side-nav .section-nav-inner { flex-
+     * direction:column }, body.has-side-nav .section-nav a { color: rgba(255,
+     * 255,255,.66) }) that match at ANY nesting depth — while the FIXED-
+     * SIDEBAR positioning those rules assume only applies via the CHILD
+     * combinator (body.has-side-nav > .section-nav), which this nav (nested
+     * inside .ov-shell, not a direct child of body) never matches. The result
+     * was a sticky, vertically-stacked, near-white-on-white nav card ~300px
+     * tall stuck to the top of the viewport while scrolling. Injecting our own
+     * scoped rule set (mirrors the plain horizontal-pill .section-nav look)
+     * sidesteps that cascade entirely. */
+    injectVitalsNavStyle();
+    var navHtml = '<div class="vit-nav"><div class="vit-nav-inner">' +
       nav.map(function (s) { return '<a href="#' + s.id + '">' + t(s.en, s.pt) + '</a>'; }).join('') +
       '</div></div>';
 
