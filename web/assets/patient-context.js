@@ -1359,9 +1359,11 @@
         body = '<div class="ov-section-note">' +
           t('Report only — no image series in this study.', 'Apenas laudo — sem série de imagens neste exame.') + '</div>';
       }
+      // Report sits BELOW the viewer (imaging-spec invariant: the doctor's
+      // report always renders beneath the slice/3D surface for every study).
       return '<div class="img-study" data-manifest="' + escapeHtml(s.manifest_blob_key || '') + '">' +
         '<h3 class="img-study-title">' + imagingTitle(s) + ' <span class="ov-count-inline">' + meta + '</span></h3>' +
-        reportBtn + body +
+        body + reportBtn +
       '</div>';
     }
 
