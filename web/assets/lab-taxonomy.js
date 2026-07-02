@@ -161,7 +161,55 @@
     'Leukocytes (urine)':        { en: 'Leukocytes', pt: 'Leucócitos', panel: 'urine' },
     'Erythrocytes (urine)':      { en: 'Erythrocytes (RBC)', pt: 'Hemácias', panel: 'urine' },
     'Epithelial cells (urine)':  { en: 'Epithelial Cells', pt: 'Células epiteliais', panel: 'urine' },
+    'Bacteria (urine)':          { en: 'Bacteria', pt: 'Bactérias', panel: 'urine' },
+    'Casts (urine)':             { en: 'Casts (cylinders)', pt: 'Cilindros', panel: 'urine' },
+    'Crystals (urine)':          { en: 'Crystals', pt: 'Cristais', panel: 'urine' },
+    'Mucus (urine)':             { en: 'Mucus', pt: 'Muco (filamentos)', panel: 'urine' },
+    'Yeast (urine)':             { en: 'Yeast', pt: 'Leveduras', panel: 'urine' },
+    'Heme pigment (urine)':      { en: 'Heme Pigment', pt: 'Pigmento heme', panel: 'urine' },
     'Urine culture':             { en: 'Urine Culture', pt: 'Urocultura', panel: 'urine' },
+
+    // ── Additional markers (extend coverage beyond Patient Zero's static page;
+    //    all routed to existing panels, so no panel-order change for any patient) ──
+    // Liver — bilirubin fractions
+    'Bilirubin total':           { en: 'Bilirubin (total)', pt: 'Bilirrubina total', panel: 'liver' },
+    'Bilirubin direct':          { en: 'Bilirubin (direct)', pt: 'Bilirrubina direta', panel: 'liver' },
+    'Bilirubin indirect':        { en: 'Bilirubin (indirect)', pt: 'Bilirrubina indireta', panel: 'liver' },
+    // Glycemia — insulin axis
+    'Insulin':                   { en: 'Insulin (fasting)', pt: 'Insulina (jejum)', panel: 'glycemia' },
+    'HOMA-IR':                   { en: 'HOMA-IR (insulin resistance)', pt: 'HOMA-IR (resistência insulínica)', panel: 'glycemia' },
+    // Lipids — apolipoproteins & Lp(a)
+    'Apolipoprotein A-1':        { en: 'Apolipoprotein A-1', pt: 'Apolipoproteína A-1', panel: 'lipids' },
+    'Apolipoprotein B':          { en: 'Apolipoprotein B', pt: 'Apolipoproteína B', panel: 'lipids' },
+    'Lipoprotein(a)':            { en: 'Lipoprotein(a)', pt: 'Lipoproteína (a)', panel: 'lipids' },
+    // Iron
+    'Transferrin':               { en: 'Transferrin', pt: 'Transferrina', panel: 'iron' },
+    // Minerals
+    'Zinc':                      { en: 'Zinc', pt: 'Zinco', panel: 'minerals' },
+    // Hormonal & endocrine
+    'ACTH':                      { en: 'ACTH (adrenocorticotropic hormone)', pt: 'ACTH (hormônio adrenocorticotrófico)', panel: 'hormonal' },
+    'DHEA':                      { en: 'DHEA', pt: 'DHEA (dehidroepiandrosterona)', panel: 'hormonal' },
+    'Estriol':                   { en: 'Estriol', pt: 'Estriol', panel: 'hormonal' },
+    'Serotonin':                 { en: 'Serotonin', pt: 'Serotonina', panel: 'hormonal' },
+    'Bioavailable testosterone': { en: 'Testosterone (bioavailable)', pt: 'Testosterona biodisponível', panel: 'hormonal' },
+    // Vitamins
+    'Active B12':                { en: 'Active B12 (holotranscobalamin)', pt: 'B12 ativa (holotranscobalamina)', panel: 'vitamins' },
+    // Serology / infectious disease
+    'Anti-HBs':                  { en: 'Anti-HBs (hepatitis B surface antibody)', pt: 'Anti-HBs (anticorpo de superfície da hepatite B)', panel: 'serology' },
+    'Anti-HBc IgG':              { en: 'Anti-HBc IgG', pt: 'Anti-HBc IgG', panel: 'serology' },
+    'Anti-HBc IgM':              { en: 'Anti-HBc IgM', pt: 'Anti-HBc IgM', panel: 'serology' },
+    'HBeAg':                     { en: 'HBeAg (hepatitis B e-antigen)', pt: 'HBeAg (antígeno "e" da hepatite B)', panel: 'serology' },
+    'Anti-HBe':                  { en: 'Anti-HBe', pt: 'Anti-HBe', panel: 'serology' },
+    'HIV Ag/Ab (I and II)':      { en: 'HIV Ag/Ab (I and II)', pt: 'HIV Ag/Ac (I e II)', panel: 'serology' },
+    'VDRL':                      { en: 'VDRL (syphilis screen)', pt: 'VDRL (triagem para sífilis)', panel: 'serology' },
+    'Treponema pallidum IgG (FTA-ABS)': { en: 'Treponema pallidum IgG (FTA-ABS)', pt: 'Treponema pallidum IgG (FTA-ABS)', panel: 'serology' },
+    'Treponema pallidum IgM (FTA-ABS)': { en: 'Treponema pallidum IgM (FTA-ABS)', pt: 'Treponema pallidum IgM (FTA-ABS)', panel: 'serology' },
+    'Trypanosoma cruzi IgG':     { en: 'Trypanosoma cruzi IgG (Chagas)', pt: 'Trypanosoma cruzi IgG (Chagas)', panel: 'serology' },
+    // Leukogram — immature / atypical cells
+    'Atypical lymphocytes':      { en: 'Atypical Lymphocytes', pt: 'Linfócitos atípicos', panel: 'cbc_leuko' },
+    'Blasts':                    { en: 'Blasts', pt: 'Blastos', panel: 'cbc_leuko' },
+    'Lymphoblasts':              { en: 'Lymphoblasts', pt: 'Linfoblastos', panel: 'cbc_leuko' },
+    'Monoblasts':                { en: 'Monoblasts', pt: 'Monoblastos', panel: 'cbc_leuko' },
   };
 
   /* canonicalMarker(rawMarker, unit, category) -> canonical key in M.
@@ -174,9 +222,32 @@
 
   var DIFF = ['Neutrophils', 'Lymphocytes', 'Monocytes', 'Eosinophils', 'Basophils'];
 
+  // Exact-name synonyms: fold alternate extraction spellings onto the single
+  // canonical key already in M so a marker never splits across reports. Keyed by
+  // lowercased trimmed name. Additive — a raw name here that another patient
+  // also uses just merges correctly; it can never break an existing marker.
+  var SYNONYMS = {
+    'non-hdl cholesterol': 'Non-HDL-C',
+    'vldl cholesterol': 'VLDL',
+    'vldl-c': 'VLDL',
+    'free testosterone': 'Testosterone (free)',
+    'anti-tpo antibodies': 'Anti-TPO',
+    'thyroid peroxidase antibodies (tpoab)': 'Anti-TPO',
+    'thyroglobulin antibodies (tgab)': 'Anti-thyroglobulin antibodies',
+    'alpha-fetoprotein (afp)': 'AFP',
+    'anti-hcv': 'Hepatitis C antibody (Anti-HCV)',
+    'hbsag': 'Hepatitis B surface antigen (HBsAg)',
+    'prothrombin time (activity)': 'Prothrombin activity',
+    'total bilirubin': 'Bilirubin total',
+    'direct bilirubin': 'Bilirubin direct',
+    'indirect bilirubin': 'Bilirubin indirect',
+  };
+
   function canonicalMarker(raw, unit, category) {
     var s = String(raw == null ? '' : raw).trim();
     var low = s.toLowerCase();
+
+    if (SYNONYMS[low]) return SYNONYMS[low];
 
     // Urinalysis: one canonical "(urine)" key per analyte, by keyword.
     if (String(category || '').toLowerCase().indexOf('urinalysis') !== -1 ||
