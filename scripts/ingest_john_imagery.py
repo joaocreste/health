@@ -113,8 +113,12 @@ def process_study(cfg, apply):
             print(f"   ! {raw:8} MISSING")
             continue
         key = sv["key"]
-        # subsample very dense series if requested (kept full unless 'every' set)
-        every = sv.get("every", 1)
+        # subsample: explicit 'every' wins; else auto-thin very dense series so the
+        # committed/deployed footprint stays sane (imperceptible for browser scrub).
+        every = sv.get("every")
+        if every is None:
+            n = len(slist)
+            every = 3 if n > 450 else (2 if n > 220 else 1)
         chosen = slist[::every]
         out_series = web_dir / key
         rel_slices = []
@@ -203,6 +207,97 @@ STUDY_SETS = {
                 {"raw": "s0006", "key": "ax-t2-inf", "label_en": "Axial T2 (lower)", "label_pt": "Axial T2 (inferior)"},
                 {"raw": "s0007", "key": "ax-t1-inf", "label_en": "Axial T1 (lower)", "label_pt": "Axial T1 (inferior)"},
                 {"raw": "s0008", "key": "key", "label_en": "Key images", "label_pt": "Imagens-chave"},
+            ],
+        },
+    ],
+    "rest": [
+        {
+            "study": "RM do cranio / encefalo", "studySlug": "brain-mri-2022-04-23",
+            "srcFolder": "MRI Head 2022", "srcSub": "jpeg", "reportFile": "Rm Cranio.PDF",
+            "modality": "MRI", "date": "2022-04-23", "bodyPart": "head",
+            "facility": None, "facilityCity": None, "facilityCountry": "Brazil",
+            "requestingDoctor": None, "reportingDoctor": None, "default": "ax-t1",
+            "series": [
+                {"raw": "s0001", "key": "ax-t1", "label_en": "Axial T1", "label_pt": "Axial T1"},
+                {"raw": "s0009", "key": "sag-flair", "label_en": "Sagittal 3D FLAIR", "label_pt": "Sagital 3D FLAIR"},
+                {"raw": "s0008", "key": "ax-t2fs", "label_en": "Axial T2 FS", "label_pt": "Axial T2 FS"},
+                {"raw": "s0002", "key": "ax-diff", "label_en": "Axial diffusion", "label_pt": "Axial difusao"},
+                {"raw": "s0003", "key": "ax-adc", "label_en": "Axial diffusion (ADC)", "label_pt": "Axial difusao (ADC)"},
+                {"raw": "s0007", "key": "swi", "label_en": "SWI", "label_pt": "SWI"},
+                {"raw": "s0006", "key": "swi-mip", "label_en": "SWI mIP", "label_pt": "SWI mIP"},
+                {"raw": "s0012", "key": "ax-3d-gd", "label_en": "Axial 3D T1 post-Gd", "label_pt": "Axial 3D T1 pos-contraste"},
+                {"raw": "s0010", "key": "ax-t1-gd", "label_en": "Axial T1 post-Gd", "label_pt": "Axial T1 pos-contraste"},
+                {"raw": "s0004", "key": "swi-mag", "label_en": "SWI magnitude", "label_pt": "SWI magnitude"},
+                {"raw": "s0005", "key": "swi-pha", "label_en": "SWI phase", "label_pt": "SWI fase"},
+                {"raw": "s0011", "key": "ax-t1-g2", "label_en": "Axial T1 (Gd, 2)", "label_pt": "Axial T1 (Gd, 2)"},
+                {"raw": "s0013", "key": "k1", "exclude": True, "label_en": "key", "label_pt": "key"},
+                {"raw": "s0014", "key": "k2", "exclude": True, "label_en": "key", "label_pt": "key"},
+            ],
+        },
+        {
+            "study": "RM da face / seios da face", "studySlug": "face-mri-2026-06-08",
+            "srcFolder": "MRI Face June 10 2026", "srcSub": "exam/jpeg", "reportFile": "Rm De Face Ou Seios Da Face.pdf",
+            "modality": "MRI", "date": "2026-06-08", "bodyPart": "head",
+            "facility": None, "facilityCity": None, "facilityCountry": "Brazil",
+            "requestingDoctor": "Dimas Andre Milcheski (CRM-96425)", "reportingDoctor": "Luiz Ricardo Araujo Uchoa (CRM/SP 220106)", "default": "ax-t1",
+            "series": [
+                {"raw": "s0004", "key": "ax-t1", "label_en": "Axial T1", "label_pt": "Axial T1"},
+                {"raw": "s0003", "key": "ax-t2-stir", "label_en": "Axial T2 STIR", "label_pt": "Axial T2 STIR"},
+                {"raw": "s0002", "key": "cor-t1", "label_en": "Coronal T1", "label_pt": "Coronal T1"},
+                {"raw": "s0001", "key": "cor-t2-stir", "label_en": "Coronal T2 STIR", "label_pt": "Coronal T2 STIR"},
+                {"raw": "s0005", "key": "ax-diff", "label_en": "Axial diffusion", "label_pt": "Axial difusao"},
+                {"raw": "s0006", "key": "ax-adc", "label_en": "Axial diffusion (ADC)", "label_pt": "Axial difusao (ADC)"},
+                {"raw": "s0009", "key": "ax-dixon", "label_en": "Axial T1 Dixon (post)", "label_pt": "Axial T1 Dixon (pos)"},
+                {"raw": "s0010", "key": "ax-vibe", "label_en": "Axial VIBE Dixon (post)", "label_pt": "Axial VIBE Dixon (pos)"},
+                {"raw": "s0011", "key": "cor-dixon", "label_en": "Coronal T1 Dixon (post)", "label_pt": "Coronal T1 Dixon (pos)"},
+                {"raw": "s0008", "key": "perf", "exclude": True, "label_en": "perfusion (dynamic)", "label_pt": "perfusao"},
+                {"raw": "s0007", "key": "cor2", "exclude": True, "label_en": "dup", "label_pt": "dup"},
+                {"raw": "s0012", "key": "k", "exclude": True, "label_en": "key", "label_pt": "key"},
+            ],
+        },
+        {
+            "study": "AngioTC coronaria (escore de calcio)", "studySlug": "coronary-cta-2023-07-19",
+            "srcFolder": "TC Heart", "srcSub": "jpeg", "reportFile": "TC Angiotomografia Coronarias.PDF",
+            "modality": "CT", "date": "2023-07-19", "bodyPart": "heart",
+            "facility": "Albert Einstein Medicina Diagnostica", "facilityCity": "Sao Paulo", "facilityCountry": "Brazil",
+            "requestingDoctor": None, "reportingDoctor": "Marcos Roberto Gomes de Queiroz (CRM-SP 90.835)", "default": "vol",
+            "series": [
+                {"raw": "s0004", "key": "vol", "label_en": "Axial (coronary volume)", "label_pt": "Axial (volume coronario)"},
+                {"raw": "s0006", "key": "ph70", "label_en": "Axial (70% phase)", "label_pt": "Axial (fase 70%)"},
+                {"raw": "s0005", "key": "ph80", "label_en": "Axial (80% phase)", "label_pt": "Axial (fase 80%)"},
+                {"raw": "s0007", "key": "fov", "label_en": "Axial (open FOV)", "label_pt": "Axial (FOV aberto)"},
+                {"raw": "s0003", "key": "score", "label_en": "Calcium score", "label_pt": "Escore de calcio"},
+                {"raw": "s0008", "key": "lad", "label_en": "LAD reconstruction", "label_pt": "Reconstrucao DA"},
+                {"raw": "s0009", "key": "rca", "label_en": "RCA reconstruction", "label_pt": "Reconstrucao CD"},
+                {"raw": "s0010", "key": "cx", "label_en": "Cx reconstruction", "label_pt": "Reconstrucao CX"},
+                # scouts / ECG-gating traces / protocol + banner pages -> excluded
+                {"raw": "s0001", "key": "x1", "exclude": True, "label_en": "scout", "label_pt": "scout"},
+                {"raw": "s0002", "key": "x2", "exclude": True, "label_en": "scout", "label_pt": "scout"},
+                {"raw": "s0011", "key": "x3", "exclude": True, "label_en": "ecg", "label_pt": "ecg"},
+                {"raw": "s0012", "key": "x4", "exclude": True, "label_en": "ecg", "label_pt": "ecg"},
+                {"raw": "s0013", "key": "x5", "exclude": True, "label_en": "ecg", "label_pt": "ecg"},
+                {"raw": "s0014", "key": "x6", "exclude": True, "label_en": "ecg", "label_pt": "ecg"},
+                {"raw": "s0015", "key": "x7", "exclude": True, "label_en": "protocol", "label_pt": "protocol"},
+                {"raw": "s0016", "key": "x8", "exclude": True, "label_en": "banner", "label_pt": "banner"},
+                {"raw": "s0017", "key": "x9", "exclude": True, "label_en": "banner", "label_pt": "banner"},
+                {"raw": "s0018", "key": "key1", "exclude": True, "label_en": "key", "label_pt": "key"},
+                {"raw": "s0019", "key": "key2", "exclude": True, "label_en": "key", "label_pt": "key"},
+            ],
+        },
+        {
+            "study": "RM do cranio (difusao)", "studySlug": "brain-mri-2026-06-08",
+            "srcFolder": "MRI Crane June 10 2026", "srcSub": "exam/jpeg", "reportFile": "Rm De Crânio Difusão.pdf",
+            "modality": "MRI", "date": "2026-06-08", "bodyPart": "head",
+            "facility": None, "facilityCity": None, "facilityCountry": "Brazil",
+            "requestingDoctor": "Dimas Andre Milcheski (CRM-96425)", "reportingDoctor": None, "default": "ax-t1-vol",
+            # NOTE: this folder ALSO contains coronary-CTA series (s0002-s0011) that
+            # duplicate the coronary study; ingesting ONLY the brain (RM CRANIO) series here.
+            "series": [
+                {"raw": "s0013", "key": "ax-t1-vol", "label_en": "Axial T1 volume FS", "label_pt": "Axial T1 volume FS"},
+                {"raw": "s0001", "key": "ax-diff", "label_en": "Axial diffusion", "label_pt": "Axial difusao"},
+                {"raw": "s0012", "key": "swi-mip", "label_en": "T2 SWI mIP", "label_pt": "T2 SWI mIP"},
+                {"raw": "s0014", "key": "ax-t1-fs", "label_en": "Axial T1 SE FS (post)", "label_pt": "Axial T1 SE FS (pos)"},
+                {"raw": "s0015", "key": "ax-t1", "label_en": "Axial T1 SE (post)", "label_pt": "Axial T1 SE (pos)"},
             ],
         },
     ],

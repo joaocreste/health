@@ -1379,7 +1379,15 @@
         groups[byKey[key]].push(s);
       });
       return groups.map(function (g) {
-        if (g.length < 2) return renderImagingStudy(g[0]);
+        // Comparative side-by-side only for a genuine pair: same date + body part
+        // AND two different modalities (e.g. CT + MRI of the lumbar spine). Two
+        // studies of the same modality (e.g. two head MRIs same day) render
+        // stacked full-width instead of a misleading "comparative" row.
+        var mods = {};
+        g.forEach(function (s) { mods[s.modality] = 1; });
+        if (g.length < 2 || Object.keys(mods).length < 2) {
+          return g.map(renderImagingStudy).join('');
+        }
         return '<div class="img-compare">' +
             '<div class="img-compare-head">' +
               t('Comparative studies', 'Exames comparativos') + ' · ' +
@@ -1395,8 +1403,13 @@
         '.img-compare{margin:8px 0 4px}' +
         '.img-compare-head{font:600 13px/1.2 Raleway,sans-serif;letter-spacing:.02em;text-transform:uppercase;' +
           'color:var(--jc-gold,#b8954a);margin:0 0 10px}' +
-        '.img-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}' +
-        '.img-compare-grid .img-study{margin:0}' +
+        // minmax(0,1fr) lets each column shrink below its content's intrinsic
+        // width (the viewer/image), otherwise the two 620px-capped viewers
+        // overflow the container. Viewers fill their column instead of forcing 620.
+        '.img-compare-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}' +
+        '.img-compare-grid .img-study{margin:0;min-width:0}' +
+        '.img-compare-grid .ct-grid.ct-grid-single{max-width:none}' +
+        '.img-compare-grid .ct-viewer{max-width:none}' +
         '@media(max-width:860px){.img-compare-grid{grid-template-columns:1fr}}' +
       '</style>';
 
