@@ -1004,6 +1004,73 @@ async function handleVitalsRange(request, env) {
       hrCount += r.n;
     }
 
+    // ── Apple Health fallback ──────────────────────────────────────────
+    // Patients whose only wearable is Apple Health store flat per-day columns
+    // (no Oura sleep_periods / Withings bp_list). Fill any dimension the primary
+    // Oura/Withings queries left empty from source='apple_health'. Each branch is
+    // gated on its primary source being empty, so Oura/Withings patients are
+    // untouched. HR-by-time-of-day needs per-minute hr_readings, which the daily
+    // Apple import does not populate, so that chart stays empty here.
+    if (!oura.length || !scale.length || !cuff.length) {
+      const apple = await sql`SELECT day::text AS d, steps, resting_hr, hrv_ms, weight_kg,
+               blood_pressure_sys, blood_pressure_dia, sleep_minutes, deep_sleep_minutes, rem_sleep_minutes
+             FROM vitals_daily WHERE patient_id = ${pid} AND source = 'apple_health'
+               AND day BETWEEN ${from} AND ${to} ORDER BY day`;
+      if (apple.length && !oura.length) {
+        for (const r of apple) {
+          if (r.steps != null) steps.push([r.d, r.steps]);
+          if (r.hrv_ms != null || r.resting_hr != null)
+            hrvRhr.push([r.d, r.hrv_ms != null ? r1(Number(r.hrv_ms)) : null, r.resting_hr != null ? r1(Number(r.resting_hr)) : null]);
+          if (r.resting_hr != null) {
+            const wk = vrIsoMonday(r.d);
+            if (!wkRhr.has(wk)) wkRhr.set(wk, []);
+            wkRhr.get(wk).push(Number(r.resting_hr));
+          }
+          if (r.sleep_minutes) {
+            const total = r.sleep_minutes / 60, deep = (r.deep_sleep_minutes || 0) / 60, rem = (r.rem_sleep_minutes || 0) / 60;
+            periods.push({ d: r.d, deep, rem, light: Math.max(0, total - deep - rem), awake: 0, total });
+          }
+        }
+        rhrByWeek.length = 0;
+        for (const wk of [...wkRhr.keys()].sort()) {
+          const vs = wkRhr.get(wk); rhrByWeek.push({ week: wk, n: vs.length, rhr: r1(vrMean(vs)) });
+        }
+        for (const stage of ["deep", "rem", "light", "awake", "total"])
+          sleepBox[stage] = vrBoxstats(periods.map((p) => p[stage]).filter((v) => v != null));
+        const wkSleepA = new Map();
+        for (const p of periods) {
+          const sum = (p.deep ?? 0) + (p.light ?? 0) + (p.rem ?? 0) + (p.awake ?? 0);
+          if (!sum) continue;
+          const wk = vrIsoMonday(p.d);
+          if (!wkSleepA.has(wk)) wkSleepA.set(wk, []);
+          wkSleepA.get(wk).push({ deep: (p.deep / sum) * 100, light: (p.light / sum) * 100, rem: (p.rem / sum) * 100, awake: (p.awake / sum) * 100, tst: p.total });
+        }
+        sleepStagesByWeek.length = 0;
+        for (const wk of [...wkSleepA.keys()].sort()) {
+          const ns = wkSleepA.get(wk);
+          sleepStagesByWeek.push({ week: wk, n: ns.length,
+            deep: r1(vrMean(ns.map((x) => x.deep))), light: r1(vrMean(ns.map((x) => x.light))),
+            rem: r1(vrMean(ns.map((x) => x.rem))), awake: r1(vrMean(ns.map((x) => x.awake))), tst: r2(vrMean(ns.map((x) => x.tst))) });
+        }
+      }
+      if (apple.length && !scale.length)
+        for (const r of apple) if (r.weight_kg) weight.push([r.d, r2(Number(r.weight_kg)), null, null]);
+      if (apple.length && !cuff.length) {
+        for (const r of apple) if (r.blood_pressure_sys != null && r.blood_pressure_dia != null) {
+          bp.push([r.d, r.blood_pressure_sys, r.blood_pressure_dia]);
+          const wk = vrIsoMonday(r.d);
+          if (!wkBp.has(wk)) wkBp.set(wk, { sys: [], dia: [] });
+          wkBp.get(wk).sys.push(r.blood_pressure_sys); wkBp.get(wk).dia.push(r.blood_pressure_dia);
+        }
+        bpByWeek.length = 0;
+        for (const wk of [...wkBp.keys()].sort()) {
+          const { sys, dia } = wkBp.get(wk);
+          bpByWeek.push([wk, sys.length, r1(vrMedian(sys)), r2(vrMean(sys)), r2(vrPstdev(sys)),
+            r1(vrMedian(dia)), r2(vrMean(dia)), r2(vrPstdev(dia))]);
+        }
+      }
+    }
+
     return new Response(JSON.stringify({
       range: { from, to },
       weight, steps, hrvRhr, stressRes, bp, bpByWeek, rhrByWeek,
