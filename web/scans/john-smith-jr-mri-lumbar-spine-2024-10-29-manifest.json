@@ -1,0 +1,298 @@
+{
+  "patient": "John Smith Jr",
+  "patientSlug": "john-smith-jr",
+  "study": "RM lombar (comparativo)",
+  "studySlug": "mri-lumbar-spine-2024-10-29",
+  "date": "2024-10-29",
+  "modality": "MRI",
+  "facility": "Rede D'Or Sao Luiz - Vila Nova Star",
+  "facilityCity": "Sao Paulo",
+  "facilityCountry": "Brazil",
+  "reportingDoctor": null,
+  "requestingDoctor": "Fausto Santana Celestino",
+  "ways": [
+    {
+      "key": "series",
+      "labelEn": "Series",
+      "labelPt": "Série",
+      "values": [
+        {
+          "key": "sag-t1",
+          "labelEn": "Sagittal T1",
+          "labelPt": "Sagital T1"
+        },
+        {
+          "key": "sag-t2",
+          "labelEn": "Sagittal T2",
+          "labelPt": "Sagital T2"
+        },
+        {
+          "key": "sag-t2fs",
+          "labelEn": "Sagittal T2 FS",
+          "labelPt": "Sagital T2 FAT"
+        },
+        {
+          "key": "cor-stir",
+          "labelEn": "Coronal STIR",
+          "labelPt": "Coronal STIR"
+        },
+        {
+          "key": "ax-t2-sup",
+          "labelEn": "Axial T2 (upper)",
+          "labelPt": "Axial T2 (superior)"
+        },
+        {
+          "key": "ax-t2-inf",
+          "labelEn": "Axial T2 (lower)",
+          "labelPt": "Axial T2 (inferior)"
+        },
+        {
+          "key": "ax-t1-inf",
+          "labelEn": "Axial T1 (lower)",
+          "labelPt": "Axial T1 (inferior)"
+        },
+        {
+          "key": "key",
+          "labelEn": "Key images",
+          "labelPt": "Imagens-chave"
+        }
+      ]
+    }
+  ],
+  "defaultSelect": {
+    "series": "sag-t2"
+  },
+  "stacks": [
+    {
+      "select": {
+        "series": "sag-t1"
+      },
+      "count": 18,
+      "slices": [
+        "sag-t1/0001.jpg",
+        "sag-t1/0002.jpg",
+        "sag-t1/0003.jpg",
+        "sag-t1/0004.jpg",
+        "sag-t1/0005.jpg",
+        "sag-t1/0006.jpg",
+        "sag-t1/0007.jpg",
+        "sag-t1/0008.jpg",
+        "sag-t1/0009.jpg",
+        "sag-t1/0010.jpg",
+        "sag-t1/0011.jpg",
+        "sag-t1/0012.jpg",
+        "sag-t1/0013.jpg",
+        "sag-t1/0014.jpg",
+        "sag-t1/0015.jpg",
+        "sag-t1/0016.jpg",
+        "sag-t1/0017.jpg",
+        "sag-t1/0018.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "sag-t2"
+      },
+      "count": 15,
+      "slices": [
+        "sag-t2/0001.jpg",
+        "sag-t2/0002.jpg",
+        "sag-t2/0003.jpg",
+        "sag-t2/0004.jpg",
+        "sag-t2/0005.jpg",
+        "sag-t2/0006.jpg",
+        "sag-t2/0007.jpg",
+        "sag-t2/0008.jpg",
+        "sag-t2/0009.jpg",
+        "sag-t2/0010.jpg",
+        "sag-t2/0011.jpg",
+        "sag-t2/0012.jpg",
+        "sag-t2/0013.jpg",
+        "sag-t2/0014.jpg",
+        "sag-t2/0015.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "sag-t2fs"
+      },
+      "count": 15,
+      "slices": [
+        "sag-t2fs/0001.jpg",
+        "sag-t2fs/0002.jpg",
+        "sag-t2fs/0003.jpg",
+        "sag-t2fs/0004.jpg",
+        "sag-t2fs/0005.jpg",
+        "sag-t2fs/0006.jpg",
+        "sag-t2fs/0007.jpg",
+        "sag-t2fs/0008.jpg",
+        "sag-t2fs/0009.jpg",
+        "sag-t2fs/0010.jpg",
+        "sag-t2fs/0011.jpg",
+        "sag-t2fs/0012.jpg",
+        "sag-t2fs/0013.jpg",
+        "sag-t2fs/0014.jpg",
+        "sag-t2fs/0015.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "cor-stir"
+      },
+      "count": 14,
+      "slices": [
+        "cor-stir/0001.jpg",
+        "cor-stir/0002.jpg",
+        "cor-stir/0003.jpg",
+        "cor-stir/0004.jpg",
+        "cor-stir/0005.jpg",
+        "cor-stir/0006.jpg",
+        "cor-stir/0007.jpg",
+        "cor-stir/0008.jpg",
+        "cor-stir/0009.jpg",
+        "cor-stir/0010.jpg",
+        "cor-stir/0011.jpg",
+        "cor-stir/0012.jpg",
+        "cor-stir/0013.jpg",
+        "cor-stir/0014.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "ax-t2-sup"
+      },
+      "count": 34,
+      "slices": [
+        "ax-t2-sup/0001.jpg",
+        "ax-t2-sup/0002.jpg",
+        "ax-t2-sup/0003.jpg",
+        "ax-t2-sup/0004.jpg",
+        "ax-t2-sup/0005.jpg",
+        "ax-t2-sup/0006.jpg",
+        "ax-t2-sup/0007.jpg",
+        "ax-t2-sup/0008.jpg",
+        "ax-t2-sup/0009.jpg",
+        "ax-t2-sup/0010.jpg",
+        "ax-t2-sup/0011.jpg",
+        "ax-t2-sup/0012.jpg",
+        "ax-t2-sup/0013.jpg",
+        "ax-t2-sup/0014.jpg",
+        "ax-t2-sup/0015.jpg",
+        "ax-t2-sup/0016.jpg",
+        "ax-t2-sup/0017.jpg",
+        "ax-t2-sup/0018.jpg",
+        "ax-t2-sup/0019.jpg",
+        "ax-t2-sup/0020.jpg",
+        "ax-t2-sup/0021.jpg",
+        "ax-t2-sup/0022.jpg",
+        "ax-t2-sup/0023.jpg",
+        "ax-t2-sup/0024.jpg",
+        "ax-t2-sup/0025.jpg",
+        "ax-t2-sup/0026.jpg",
+        "ax-t2-sup/0027.jpg",
+        "ax-t2-sup/0028.jpg",
+        "ax-t2-sup/0029.jpg",
+        "ax-t2-sup/0030.jpg",
+        "ax-t2-sup/0031.jpg",
+        "ax-t2-sup/0032.jpg",
+        "ax-t2-sup/0033.jpg",
+        "ax-t2-sup/0034.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "ax-t2-inf"
+      },
+      "count": 30,
+      "slices": [
+        "ax-t2-inf/0001.jpg",
+        "ax-t2-inf/0002.jpg",
+        "ax-t2-inf/0003.jpg",
+        "ax-t2-inf/0004.jpg",
+        "ax-t2-inf/0005.jpg",
+        "ax-t2-inf/0006.jpg",
+        "ax-t2-inf/0007.jpg",
+        "ax-t2-inf/0008.jpg",
+        "ax-t2-inf/0009.jpg",
+        "ax-t2-inf/0010.jpg",
+        "ax-t2-inf/0011.jpg",
+        "ax-t2-inf/0012.jpg",
+        "ax-t2-inf/0013.jpg",
+        "ax-t2-inf/0014.jpg",
+        "ax-t2-inf/0015.jpg",
+        "ax-t2-inf/0016.jpg",
+        "ax-t2-inf/0017.jpg",
+        "ax-t2-inf/0018.jpg",
+        "ax-t2-inf/0019.jpg",
+        "ax-t2-inf/0020.jpg",
+        "ax-t2-inf/0021.jpg",
+        "ax-t2-inf/0022.jpg",
+        "ax-t2-inf/0023.jpg",
+        "ax-t2-inf/0024.jpg",
+        "ax-t2-inf/0025.jpg",
+        "ax-t2-inf/0026.jpg",
+        "ax-t2-inf/0027.jpg",
+        "ax-t2-inf/0028.jpg",
+        "ax-t2-inf/0029.jpg",
+        "ax-t2-inf/0030.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "ax-t1-inf"
+      },
+      "count": 30,
+      "slices": [
+        "ax-t1-inf/0001.jpg",
+        "ax-t1-inf/0002.jpg",
+        "ax-t1-inf/0003.jpg",
+        "ax-t1-inf/0004.jpg",
+        "ax-t1-inf/0005.jpg",
+        "ax-t1-inf/0006.jpg",
+        "ax-t1-inf/0007.jpg",
+        "ax-t1-inf/0008.jpg",
+        "ax-t1-inf/0009.jpg",
+        "ax-t1-inf/0010.jpg",
+        "ax-t1-inf/0011.jpg",
+        "ax-t1-inf/0012.jpg",
+        "ax-t1-inf/0013.jpg",
+        "ax-t1-inf/0014.jpg",
+        "ax-t1-inf/0015.jpg",
+        "ax-t1-inf/0016.jpg",
+        "ax-t1-inf/0017.jpg",
+        "ax-t1-inf/0018.jpg",
+        "ax-t1-inf/0019.jpg",
+        "ax-t1-inf/0020.jpg",
+        "ax-t1-inf/0021.jpg",
+        "ax-t1-inf/0022.jpg",
+        "ax-t1-inf/0023.jpg",
+        "ax-t1-inf/0024.jpg",
+        "ax-t1-inf/0025.jpg",
+        "ax-t1-inf/0026.jpg",
+        "ax-t1-inf/0027.jpg",
+        "ax-t1-inf/0028.jpg",
+        "ax-t1-inf/0029.jpg",
+        "ax-t1-inf/0030.jpg"
+      ]
+    },
+    {
+      "select": {
+        "series": "key"
+      },
+      "count": 4,
+      "slices": [
+        "key/0001.jpg",
+        "key/0002.jpg",
+        "key/0003.jpg",
+        "key/0004.jpg"
+      ]
+    }
+  ],
+  "report": {
+    "match": null,
+    "pdf": "report.pdf",
+    "textEn": null,
+    "textPt": "Solicitante: Fausto Santana Celestino                                      Data: 29/10/2024\n\n                          RESSONÂNCIA MAGNÉTICA DA COLUNA LOMBAR\n\nTécnica:\nSequências ponderadas em T1 e T2, em aquisições multiplanares, sem uso de contraste.\n\nAnálise:\n- Fraturas: ausentes.\n- Lesões ósseas agressivas: ausentes.\n- Alinhamentos sagital e coronal: preservados.\n- Corpos vertebrais: de alturas e sinal medular preservados.\n- Discos intervertebrais: discopatia degenerativa no nível L5-S1.\n     L5-S1: protrusão discal mediana e paramediana esquerda com fissura do ânulo fibroso fazendo\n        impressão dural e mantendo proximidade / tênue contato com a raiz descendente de S1 esquerda.\n- Articulações interfacetárias: preservadas.\n- Canal vertebral e forames neurais: de amplitude normal.\n- Cauda equina: de distribuição anatômica no interior do saco dural.\n- Estruturas paravertebrais: sem particularidades.\n\nConclusão:\n- Discopatia degenerativa no nível L5-S1 com protrusão discal.\n\n                                                                                                           Página 1 de 3\n______________________________________________________________________________________________________________________\n\n                         Rua Dr Alceu de Campos Rodrigues, 126, Vila Nova Conceição- Tel (11) 3457-1000\n                                           www.rededorsaoluiz.com.br/star/vilanovastar\n\nSolicitante: Fausto Santana Celestino                                      Data: 29/10/2024\n\n                                                                                                           Página 2 de 3\n______________________________________________________________________________________________________________________\n\n                         Rua Dr Alceu de Campos Rodrigues, 126, Vila Nova Conceição- Tel (11) 3457-1000\n                                           www.rededorsaoluiz.com.br/star/vilanovastar\n\nSolicitante: Fausto Santana Celestino                                      Data: 29/10/2024\n\n                                                                                                           Página 3 de 3\n______________________________________________________________________________________________________________________\n\n                         Rua Dr Alceu de Campos Rodrigues, 126, Vila Nova Conceição- Tel (11) 3457-1000\n                                           www.rededorsaoluiz.com.br/star/vilanovastar",
+    "aiSummary": null
+  }
+}

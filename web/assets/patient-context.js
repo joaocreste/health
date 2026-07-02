@@ -1365,10 +1365,43 @@
       '</div>';
     }
 
+    // Comparative layout: studies sharing a date + body part (e.g. a CT and an
+    // MRI of the lumbar spine on the same day) render side by side in a two-column
+    // row so they read as the comparative pair they are. Singles stay full-width.
+    // Input is already newest-first (API orders by study_date DESC).
+    function renderImagingSection(list) {
+      var groups = [], byKey = {};
+      list.forEach(function (s) {
+        var key = (s.study_date || '') + '|' + (s.body_part || '~' + (s.id || Math.random()));
+        if (byKey[key] == null) { byKey[key] = groups.length; groups.push([]); }
+        groups[byKey[key]].push(s);
+      });
+      return groups.map(function (g) {
+        if (g.length < 2) return renderImagingStudy(g[0]);
+        return '<div class="img-compare">' +
+            '<div class="img-compare-head">' +
+              t('Comparative studies', 'Exames comparativos') + ' · ' +
+              escapeHtml(formatDate(g[0].study_date)) +
+            '</div>' +
+            '<div class="img-compare-grid">' + g.map(renderImagingStudy).join('') + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    var imagingStyle =
+      '<style>' +
+        '.img-compare{margin:8px 0 4px}' +
+        '.img-compare-head{font:600 13px/1.2 Raleway,sans-serif;letter-spacing:.02em;text-transform:uppercase;' +
+          'color:var(--jc-gold,#b8954a);margin:0 0 10px}' +
+        '.img-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}' +
+        '.img-compare-grid .img-study{margin:0}' +
+        '@media(max-width:860px){.img-compare-grid{grid-template-columns:1fr}}' +
+      '</style>';
+
     var imagingHtml = imaging.length === 0 ? '' :
-      '<section class="ov-section" id="imaging">' +
+      '<section class="ov-section" id="imaging">' + imagingStyle +
         '<h2>' + t('Imaging studies', 'Estudos de imagem') + ' <span class="ov-count-inline">' + imaging.length + '</span></h2>' +
-        imaging.map(renderImagingStudy).join('') +
+        renderImagingSection(imaging) +
       '</section>';
 
     var docsHtml = docs.length === 0 ? '' :
