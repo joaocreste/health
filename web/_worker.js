@@ -65,6 +65,7 @@ const PATIENT_CLERKS = {
   silvana: "pending:silvana-creste-18ba19",
   cristina: "pending:cristina-cresti-d7479c",
   maria: "pending:maria-regina-coury-0cfb1b",
+  johnsmithjr: "pending:john-smith-jr-dbef5f",
 };
 
 /* ── Signed session cookie ──
@@ -187,6 +188,7 @@ const GATED_ASSETS = [
 const SCAN_OWNERS = [
   { prefix: "/scans/paulo-", patient: PATIENT_CLERKS.paulo, anyOf: ["imaging"], honorFilter: true },
   { prefix: "/scans/maria-regina-coury-", patient: PATIENT_CLERKS.maria, anyOf: ["imaging"], honorFilter: true },
+  { prefix: "/scans/john-smith-jr-", patient: PATIENT_CLERKS.johnsmithjr, anyOf: ["imaging"], honorFilter: true },
   { prefix: "/scans/silvana-source-pdfs/", patient: PATIENT_CLERKS.silvana, anyOf: ["labs"] },
   { prefix: "/scans/cristina-source-pdfs/", patient: PATIENT_CLERKS.cristina, anyOf: ["labs"] },
   // Patient Zero's scan slugs are historically unprefixed:
