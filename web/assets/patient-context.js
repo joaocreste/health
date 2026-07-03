@@ -2251,10 +2251,12 @@
         vTiles(sTiles) +
         vCanvasCard('vSleepStageChart', 'Sleep stage distribution — boxplot (±1.5 × IQR)', 'Distribuição dos estágios do sono — boxplot (±1,5 × IIQ)',
           'Hours per night · n=' + nNights + ' nights', 'Horas por noite · n=' + nNights + ' noites') +
+        '<div class="two-col">' +
         vPlotCard('vSleepTotalChart', 'Total sleep — weekly average (hours per night)', 'Sono total — média semanal (horas por noite)',
           '7–9 h adult-guidance band · n=' + sleepStagesByWeek.length + ' weeks', 'Faixa recomendada 7–9 h · n=' + sleepStagesByWeek.length + ' semanas') +
         vPlotCard('vSleepCompositionChart', 'Sleep stage composition — weekly average (% of total sleep)', 'Composição dos estágios — média semanal (% do sono total)',
-          '100% stacked · deep + REM + light + awake', '100% empilhado · profundo + REM + leve + acordado'));
+          '100% stacked · deep + REM + light + awake', '100% empilhado · profundo + REM + leve + acordado') +
+        '</div>');
 
       /* 2a — boxplot (Chart.js) */
       _vitalsBuilders.push(function () {
@@ -2444,13 +2446,17 @@
       var cardioBody = vTiles(cTiles) +
         vCanvasCard('vCardioChart', 'HRV & resting HR — monthly mean', 'VFC e FC em repouso — média mensal',
           'HRV (ms, left) · resting HR (bpm, right) · per-night source', 'VFC (ms, esq.) · FC repouso (bpm, dir.) · fonte por noite');
-      if (hasHrTod) {
-        cardioBody += vPlotCard('vHrPatternsChart', 'Daily patterns — heart rate by time of day', 'Padrões diários — frequência cardíaca por hora do dia',
-          'All readings folded onto 24 h · median · ±1 SD · ±2 SD', 'Todas as leituras dobradas em 24 h · mediana · ±1 DP · ±2 DP');
-      }
-      if (hasRhrWeek) {
-        cardioBody += vPlotCard('vRhrTimelineChart', 'Resting HR — weekly timeline', 'FC em repouso — linha do tempo semanal',
-          '50–65 bpm healthy band · gaps not bridged', 'Faixa saudável 50–65 bpm · lacunas não interligadas');
+      if (hasHrTod || hasRhrWeek) {
+        cardioBody += (hasHrTod && hasRhrWeek) ? '<div class="two-col">' : '';
+        if (hasHrTod) {
+          cardioBody += vPlotCard('vHrPatternsChart', 'Daily patterns — heart rate by time of day', 'Padrões diários — frequência cardíaca por hora do dia',
+            'All readings folded onto 24 h · median · ±1 SD · ±2 SD', 'Todas as leituras dobradas em 24 h · mediana · ±1 DP · ±2 DP');
+        }
+        if (hasRhrWeek) {
+          cardioBody += vPlotCard('vRhrTimelineChart', 'Resting HR — weekly timeline', 'FC em repouso — linha do tempo semanal',
+            '50–65 bpm healthy band · gaps not bridged', 'Faixa saudável 50–65 bpm · lacunas não interligadas');
+        }
+        cardioBody += (hasHrTod && hasRhrWeek) ? '</div>' : '';
       }
       sectionsHtml += vSection(num, 'vit-cardio', 'Cardiovascular & recovery', 'Cardiovascular e recuperação',
         'Heart-rate variability, resting heart rate and their daily and weekly rhythm.',
