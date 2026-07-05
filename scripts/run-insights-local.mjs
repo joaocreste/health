@@ -8,10 +8,14 @@
  * (e.g. Silvana's 193-lab history) and dies mid-generation. Running the SAME
  * lib/ai-insights.js pipeline here has no such limit.
  *
- * It calls rebuildAiInsights() — identical assemble -> fill -> opus-4-7
+ * It calls rebuildAiInsights() — identical assemble -> fill -> sonnet-5
  * (adaptive thinking, effort high) -> validate -> persist as the Worker — so the
  * output and persistence are exactly what the endpoint would have written
  * (cards_json on patient_dashboards, section 'ai-insights', version bumped).
+ *
+ * Cheaper still: scripts/run-insights-batch.mjs runs the same pipeline through
+ * the Message Batches API at 50% off — use it whenever the rebuild can wait
+ * up to an hour. Keep THIS script for urgent single-patient reruns.
  *
  * Usage:
  *   ANTHROPIC_API_KEY=sk-ant-... node scripts/run-insights-local.mjs <patient_clerk>
