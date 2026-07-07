@@ -7221,7 +7221,7 @@
                 '<p><strong>Sleep — needs attention.</strong> Mild obstructive sleep apnoea (2017 study), with the airway shown collapsing at three levels on the 2019 endoscopy; a mandibular-advancement device looked promising.</p>' +
                 '<p><strong>Blood work — one flag.</strong> Latest panel (Apr 2024) shows mildly low red cells and haematocrit; everything else reviewed and within range.</p>' +
                 '<p><strong>Heart — reviewed, reassuring.</strong> Four exercise stress tests (2011 → 2023) were all negative for ischaemia.</p>' +
-                '<p><strong>Pending.</strong> A chest CT is on file awaiting review.</p>' +
+                '<p><strong>Chest CT (6 Jul 2026) — now on file.</strong> The full study (6 reconstructions, inspiration + expiration) and the radiologist&apos;s report are in the imaging section below. A plain-language AI reading is pending de-identified review.</p>' +
                 '<p><strong>Other dimensions.</strong> Mental: see the reflective portrait. Spiritual: no data captured yet.</p>' +
               '</div>' +
               '<div class="paulo-ai-summary-body lang-pt">' +
@@ -7229,7 +7229,7 @@
                 '<p><strong>Sono — requer atenção.</strong> Apneia obstrutiva do sono leve (estudo de 2017), com colapso da via aérea em três níveis na endoscopia de 2019; o avanço mandibular mostrou-se promissor.</p>' +
                 '<p><strong>Exames de sangue — um alerta.</strong> O painel mais recente (abr 2024) mostra hemácias e hematócrito levemente baixos; o restante foi revisado e está dentro do intervalo.</p>' +
                 '<p><strong>Coração — revisado, tranquilizador.</strong> Quatro testes ergométricos (2011 → 2023) foram todos negativos para isquemia.</p>' +
-                '<p><strong>Pendente.</strong> Há uma TC de tórax em arquivo aguardando revisão.</p>' +
+                '<p><strong>TC de tórax (6 jul 2026) — agora em arquivo.</strong> O estudo completo (6 reconstruções, inspiração + expiração) e o laudo do radiologista estão na seção de imagem abaixo. Uma leitura em linguagem simples por IA está pendente de revisão desidentificada.</p>' +
                 '<p><strong>Outras dimensões.</strong> Mental: ver o retrato reflexivo. Espiritual: ainda sem dados.</p>' +
               '</div>' +
               '<div class="paulo-ai-disclaimer ai-pill-note">' +
@@ -7322,6 +7322,62 @@
         examsHtml +
       '</section>';
 
+    // ── Chest CT · 6 Jul 2026 (Hospital São Luiz Campinas) ──────────────
+    // Generic manifest-driven viewer (app.js auto-wires .ct-viewer): a single
+    // "Series" way (dropdown) over the 6 diagnostic reconstructions. The dose
+    // sheet (DICOM series 999) is intentionally excluded. Report renders below
+    // as DICOM-derived identifiers + the embedded laudo PDF — no AI summary
+    // until the de-identified pass (compliance).
+    var chestCt =
+      '<section class="report-section" id="chest-ct-2026">' +
+        '<div class="container">' +
+          '<div class="section-label">' + t('3 · Imagery · Chest CT', '3 · Imagem · TC de tórax') + '</div>' +
+          '<h2 class="section-title">' + t('Chest CT · 6 July 2026', 'TC de tórax · 6 de julho de 2026') + '</h2>' +
+          '<p class="section-desc">' +
+            t('Volumetric multidetector chest CT acquired in both inspiration and expiration, reconstructed six ways. Pick a reconstruction from the <strong>Series</strong> dropdown — lung parenchyma and mediastinal (soft-tissue) windows on the inspiration volume, the expiration acquisition and a high-resolution expiration series for air-trapping, plus thin axial and coronal reformats — then scrub the slider, scroll, drag, or use the arrow keys. The radiologist&apos;s report is embedded below.',
+              'TC de tórax volumetric multidetector adquirida em inspiração e expiração, reconstruída de seis formas. Escolha uma reconstrução no seletor <strong>Série</strong> — janelas de parênquima pulmonar e de mediastino (partes moles) sobre o volume de inspiração, a aquisição em expiração e uma série de alta resolução em expiração para aprisionamento aéreo, além das reformatações axial fina e coronal — e depois deslize o controle, role, arraste ou use as setas. O laudo do radiologista está embutido abaixo.') +
+          '</p>' +
+          '<div class="report-export-row">' +
+            '<a class="export-btn-primary" href="scans/paulo-chest-ct-2026-07-06-report.pdf" download>' +
+              '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+              t('Export report (PDF)', 'Exportar laudo (PDF)') +
+            '</a>' +
+          '</div>' +
+          '<div class="ct-grid ct-grid-single">' +
+            '<div class="ct-viewer" data-prefix="scans/paulo-chest-ct-2026-07-06/" data-manifest="scans/paulo-chest-ct-2026-07-06/manifest.json?v=1">' +
+              '<div class="ct-viewer-head">' +
+                '<div class="ct-viewer-title">' + t('Series viewer', 'Visualizador por série') + '</div>' +
+                '<div class="ct-viewer-meta">' + t('Image', 'Imagem') + ' <span class="ct-idx">1</span> / <span class="ct-total">1</span></div>' +
+              '</div>' +
+              '<div class="ct-controls"></div>' +
+              '<div class="ct-stage"><img class="ct-img" alt="Chest CT image" loading="lazy"></div>' +
+              '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="Chest CT image">' +
+            '</div>' +
+          '</div>' +
+          '<h3 style="font-family:\'Raleway\',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">' +
+            t('Radiologist&apos;s report', 'Laudo do radiologista') +
+          '</h3>' +
+          '<div class="list-card mb-3">' +
+            '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+            '<ul>' +
+              '<li><strong>' + t('Patient.', 'Paciente.') + '</strong> Paulo Augusto Silotto Dias de Souza</li>' +
+              '<li><strong>' + t('DOB.', 'Nascimento.') + '</strong> ' + t('14 July 1961', '14 de julho de 1961') + '</li>' +
+              '<li><strong>' + t('Exam date.', 'Data do exame.') + '</strong> ' + t('6 July 2026', '6 de julho de 2026') + '</li>' +
+              '<li><strong>' + t('Exam.', 'Exame.') + '</strong> ' + t('Chest CT (inspiration + expiration)', 'TC de tórax (inspiração + expiração)') + '</li>' +
+              '<li><strong>' + t('Accession.', 'Identificador.') + '</strong> 9000000249014098</li>' +
+              '<li><strong>' + t('Institution.', 'Instituição.') + '</strong> Hospital São Luiz Campinas · Campinas</li>' +
+              '<li><strong>' + t('Scanner.', 'Equipamento.') + '</strong> GE Medical Systems · Revolution Maxima</li>' +
+            '</ul>' +
+          '</div>' +
+          '<object class="pdf-embed" data="scans/paulo-chest-ct-2026-07-06-report.pdf" type="application/pdf" style="width:100%;height:640px;border:1px solid var(--border);border-radius:8px;">' +
+            '<p style="padding:1rem;">' +
+              t('Your browser can&apos;t display the embedded PDF. ', 'Seu navegador não consegue exibir o PDF embutido. ') +
+              '<a href="scans/paulo-chest-ct-2026-07-06-report.pdf" download>' + t('Download the report', 'Baixar o laudo') + '</a>.' +
+            '</p>' +
+          '</object>' +
+        '</div>' +
+      '</section>';
+
     var history      = buildPauloHistorySection();
     var otherStudies = buildPauloOtherStudiesSection();
     var overall      = buildPauloOverallEvolution();
@@ -7341,6 +7397,7 @@
     main.className = 'jc-paulo-exams';
     main.innerHTML = hero + aiSummary +
       '<div data-tier="essential">' + imagery + '</div>' +
+      '<div data-tier="essential">' + chestCt + '</div>' +
       '<div data-tier="historical">' + history + '</div>' +
       '<div data-tier="standard">' + otherStudies + overall + '</div>' +
       '<div data-tier="essential">' + labs + '</div>' +
