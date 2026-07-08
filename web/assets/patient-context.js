@@ -7221,7 +7221,7 @@
                 '<p><strong>Sleep — needs attention.</strong> Mild obstructive sleep apnoea (2017 study), with the airway shown collapsing at three levels on the 2019 endoscopy; a mandibular-advancement device looked promising.</p>' +
                 '<p><strong>Blood work — one flag.</strong> Latest panel (Apr 2024) shows mildly low red cells and haematocrit; everything else reviewed and within range.</p>' +
                 '<p><strong>Heart — reviewed, reassuring.</strong> Four exercise stress tests (2011 → 2023) were all negative for ischaemia.</p>' +
-                '<p><strong>Chest CT (6 Jul 2026) — now on file.</strong> The full study (6 reconstructions, inspiration + expiration) and the radiologist&apos;s report are in the imaging section below. A plain-language AI reading is pending de-identified review.</p>' +
+                '<p><strong>Chest CT (6 Jul 2026) — reviewed.</strong> Conclusion: <strong>inflammatory bronchopathy</strong> (diffuse bronchial-wall thickening) with otherwise clear, normally-aerated lungs — no effusion, masses or enlarged nodes. Minor incidental notes: mild diffuse atheromatosis (incl. coronary), thoracic spondylosis and a probable tiny right renal cyst. Full study, findings and AI summary in the imaging section below.</p>' +
                 '<p><strong>Other dimensions.</strong> Mental: see the reflective portrait. Spiritual: no data captured yet.</p>' +
               '</div>' +
               '<div class="paulo-ai-summary-body lang-pt">' +
@@ -7229,7 +7229,7 @@
                 '<p><strong>Sono — requer atenção.</strong> Apneia obstrutiva do sono leve (estudo de 2017), com colapso da via aérea em três níveis na endoscopia de 2019; o avanço mandibular mostrou-se promissor.</p>' +
                 '<p><strong>Exames de sangue — um alerta.</strong> O painel mais recente (abr 2024) mostra hemácias e hematócrito levemente baixos; o restante foi revisado e está dentro do intervalo.</p>' +
                 '<p><strong>Coração — revisado, tranquilizador.</strong> Quatro testes ergométricos (2011 → 2023) foram todos negativos para isquemia.</p>' +
-                '<p><strong>TC de tórax (6 jul 2026) — agora em arquivo.</strong> O estudo completo (6 reconstruções, inspiração + expiração) e o laudo do radiologista estão na seção de imagem abaixo. Uma leitura em linguagem simples por IA está pendente de revisão desidentificada.</p>' +
+                '<p><strong>TC de tórax (6 jul 2026) — revisada.</strong> Conclusão: <strong>broncopatia inflamatória</strong> (espessamento parietal brônquico difuso), com pulmões normalmente aerados e sem alterações — sem derrame, massas ou linfonodos aumentados. Achados incidentais menores: ateromatose difusa leve (inclusive coronariana), espondilose torácica e provável diminuto cisto renal à direita. Estudo completo, achados e resumo por IA na seção de imagem abaixo.</p>' +
                 '<p><strong>Outras dimensões.</strong> Mental: ver o retrato reflexivo. Espiritual: ainda sem dados.</p>' +
               '</div>' +
               '<div class="paulo-ai-disclaimer ai-pill-note">' +
@@ -7325,17 +7325,17 @@
     // ── Chest CT · 6 Jul 2026 (Hospital São Luiz Campinas) ──────────────
     // Generic manifest-driven viewer (app.js auto-wires .ct-viewer): a single
     // "Series" way (dropdown) over the 6 diagnostic reconstructions. The dose
-    // sheet (DICOM series 999) is intentionally excluded. Report renders below
-    // as DICOM-derived identifiers + the embedded laudo PDF — no AI summary
-    // until the de-identified pass (compliance).
+    // sheet (DICOM series 999) is intentionally excluded. Report follows the
+    // house pattern: identifiers + radiologist findings/conclusion (PT/EN) + a
+    // plain-language AI card + a download-original button (no inline PDF embed).
     var chestCt =
       '<section class="report-section" id="chest-ct-2026">' +
         '<div class="container">' +
           '<div class="section-label">' + t('3 · Imagery · Chest CT', '3 · Imagem · TC de tórax') + '</div>' +
           '<h2 class="section-title">' + t('Chest CT · 6 July 2026', 'TC de tórax · 6 de julho de 2026') + '</h2>' +
           '<p class="section-desc">' +
-            t('Volumetric multidetector chest CT acquired in both inspiration and expiration, reconstructed six ways. Pick a reconstruction from the <strong>Series</strong> dropdown — lung parenchyma and mediastinal (soft-tissue) windows on the inspiration volume, the expiration acquisition and a high-resolution expiration series for air-trapping, plus thin axial and coronal reformats — then scrub the slider, scroll, drag, or use the arrow keys. The radiologist&apos;s report is embedded below.',
-              'TC de tórax volumetric multidetector adquirida em inspiração e expiração, reconstruída de seis formas. Escolha uma reconstrução no seletor <strong>Série</strong> — janelas de parênquima pulmonar e de mediastino (partes moles) sobre o volume de inspiração, a aquisição em expiração e uma série de alta resolução em expiração para aprisionamento aéreo, além das reformatações axial fina e coronal — e depois deslize o controle, role, arraste ou use as setas. O laudo do radiologista está embutido abaixo.') +
+            t('Volumetric multidetector chest CT acquired in both inspiration and expiration, reconstructed six ways. Pick a reconstruction from the <strong>Series</strong> dropdown — lung parenchyma and mediastinal (soft-tissue) windows on the inspiration volume, the expiration acquisition and a high-resolution expiration series for air-trapping, plus thin axial and coronal reformats — then scrub the slider, scroll, drag, or use the arrow keys. The radiologist&apos;s findings and conclusion follow below, with a plain-language AI summary; the original laudo is available to download.',
+              'TC de tórax volumétrica multidetectores adquirida em inspiração e expiração, reconstruída de seis formas. Escolha uma reconstrução no seletor <strong>Série</strong> — janelas de parênquima pulmonar e de mediastino (partes moles) sobre o volume de inspiração, a aquisição em expiração e uma série de alta resolução em expiração para aprisionamento aéreo, além das reformatações axial fina e coronal — e depois deslize o controle, role, arraste ou use as setas. Os achados e a conclusão do radiologista seguem abaixo, com um resumo em linguagem simples por IA; o laudo original está disponível para download.') +
           '</p>' +
           '<div class="report-export-row">' +
             '<a class="export-btn-primary" href="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" download>' +
@@ -7355,26 +7355,58 @@
             '</div>' +
           '</div>' +
           '<h3 style="font-family:\'Raleway\',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">' +
-            t('Radiologist&apos;s report', 'Laudo do radiologista') +
+            t('Radiologist&apos;s report', 'Laudo do radiologista') + ' <span class="mono" style="color:var(--text-muted);font-size:12px;font-weight:400;letter-spacing:0.06em;">' + t('(translated)', '(traduzido)') + '</span>' +
           '</h3>' +
+          '<div class="two-col mb-3">' +
+            '<div class="list-card">' +
+              '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+              '<ul>' +
+                '<li><strong>' + t('Patient.', 'Paciente.') + '</strong> Paulo Augusto Silotto Dias de Souza</li>' +
+                '<li><strong>' + t('DOB.', 'Nascimento.') + '</strong> ' + t('14 July 1961', '14 de julho de 1961') + '</li>' +
+                '<li><strong>' + t('Exam date.', 'Data do exame.') + '</strong> ' + t('6 July 2026 · 14:55', '6 de julho de 2026 · 14:55') + '</li>' +
+                '<li><strong>' + t('Exam.', 'Exame.') + '</strong> ' + t('Chest CT (inspiration + expiration)', 'TC de tórax (inspiração + expiração)') + '</li>' +
+                '<li><strong>' + t('Accession.', 'Identificador.') + '</strong> 9000000249014098 · ' + t('MRN', 'Prontuário') + ' 5493303</li>' +
+                '<li><strong>' + t('Requesting physician.', 'Médico solicitante.') + '</strong> Dra. Tereza Cristina Goes Fernandez</li>' +
+                '<li><strong>' + t('Institution.', 'Instituição.') + '</strong> Hospital São Luiz Campinas · Campinas · Rede D&apos;Or</li>' +
+                '<li><strong>' + t('Scanner.', 'Equipamento.') + '</strong> GE Medical Systems · Revolution Maxima</li>' +
+              '</ul>' +
+            '</div>' +
+            '<div class="list-card">' +
+              '<h4>' + t('Technique', 'Técnica') + '</h4>' +
+              '<ul>' +
+                '<li>' + t('Helical multidetector CT.', 'TC helicoidal multidetectores.') + '</li>' +
+                '<li>' + t('No iodinated intravenous contrast administered.', 'Sem administração de contraste iodado endovenoso.') + '</li>' +
+                '<li>' + t('No prior exams available for comparison.', 'Exames anteriores não disponíveis para comparação.') + '</li>' +
+              '</ul>' +
+            '</div>' +
+          '</div>' +
           '<div class="list-card mb-3">' +
-            '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+            '<h4>' + t('Findings', 'Achados') + '</h4>' +
             '<ul>' +
-              '<li><strong>' + t('Patient.', 'Paciente.') + '</strong> Paulo Augusto Silotto Dias de Souza</li>' +
-              '<li><strong>' + t('DOB.', 'Nascimento.') + '</strong> ' + t('14 July 1961', '14 de julho de 1961') + '</li>' +
-              '<li><strong>' + t('Exam date.', 'Data do exame.') + '</strong> ' + t('6 July 2026', '6 de julho de 2026') + '</li>' +
-              '<li><strong>' + t('Exam.', 'Exame.') + '</strong> ' + t('Chest CT (inspiration + expiration)', 'TC de tórax (inspiração + expiração)') + '</li>' +
-              '<li><strong>' + t('Accession.', 'Identificador.') + '</strong> 9000000249014098</li>' +
-              '<li><strong>' + t('Institution.', 'Instituição.') + '</strong> Hospital São Luiz Campinas · Campinas</li>' +
-              '<li><strong>' + t('Scanner.', 'Equipamento.') + '</strong> GE Medical Systems · Revolution Maxima</li>' +
+              '<li><strong>' + t('Trachea &amp; bronchial tree.', 'Traqueia e árvore brônquica.') + '</strong> ' + t('Normal calibre, with <strong>diffuse bronchial wall thickening</strong>.', 'Calibres normais, com <strong>espessamento parietal brônquico difuso</strong>.') + '</li>' +
+              '<li><strong>' + t('Lungs.', 'Pulmões.') + '</strong> ' + t('Preserved attenuation (normally aerated).', 'Atenuação preservada (normalmente aerados).') + '</li>' +
+              '<li><strong>' + t('Pleural spaces.', 'Espaços pleurais.') + '</strong> ' + t('No pleural effusion; no pneumothorax.', 'Ausência de derrame pleural; sem pneumotórax.') + '</li>' +
+              '<li><strong>' + t('Mediastinum.', 'Mediastino.') + '</strong> ' + t('No lymph-node enlargement; remaining mediastinal structures preserved.', 'Não se observam linfonodomegalias; demais estruturas mediastinais preservadas.') + '</li>' +
+              '<li><strong>' + t('Cardiovascular.', 'Cardiovascular.') + '</strong> ' + t('Aorta and pulmonary trunk of preserved external calibre. Discrete <strong>diffuse atheromatosis, including coronary</strong>.', 'Aorta e tronco pulmonar com calibres externos preservados. Discreta <strong>ateromatose difusa, inclusive coronariana</strong>.') + '</li>' +
+              '<li><strong>' + t('Cervicothoracic transition.', 'Transição cervicotorácica.') + '</strong> ' + t('Unremarkable.', 'Sem particularidades.') + '</li>' +
+              '<li><strong>' + t('Soft tissues &amp; bone.', 'Partes moles e ossos.') + '</strong> ' + t('Dorsal (thoracic) spondylosis.', 'Espondilose dorsal.') + '</li>' +
+              '<li><strong>' + t('Thoracoabdominal transition.', 'Transição toracoabdominal.') + '</strong> ' + t('Probable tiny renal cyst on the right.', 'Provável diminuto cisto renal à direita.') + '</li>' +
             '</ul>' +
           '</div>' +
-          '<object class="pdf-embed" data="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" type="application/pdf" style="width:100%;height:640px;border:1px solid var(--border);border-radius:8px;">' +
-            '<p style="padding:1rem;">' +
-              t('Your browser can&apos;t display the embedded PDF. ', 'Seu navegador não consegue exibir o PDF embutido. ') +
-              '<a href="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" download>' + t('Download the report', 'Baixar o laudo') + '</a>.' +
+          '<div class="alert alert-warn">' +
+            '<strong>' + t('Conclusion:', 'Conclusão:') + '</strong> ' +
+            t(' <strong>Inflammatory bronchopathy.</strong>', ' <strong>Broncopatia inflamatória.</strong>') +
+          '</div>' +
+          '<div class="list-card ai-insight-card mb-3">' +
+            '<h4><span class="ai-pill">' + t('AI summary', 'Resumo por IA') + '</span> ' + t('Plain-language read', 'Leitura em linguagem simples') + '</h4>' +
+            '<p style="font-size:14px;color:var(--text-secondary);line-height:1.65;">' +
+              '<span class="lang-en">This non-contrast chest CT is largely reassuring. The <strong>lungs are normally aerated</strong> — no fluid, no collapse, no masses and no enlarged lymph nodes. The main finding is <strong>diffuse thickening of the bronchial (airway) walls</strong>, which the radiologist reads as <strong>inflammatory bronchopathy</strong> — a chronic airway-inflammation pattern (seen with chronic bronchitis, asthma, smoking or recurrent infection) rather than anything acute. Incidental notes: mild diffuse atherosclerosis <strong>including the coronary arteries</strong> (worth keeping in view for cardiovascular prevention), wear-and-tear change in the thoracic spine, and a probable tiny cyst on the right kidney (usually harmless). No earlier scans were available to compare; correlate the airway finding with symptoms and history.</span>' +
+              '<span class="lang-pt">Esta TC de tórax sem contraste é, no geral, tranquilizadora. Os <strong>pulmões estão normalmente aerados</strong> — sem derrame, sem colapso, sem massas e sem linfonodos aumentados. O achado principal é o <strong>espessamento difuso das paredes brônquicas (vias aéreas)</strong>, que o radiologista interpreta como <strong>broncopatia inflamatória</strong> — um padrão de inflamação crônica das vias aéreas (visto em bronquite crônica, asma, tabagismo ou infecções de repetição), e não algo agudo. Achados incidentais: aterosclerose difusa leve <strong>inclusive nas coronárias</strong> (a acompanhar na prevenção cardiovascular), alterações degenerativas da coluna torácica e um provável diminuto cisto no rim direito (em geral benigno). Não havia exames anteriores para comparação; correlacionar o achado das vias aéreas com sintomas e história clínica.</span>' +
             '</p>' +
-          '</object>' +
+            '<p style="font-size:11.5px;color:var(--text-muted);margin-top:10px;line-height:1.5;">' +
+              t('AI-generated plain-language summary of the radiologist&apos;s report — not a diagnosis. Read alongside the full report above.', 'Resumo em linguagem simples gerado por IA a partir do laudo do radiologista — não é um diagnóstico. Leia junto com o laudo completo acima.') +
+            '</p>' +
+          '</div>' +
         '</div>' +
       '</section>';
 
