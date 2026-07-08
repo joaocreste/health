@@ -7338,7 +7338,7 @@
               'TC de tórax volumetric multidetector adquirida em inspiração e expiração, reconstruída de seis formas. Escolha uma reconstrução no seletor <strong>Série</strong> — janelas de parênquima pulmonar e de mediastino (partes moles) sobre o volume de inspiração, a aquisição em expiração e uma série de alta resolução em expiração para aprisionamento aéreo, além das reformatações axial fina e coronal — e depois deslize o controle, role, arraste ou use as setas. O laudo do radiologista está embutido abaixo.') +
           '</p>' +
           '<div class="report-export-row">' +
-            '<a class="export-btn-primary" href="scans/paulo-chest-ct-2026-07-06-report.pdf" download>' +
+            '<a class="export-btn-primary" href="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" download>' +
               '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
               t('Export report (PDF)', 'Exportar laudo (PDF)') +
             '</a>' +
@@ -7369,10 +7369,10 @@
               '<li><strong>' + t('Scanner.', 'Equipamento.') + '</strong> GE Medical Systems · Revolution Maxima</li>' +
             '</ul>' +
           '</div>' +
-          '<object class="pdf-embed" data="scans/paulo-chest-ct-2026-07-06-report.pdf" type="application/pdf" style="width:100%;height:640px;border:1px solid var(--border);border-radius:8px;">' +
+          '<object class="pdf-embed" data="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" type="application/pdf" style="width:100%;height:640px;border:1px solid var(--border);border-radius:8px;">' +
             '<p style="padding:1rem;">' +
               t('Your browser can&apos;t display the embedded PDF. ', 'Seu navegador não consegue exibir o PDF embutido. ') +
-              '<a href="scans/paulo-chest-ct-2026-07-06-report.pdf" download>' + t('Download the report', 'Baixar o laudo') + '</a>.' +
+              '<a href="scans/paulo-chest-ct-2026-07-06-report.pdf?v=2" download>' + t('Download the report', 'Baixar o laudo') + '</a>.' +
             '</p>' +
           '</object>' +
         '</div>' +
