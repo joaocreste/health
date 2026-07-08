@@ -7409,6 +7409,11 @@
     var unifiedViewer = main.querySelector('.pl-ct-viewer[data-paulo-study="spine-combined"]');
     if (unifiedViewer) wirePauloUnifiedViewer(unifiedViewer, PAULO_STUDIES);
 
+    // Wire the generic .ct-viewer(s) injected above (chest CT · manifest-driven).
+    // The spine viewer is bespoke (.pl-ct-viewer); the chest CT uses app.js's
+    // generic engine, which only auto-runs at load — so re-scan after injection.
+    if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+
     // Place the danger zone beneath the new main, mirroring how the
     // jc-overview view does it for other patients.
     injectDangerZone(main);
