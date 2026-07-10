@@ -207,7 +207,7 @@ const SCAN_OWNERS = [
 const VALID_PAGES = new Set([
   "home", "physical", "physical-vitals", "physical-exams", "physical-genetics",
   "mental", "spiritual", "patients", "admin", "account", "upload", "login",
-  "uploads-review",
+  "uploads-review", "log",
 ]);
 
 async function serveNotFound(request, env, url) {
