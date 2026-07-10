@@ -17,7 +17,7 @@ _Deduplicated across Pass 1, Pass 2a/2b/2c, and FRONTEND-AUDIT.md. Severity-orde
 | # | Defect | Evidence | Root cause | Fix path |
 |---|---|---|---|---|
 | 7 | **No shared page assembler.** Order hand-maintained per static page + 3 self-pinning injectors; AI summary architecturally LAST (`insertBefore(footer)` → bottom dock); `/physical`,`/mental` have no AI summary at all | Pass 1 #11; code Job 2A/E (`pc:4502`, `pc:3240`) | No assembler exists | Build prompt #1: assembler + registry |
-| 8 | **Card order = raw LLM emission.** No `ORDER BY`, no ordinal; order reshuffles across rebuilds | code Job 4.3; 2b §5 | `cards_json` blob stored/returned verbatim | Build prompt #2: deterministic sort + `rank` (D1) |
+| 8 | **RESOLVED 2026-07-10 (Prompt #2, prod-verified).** **Card order = raw LLM emission.** No `ORDER BY`, no ordinal; order reshuffles across rebuilds | code Job 4.3; 2b §5 | `cards_json` blob stored/returned verbatim | Build prompt #2: deterministic sort + `rank` (D1) — cardSortKey in lib/card-order.js; rank persisted on write, defensive sort on read; 9 dashboards / 213 cards backfilled (fold-as-copy, 0 PT invented) |
 | 9 | **Per-patient if-ladder in shared dispatcher.** ≥12 `patient===X` branches; per-patient classes in `hidePageBody`; per-patient `<script>` tags on all shells | code Job 1.2/1.4/1.5 (`pc:3724-3887`, `pc:330-351`) | Accreted special-casing | Registry collapse (build prompt #1) |
 | 10 | **PARTIAL 2026-07-10 (Prompt #1).** Per-patient data files now dispatcher-injected only for the owning patient; residual: data.js/metrics.json still shell-tagged (PZ static charts) — prompts #3/#4. **Gated PHI assets loaded globally.** `silvana-labs.js` (+`cristina-labs.js`) are GATED_ASSETS yet `<script>`-tagged on all 8 shells → 403/503 for every non-owning viewer | Pass 1 #3; code Job 3#3 (`_worker.js:182-183`) | Gate at asset layer + unconditional load | Remove GATED_ASSETS entries; load per-patient data only in-branch (transitional), then migrate to DB |
 | 11 | **RESOLVED 2026-07-10 (Prompt #1, prod-verified).** **Routes fail open.** No `404.html`; unrouted paths (e.g. `/assessment`) soft-404 to marketing `index.html` | Pass 1 #1; code Job 3#1 (`_worker.js:204-227`) | Pages fallback behavior | 404 page + explicit route table (D4) |
@@ -48,7 +48,7 @@ _Deduplicated across Pass 1, Pass 2a/2b/2c, and FRONTEND-AUDIT.md. Severity-orde
 | 25 | Export modal "No exportable sections found" — no graceful path for empty patients | 2c D-1x+4 → hide EXPORT when nothing exportable |
 | 26 | Admin: duplicate doctor "Americo/Américo Ceiki Sakamoto" in every grant dropdown | 2c D-1x+5 → dedupe users table |
 | 27 | Maria Regina chip spacing "1009lab markers" / "4imaging" | 2a #8 |
-| 28 | `highlights` jsonb column written but never read; two card shapes coexist in `cards_json`; `patient_dashboards` absent from Drizzle schema | code Job 4.2 → contract §3 |
+| 28 | `highlights` jsonb column written but never read; two card shapes coexist in `cards_json`; `patient_dashboards` absent from Drizzle schema | code Job 4.2 → contract §3 · Prompt #2 (2026-07-10): schema definition added; backfill sweep found ZERO legacy {kind,...} cards platform-wide (9 dashboards, 213 cards — the two-shapes concern is empirically closed); `highlights` unchanged (documented-unused) |
 
 ## Already fixed on the feature branch (verify at deploy)
 - Pass 1 #6 "Clínico geral" missing EN span — paired on disk (`home.html:258`).
