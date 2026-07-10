@@ -1,327 +1,383 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lumen Health — Sign in</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — Lumen Health</title>
 <meta name="description" content="Lumen Health — secure access to a personal health summary for clinical communication.">
 <meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=55">
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{var l=localStorage.getItem('jc_lang')||'en';if(l!=='en'&&l!=='pt')l='en';document.documentElement.setAttribute('data-lang',l);if(l==='pt'){document.documentElement.setAttribute('lang','pt-BR');}}catch(e){}</script>
 <style>
-  /* Login-only styles. Kept inline so the page is self-contained. */
-  body.login-page {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #0F2238;
-    color: #E6EEF6;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  /* Tokens — /mnt/project/lumenhealth-branding.html (dark theme) */
+  :root{
+    --bg-page:#0A1428; --bg-surface:#131F37; --bg-subtle:#1A2542;
+    --border-subtle:#283655; --border-default:#3E5070;
+    --text-primary:#F0F4F8; --text-secondary:#A4B2CC; --text-tertiary:#6F7E9A;
+    --accent-gold:#F4B942; --accent-petrol:#6BA3C7; --accent-petrol-light:#94BBD3;
+    --petrol-fill:rgba(107,163,199,0.10);
+    --red-bg:rgba(155,53,53,0.20); --red-bd:rgba(155,53,53,0.45); --red-fg:#E89494;
+    --ff-display:'Raleway',sans-serif; --ff-body:'IBM Plex Sans',system-ui,sans-serif; --ff-mono:'IBM Plex Mono',monospace;
   }
-  /* Subtle texture matching the hero treatment used elsewhere */
-  body.login-page::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 56px 56px;
-    pointer-events: none;
-    z-index: 0;
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--ff-body);-webkit-font-smoothing:antialiased;background:var(--bg-page);color:var(--text-primary);line-height:1.55}
+  body::before{ /* the brand's 64px measurement grid — the dots settle onto its intersections */
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+    background-size:64px 64px;
   }
-  body.login-page::after {
-    content: '';
-    position: fixed; inset: -20%;
-    background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.07), transparent 55%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .login-shell {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1.5rem;
-    position: relative;
-    z-index: 1;
-  }
-  .login-brand {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-  .login-brand img {
-    width: 84px; height: 84px;
-    margin: 0 auto 1.25rem;
-    display: block;
-  }
-  .login-brand-name {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 300;
-    font-size: 38px;
-    letter-spacing: 0.06em;
-    color: #FFFFFF;
-    margin-bottom: 0.6rem;
-  }
-  .login-brand-tagline {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.20em;
-    text-transform: uppercase;
-    color: #8AA8C0;
-  }
-  .login-card {
-    width: 100%;
-    max-width: 360px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 14px;
-    padding: 2rem;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  .login-title {
-    font-family: 'Raleway', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: #FFFFFF;
-    margin: 0 0 0.4rem;
-    letter-spacing: 0.01em;
-  }
-  .login-sub {
-    font-size: 14px;
-    color: #98AFC4;
-    margin: 0 0 1.5rem;
-    line-height: 1.5;
-  }
-  .login-field {
-    display: block;
-    margin-bottom: 1rem;
-  }
-  .login-field label {
-    display: block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #8AA8C0;
-    margin-bottom: 0.4rem;
-  }
-  .login-field input {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 11px 14px;
-    color: #FFFFFF;
-    font-family: inherit;
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .login-field input:focus {
-    outline: none;
-    border-color: #6BA3C7;
-    box-shadow: 0 0 0 3px rgba(107, 163, 199, 0.22);
-  }
-  .login-button {
-    width: 100%;
-    background: #B8860B;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-family: 'Raleway', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.05s;
-  }
-  .login-button:hover { background: #F4B942; color: #0A1428; }
-  .login-button:active { transform: translateY(1px); }
-  .login-error {
-    display: none;
-    margin-top: 0.85rem;
-    color: #F0A0A0;
-    font-size: 14px;
-    background: rgba(192, 57, 43, 0.12);
-    border-left: 3px solid #C0392B;
-    padding: 8px 10px;
-    border-radius: 4px;
-  }
-  .login-error.visible { display: block; }
-  .login-foot {
-    margin-top: 1.25rem;
-    font-size: 11px;
-    color: #6B819A;
-    text-align: center;
-    line-height: 1.5;
-  }
-  .login-comingsoon {
-    margin-top: 1.5rem;
-    width: 100%;
-    max-width: 360px;
-    text-align: center;
-    background: rgba(184, 134, 11, 0.08);
-    border: 1px solid rgba(184, 134, 11, 0.30);
-    border-radius: 10px;
-    padding: 14px 18px;
-    box-sizing: border-box;
-  }
-  .login-comingsoon-tag {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.20em;
-    text-transform: uppercase;
-    color: #F4B942;
-    margin-bottom: 0.45rem;
-  }
-  .login-comingsoon-text {
-    font-size: 13px;
-    color: #98AFC4;
-    line-height: 1.55;
-    margin: 0;
-  }
-  .login-disclaimer {
-    margin-top: 2rem;
-    font-size: 11px;
-    color: #5B7088;
-    text-align: center;
-    max-width: 380px;
-    line-height: 1.6;
-    font-family: 'IBM Plex Mono', monospace;
-    letter-spacing: 0.04em;
-  }
+  img,svg{display:block;max-width:100%}
+  [hidden]{display:none!important}
+  [data-lang="en"] .lang-pt{display:none!important}
+  [data-lang="pt"] .lang-en{display:none!important}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-  /* Top-right language switcher on the login page */
-  .login-topbar {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.5rem;
-    z-index: 2;
-  }
+  #field{position:fixed;inset:0;z-index:1}
 
-  /* Override the topnav switcher styles' default colors slightly for this page */
-  .login-topbar .lang-btn { border-color: rgba(255, 255, 255, 0.20); }
-  .login-topbar .lang-btn[aria-pressed="true"] {
-    border-color: #FFFFFF;
-    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.30);
+  .wrap{position:relative;z-index:2;min-height:100dvh;display:flex;flex-direction:column;padding:24px 28px}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .mid{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 0}
+  .foot{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-tertiary);text-align:center}
+
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+  .brand-mark{width:38px;height:38px}
+  .icon-body{fill:var(--petrol-fill);stroke:var(--accent-petrol);stroke-width:0.7;stroke-linejoin:round}
+  .icon-ecg{stroke:var(--accent-gold);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .brand-text{display:flex;flex-direction:column;line-height:1.2}
+  .brand-name{font-family:var(--ff-display);font-weight:300;font-size:18px;letter-spacing:0.04em;color:var(--text-primary)}
+  .brand-tag{font-family:var(--ff-mono);font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--text-tertiary);margin-top:3px}
+
+  .lang-switch{display:flex;padding:3px;background:var(--bg-subtle);border-radius:6px}
+  .lang-btn{min-width:30px;height:24px;border:0;background:transparent;font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:0.06em;color:var(--text-tertiary);cursor:pointer;border-radius:4px;padding:0 8px}
+  .lang-btn.active{background:var(--bg-surface);color:var(--accent-petrol)}
+  .lang-btn:focus-visible{outline:2px solid var(--accent-petrol);outline-offset:2px}
+
+  .card{width:min(410px,100%);background:rgba(19,31,55,0.66);border:1px solid var(--border-subtle);border-radius:14px;padding:36px 32px 30px;backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);box-shadow:0 36px 80px -40px rgba(0,0,0,0.7)}
+  @supports not (backdrop-filter:blur(1px)){.card{background:rgba(19,31,55,0.94)}}
+  .card-eyebrow{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 10px}
+  .card h1{font-family:var(--ff-display);font-weight:200;font-size:30px;letter-spacing:0.02em;color:#fff;margin:0 0 6px}
+  .card-sub{font-size:14px;color:var(--text-secondary);margin:0 0 26px}
+  .card-sub em{font-style:normal;font-weight:500;color:var(--accent-gold)}
+
+  .field{margin-bottom:16px}
+  .field label{display:block;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:7px}
+  .field input{width:100%;padding:12px 14px;border-radius:8px;background:rgba(10,20,40,0.62);border:1px solid var(--border-default);color:var(--text-primary);font:400 15px/1.4 var(--ff-body);transition:border-color .15s,box-shadow .15s}
+  .field input:focus{outline:none;border-color:var(--accent-petrol);box-shadow:0 0 0 3px rgba(107,163,199,0.18)}
+  .pw-wrap{position:relative}
+  .pw-wrap input{padding-right:44px}
+  .pw-toggle{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:transparent;color:var(--text-tertiary);cursor:pointer}
+  .pw-toggle:hover{color:var(--text-secondary)}
+  .pw-toggle:focus-visible{outline:2px solid var(--accent-petrol);outline-offset:1px}
+  .pw-toggle .eye-off{display:none}
+  .pw-toggle.showing .eye{display:none}
+  .pw-toggle.showing .eye-off{display:block}
+
+  .form-error{display:flex;gap:9px;align-items:flex-start;margin:0 0 16px;padding:10px 12px;border-radius:8px;background:var(--red-bg);border:1px solid var(--red-bd);color:var(--red-fg);font-size:13px;line-height:1.5}
+  .form-error svg{flex:none;margin-top:2px}
+
+  .submit{width:100%;margin-top:4px;padding:12px 18px;border-radius:8px;border:1px solid var(--accent-petrol);background:var(--accent-petrol);color:var(--bg-page);font:500 14px var(--ff-body);letter-spacing:0.02em;cursor:pointer;transition:background .15s,border-color .15s,transform .06s}
+  .submit:hover{background:var(--accent-petrol-light);border-color:var(--accent-petrol-light)}
+  .submit:active{transform:translateY(1px)}
+  .submit:disabled{opacity:.72;cursor:default;transform:none}
+  .submit:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+  .submit .busy-label{display:none}
+  .submit.busy .idle{display:none}
+  .submit.busy .busy-label{display:inline}
+
+  .card-note{margin-top:20px;padding-top:18px;border-top:1px solid var(--border-subtle);text-align:center}
+  .card-note-tag{display:inline-block;font-family:var(--ff-mono);font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent-gold);margin-bottom:6px}
+  .card-note-text{font-size:12px;color:var(--text-tertiary);line-height:1.55;margin:0}
+
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+  .card.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97) both}
+  @media (prefers-reduced-motion:reduce){.card.shake{animation:none}}
+
+  @media (max-width:560px){
+    .wrap{padding:18px}
+    .card{padding:30px 22px 26px}
+    .brand-tag{display:none}
   }
 </style>
 </head>
-<body class="login-page">
+<body>
 
-<div class="login-topbar">
-  <div class="lang-switch" role="group" aria-label="Language">
-    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
-    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+<canvas id="field" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g transform="translate(32, 32) scale(1.1)">
+          <path class="icon-body" d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z"/>
+          <path class="icon-ecg" d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0"/>
+        </g>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-name">Lumen Health</span>
+        <span class="brand-tag"><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
+      </span>
+    </a>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="pt">PT</button>
+    </div>
   </div>
+
+  <div class="mid">
+    <div class="card" id="login-card">
+      <p class="card-eyebrow"><span class="lang-en">Patient access</span><span class="lang-pt">Acesso do paciente</span></p>
+      <h1><span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span></h1>
+      <p class="card-sub">
+        <span class="lang-en">From scattered data to a <em>clinical picture</em>.</span>
+        <span class="lang-pt">De dados dispersos a um <em>quadro clínico</em>.</span>
+      </p>
+
+      <form id="login-form" novalidate autocomplete="on">
+        <div class="field">
+          <label for="username"><span class="lang-en">Username</span><span class="lang-pt">Usuário</span></label>
+          <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </div>
+
+        <div class="field">
+          <label for="password"><span class="lang-en">Password</span><span class="lang-pt">Senha</span></label>
+          <div class="pw-wrap">
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="pw-toggle" id="pw-toggle">
+              <span class="sr-only"><span class="lang-en">Show or hide password</span><span class="lang-pt">Mostrar ou ocultar senha</span></span>
+              <svg class="eye" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-error" id="form-error" role="alert" hidden>
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
+          <span><span class="lang-en">That username and password didn't match. Try again.</span><span class="lang-pt">Usuário e senha não conferem. Tente novamente.</span></span>
+        </div>
+
+        <button class="submit" id="submit-btn" type="submit">
+          <span class="idle"><span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span></span>
+          <span class="busy-label"><span class="lang-en">Signing in…</span><span class="lang-pt">Entrando…</span></span>
+        </button>
+      </form>
+
+      <div class="card-note">
+        <span class="card-note-tag"><span class="lang-en">Coming soon</span><span class="lang-pt">Em breve</span></span>
+        <p class="card-note-text">
+          <span class="lang-en">Lumen Health is in private development and not yet open to new patients. Access is limited to invited accounts.</span>
+          <span class="lang-pt">A Lumen Health está em desenvolvimento privado e ainda não está aberta a novos pacientes. O acesso é limitado a contas convidadas.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div><span class="lang-en">EU-resident data · GDPR-first architecture</span><span class="lang-pt">Dados residentes na UE · arquitetura GDPR-first</span></div>
+    <div>© 2026 Lumen Health</div>
+  </footer>
 </div>
 
-<main class="login-shell">
-
-  <div class="login-brand">
-    <img src="assets/logo-on-dark.svg" alt="Lumen Health">
-    <div class="login-brand-name">Lumen Health</div>
-    <div class="login-brand-tagline"><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></div>
-  </div>
-
-  <form class="login-card" id="login-form" autocomplete="on">
-    <h1 class="login-title"><span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span></h1>
-    <p class="login-sub">
-      <span class="lang-en">Restricted access — clinical communication only.</span>
-      <span class="lang-pt">Acesso restrito — apenas para comunicação clínica.</span>
-    </p>
-
-    <label class="login-field">
-      <span><span class="lang-en">Username</span><span class="lang-pt">Usuário</span></span>
-      <input type="text" id="username" name="username" autocomplete="username" required>
-    </label>
-
-    <label class="login-field">
-      <span><span class="lang-en">Password</span><span class="lang-pt">Senha</span></span>
-      <input type="password" id="password" name="password" autocomplete="current-password" required>
-    </label>
-
-    <button type="submit" class="login-button">
-      <span class="lang-en">Sign in</span><span class="lang-pt">Entrar</span>
-    </button>
-
-    <div class="login-error" id="login-error" role="alert">
-      <span class="lang-en">Invalid username or password.</span>
-      <span class="lang-pt">Usuário ou senha inválidos.</span>
-    </div>
-  </form>
-
-  <div class="login-comingsoon">
-    <span class="login-comingsoon-tag"><span class="lang-en">Coming soon</span><span class="lang-pt">Em breve</span></span>
-    <p class="login-comingsoon-text">
-      <span class="lang-en">Lumen Health is still in private development and not yet open to new patients. Access is currently limited to invited accounts.</span>
-      <span class="lang-pt">A Lumen Health ainda está em desenvolvimento privado e não está aberta a novos pacientes. O acesso é limitado a contas convidadas.</span>
-    </p>
-  </div>
-
-  <p class="login-disclaimer">
-    <span class="lang-en">Strictly confidential. Demonstration credentials only — replace with provider-grade authentication before any external publication.</span>
-    <span class="lang-pt">Estritamente confidencial. Credenciais apenas para demonstração — substituir por autenticação de nível corporativo antes de qualquer publicação externa.</span>
-  </p>
-
-</main>
-
-<!-- Public page: opt out of app.js's client-side auth gate (login lives at
-     /login.html now; the landing is the root /). -->
-<script>window.JC_PUBLIC = true;</script>
-<script src="assets/app.js?v=34"></script>
 <script>
-  (function () {
-    'use strict';
-    // If we're already authenticated, jump straight to the picker.
-    if (sessionStorage.getItem('jc_authed') === 'true') {
-      location.replace('patients.html');
-      return;
-    }
-    // Credentials live in the DB (users.demo_username / demo_password);
-    // POST /api/login verifies them. Replaced by Clerk + Google SSO later.
-    var form = document.getElementById('login-form');
-    var err = document.getElementById('login-error');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var u = document.getElementById('username').value.trim();
-      var p = document.getElementById('password').value;
-      err.classList.remove('visible');
-      fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p }),
-      })
-        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
-        .then(function (res) {
-          if (!res.ok || !res.data || !res.data.ok) {
-            err.classList.add('visible');
-            return;
-          }
-          sessionStorage.setItem('jc_authed', 'true');
-          sessionStorage.setItem('jc_viewer_clerk', res.data.clerk_user_id);
-          sessionStorage.setItem('jc_viewer_username', res.data.username || u);
-          sessionStorage.setItem('jc_viewer_name', res.data.full_name || '');
-          sessionStorage.setItem('jc_viewer_role', res.data.role || '');
-          // Honour the account's preferred language as the UI default.
-          if (res.data.locale === 'en' || res.data.locale === 'pt') {
-            localStorage.setItem('jc_lang', res.data.locale);
-          }
-          sessionStorage.removeItem('jc_current_patient');
-          location.href = 'patients.html';
-        })
-        .catch(function () { err.classList.add('visible'); });
+/* ---------- Language toggle (jc_lang, dual-span) — mirrors app.js so the
+     choice carries over to patients.html after sign-in. ---------- */
+(function(){
+  var KEY='jc_lang';
+  function apply(l){
+    if(l!=='en'&&l!=='pt') l='en';
+    document.documentElement.setAttribute('data-lang',l);
+    document.documentElement.setAttribute('lang', l==='pt' ? 'pt-BR' : 'en');
+    document.title = l==='pt' ? 'Entrar — Lumen Health' : 'Sign in — Lumen Health';
+    document.querySelectorAll('.lang-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-lang')===l);
     });
-  })();
+    try{ localStorage.setItem(KEY,l); }catch(e){}
+  }
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
+  });
+  var saved='en';
+  try{ saved=localStorage.getItem(KEY)||'en'; }catch(e){}
+  apply(saved);
+})();
+
+/* ---------- Login ---------- */
+(function(){
+  'use strict';
+
+  // If we're already authenticated, jump straight to the picker.
+  if (sessionStorage.getItem('jc_authed') === 'true') {
+    location.replace('patients.html');
+    return;
+  }
+
+  var form=document.getElementById('login-form');
+  var card=document.getElementById('login-card');
+  var btn=document.getElementById('submit-btn');
+  var err=document.getElementById('form-error');
+  var pw=document.getElementById('password');
+  var toggle=document.getElementById('pw-toggle');
+
+  toggle.addEventListener('click', function(){
+    var show = pw.type==='password';
+    pw.type = show ? 'text' : 'password';
+    toggle.classList.toggle('showing', show);
+  });
+
+  function fail(){
+    err.hidden=false;
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+    btn.disabled=false;
+    btn.classList.remove('busy');
+  }
+
+  // Credentials live in the DB (users.demo_username / demo_password);
+  // POST /api/login verifies them. Replaced by Clerk + Google SSO later.
+  form.addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    err.hidden=true;
+    btn.disabled=true;
+    btn.classList.add('busy');
+    var u = form.username.value.trim();
+    var p = form.password.value;
+    try{
+      var res = await fetch('/api/login',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ username: u, password: p })
+      });
+      var data = await res.json().catch(function(){ return null; });
+      if(!res.ok || !data || !data.ok){ fail(); return; }
+
+      sessionStorage.setItem('jc_authed', 'true');
+      sessionStorage.setItem('jc_viewer_clerk', data.clerk_user_id);
+      sessionStorage.setItem('jc_viewer_username', data.username || u);
+      sessionStorage.setItem('jc_viewer_name', data.full_name || '');
+      sessionStorage.setItem('jc_viewer_role', data.role || '');
+      // Honour the account's preferred language as the UI default.
+      if (data.locale === 'en' || data.locale === 'pt') {
+        localStorage.setItem('jc_lang', data.locale);
+      }
+      sessionStorage.removeItem('jc_current_patient');
+      location.href='patients.html';
+    }catch(e){
+      fail();
+    }
+  });
+})();
+
+/* ---------- Ambient field: chaos -> the brand's 64px grid -> breathe -> release ----------
+   Dots settle exactly onto the intersections of the faint grid drawn by body::before. */
+(function(){
+  var canvas=document.getElementById('field');
+  if(!canvas) return;
+  var ctx=canvas.getContext('2d');
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var GRID=64, N=230;
+  var P=16000, CH=4400, CV=3400, HD=4800, RL=3400; /* chaos / converge / hold / release (ms) */
+  var W=0,H=0,dots=[],targets=[],started=false,raf=null;
+
+  var PALETTE=[['107,163,199',0.72],['148,187,211',0.12],['134,217,166',0.10],['244,185,66',0.06]];
+  function pick(){var r=Math.random(),a=0;for(var i=0;i<PALETTE.length;i++){a+=PALETTE[i][1];if(r<=a)return PALETTE[i][0];}return PALETTE[0][0];}
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function clamp01(v){return v<0?0:(v>1?1:v);}
+  function ease(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+  function buildTargets(){
+    targets=[];
+    for(var y=GRID;y<H-GRID*0.4;y+=GRID){
+      for(var x=GRID;x<W-GRID*0.4;x+=GRID){
+        targets.push([x,y]);
+      }
+    }
+    for(var i=targets.length-1;i>0;i--){ /* shuffle so trajectories cross */
+      var j=(Math.random()*(i+1))|0;
+      var tmp=targets[i];targets[i]=targets[j];targets[j]=tmp;
+    }
+  }
+  function assign(){
+    if(!targets.length) return;
+    for(var k=0;k<N;k++){
+      var t=targets[k%targets.length], d=dots[k];
+      var reuse=k>=targets.length;
+      d.tx=t[0]+(reuse?rand(-3,3):0);
+      d.ty=t[1]+(reuse?rand(-3,3):0);
+    }
+  }
+  function fadeAt(x,y){ /* keep the zone behind the card calm */
+    var dx=x-W/2, dy=y-H*0.52;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    var f=(dist-230)/240;
+    return f<0.15?0.15:(f>1?1:f);
+  }
+
+  function resize(){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    W=window.innerWidth; H=window.innerHeight;
+    canvas.width=W*dpr; canvas.height=H*dpr;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    if(!started){
+      for(var i=0;i<N;i++){
+        dots.push({cx:rand(0,W),cy:rand(0,H),vx:rand(-0.12,0.12),vy:rand(-0.12,0.12),r:rand(1.2,2.4),c:pick(),delay:Math.random(),tx:0,ty:0});
+      }
+      started=true;
+    }
+    buildTargets();
+    assign();
+    if(reduced) drawStatic();
+  }
+
+  function mixE(t,delay){
+    if(t<CH) return 0;
+    if(t<CH+CV){var u=(t-CH)/CV;return ease(clamp01((u-delay*0.4)/0.6));}
+    if(t<CH+CV+HD) return 1;
+    var u2=(t-CH-CV-HD)/RL;
+    return 1-ease(clamp01((u2-(1-delay)*0.4)/0.6));
+  }
+
+  function drawStatic(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<N;i++){
+      var d=dots[i];
+      var a=0.72*fadeAt(d.tx,d.ty);
+      ctx.beginPath();ctx.arc(d.tx,d.ty,d.r,0,6.2832);
+      ctx.fillStyle='rgba('+d.c+','+a.toFixed(3)+')';ctx.fill();
+    }
+  }
+
+  var t0=performance.now();
+  function frame(now){
+    var t=(now-t0)%P;
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<N;i++){
+      var d=dots[i];
+      d.vx+=rand(-0.014,0.014); d.vy+=rand(-0.014,0.014);
+      d.vx*=0.985; d.vy*=0.985;
+      d.cx+=d.vx; d.cy+=d.vy;
+      if(d.cx<-30)d.vx+=0.018; else if(d.cx>W+30)d.vx-=0.018;
+      if(d.cy<-30)d.vy+=0.018; else if(d.cy>H+30)d.vy-=0.018;
+      var e=mixE(t,d.delay);
+      var x=d.cx+(d.tx-d.cx)*e, y=d.cy+(d.ty-d.cy)*e;
+      var breathe=1+0.20*e*Math.sin(now*0.0015+(d.tx+d.ty)*0.015); /* ripple across the grid while held */
+      var a=(0.28+0.44*e)*fadeAt(x,y);
+      ctx.beginPath();ctx.arc(x,y,d.r*breathe,0,6.2832);
+      ctx.fillStyle='rgba('+d.c+','+a.toFixed(3)+')';
+      ctx.fill();
+    }
+    raf=requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize',resize);
+  resize();
+  if(!reduced) raf=requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
