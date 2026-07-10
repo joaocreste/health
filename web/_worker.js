@@ -212,7 +212,9 @@ const VALID_PAGES = new Set([
 
 async function serveNotFound(request, env, url) {
   try {
-    const nf = await env.ASSETS.fetch(new Request(new URL("/404.html", url).toString(), request));
+    // NB: extensionless — Pages 308-redirects /404.html, which would give an
+    // empty redirect body here.
+    const nf = await env.ASSETS.fetch(new Request(new URL("/404", url).toString(), request));
     return new Response(nf.body, {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache, must-revalidate" },
