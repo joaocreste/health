@@ -36,6 +36,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const APPLY = process.argv.includes("--apply");
 const UPLOAD_R2 = process.argv.includes("--upload-r2");
+// Which staged session to ingest. Default keeps the original 2026-06-23 (Ageu)
+// behaviour; pass --session=YYYY-MM-DD to ingest another staged file.
+const SESSION_ARG = (process.argv.find((a) => a.startsWith("--session=")) || "").split("=")[1] || "2026-06-23";
 
 const CLERK = "pending:joao";
 const R2_BUCKET = "jc-health-uploads";
@@ -82,15 +85,28 @@ async function main() {
   const pid = prow[0].id;
   console.log(`Patient: ${prow[0].full_name}  (users.id ${pid})`);
 
-  // ── Load the staged extraction + the raw transcript ──────────────────────
-  const stagePath = path.join(STAGE, "2026-06-23.json");
+  // ── Load the staged extraction + the raw source ──────────────────────────
+  const stagePath = path.join(STAGE, `${SESSION_ARG}.json`);
   const data = JSON.parse(fs.readFileSync(stagePath, "utf8"));
   const s = data.session;
-  const rawPath = path.join(TRANSCRIPT_DIR, data.source_file_name);
-  const rawBuf = fs.readFileSync(rawPath);
-  const contentHash = sha256(rawBuf);
 
-  // Derived/normalised transcript artifact (verbatim-cleaned copy + provenance
+  // Two source shapes are supported:
+  //   text  — source_file_name IS the transcript (Ageu 2026-06-23 case). The
+  //           raw bytes are utf8 text; content_hash hashes that text; the
+  //           derived R2 artifact wraps it with a provenance header.
+  //   audio — source_file_name is the binary recording (.m4a etc.) and
+  //           transcript_file_name is the diarized transcript produced from it.
+  //           content_hash hashes the *audio* (the canonical source); the raw
+  //           blob in R2 is the audio; the derived transcript blob is the text.
+  const isAudio = !!data.transcript_file_name;
+  const rawPath = path.join(TRANSCRIPT_DIR, data.source_file_name);
+  const rawBuf = fs.readFileSync(rawPath);          // audio binary OR text bytes
+  const contentHash = sha256(rawBuf);               // hash of the canonical source
+  const transcriptText = isAudio
+    ? fs.readFileSync(path.join(TRANSCRIPT_DIR, data.transcript_file_name), "utf8")
+    : rawBuf.toString("utf8");
+
+  // Derived/normalised transcript artifact (transcript text + provenance
   // header). The bulk transcript lives in R2, never the DB.
   const derived = [
     `# Lumen therapy transcript (derived)`,
@@ -104,12 +120,15 @@ async function main() {
     ``,
     `---`,
     ``,
-    rawBuf.toString("utf8"),
+    transcriptText,
   ].join("\n");
 
-  const slug = "clean-transcript";
+  const slug = data.slug || "clean-transcript";
+  const sourceExt = path.extname(data.source_file_name) || ".txt";
+  const sourceContentType = data.source_content_type || (isAudio ? "audio/mp4" : "text/plain");
+  const sourceMime = isAudio ? sourceContentType : "text/plain";
   const prefix = `patients/${pid}/therapy/${s.session_date}__${slug}/`;
-  const sourceKey = `${prefix}source.txt`;
+  const sourceKey = `${prefix}source${sourceExt}`;
   const transcriptKey = `${prefix}transcript.md`;
 
   // ── Resolve psych_item links (legacy_anchor -> uuid) ─────────────────────
@@ -165,7 +184,7 @@ async function main() {
     fs.writeFileSync(tmpSrc, rawBuf);
     fs.writeFileSync(tmpDer, derived, "utf8");
     for (const [key, file, ct] of [
-      [sourceKey, tmpSrc, "text/plain"],
+      [sourceKey, tmpSrc, sourceContentType],
       [transcriptKey, tmpDer, "text/markdown"],
     ]) {
       console.log(`  R2 put ${key}`);
@@ -279,7 +298,7 @@ async function main() {
   await sql`INSERT INTO documents
     (patient_id, kind, title, original_filename, blob_key, mime_type, document_date, metadata)
     VALUES (${pid}, 'therapy_session', ${`Therapy session ${s.session_date}`},
-            ${data.source_file_name}, ${sourceKey}, 'text/plain', ${s.session_date}, ${JSON.stringify(meta)}::jsonb)`;
+            ${data.source_file_name}, ${sourceKey}, ${sourceMime}, ${s.session_date}, ${JSON.stringify(meta)}::jsonb)`;
 
   console.log("Children + documents row written.");
 }

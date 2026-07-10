@@ -78,3 +78,18 @@ token.txt
 
 # PHI staging intermediates (therapy/labs extractions) — never commit
 .staging/
+
+# Local backfill data + backups (PHI — never commit)
+scripts/data/
+
+# ==========================================================================
+# PHI and working material at repo root — never stage (relocation job pending)
+# ==========================================================================
+/*.pdf
+/*.pdf.zip
+/reports/
+/scans/
+/Patients/
+/Management Prompts/
+/Marketing Material/
+/Patent/

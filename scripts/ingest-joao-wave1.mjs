@@ -52,6 +52,7 @@ const METRICS = JSON.parse(fs.readFileSync(path.join(root, "web/assets/metrics.j
 /* ───── Transformers ────────────────────────────────────────────── */
 
 const num = (v) => (typeof v === "number" && isFinite(v) ? v : null);
+const int = (v) => (typeof v === "number" && isFinite(v) ? Math.round(v) : null); // integer columns
 
 // Merge every per-day metric into one row keyed by day.
 function buildVitals() {
@@ -60,13 +61,13 @@ function buildVitals() {
     if (!byDay.has(day)) byDay.set(day, { day });
     return byDay.get(day);
   };
-  for (const [day, w] of D.WEIGHT || []) row(day).weight_kg = num(w);
+  for (const [day, w] of D.WEIGHT || []) row(day).weight_kg = num(w);          // real column
   for (const [day, hrv, rhr] of D.HRV_RHR || []) {
-    const r = row(day); r.hrv_ms = num(hrv); r.resting_hr = num(rhr);
+    const r = row(day); r.hrv_ms = num(hrv); r.resting_hr = num(rhr);          // real columns
   }
-  for (const [day, steps] of D.STEPS || []) row(day).steps = num(steps);
+  for (const [day, steps] of D.STEPS || []) row(day).steps = int(steps);       // integer column
   for (const [day, sys, dia] of D.BP || []) {
-    const r = row(day); r.blood_pressure_sys = num(sys); r.blood_pressure_dia = num(dia);
+    const r = row(day); r.blood_pressure_sys = int(sys); r.blood_pressure_dia = int(dia); // integer columns
   }
   // Per-night sleep from metrics.sleep.series, when it carries [date, minutes|hours].
   const series = METRICS?.sleep?.series;
