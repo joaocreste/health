@@ -1,9 +1,10 @@
 /* ════════════════════════════════════════════════════════════════════════════
  * Lumen Health — "Update AI Insights" button + async progress.
  *
- * Drops onto EVERY patient page (Summary/Physical/Exams/Vitals/Genetics/Mental/
- * Spiritual), static (Joao) and bespoke (Paulo/Silvana/Leo) alike. One button,
- * one behaviour everywhere: a WHOLE-PATIENT rebuild — never page-scoped.
+ * Pure builder: window.jcBuildInsightsUpdateCard() returns the wired card (or
+ * null when no patient is active). Placement is owned by the page assembler's
+ * tail (page-assembler.js) on every patient page. One button, one behaviour
+ * everywhere: a WHOLE-PATIENT rebuild — never page-scoped.
  *
  * Flow:
  *   idle button -> click -> confirm modal (blue Yes / muted No)
@@ -226,8 +227,6 @@
       try {
         if (typeof window.jcRefreshAiInsights === 'function') {
           window.jcRefreshAiInsights(section());
-          // re-dock the freshly rendered cards next to the danger zone
-          if (typeof window.jcReflowBottom === 'function') setTimeout(window.jcReflowBottom, 300);
         } else { location.reload(); }
       } catch (e) { /* leave existing cards in place */ }
     }
@@ -315,8 +314,8 @@
       openConfirm(start);
     });
 
-    // On mount: render any existing insights + show last-updated/cooldown.
-    refreshCards();
+    // On mount: show last-updated/cooldown (initial card render is owned by
+    // patient-context.js / the page assembler, not this button).
     refreshMeta();
 
     // If a job is already running for this patient (e.g. started on another page),
@@ -332,42 +331,12 @@
       }).catch(function () {});
   }
 
-  /* ── mount (handles async-rendered bespoke pages via observer) ── */
-  function anchorRef() {
-    return document.querySelector('section[data-ai-insights]')
-        || document.querySelector('footer')
-        || document.querySelector('main.jc-home, main.jc-paulo-exams, main.jc-silvana-exams, main.jc-empty-shell, main');
-  }
-  function tryMount() {
-    if (document.querySelector('.iu-wrap[data-insights-update]')) return true;
-    var ref = anchorRef();
-    if (!ref) return false;
+  /* Pure builder consumed by the assembler tail (page-assembler.js). */
+  window.jcBuildInsightsUpdateCard = function () {
+    if (!patientClerk()) return null;
     injectStyles();
     var wrap = buildWrap();
-    if (ref.tagName === 'FOOTER' || ref.hasAttribute('data-ai-insights')) {
-      ref.parentNode.insertBefore(wrap, ref);    // above the footer / above the AI block
-    } else {
-      ref.appendChild(wrap);                      // bottom of the bespoke main
-    }
     wire(wrap);
-    // Move the button (and, as they arrive, the AI cards) into the bottom dock
-    // so they sit side by side with the Danger zone. patient-context.js owns the
-    // dock; reflow is idempotent. A deferred call catches the async AI block.
-    if (typeof window.jcReflowBottom === 'function') {
-      window.jcReflowBottom();
-      setTimeout(window.jcReflowBottom, 400);
-      setTimeout(window.jcReflowBottom, 1500);
-    }
-    return true;
-  }
-  function mount() {
-    if (!patientClerk()) return;                  // no patient context -> nothing to do
-    if (tryMount()) return;
-    var obs = new MutationObserver(function () { if (tryMount()) obs.disconnect(); });
-    obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { obs.disconnect(); }, 12000);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
-  else mount();
+    return wrap;
+  };
 })();

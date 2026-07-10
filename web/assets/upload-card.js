@@ -1,10 +1,10 @@
 /* ════════════════════════════════════════════════════════════════════════════
  * Lumen Health — "Upload data" action card.
  *
- * Mounts on EVERY patient page (static Joao, bespoke Paulo/Silvana, runtime Leo,
- * generic) and docks itself into the shared bottom dock (window.jcReflowBottom)
- * as the FIRST of the three action cards: Upload (green) · Update AI Insights ·
- * Delete my health data. Green-bordered to mirror the existing two cards' shape.
+ * Pure builder: window.jcBuildUploadCard() returns the wired card element (or
+ * null when no patient is active). Placement is owned by the page assembler's
+ * tail (page-assembler.js) — Upload · Update AI Insights · Delete — on both
+ * assembler-rendered and static-bespoke pages. No self-mounting, no observer.
  * Routes to upload.html (the actual upload happens there). Identity matches
  * patient-context.js / insights-update.js (?patient= / sessionStorage).
  * ════════════════════════════════════════════════════════════════════════════ */
@@ -18,7 +18,7 @@
   function injectStyles() {
     if (document.getElementById('uc-styles')) return;
     var css = [
-      '.uc-wrap{max-width:880px;margin:26px auto 4px;padding:0 22px;font-family:var(--font-body,system-ui);}',
+      '.uc-wrap{font-family:var(--font-body,system-ui);}',
       // green-bordered card — mirrors .jc-danger-card / .iu-card structure
       '.uc-card{background:#FFFFFF;border:1px solid var(--green-200,#B0DEBE);border-radius:10px;padding:20px 24px;display:flex;flex-direction:column;gap:10px;}',
       '.uc-eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono,monospace);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--green-700,#245F3C);}',
@@ -38,10 +38,11 @@
     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
       '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
 
-  function buildWrap() {
-    var href = 'upload.html';
+  window.jcBuildUploadCard = function () {
     var pc = patientClerk();
-    if (pc) href += '?patient=' + encodeURIComponent(pc);
+    if (!pc) return null;
+    injectStyles();
+    var href = 'upload.html?patient=' + encodeURIComponent(pc);
     var wrap = document.createElement('section');
     wrap.className = 'uc-wrap';
     wrap.setAttribute('data-upload-card', '1');
@@ -56,43 +57,5 @@
         '<a class="uc-btn" href="' + href + '">' + uploadIcon + t('Upload data', 'Enviar dados') + '</a>' +
       '</div>';
     return wrap;
-  }
-
-  /* ── mount (handles async-rendered bespoke pages via observer), then dock ── */
-  function anchorRef() {
-    return document.querySelector('section[data-ai-insights]')
-        || document.querySelector('footer')
-        || document.querySelector('main.jc-home, main.jc-paulo-exams, main.jc-silvana-exams, main.jc-empty-shell, main');
-  }
-  function tryMount() {
-    if (document.querySelector('.uc-wrap[data-upload-card]')) {
-      if (typeof window.jcReflowBottom === 'function') window.jcReflowBottom();
-      return true;
-    }
-    var ref = anchorRef();
-    if (!ref) return false;
-    injectStyles();
-    var wrap = buildWrap();
-    if (ref.tagName === 'FOOTER' || ref.hasAttribute('data-ai-insights')) {
-      ref.parentNode.insertBefore(wrap, ref);
-    } else {
-      ref.appendChild(wrap);
-    }
-    if (typeof window.jcReflowBottom === 'function') {
-      window.jcReflowBottom();
-      setTimeout(window.jcReflowBottom, 400);
-      setTimeout(window.jcReflowBottom, 1500);
-    }
-    return true;
-  }
-  function mount() {
-    if (!patientClerk()) return;
-    if (tryMount()) return;
-    var obs = new MutationObserver(function () { if (tryMount()) obs.disconnect(); });
-    obs.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () { obs.disconnect(); }, 12000);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
-  else mount();
+  };
 })();

@@ -1347,49 +1347,6 @@ html[lang="pt"] .pt-pending-notice { display: block; }
   height: 100%;
 }
 
-/* ── VIEW-MODE TOGGLE (Simplified / Complete) — mirrors .lang-switch ──
-   Lives next to the language flag in the topnav. The button reads the chosen
-   mode; the actual hide/swap is the body[data-view] block further down. */
-.view-switch {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 1rem;
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  border-radius: 5px;
-  overflow: hidden;
-}
-.view-btn {
-  background: transparent;
-  border: 0;
-  color: rgba(255, 255, 255, 0.6);
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  padding: 5px 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
-}
-.view-btn:hover { color: rgba(255, 255, 255, 0.9); }
-.view-btn[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.92);
-  color: #0D1B2A;
-}
-
-/* The whole hiding mechanism. Until JS sets body[data-view] nothing is hidden,
-   so a pre-init or JS-off page is never UNDER-shown (safe failure = over-show).
-   simplified  → drop standard + historical cards, swap summary register
-   complete    → show everything, full summary register */
-.view-simplified { display: none; }            /* hidden until simplified chosen */
-body[data-view="simplified"] [data-tier="standard"],
-body[data-view="simplified"] [data-tier="historical"] { display: none !important; }
-body[data-view="simplified"] .view-complete   { display: none; }
-body[data-view="simplified"] .view-simplified { display: revert; }
-body[data-view="complete"]  .view-simplified  { display: none; }
-body[data-view="complete"]  .view-complete    { display: revert; }
-
 /* ── SIGN-OUT BUTTON (topnav) ── */
 .signout-btn {
   background: transparent;

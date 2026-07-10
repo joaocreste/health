@@ -334,18 +334,13 @@
       // Keep <nav> (the top bar) and <script>; explicitly hide
       // <header class="page-header"> because it hardcodes Joao's hero
       // copy on the static pages and would leak through for every
-      // other patient.
+      // other patient. Patient content renders INSIDE the assembler
+      // root (.lumen-page-root) — no per-patient classes here (I-2).
       if (el.tagName === 'NAV' || el.tagName === 'SCRIPT' ||
-          el.classList.contains('jc-empty-shell') ||
-          el.classList.contains('jc-overview') ||
-          el.classList.contains('jc-exams') ||
-          el.classList.contains('jc-home') ||
-          el.classList.contains('jc-paulo-exams') ||
-          el.classList.contains('jc-paulo-mental') ||
-          el.classList.contains('jc-silvana-exams') ||
+          el.classList.contains('lumen-page-root') ||
+          el.classList.contains('lumen-chat-root') ||
           el.classList.contains('jc-danger-zone') ||
-          el.classList.contains('jc-danger-backdrop') ||
-          el.classList.contains('lumen-chat-root')) continue;
+          el.classList.contains('jc-danger-backdrop')) continue;
       el.style.display = 'none';
     }
   }
@@ -378,75 +373,7 @@
   }
 
   // ─── Renderers ──────────────────────────────────────────────────
-  function renderPatientHeader(p) {
-    var profileBits = [];
-    if (p.date_of_birth) profileBits.push(t('DOB ', 'Nasc. ') + formatDate(p.date_of_birth));
-    if (p.sex) profileBits.push(escapeHtml(p.sex));
-    if (p.country_of_residence) profileBits.push(escapeHtml(p.country_of_residence));
-    if (p.native_language) profileBits.push(t('lang: ', 'idioma: ') + escapeHtml(p.native_language));
-    var profile = profileBits.length
-      ? profileBits.join(' · ')
-      : '<em>' + t('No profile fields set.', 'Nenhum dado de perfil definido.') + '</em>';
-    return (
-      '<header class="ov-header">' +
-        '<div class="ov-eyebrow">' + t('Patient record', 'Prontuário do paciente') + '</div>' +
-        '<h1 class="ov-title">' + (p.full_name ? escapeHtml(p.full_name) : t('Unnamed', 'Sem nome')) + '</h1>' +
-        '<div class="ov-profile">' + profile + '</div>' +
-        '<div class="ov-id">' + escapeHtml(p.clerk_user_id || '') + '</div>' +
-      '</header>'
-    );
-  }
 
-  function renderPillarCard(name, total, breakdown, href, accent) {
-    var rows = Object.keys(breakdown).map(function (k) {
-      var label = k.replace(/_/g, ' ');
-      var v = breakdown[k];
-      return '<li class="pillar-row' + (v === 0 ? ' empty' : '') + '">' +
-               '<span>' + escapeHtml(label) + '</span>' +
-               '<span>' + v + '</span>' +
-             '</li>';
-    }).join('');
-    var emptyNote = total === 0
-      ? '<div class="pillar-empty">No data yet for this pillar.</div>' : '';
-    return (
-      '<section class="pillar-card pillar-' + accent + '">' +
-        '<header class="pillar-head">' +
-          '<h2>' + escapeHtml(name) + '</h2>' +
-          '<div class="pillar-total">' + total + '</div>' +
-        '</header>' +
-        emptyNote +
-        '<ul class="pillar-rows">' + rows + '</ul>' +
-        '<a class="pillar-link" href="' + href + '">Open ' + escapeHtml(name) + ' →</a>' +
-      '</section>'
-    );
-  }
-
-  function renderPendingBanner(pending) {
-    if (!pending || pending.length === 0) return '';
-    var n = pending.length;
-    var headline = t(
-      n + (n === 1 ? ' file' : ' files') + ' did not process.',
-      n + (n === 1 ? ' arquivo' : ' arquivos') + ' não foi processado.'
-    );
-    var sub = t(
-      'Uploaded but classification or parsing failed (often an API billing or transient error). ',
-      'Enviado, mas a classificação ou o parsing falhou (frequentemente erro de billing da API ou transitório). '
-    );
-    return (
-      '<div class="ov-pending">' +
-        '<strong>' + headline + '</strong> ' + sub +
-        '<ul class="ov-list">' +
-          pending.map(function (f) {
-            return '<li>' +
-              '<span class="ov-list-title">' + (f.original_path ? escapeHtml(f.original_path) : t('(no name)', '(sem nome)')) + '</span>' +
-              '<span class="ov-list-meta">' + escapeHtml(f.status || '?') +
-                (f.error_message ? ' — ' + escapeHtml(String(f.error_message).slice(0, 160)) : '') +
-              '</span></li>';
-          }).join('') +
-        '</ul>' +
-      '</div>'
-    );
-  }
 
   function renderDocList(docs) {
     if (!docs || docs.length === 0) {
@@ -553,7 +480,7 @@
     var inner = medsTablesInner(summary);
     if (!inner) return '';
     return '<section class="report-section meds-section"><div class="container">' +
-      '<div class="section-label"><span class="lang-en">02 · Treatment</span><span class="lang-pt">02 · Tratamento</span></div>' +
+      '<div class="section-label"><span class="lang-en">Treatment</span><span class="lang-pt">Tratamento</span></div>' +
       '<h2 class="section-title"><span class="lang-en">Medications &amp; Supplements</span><span class="lang-pt">Medicações e Suplementos</span></h2>' +
       inner +
     '</div></section>';
@@ -569,77 +496,11 @@
     '</div>';
   }
 
-  function renderHome(summary) {
-    var p = (summary && summary.patient) || {};
-    var name = p.full_name || 'this patient';
-
-    document.title = 'Lumen Health — Health Summary · ' + name;
-
-    // ── Hero meta values ──────────────────────────────────────────
-    var months = ['January','February','March','April','May','June',
-                  'July','August','September','October','November','December'];
-    var monthsPt = ['janeiro','fevereiro','março','abril','maio','junho',
-                    'julho','agosto','setembro','outubro','novembro','dezembro'];
-    var today = new Date();
-    var todayEn = today.getDate() + ' ' + months[today.getMonth()].slice(0, 3) + ' ' + today.getFullYear();
-    var todayPt = today.getDate() + ' de ' + monthsPt[today.getMonth()] + ' de ' + today.getFullYear();
-
-    var dobEn = '—', dobPt = '—';
-    if (p.date_of_birth) {
-      var dob = new Date(p.date_of_birth);
-      if (!isNaN(dob)) {
-        var age = today.getFullYear() - dob.getFullYear();
-        var beforeBirthday = (today.getMonth() < dob.getMonth()) ||
-                             (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
-        if (beforeBirthday) age--;
-        dobEn = dob.getDate() + ' ' + months[dob.getMonth()] + ' ' + dob.getFullYear() + ' · age ' + age;
-        dobPt = dob.getDate() + ' de ' + monthsPt[dob.getMonth()] + ' de ' + dob.getFullYear() + ' · ' + age + ' anos';
-      }
-    }
-
-    var residence = p.country_of_residence ? escapeHtml(p.country_of_residence) : '—';
-
-    // ── Hero ──────────────────────────────────────────────────────
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' +
-            '<span class="lang-en">Health Summary · ' + todayEn + '</span>' +
-            '<span class="lang-pt">Resumo de saúde · ' + todayPt + '</span>' +
-          '</div>' +
-          '<h1 class="hero-title">' +
-            '<span class="lang-en">From scattered data to a clinical picture.</span>' +
-            '<span class="lang-pt">Dos dados dispersos a um quadro clínico.</span>' +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            '<span class="lang-en">A single, structured view of ' + escapeHtml(name) + '’s physical, mental and spiritual health.</span>' +
-            '<span class="lang-pt">Uma visão única e estruturada da saúde física, mental e espiritual de ' + escapeHtml(name) + '.</span>' +
-          '</p>' +
-          '<div class="hero-meta">' +
-            '<div class="hero-meta-item">' +
-              '<span class="lang-en">Patient</span><span class="lang-pt">Paciente</span>' +
-              '<span>' + escapeHtml(name) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span class="lang-en">Date of birth</span><span class="lang-pt">Data de nascimento</span>' +
-              '<span><span class="lang-en">' + dobEn + '</span><span class="lang-pt">' + dobPt + '</span></span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span class="lang-en">Residence</span><span class="lang-pt">Residência</span>' +
-              '<span>' + residence + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span class="lang-en">Prepared</span><span class="lang-pt">Preparado em</span>' +
-              '<span><span class="lang-en">' + todayEn + '</span><span class="lang-pt">' + todayPt + '</span></span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span class="lang-en">Classification</span><span class="lang-pt">Classificação</span>' +
-              '<span><span class="lang-en">Strictly confidential</span><span class="lang-pt">Estritamente confidencial</span></span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</section>';
-
+  /* ── Home topic-section builders (assembler providers) ──────────────
+     The old renderHome() hero + mount is retired: the assembler owns the
+     hero (identity from /api/patient-summary, nullable-safe) and the page
+     sequence. These builders return topic-section HTML only.            */
+  function homeReportsNavHtml(summary) {
     // ── Reports — pillar cards, one per pillar THAT HAS DATA ─────────
     // Canon: a pillar with no data shows no pillar card (and no nav entry —
     // see gatePillarNav). Gate each card on summary.pillars[x].total so a
@@ -678,21 +539,98 @@
               '<span class="entry-cta"><span class="lang-en">Open</span><span class="lang-pt">Abrir</span></span>' +
             '</a>';
     var pillarCards = physicalCard + mentalCard + spiritualCard;
-    var reports = !pillarCards ? '' :
-      '<section class="report-section">' +
+    if (!pillarCards) return '';
+    return '<section class="report-section">' +
         '<div class="container">' +
-          '<div class="section-label"><span class="lang-en">01 · Browse</span><span class="lang-pt">01 · Navegar</span></div>' +
+          '<div class="section-label"><span class="lang-en">Browse</span><span class="lang-pt">Navegar</span></div>' +
           '<h2 class="section-title"><span class="lang-en">Reports</span><span class="lang-pt">Relatórios</span></h2>' +
           '<div class="entry-grid entry-grid-visual">' +
             pillarCards +
           '</div>' +
         '</div>' +
       '</section>';
+  }
 
-    var overview = document.createElement('main');
-    overview.className = 'jc-home';
-    overview.innerHTML = hero + reports + medsSectionHome(summary);
-    document.body.appendChild(overview);
+  /* At-a-glance: per-pillar record counts from summary.pillars breakdowns.
+     Renders only pillars with total > 0 (G-NUM per card, contract I-5). */
+  function homeAtAGlanceHtml(summary) {
+    var P = (summary && summary.pillars) || {};
+    var LBL = {
+      lab_results: ['lab markers', 'marcadores'], imaging_studies: ['imaging studies', 'exames de imagem'],
+      medications: ['medications', 'medicações'], supplements: ['supplements', 'suplementos'],
+      encounters: ['encounters', 'consultas'], prescriptions: ['prescriptions', 'prescrições'],
+      vitals_days: ['vitals days', 'dias de vitais'], ecg_events: ['ECG events', 'eventos de ECG'],
+      pgx_findings: ['PGx findings', 'achados PGx'], writings: ['writings', 'escritos'],
+      mood_entries: ['mood entries', 'registros de humor'], psych_items: ['psych items', 'itens psiquiátricos'],
+      panic_events: ['panic events', 'eventos de pânico'], risk_assessments: ['risk assessments', 'avaliações de risco'],
+      therapy_sessions: ['therapy sessions', 'sessões de terapia'],
+      wheel_of_life: ['wheel of life', 'roda da vida'], life_events: ['life events', 'eventos de vida'],
+      sleep_studies: ['sleep studies', 'estudos do sono'], edx_studies: ['EDX studies', 'estudos EDX'],
+    };
+    var PILLAR_LBL = { physical: ['Physical', 'Físico'], mental: ['Mental', 'Mental'], spiritual: ['Spiritual', 'Espiritual'] };
+    var cards = ['physical', 'mental', 'spiritual'].map(function (k) {
+      var pl = P[k];
+      if (!pl || !(pl.total > 0)) return '';
+      var bits = Object.keys(pl.breakdown || {}).filter(function (b) {
+        return Number(pl.breakdown[b]) > 0;
+      }).map(function (b) {
+        var l = LBL[b] || [b.replace(/_/g, ' '), b.replace(/_/g, ' ')];
+        return '<li>' + pl.breakdown[b] + ' ' + t(escapeHtml(l[0]), escapeHtml(l[1])) + '</li>';
+      }).join('');
+      return '<div class="glance-card">' +
+        '<div class="glance-pillar">' + t(PILLAR_LBL[k][0], PILLAR_LBL[k][1]) + '</div>' +
+        '<div class="glance-total">' + pl.total + '</div>' +
+        (bits ? '<ul class="glance-bits">' + bits + '</ul>' : '') +
+      '</div>';
+    }).join('');
+    if (!cards) return '';
+    injectGlanceStyles();
+    return '<section class="report-section"><div class="container">' +
+      '<div class="section-label"><span class="lang-en">At a glance</span><span class="lang-pt">Resumo rápido</span></div>' +
+      '<h2 class="section-title"><span class="lang-en">Records on file</span><span class="lang-pt">Registros no prontuário</span></h2>' +
+      '<div class="glance-grid">' + cards + '</div>' +
+    '</div></section>';
+  }
+  function injectGlanceStyles() {
+    if (document.getElementById('jc-glance-styles')) return;
+    var s = document.createElement('style');
+    s.id = 'jc-glance-styles';
+    s.textContent =
+      '.glance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}' +
+      '.glance-card{background:var(--surface-pure,#FFF);border:1px solid var(--border-subtle,#E5E2DC);border-radius:10px;padding:18px 20px;}' +
+      '.glance-pillar{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted,#7A8FA6);}' +
+      '.glance-total{font-family:Raleway,sans-serif;font-weight:300;font-size:32px;color:var(--text-primary,#0D1B2A);margin:4px 0 8px;}' +
+      '.glance-bits{list-style:none;margin:0;padding:0;font-size:13px;color:var(--text-secondary,#3E4956);}' +
+      '.glance-bits li{margin:2px 0;}';
+    document.head.appendChild(s);
+  }
+
+  /* Injuries & surgeries from summary.procedures (same rows the static
+     Patient-Zero tables use via decorateProceduresFromDb).             */
+  function homeInjuriesHtml(summary) {
+    var rows = (summary && summary.procedures) || [];
+    if (!rows.length) return '';
+    var injuries = rows.filter(function (r) { return (r.type || '').toLowerCase() === 'injury'; });
+    var surgeries = rows.filter(function (r) { return (r.type || '').toLowerCase() !== 'injury'; });
+    function tbl(titleEn, titlePt, list) {
+      if (!list.length) return '';
+      return '<section class="exam-panel">' +
+        '<div class="exam-panel-head">' +
+          '<h2>' + t(titleEn, titlePt) + '</h2>' +
+          '<span class="exam-panel-count">' + list.length + '</span>' +
+        '</div>' +
+        '<table class="exam-table"><thead><tr>' +
+          '<th>' + t('Date', 'Data') + '</th><th>' + t('Event', 'Evento') + '</th>' +
+          '<th>' + t('Location', 'Local') + '</th><th>' + t('Notes', 'Observações') + '</th>' +
+        '</tr></thead><tbody>' + list.map(procRow).join('') + '</tbody></table>' +
+      '</section>';
+    }
+    return '<section class="report-section"><div class="container">' +
+      '<div class="section-label"><span class="lang-en">Cross-cutting context</span><span class="lang-pt">Contexto transversal</span></div>' +
+      '<h2 class="section-title"><span class="lang-en">Injury &amp; surgical history</span><span class="lang-pt">Histórico de lesões e cirurgias</span></h2>' +
+      tbl('Injuries', 'Lesões', injuries) +
+      tbl('Surgeries & procedures', 'Cirurgias e procedimentos', surgeries) +
+    '</div></section>';
   }
 
   /* ── Paulo Silotto · AI pain map / symptom inference (Summary) ──────
@@ -874,22 +812,15 @@
     );
   }
 
-  // Dock the pain-map into the bottom dock's EXTRA slot, which renders directly
-  // below the "Health Synthesis" AI block and directly above the upload / update
-  // / delete action cards (which always stay last). reflowBottomDock keeps this
-  // ordering even as the async AI block arrives.
-  function injectPauloPainMap() {
+  // Paulo's pain-map as a registry section (home, patient-scoped): pure
+  // builder — the assembler owns its placement in the page order.
+  function buildPauloPainMapSection() {
     injectPauloPainMapStyles();
-    if (document.getElementById('paulo-painmap')) return;
     var sec = document.createElement('section');
     sec.id = 'paulo-painmap';
     sec.className = 'report-section paulo-painmap-section';
-    sec.setAttribute('data-tier', 'essential');   // current clinical pain picture
     sec.innerHTML = renderPauloPainMap();
-    var dock = ensureBottomDock();
-    var extra = dock.querySelector('[data-bottom-extra]');
-    (extra || dock).appendChild(sec);
-    reflowBottomDock();
+    return sec;
   }
 
   function fmtLabNum(n) {
@@ -1280,7 +1211,12 @@
     return out;
   }
 
-  function renderExams(exams) {
+  /* Builds the exams topic sections for the assembler: 'imaging' (imaging
+     studies + ECG) and 'laboratory' (AI summary card + blood/urine panels +
+     historical comparison + source PDFs). Returns HTML parts plus an after()
+     hook that wires viewers/charts and fills the amber AI cards once the
+     page is in the DOM.                                                    */
+  function buildExamsParts(exams) {
     var p = exams.patient || {};
     var panels = regroupByTaxonomy(exams.panels || []);
     var docs = exams.lab_documents || [];
@@ -1447,25 +1383,15 @@
         t(totalMarkers === 1 ? 'marker' : 'markers', totalMarkers === 1 ? 'marcador' : 'marcadores') +
       '</span>';
 
-    var view = document.createElement('main');
-    view.className = 'jc-overview jc-exams';
-    view.innerHTML =
-      '<div class="ov-shell">' +
-        renderPatientHeader(p) +
-        '<div class="ov-section-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
+    var laboratoryHtml = '';
+    if (panels.length || docs.length) {
+      laboratoryHtml =
         '<section class="ov-ai-summary" id="exams-ai-summary"></section>' +
-        '<h2 class="ov-panels-title" id="blood-urine">' + panelsTitleInner + '</h2>' +
-        panelsHtml +
-        comparisonHtml +
-        imagingHtml +
-        ecgHtml +
-        docsHtml +
-      '</div>';
-    document.body.appendChild(view);
-    // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
-    if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
-    hydrateEcgCharts(view, p.clerk_user_id); // inject the Lumen ECG SVG(s) inline
-    wireEcgSwitcher(view, ecg, p.clerk_user_id); // date pill + version dropdown
+        (panels.length
+          ? '<h2 class="ov-panels-title" id="blood-urine">' + panelsTitleInner + '</h2>' + panelsHtml + comparisonHtml
+          : '') +
+        docsHtml;
+    }
 
     function amberCardHtml(label, bodyHtml) {
       return '<div class="ov-ai-inner">' +
@@ -1571,7 +1497,7 @@
       }
       return amberCardHtml(t('AI Summary', 'Resumo por IA'), bits.join(''));
     }
-    function fillExamsAi(pnls, imgs) {
+    function fillExamsAi(pnls, imgs, scopeEl) {
       // 1.2.1 consolidated AI Summary at the top of Exams.
       var summaryEl = document.getElementById('exams-ai-summary');
       if (summaryEl) summaryEl.innerHTML = examsSummaryHtml(offFromPanels(pnls), (imgs || []).length);
@@ -1580,7 +1506,7 @@
       // what each marker means + possible reasons grounded in the patient's record.
       // Scope to OUR rendered view — Patient Zero's hidden static page also has a
       // .lab-panel-grid, and an unscoped index would inject into those hidden panels.
-      var examMain = document.querySelector('main.jc-exams');
+      var examMain = scopeEl || document.querySelector('.lumen-page-root');
       var gridPanels = examMain ? examMain.querySelectorAll('.lab-panel-grid > .lab-panel') : [];
       (pnls || []).forEach(function (pn, i) {
         var offM = (pn.markers || []).filter(function (m) { return dirOf(m); });
@@ -1648,9 +1574,19 @@
       });
     }
 
-    // Amber-card invariant: consolidated AI Summary at top + per-panel lab cards
-    // + per-imagery finding cards. Called after all defs so LAB_EXPL is assigned.
-    fillExamsAi(panels, imaging);
+    return {
+      laboratoryHtml: laboratoryHtml,
+      imagingHtml: imagingHtml + ecgHtml,
+      after: function (scopeEl) {
+        // Wire any .ct-viewer blocks we just injected (app.js's generic engine).
+        if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+        hydrateEcgCharts(scopeEl || document, p.clerk_user_id); // inline Lumen ECG SVG(s)
+        wireEcgSwitcher(scopeEl || document, ecg, p.clerk_user_id); // date pill + version dropdown
+        // Amber-card invariant: consolidated AI Summary at top + per-panel lab
+        // cards + per-imagery finding cards.
+        fillExamsAi(panels, imaging, scopeEl);
+      },
+    };
   }
 
   function renderHistoricalComparison(panels) {
@@ -1778,32 +1714,6 @@
     );
   }
 
-  function renderSectionView(opts) {
-    /* opts: { summary, title, eyebrow, metrics, emptyHint, extra }
-       eyebrow and emptyHint are pre-built HTML (already paired via t()). */
-    var p = (opts.summary && opts.summary.patient) || {};
-    var pending = (opts.summary && opts.summary.pending_files) || [];
-    var anyValue = (opts.metrics || []).some(function (m) { return m.value > 0; });
-
-    document.title = 'Lumen Health — ' + opts.title + ' · ' + (p.full_name || 'Patient');
-
-    var view = document.createElement('main');
-    view.className = 'jc-overview jc-section';
-    view.innerHTML =
-      '<div class="ov-shell">' +
-        renderPatientHeader(p) +
-        renderPendingBanner(pending) +
-        '<div class="ov-section-eyebrow">' + opts.eyebrow + '</div>' +
-        renderMetricGrid(opts.metrics) +
-        (anyValue ? '' :
-          '<div class="ov-section ov-empty-hint">' +
-            '<p>' + opts.emptyHint + '</p>' +
-          '</div>') +
-        (opts.extra || '') +
-      '</div>';
-    document.body.appendChild(view);
-  }
-
   function recentSection(titleHtml, count, body) {
     return (
       '<section class="ov-section">' +
@@ -1817,8 +1727,7 @@
   // Genetics). It does NOT show the data itself — Exams holds blood + imaging one
   // click away. Each card carries a live count (or "no data yet"); empty options
   // stay visible as the structural frame and open to a clean empty state.
-  function renderPhysical(summary) {
-    var p = summary.patient || {};
+  function physBrowseCardsHtml(summary) {
     var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
     function statusPill(n, en, pt) {
       return n > 0
@@ -1858,17 +1767,8 @@
     // canonical hub is the three entry cards; real synthesis lives on Exams and
     // in the home AI cards.)
 
-    var view = document.createElement('main');
-    view.className = 'jc-overview jc-section';
-    view.innerHTML =
-      '<div class="ov-shell">' +
-        '<div class="ov-section-eyebrow">' + t('Physical', 'Físico') + '</div>' +
-        '<h1 class="ov-title">' + t('Physical Health Overview', 'Visão Geral da Saúde Física') + '</h1>' +
-        '<p class="ov-profile">' + (p.full_name ? escapeHtml(p.full_name) : '') + '</p>' +
-        '<div class="entry-grid entry-grid-overview">' + cards + '</div>' +
-        medsSectionInline(summary) +
-      '</div>';
-    document.body.appendChild(view);
+    if (!cards) return '';
+    return '<div class="entry-grid entry-grid-overview">' + cards + '</div>';
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -1879,7 +1779,7 @@
      data.js. Sections render ONLY when their underlying series has real data.
 
      In scope from patient-context.js (do NOT redeclare): t(en,pt),
-     escapeHtml(s), renderSectionView(opts), and the module-level `patient`.
+     escapeHtml(s), and the module-level `patient`.
 
      Chart libs are loaded globally on physical-vitals.html:
        Chart.js 4.4.4 (Chart) · @sgratzl boxplot (registered) · Plotly 2.35.2.
@@ -2099,40 +1999,15 @@
      renderVitals — fetch the range, build only the sections with data,
      mount the shell, then initialise the charts.
      ══════════════════════════════════════════════════════════════════════ */
-  function renderVitals(summary) {
-    var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
-    var clerk = (summary.patient && summary.patient.clerk_user_id) || patient;
-
-    /* Fallback shell mirroring the previous stub — used on fetch failure or
-       when the range holds no vitals at all. */
-    function fallback() {
-      renderSectionView({
-        summary: summary, title: 'Vitals',
-        eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
-        metrics: [
-          { label: t('Vitals days', 'Dias de vitais'), value: b.vitals_days || 0 },
-          { label: t('ECG events', 'Eventos de ECG'), value: b.ecg_events || 0 },
-        ],
-        emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
-                     'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
-      });
-    }
-
-    var today = new Date().toISOString().slice(0, 10);
-    var viewer = '';
-    try { viewer = sessionStorage.getItem('jc_viewer_clerk') || ''; } catch (_) {}
-    var url = '/api/vitals-range?clerk=' + encodeURIComponent(clerk) + '&from=2015-01-01&to=' + today;
-
-    fetch(url, { headers: viewer ? { 'X-Viewer-Clerk': viewer, Accept: 'application/json' } : { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        if (!d) return fallback();
-        buildVitals(summary, b, d);
-      })
-      .catch(function (e) { console.error('[vitals-range]', e); fallback(); });
-  }
-
-  function buildVitals(summary, b, d) {
+  /* Computes the vitals chart sections for the assembler, keyed by the
+     registry section ids (body-composition / sleep / movement /
+     cardiovascular / stress-resilience / blood-pressure). The vitals-range
+     payload is fetched by the assembler (page-assembler.js). Chart builders
+     queue into _vitalsBuilders; the provider's after() hook runs them once
+     the canvases are in the DOM. Returns null when no series has data —
+     the registry gates then leave the page to the honest empty state.    */
+  function computeVitalsParts(summary, d) {
+    var b = (summary && summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
     /* Normalise each series to an array/object we can presence-test. */
     var weight = d.weight || [];
     var steps = d.steps || [];
@@ -2160,18 +2035,7 @@
     var hasBpWeek = bpByWeek.length > 0;
 
     if (!hasBody && !hasSleep && !hasMovement && !hasCardio && !hasStress && !hasBp) {
-      /* Nothing to draw — fall back to the empty shell. */
-      renderSectionView({
-        summary: summary, title: 'Vitals',
-        eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
-        metrics: [
-          { label: t('Vitals days', 'Dias de vitais'), value: b.vitals_days || 0 },
-          { label: t('ECG events', 'Eventos de ECG'), value: b.ecg_events || 0 },
-        ],
-        emptyHint: t('No vitals data ingested yet. Drop CSV/JSON exports from Oura, Apple Health, Withings, Whoop, etc.',
-                     'Sem dados de vitais ainda. Envie exports CSV/JSON de Oura, Apple Health, Withings, Whoop, etc.'),
-      });
-      return;
+      return null; // nothing to draw — gates emit nothing (I-5)
     }
 
     /* Reset registries for this render. */
@@ -2180,9 +2044,17 @@
 
     /* Build section markup + collect nav entries + queue chart builders. */
     var nav = [];
-    var sectionsHtml = '';
+    var parts = {};
+    var order = [];
     var num = 0;
-    function addNav(id, en, pt) { nav.push({ id: id, en: en, pt: pt }); }
+    var NAV_TO_KEY = {
+      'vit-body': 'body-composition', 'vit-sleep': 'sleep', 'vit-movement': 'movement',
+      'vit-cardio': 'cardiovascular', 'vit-stress': 'stress-resilience', 'vit-bp': 'blood-pressure',
+    };
+    function addNav(id, en, pt) {
+      nav.push({ id: id, en: en, pt: pt });
+      if (NAV_TO_KEY[id]) order.push(NAV_TO_KEY[id]);
+    }
 
     /* ── 1 · Body composition ───────────────────────────────────────────── */
     if (hasBody) {
@@ -2197,7 +2069,7 @@
       if (latest[2] != null) tiles.push({ label: t('Body fat', 'Gordura corporal'), value: vFmt(latest[2]), unit: '%' });
       if (latest[3] != null) tiles.push({ label: t('Muscle mass', 'Massa muscular'), value: vFmt(latest[3]), unit: 'kg' });
       /* BMI omitted — height is not carried in the vitals-range API. */
-      sectionsHtml += vSection(num, 'vit-body', 'Body composition', 'Composição corporal',
+      parts['body-composition'] = vSection(num, 'vit-body', 'Body composition', 'Composição corporal',
         'Weight, muscle mass and body-fat trend from connected smart-scale readings.',
         'Tendência de peso, massa muscular e gordura corporal a partir de balanças conectadas.',
         vTiles(tiles) +
@@ -2245,7 +2117,7 @@
       if (stageHasData(sleepBox.rem)) sTiles.push({ label: t('Median REM', 'REM (mediana)'), value: vHm(sleepBox.rem.median) });
       if (stageHasData(sleepBox.light)) sTiles.push({ label: t('Median light', 'Leve (mediana)'), value: vHm(sleepBox.light.median) });
       var nNights = (d.meta && d.meta.nights) || (sleepBox.total && sleepBox.total.n) || 0;
-      sectionsHtml += vSection(num, 'vit-sleep', 'Sleep architecture', 'Arquitetura do sono',
+      parts['sleep'] = vSection(num, 'vit-sleep', 'Sleep architecture', 'Arquitetura do sono',
         'Per-night sleep-stage distribution and how the nightly composition drifts week to week.',
         'Distribuição dos estágios do sono por noite e como a composição varia semana a semana.',
         vTiles(sTiles) +
@@ -2376,7 +2248,7 @@
       var stepVals = vNums(steps, function (r) { return r[1]; });
       var over10k = stepVals.filter(function (v) { return v >= 10000; }).length;
       var over5k = stepVals.filter(function (v) { return v >= 5000; }).length;
-      sectionsHtml += vSection(num, 'vit-movement', 'Movement', 'Movimento',
+      parts['movement'] = vSection(num, 'vit-movement', 'Movement', 'Movimento',
         'Daily step count across every recorded day, with the weekly-median trend overlaid.',
         'Contagem de passos em cada dia registrado, com a tendência mediana semanal sobreposta.',
         vTiles([
@@ -2458,7 +2330,7 @@
         }
         cardioBody += (hasHrTod && hasRhrWeek) ? '</div>' : '';
       }
-      sectionsHtml += vSection(num, 'vit-cardio', 'Cardiovascular & recovery', 'Cardiovascular e recuperação',
+      parts['cardiovascular'] = vSection(num, 'vit-cardio', 'Cardiovascular & recovery', 'Cardiovascular e recuperação',
         'Heart-rate variability, resting heart rate and their daily and weekly rhythm.',
         'Variabilidade da frequência cardíaca, FC em repouso e seu ritmo diário e semanal.',
         cardioBody);
@@ -2573,7 +2445,7 @@
       if (stressVals.length) stTiles.push({ label: t('High-stress (median)', 'Alto estresse (mediana)'), value: vFmt(vMedian(stressVals), 0), unit: 'min/day' });
       if (scoreVals.length) stTiles.push({ label: t('Resilience (median)', 'Resiliência (mediana)'), value: vFmt(vMedian(scoreVals), 0) });
       if (scoreVals.length) stTiles.push({ label: t('Resilience (mean)', 'Resiliência (média)'), value: vFmt(vMean(scoreVals), 0) });
-      sectionsHtml += vSection(num, 'vit-stress', 'Stress & resilience', 'Estresse e resiliência',
+      parts['stress-resilience'] = vSection(num, 'vit-stress', 'Stress & resilience', 'Estresse e resiliência',
         'Daily high-stress load and the composite resilience score, each with a 7-day rolling mean.',
         'Carga diária de alto estresse e a pontuação composta de resiliência, cada uma com média móvel de 7 dias.',
         vTiles(stTiles) +
@@ -2645,7 +2517,7 @@
         bpBody += vPlotCard('vBpPatternsChart', 'Blood pressure — weekly variability', 'Pressão arterial — variabilidade semanal',
           'Systolic (red) · diastolic (blue) · median ± SD · AHA stage lines', 'Sistólica (verm.) · diastólica (azul) · mediana ± DP · linhas de estágio AHA');
       }
-      sectionsHtml += vSection(num, 'vit-bp', 'Blood pressure', 'Pressão arterial',
+      parts['blood-pressure'] = vSection(num, 'vit-bp', 'Blood pressure', 'Pressão arterial',
         'Monthly mean systolic and diastolic pressure, with the week-to-week spread when available.',
         'Média mensal de pressão sistólica e diastólica, com a dispersão semanal quando disponível.',
         bpBody);
@@ -2811,10 +2683,8 @@
       nav.map(function (s) { return '<a href="#' + s.id + '">' + t(s.en, s.pt) + '</a>'; }).join('') +
       '</div></div>';
 
-    /* ── Mount the shell, then initialise charts (canvases must be in DOM) ── */
-    /* Top metric grid — kept always-positive so renderSectionView never prints
-       its emptyHint above real charts (breakdown.vitals_days can be 0 for
-       front-end-only patients whose data lives only behind the API). */
+    /* Top metric grid — kept always-positive (breakdown.vitals_days can be 0
+       for front-end-only patients whose data lives only behind the API). */
     var nights = (d.meta && d.meta.nights) || 0;
     var hrReadings = (d.meta && d.meta.hrReadings) || 0;
     var topMetrics = [
@@ -2823,16 +2693,6 @@
     ];
     if (nights) topMetrics.push({ label: t('Sleep nights', 'Noites de sono'), value: nights });
     if (hrReadings) topMetrics.push({ label: t('HR readings', 'Leituras de FC'), value: hrReadings });
-
-    renderSectionView({
-      summary: summary, title: 'Vitals',
-      eyebrow: t('Physical → Vitals', 'Físico → Vitais'),
-      metrics: topMetrics,
-      emptyHint: t('No vitals data ingested yet.', 'Sem dados de vitais ainda.'),
-      extra: navHtml + sectionsHtml,
-    });
-
-    runVitalsBuilders();
 
     /* Re-render every chart when the language toggle flips so baked-in
        Chart.js / Plotly strings switch language. Registered once. */
@@ -2843,19 +2703,13 @@
         if (btn) setTimeout(runVitalsBuilders, 0);
       });
     }
-  }
 
-  function renderGenetics(summary) {
-    var b = (summary.pillars && summary.pillars.physical && summary.pillars.physical.breakdown) || {};
-    renderSectionView({
-      summary: summary, title: 'Genetics',
-      eyebrow: t('Physical → Genetics', 'Físico → Genética'),
-      metrics: [
-        { label: t('PGx findings', 'Achados PGx'), value: b.pgx_findings || 0 },
-      ],
-      emptyHint: t('No genetics data ingested yet. Upload a 23andMe / AncestryDNA raw file or a pharmacogenomic report PDF.',
-                   'Sem dados genéticos ainda. Envie um arquivo bruto 23andMe / AncestryDNA ou um PDF de relatório farmacogenômico.'),
-    });
+    return {
+      parts: parts,
+      order: order,
+      navHtml: navHtml,
+      topMetricsHtml: renderMetricGrid(topMetrics),
+    };
   }
 
   // Build the psychological-architecture HTML (archetype card + AMPD dimension
@@ -2864,7 +2718,7 @@
   // plain spans (visible under both language toggles) so there are no blank PT gaps;
   // only the section/dimension headers are bilingual.
   var LIFE_FLAG_CATS = { crisis: 1, hospitalization: 1, loss: 1, diagnosis: 1, divorce: 1 };
-  function buildPsychArchitecture(psych) {
+  function psychArchitectureHtml(psych) {
     var out = '';
     var a = psych.archetype;
     if (a) {
@@ -2889,6 +2743,7 @@
         '<span class="lang-pt">Arquitetura psicológica — sintetizada a partir de escritos pessoais</span>' +
         ' <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></h2>';
       psych.dimensions.forEach(function (d) {
+        if (!d.items || !d.items.length) return; // skip empty dimensions (I-5)
         out += '<div class="psych-dim-panel" data-dim="' + escapeHtml(d.id) + '">' +
           '<div class="psych-dim-panel-head">' +
             '<h3 class="psych-dim-panel-title"><span class="lang-en">' + escapeHtml(d.name_en) + '</span>' +
@@ -2910,87 +2765,25 @@
       });
       out += '</div></section>';
     }
-    var le = psych.life_events || [];
-    if (le.length) {
-      out += '<section class="report-section"><div class="container">' +
-        '<h2 class="section-title"><span class="lang-en">A life in events</span><span class="lang-pt">Uma vida em eventos</span></h2>' +
-        '<div class="timeline">' +
-        le.map(function (e) {
-          var flag = LIFE_FLAG_CATS[e.category] ? ' flag' : '';
-          return '<div class="timeline-item' + flag + '">' +
-            '<div class="timeline-date">' + escapeHtml(e.occurred_on || '') + '</div>' +
-            '<div class="timeline-title"><span>' + escapeHtml(e.title) + '</span></div>' +
-            (e.description ? '<div class="timeline-body"><span>' + escapeHtml(e.description) + '</span></div>' : '') +
-          '</div>';
-        }).join('') +
-        '</div></div></section>';
-    }
     return out;
   }
 
-  function renderMental(summary) {
-    var b = (summary.pillars && summary.pillars.mental && summary.pillars.mental.breakdown) || {};
-    var clerk = (summary.patient && summary.patient.clerk_user_id) || patient;
-    var metrics = [
-      { label: t('Writings',         'Escritos'),               value: b.writings         || 0 },
-      { label: t('Mood entries',     'Registros de humor'),     value: b.mood_entries     || 0 },
-      { label: t('Psych items',      'Itens psiquiátricos'),    value: b.psych_items      || 0 },
-      { label: t('Panic events',     'Eventos de pânico'),      value: b.panic_events     || 0 },
-      { label: t('Risk assessments', 'Avaliações de risco'),    value: b.risk_assessments || 0 },
-    ];
-    var draw = function (extra) {
-      renderSectionView({
-        summary: summary, title: 'Mental', eyebrow: t('Mental', 'Mental'),
-        metrics: metrics, extra: extra || '',
-        emptyHint: t('No mental-health data ingested yet. Drop journals, mood logs, or psych evaluations from Add data.',
-                     'Sem dados de saúde mental ainda. Envie diários, registros de humor ou avaliações psiquiátricas em "Adicionar dados".'),
-      });
-    };
-    // Fetch the psych architecture; render it below the metric row. Fall back to
-    // the bare view if the endpoint is unavailable or the patient has no items.
-    if (!(b.psych_items || b.writings)) { draw(''); return; }
-    fetch('/api/patient-psych?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (psych) { draw(psych ? buildPsychArchitecture(psych) : ''); })
-      .catch(function () { draw(''); });
-  }
-
-  function renderSpiritual(summary) {
-    var b = (summary.pillars && summary.pillars.spiritual && summary.pillars.spiritual.breakdown) || {};
-    renderSectionView({
-      summary: summary, title: 'Spiritual',
-      eyebrow: t('Spiritual', 'Espiritual'),
-      metrics: [
-        { label: t('Wheel of life', 'Roda da vida'),    value: b.wheel_of_life || 0 },
-        { label: t('Life events',   'Eventos de vida'), value: b.life_events   || 0 },
-      ],
-      emptyHint: t('No spiritual data ingested yet. Drop wheel-of-life self-assessments or life-event CSVs from Add data.',
-                   'Sem dados espirituais ainda. Envie autoavaliações de roda da vida ou CSVs de eventos de vida em "Adicionar dados".'),
-    });
-  }
-
-  function renderEmptyShell(clerkId, patientName, sectionLabelHtml) {
-    var nameHtml = patientName ? escapeHtml(patientName) : t('this patient', 'este paciente');
-    var shell = document.createElement('main');
-    shell.className = 'jc-empty-shell';
-    shell.innerHTML =
-      '<div class="jc-empty-card">' +
-        '<div class="jc-empty-eyebrow">' + (sectionLabelHtml || t('Patient record', 'Prontuário do paciente')) + '</div>' +
-        '<h1 class="jc-empty-title">' +
-          t('Not built yet for ' + nameHtml + '.', 'Ainda não construído para ' + nameHtml + '.') +
-        '</h1>' +
-        '<p class="jc-empty-body">' +
-          t('This section still uses Patient Zero\'s hardcoded layout. Data for ' + nameHtml + ' will appear here once a data-driven view is built.',
-            'Esta seção ainda usa o layout fixo do Paciente Zero. Os dados de ' + nameHtml + ' aparecerão aqui quando uma visão orientada a dados for construída.') +
-        '</p>' +
-        '<div class="jc-empty-id">' + escapeHtml(clerkId) + '</div>' +
-        '<div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">' +
-          '<a href="home.html" class="jc-empty-back" style="text-decoration:none;display:inline-block;">' +
-            t('← Back to summary', '← Voltar ao resumo') +
-          '</a>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(shell);
+  /* Life-events timeline as its own registry section (mental · life-history). */
+  function psychLifeHistoryHtml(psych) {
+    var le = (psych && psych.life_events) || [];
+    if (!le.length) return '';
+    return '<section class="report-section"><div class="container">' +
+      '<h2 class="section-title"><span class="lang-en">A life in events</span><span class="lang-pt">Uma vida em eventos</span></h2>' +
+      '<div class="timeline">' +
+      le.map(function (e) {
+        var flag = LIFE_FLAG_CATS[e.category] ? ' flag' : '';
+        return '<div class="timeline-item' + flag + '">' +
+          '<div class="timeline-date">' + escapeHtml(e.occurred_on || '') + '</div>' +
+          '<div class="timeline-title"><span>' + escapeHtml(e.title) + '</span></div>' +
+          (e.description ? '<div class="timeline-body"><span>' + escapeHtml(e.description) + '</span></div>' : '') +
+        '</div>';
+      }).join('') +
+      '</div></div></section>';
   }
 
   // ─── Styles ─────────────────────────────────────────────────────
@@ -3179,102 +2972,11 @@
   // (non-Patient-Zero), pass the just-appended <main> so the zone lands
   // beneath it. When omitted (Patient Zero's static page), fall back to
   // "before footer" → "append to body".
-  /* ── Bottom dock: Update-AI-Insights + AI cards (left) side by side with the
-     Danger zone (right). The three pieces are injected by different code paths
-     (this file + insights-update.js) at different times, so rather than fight
-     placement we REFLOW: gather whatever exists into a two-column row pinned to
-     the visual bottom of the page. Idempotent — safe to call repeatedly. ── */
-  function injectBottomDockStyles() {
-    if (document.getElementById('jc-bottom-dock-styles')) return;
-    var s = document.createElement('style');
-    s.id = 'jc-bottom-dock-styles';
-    s.textContent = [
-      '.jc-bottom-dock { max-width: 1080px; margin: 32px auto; padding: 0 24px; }',
-      // The three action cards: one row, three EQUAL columns, tops/bottoms aligned.
-      // They are the LAST row of the dock so they are always the final thing on the page.
-      '.jc-bottom-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; margin-top: 24px; }',
-      '.jc-bottom-actions > div:empty { display: none; }',
-      // The AI synthesis block sits full-width at the TOP of the dock.
-      '.jc-bottom-ai:empty { display: none; }',
-      // Patient-specific extra block (Paulo pain map) between synthesis and actions.
-      '.jc-bottom-extra { margin-top: 24px; }',
-      '.jc-bottom-extra:empty { display: none; }',
-      // neutralise each child\'s own centring/width so the columns control layout
-      '.jc-bottom-dock .uc-wrap, .jc-bottom-dock .iu-wrap, .jc-bottom-dock .jc-danger-zone { max-width: none; margin: 0; padding: 0; height: 100%; }',
-      '.jc-bottom-dock .ai-ins-block { max-width: none; margin: 0; padding: 0; border-top: none; }',
-      '.jc-bottom-dock .paulo-painmap-section { margin: 0; }',
-      '.jc-bottom-dock .paulo-painmap-section > .container { max-width: none; margin: 0; padding: 0; }',
-      // equal-height cards so the three line up top and bottom
-      '.jc-bottom-actions .uc-card, .jc-bottom-actions .iu-card, .jc-bottom-actions .jc-danger-card { height: 100%; box-sizing: border-box; }',
-      '@media (max-width: 880px) { .jc-bottom-actions { grid-template-columns: 1fr; gap: 18px; } }',
-    ].join('\n');
-    document.head.appendChild(s);
-  }
-
-  function ensureBottomDock() {
-    injectBottomDockStyles();
-    var dock = document.querySelector('.jc-bottom-dock');
-    if (dock) return dock;
-    dock = document.createElement('div');
-    dock.className = 'jc-bottom-dock';
-    // Order top -> bottom: AI synthesis, then any patient-specific extra block
-    // (Paulo's pain map), then the upload / update / delete action cards LAST —
-    // the action cards must always be the last thing a patient sees on any page.
-    dock.innerHTML =
-      '<div class="jc-bottom-ai" data-bottom-ai></div>' +
-      '<div class="jc-bottom-extra" data-bottom-extra></div>' +
-      '<div class="jc-bottom-actions">' +
-        '<div class="jc-bottom-upload" data-bottom-upload></div>' +
-        '<div class="jc-bottom-aibtn" data-bottom-aibtn></div>' +
-        '<div class="jc-bottom-danger" data-bottom-danger></div>' +
-      '</div>';
-    // Pin to the visual bottom: before a VISIBLE footer (static pages) or at the
-    // end of <body> (dynamic pages hide the original footer and append content).
-    var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
-    var footerVisible = footer && footer.offsetParent !== null;
-    if (footerVisible && footer.parentNode) footer.parentNode.insertBefore(dock, footer);
-    else document.body.appendChild(dock);
-    return dock;
-  }
-
-  function reflowBottomDock() {
-    var upload = document.querySelector('.uc-wrap[data-upload-card]');
-    var iu = document.querySelector('.iu-wrap[data-insights-update]');
-    var ai = document.querySelector('section[data-ai-insights]');
-    var extra = document.getElementById('paulo-painmap'); // patient-specific extra block
-    var danger = document.querySelector('.jc-danger-zone');
-    if (!upload && !iu && !ai && !danger && !extra) return;
-    var dock = ensureBottomDock();
-    // Re-pin the dock to the visual bottom on every reflow. The dock can be
-    // created early (insights-update mounts on DOMContentLoaded) while the page's
-    // main content is appended later by an async render — without this the dock
-    // would sit ABOVE the summary. Move it after the last rendered content.
-    var pinFooter = document.querySelector('footer.doc-footer') || document.querySelector('footer');
-    if (pinFooter && pinFooter.offsetParent !== null) {
-      if (pinFooter.previousElementSibling !== dock) pinFooter.parentNode.insertBefore(dock, pinFooter);
-    } else if (document.body.lastElementChild !== dock) {
-      document.body.appendChild(dock);
-    }
-    var uploadCol = dock.querySelector('[data-bottom-upload]');
-    var aiBtnCol = dock.querySelector('[data-bottom-aibtn]');
-    var aiCol = dock.querySelector('[data-bottom-ai]');
-    var extraCol = dock.querySelector('[data-bottom-extra]');
-    var dangerCol = dock.querySelector('[data-bottom-danger]');
-    // The AI synthesis block goes full-width at the TOP of the dock.
-    if (ai && ai.parentNode !== aiCol) aiCol.appendChild(ai);
-    // Patient-specific extra (Paulo's pain map) sits below the synthesis…
-    if (extra && extraCol && extra.parentNode !== extraCol) extraCol.appendChild(extra);
-    // …and the three action cards (Upload | Update AI Insights | Delete) stay LAST.
-    if (upload && uploadCol && upload.parentNode !== uploadCol) uploadCol.appendChild(upload);
-    if (iu && aiBtnCol && iu.parentNode !== aiBtnCol) aiBtnCol.appendChild(iu);
-    if (danger && danger.parentNode !== dangerCol) dangerCol.appendChild(danger);
-  }
-  // Exposed so assets/insights-update.js can trigger a reflow after it mounts /
-  // refreshes the button + cards.
-  window.jcReflowBottom = reflowBottomDock;
-
-  function injectDangerZone(insertAfterEl) {
-    if (document.querySelector('.jc-danger-zone')) return;
+  /* ── Danger zone (Delete my health data) ─────────────────────────────
+     Pure builder: returns the card element, never inserts itself. Placement
+     is owned by the page assembler's tail (Upload → Update → Delete, home
+     only per D3) — the old bottom-dock/reflow machinery is retired. ── */
+  function buildDangerZone() {
     var zone = document.createElement('section');
     zone.className = 'jc-danger-zone';
     zone.innerHTML =
@@ -3289,16 +2991,11 @@
           t('Delete my health data', 'Excluir meus dados de saúde') +
         '</button>' +
       '</div>';
-    if (insertAfterEl && insertAfterEl.parentNode) {
-      insertAfterEl.parentNode.insertBefore(zone, insertAfterEl.nextSibling);
-    } else {
-      var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
-      if (footer && footer.parentNode) footer.parentNode.insertBefore(zone, footer);
-      else document.body.appendChild(zone);
-    }
     zone.querySelector('.jc-danger-btn').addEventListener('click', openDangerModal);
-    reflowBottomDock(); // move the danger zone into the side-by-side bottom dock
+    return zone;
   }
+  // Consumed by the assembler tail (page-assembler.js) on home pages.
+  window.jcBuildDangerZone = buildDangerZone;
 
   function openDangerModal() {
     var existing = document.querySelector('.jc-danger-backdrop');
@@ -3721,232 +3418,288 @@
       .catch(function () { section.style.display = 'none'; });
   }
 
+  /* ── Per-patient data assets (dispatcher-injected) ────────────────────
+     These PHI data files are gated per patient at the worker (GATED_ASSETS /
+     scoped access); they used to be <script>-tagged on every shell, giving
+     every non-owning viewer a guaranteed 403/503 on the critical path
+     (defect #10). The dispatcher now injects only the active patient's
+     file(s) and awaits the load before the providers run. */
+  var PATIENT_DATA_ASSETS = {};
+  PATIENT_DATA_ASSETS[PAULO_SILOTTO] = [
+    'assets/paulo-labs.js?v=3', 'assets/paulo-ergometric.js?v=1',
+    'assets/paulo-sleep.js?v=1', 'assets/paulo-mental.js?v=1',
+  ];
+  PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=3'];
+  PATIENT_DATA_ASSETS[CRISTINA_CRESTI] = ['assets/cristina-labs.js?v=2'];
+
+  function loadPatientDataAssets(clerkId) {
+    var srcs = PATIENT_DATA_ASSETS[clerkId] || [];
+    return Promise.all(srcs.map(function (srcUrl) {
+      return new Promise(function (resolve) {
+        var s = document.createElement('script');
+        s.src = srcUrl;
+        s.onload = resolve;
+        s.onerror = resolve; // providers null-check their globals
+        document.head.appendChild(s);
+      });
+    }));
+  }
+
+  /* ── AI provider helpers ── */
+  function aiPayloadOf(ctx) {
+    var d = ctx.payloads && ctx.payloads.dashboard;
+    var rec = d && d.sections && d.sections['ai-insights'];
+    var pl = rec && rec.cards_json;
+    return (pl && pl.pages) ? pl : null;
+  }
+  function aiBlockEl(html) {
+    injectAiInsightsStyles();
+    var sec = document.createElement('section');
+    sec.className = 'ai-ins-block';
+    sec.setAttribute('data-ai-insights', '1');
+    sec.innerHTML = html;
+    return sec;
+  }
+  function examsPartsOf(ctx) {
+    if (!('examsParts' in ctx.shared)) {
+      ctx.shared.examsParts = ctx.payloads.exams ? buildExamsParts(ctx.payloads.exams) : null;
+    }
+    return ctx.shared.examsParts;
+  }
+  function examsAfterOnce(ctx, parts) {
+    return function (root) {
+      if (ctx.shared.examsAfterRan) return;
+      ctx.shared.examsAfterRan = true;
+      parts.after(root);
+      decorateExamsWithAiOutliers(); // dashboard-driven per-marker notes
+    };
+  }
+
+  /* ── Section providers (consumed by page-assembler.js via the registry).
+     Every function returns an Element, an HTML string, {el, after}, or null.
+     Registered before dispatch; the assembler looks them up by name. ── */
+  function registerLumenProviders() {
+    window.LUMEN_PROVIDERS = {
+
+      /* slot-2 concise AI summary (gate G-DASH / G-DOMAIN via registry) */
+      aiSummary: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var html = aiConciseHtml(pl, ctx.page);
+        return html ? aiBlockEl(html) : null;
+      },
+      homeActivePriorities: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var sm = pl.summary || {};
+        var work = aiResolveRefs(pl, sm.points_to_work_on || sm.top_attention_points).map(aiInsightCard).join('');
+        if (!work) return null;
+        return aiBlockEl(aiHeader('Active clinical priorities', 'Prioridades clínicas ativas') + work);
+      },
+      homeHealthSynthesis: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var sm = pl.summary || {};
+        var lev = aiResolveRefs(pl, sm.points_to_leverage || sm.top_strengths).map(aiInsightCard).join('');
+        var links = (sm.cross_domain_links || []).map(aiCrossCard).join('');
+        if (!lev && !links) return null;
+        return aiBlockEl(aiHeader('Health synthesis', 'Síntese de saúde')
+          + (lev ? '<h3 class="ai-sub">' + t('Points to leverage', 'Pontos a favor') + '</h3>' + lev : '')
+          + (links ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links : ''));
+      },
+      aiAttentionStrengths: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var domain = PAGE_TO_DOMAIN[ctx.page];
+        var page = domain && pl.pages && pl.pages[domain];
+        if (!page) return null;
+        var cards = aiPillarCards(page);
+        if (!cards) return null;
+        var lbl = { physical: ['Physical', 'Físico'], mental: ['Mental', 'Mental'], spiritual: ['Spiritual', 'Espiritual'] }[domain];
+        return aiBlockEl(aiHeader(lbl[0] + ' — AI synthesis', lbl[1] + ' — síntese por IA') + cards);
+      },
+      aiFromYourRecord: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var w = (pl.inline_insights || []).filter(function (x) {
+          return x.subpage === 'writings' || x.subpage === 'mental';
+        }).map(aiInlineCard).join('');
+        if (!w) return null;
+        return aiBlockEl(aiHeader('From your record', 'Do seu prontuário') + w);
+      },
+      aiSpecificFindings: function (ctx) {
+        var pl = aiPayloadOf(ctx);
+        if (!pl) return null;
+        var SUBS = {
+          'physical-exams': ['labs', 'imaging', 'physical-exams'],
+          'physical-vitals': ['vitals', 'ecg', 'physical-vitals'],
+          'physical-genetics': ['pgx', 'physical-genetics'],
+          'spiritual': ['journal', 'spiritual'],
+        };
+        var subs = SUBS[ctx.page];
+        if (!subs) return null;
+        var inl = (pl.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
+        if (!inl) return null;
+        return aiBlockEl(aiHeader('Specific findings', 'Achados específicos') + inl);
+      },
+
+      /* home */
+      homeReportsNav: function (ctx) { return homeReportsNavHtml(ctx.payloads.summary || {}); },
+      homeAtAGlance: function (ctx) { return homeAtAGlanceHtml(ctx.payloads.summary || {}); },
+      homeInjuries: function (ctx) { return homeInjuriesHtml(ctx.payloads.summary || {}); },
+      homeConnectedSources: function () { return null; }, // D6: no DB-backed source list yet
+      homeMedications: function (ctx) { return medsSectionHome(ctx.payloads.summary || {}); },
+      pauloPainMap: function () { return buildPauloPainMapSection(); },
+
+      /* physical hub */
+      physBrowseCards: function (ctx) { return physBrowseCardsHtml(ctx.payloads.summary || {}); },
+      physClinicalHistory: function () { return null; }, // no queryable encounters array yet (D6)
+      physMedications: function (ctx) { return medsSectionInline(ctx.payloads.summary || {}); },
+      silvanaLanding: function () { return renderSilvanaPhysicalLanding(); },
+
+      /* physical-vitals */
+      vitalsSection: function (ctx) {
+        var d = ctx.payloads.vitals;
+        if (!d) return null;
+        var sh = ctx.shared;
+        if (!('vitalsParts' in sh)) sh.vitalsParts = computeVitalsParts(ctx.payloads.summary || {}, d);
+        var vp = sh.vitalsParts;
+        if (!vp) return null;
+        var html = vp.parts[ctx.entry.id];
+        if (!html) return null;
+        var pre = '';
+        if (!sh.vitalsChromeDone) {
+          sh.vitalsChromeDone = true;
+          pre = vp.topMetricsHtml + vp.navHtml; // metric tiles + in-page nav, once
+        }
+        var el = document.createElement('div');
+        el.innerHTML = pre + html;
+        return {
+          el: el,
+          after: function () {
+            if (sh.vitalsChartsRan) return;
+            sh.vitalsChartsRan = true;
+            runVitalsBuilders(); // canvases are in the DOM now
+          },
+        };
+      },
+      silvanaVitals: function () { return renderSilvanaVitals(); },
+
+      /* physical-exams */
+      examsImaging: function (ctx) {
+        var parts = examsPartsOf(ctx);
+        if (!parts || !parts.imagingHtml) return null;
+        var el = document.createElement('div');
+        el.className = 'jc-exams';
+        el.innerHTML = parts.imagingHtml;
+        return { el: el, after: examsAfterOnce(ctx, parts) };
+      },
+      examsLaboratory: function (ctx) {
+        var parts = examsPartsOf(ctx);
+        if (!parts || !parts.laboratoryHtml) return null;
+        var el = document.createElement('div');
+        el.className = 'jc-exams';
+        el.innerHTML = parts.laboratoryHtml;
+        return { el: el, after: examsAfterOnce(ctx, parts) };
+      },
+      examsMicrobiota: function () { return null; }, // no payload array yet (D6)
+      examsAudit: function () { return null; },      // no payload array yet (D6)
+      pauloExams: function () { return renderPauloPhysicalExams(); },
+      silvanaExams: function () {
+        var el = renderSilvanaPhysicalExams();
+        if (!el) return null;
+        return { el: el, after: function () { setTimeout(decorateExamsWithAiOutliers, 600); } };
+      },
+      cristinaExams: function () {
+        var el = renderCristinaPhysicalExams();
+        if (!el) return null;
+        return { el: el, after: function () { setTimeout(decorateExamsWithAiOutliers, 600); } };
+      },
+
+      /* physical-genetics — DB-driven PGx arrives with build prompt #3 (D6) */
+      pgxSummary: function () { return null; },
+      pgxMedsTable: function () { return null; },
+      pgxModules: function () { return null; },
+
+      /* mental */
+      psychArchitecture: function (ctx) {
+        return ctx.payloads.psych ? psychArchitectureHtml(ctx.payloads.psych) : null;
+      },
+      psychLifeHistory: function (ctx) {
+        return ctx.payloads.psych ? psychLifeHistoryHtml(ctx.payloads.psych) : null;
+      },
+      pauloMental: function () { return renderPauloMental(); },
+
+      /* spiritual — topic arrays have no queryable payload yet (D6) */
+      spiritualTopic: function () { return null; },
+    };
+  }
+
+  /* Assembler tail on the static-bespoke shells: Upload → Update-AI-Insights
+     (→ Delete on home only, D3), inserted before the shell footer. */
+  function injectStaticTail(section) {
+    if (!window.LUMEN_ASSEMBLER) return;
+    if (document.querySelector('.lumen-tail')) return;
+    var tail = window.LUMEN_ASSEMBLER.buildTail(patient, section);
+    if (!tail) return;
+    var footer = document.querySelector('footer.doc-footer') || document.querySelector('footer');
+    if (footer && footer.parentNode) footer.parentNode.insertBefore(tail, footer);
+    else document.body.appendChild(tail);
+  }
+
+  /* ── Dispatch ─────────────────────────────────────────────────────────
+     Two paths only (I-2): the static-bespoke trio renders from the
+     hardcoded shells + decorators; every other patient goes through
+     assemblePage(), with per-patient variation expressed ONLY as registry
+     data (patientScope entries). The old >=12-branch patient ladder is
+     retired. */
+  var STATIC_BESPOKE = [PATIENT_ZERO, LEO_KELLER, JOHN_SMITH_JR];
+
   ready(function () {
     injectChangeButton();
-    // Patient Zero's home is a static page that ends in <footer> — we can
-    // inject the danger zone right away, before the footer.
-    // Patient Zero renders from bespoke static HTML; Leo Keller inherits it via
-    // leo-mode. (Leo's backend record is independent, but the generic DB
-    // renderer's Vitals/Genetics/Mental/Spiritual are still stubs — no charts —
-    // so until those are built to canon parity, Leo stays on the bespoke path so
-    // his pages keep mirroring Patient Zero's.)
-    if (patient === PATIENT_ZERO || patient === LEO_KELLER || patient === JOHN_SMITH_JR) {
+    registerLumenProviders();
+
+    if (STATIC_BESPOKE.indexOf(patient) !== -1) {
       var section0 = currentSection();
       if (section0 === 'home') {
         injectStyles();
-        injectDangerZone();
         decorateProceduresFromDb(patient); // fill #injury tables from the DB
       } else if (section0 === 'physical-exams') {
-        // Static lab cards on Joao's hardcoded page — read the
-        // historical comparison table at the bottom and graft the same
-        // click-to-expand history UX onto every card. Runs for Leo too
-        // (he inherits Joao's static HTML; leo-mode's hide pass only
-        // touches alerts/timeline rows, not .lab-test or .lab-cmp-table).
         injectStyles();
         retrofitStaticLabHistory();
         decorateExamsWithAiOutliers(); // 9a — AI outlier explanation onto static lab cards
         decorateEcgStudies(patient);   // DB-driven ECG block on the static page
       }
-      // LLM-authored AI insights (patient_dashboards / section 'ai-insights').
-      // Static pages otherwise skip the dashboard layer, so do it here. No-ops
-      // when the patient has no insights row yet (e.g. Leo).
+      // Contract order on the static shells: tail first (so the AI topic
+      // block can anchor before it), then the split AI decorator places the
+      // concise summary right after the hero and the topic block before the
+      // tail. The legend line lands under the first AI-badged block.
+      injectStaticTail(section0);
       decorateWithAiInsights(section0);
+      if (window.LUMEN_ASSEMBLER) window.LUMEN_ASSEMBLER.ensureAiLegend();
       return;
     }
 
     injectStyles();
     hidePageBody();
-    gatePillarNav(patient); // canon: hide nav entries + home cards for pillars with no data
+    gatePillarNav(patient); // canon: hide nav entries for pillars with no data
 
     var section = currentSection();
-
-    if (section === 'home') {
-      fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (s) {
-          renderHome(s);
-          // Place the danger zone AFTER the just-rendered home — otherwise
-          // it would land above it (renderHome appends to body, which would
-          // sit below any sibling already inserted higher up).
-          injectDangerZone(document.querySelector('main.jc-home'));
-          decorateWithDashboard('home', { isHome: true });
-          // LLM-authored AI insights (patient_dashboards / 'ai-insights'):
-          // headline + cross-domain links on the landing. No-ops when the
-          // patient has no insights row (docks next to the danger zone).
-          decorateWithAiInsights('home');
-          // Paulo Silotto: bespoke AI pain-map / symptom-inference section,
-          // docked on the Summary page directly below the AI summary card.
-          if (patient === PAULO_SILOTTO) injectPauloPainMap();
-        })
-        .catch(function () {
-          renderEmptyShell(patient, null, t('Patient record', 'Prontuário do paciente'));
-          injectDangerZone(document.querySelector('main.jc-empty-shell'));
-        });
-      return;
-    }
-
-    if (section === 'physical-exams') {
-      if (patient === PAULO_SILOTTO) {
-        renderPauloPhysicalExams();
-        decorateWithAiInsights('physical'); // DB attention points + strengths -> bottom dock
+    loadPatientDataAssets(patient).then(function () {
+      if (!window.LUMEN_ASSEMBLER || !window.LUMEN_REGISTRY) {
+        console.error('[lumen] page assembler / section registry not loaded');
         return;
       }
-      if (patient === SILVANA_CRESTE) {
-        renderSilvanaPhysicalExams();
-      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
-        return;
-      }
-      if (patient === CRISTINA_CRESTI) {
-        renderCristinaPhysicalExams();
-        setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
-        return;
-      }
-      fetch('/api/patient-exams?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (e) { renderExams(e); decorateWithDashboard('physical'); decorateExamsWithAiOutliers(); })
-        .catch(function () { renderEmptyShell(patient, null, t('Physical → Exams', 'Físico → Exames')); });
-      return;
-    }
-
-    // Paulo's only physical data is the manually-curated MRI pair, so
-    // every Physical sub-page short-circuits to the bespoke MRI page.
-    // Avoids the "0 / 0 / 0" metric grid that hides the actual content.
-    if (patient === PAULO_SILOTTO &&
-        (section === 'physical' || section === 'physical-vitals' || section === 'physical-genetics')) {
-      renderPauloPhysicalExams();
-      decorateWithAiInsights('physical'); // DB attention points + strengths -> bottom dock
-      return;
-    }
-
-    // Paulo's Mental section is the verbatim collateral family account
-    // (window.PAULO_MENTAL_NARRATIVE) rendered as a primary-source document,
-    // not the DB metric grid. AI insights dock beneath once they exist.
-    if (patient === PAULO_SILOTTO && section === 'mental') {
-      renderPauloMental();
-      decorateWithAiInsights('mental');
-      return;
-    }
-
-    // Cristina's only physical data is the bespoke thyroid-antibody panel,
-    // so the Physical overview short-circuits to the exams page — otherwise
-    // the DB-driven "0 lab markers" metric grid hides the actual content.
-    if (patient === CRISTINA_CRESTI && section === 'physical') {
-      renderCristinaPhysicalExams();
-      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
-      return;
-    }
-
-    // Silvana's data is hand-curated. Routes:
-    //   Physical (overview)  → 2-card landing (Sinais Vitais + Exames)
-    //   Physical → Vitals    → bespoke InBody body-composition view
-    //   Physical → Exams     → multi-year lab history page
-    //   Physical → Genetics  → not built yet
-    if (patient === SILVANA_CRESTE && section === 'physical') {
-      renderSilvanaPhysicalLanding();
-      return;
-    }
-    if (patient === SILVANA_CRESTE && section === 'physical-vitals') {
-      renderSilvanaVitals();
-      return;
-    }
-    if (patient === SILVANA_CRESTE && section === 'physical-exams') {
-      renderSilvanaPhysicalExams();
-      setTimeout(decorateExamsWithAiOutliers, 600); // 9a (bespoke; no-op if no .lab-test cards)
-      return;
-    }
-    if (patient === SILVANA_CRESTE && section === 'physical-genetics') {
-      renderEmptyShell(patient, 'Silvana Creste', t('Physical → Genetics', 'Físico → Genética'));
-      return;
-    }
-
-    // Other section pages — show a small "not built yet" shell rather than the
-    // home overview, so the user knows where they are.
-    var labels = {
-      'physical':          t('Physical',           'Físico'),
-      'physical-vitals':   t('Physical → Vitals',  'Físico → Vitais'),
-      'physical-genetics': t('Physical → Genetics','Físico → Genética'),
-      'mental':            t('Mental',             'Mental'),
-      'spiritual':         t('Spiritual',          'Espiritual'),
-      'loops':             t('Loops',              'Loops'),
-    };
-    var dataRenderers = {
-      'physical':          renderPhysical,
-      'physical-vitals':   renderVitals,
-      'physical-genetics': renderGenetics,
-      'mental':            renderMental,
-      'spiritual':         renderSpiritual,
-    };
-    fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (summary) {
-        var renderer = dataRenderers[section];
-        if (renderer) { renderer(summary); decorateWithDashboard(section); }
-        else renderEmptyShell(patient, summary.patient && summary.patient.full_name, labels[section] || escapeHtml(section));
-      })
-      .catch(function () { renderEmptyShell(patient, null, labels[section] || escapeHtml(section)); });
+      window.LUMEN_ASSEMBLER.assemble(patient, section);
+    });
   });
 
-  /* ── LLM-authored dashboard layer ──────────────────────────────────
-     Each rendered view (jc-home, jc-overview, jc-exams) gets an extra
-     "AI Summary" card injected via decorateWithDashboard(section). The
-     card shows the cached patient_dashboards.summary_md when present,
-     otherwise a "Build summary" CTA. Home gets a second "Build all
-     sections" CTA. Building triggers the donut overlay and fires one
-     POST per section sequentially.                                    */
-
-  var DASHBOARD_SECTIONS = ['home', 'physical', 'mental', 'spiritual'];
-  var SECTION_LABEL = {
-    home:       t('Home',       'Início'),
-    physical:   t('Physical',   'Físico'),
-    mental:     t('Mental',     'Mental'),
-    spiritual:  t('Spiritual',  'Espiritual'),
-  };
-  var SECTION_LABEL_PLAIN_EN = {
-    home: 'Home', physical: 'Physical', mental: 'Mental',
-    spiritual: 'Spiritual',
-  };
-  var SECTION_LABEL_PLAIN_PT = {
-    home: 'Início', physical: 'Físico', mental: 'Mental',
-    spiritual: 'Espiritual',
-  };
-  // Which dashboard section to inject onto which page slug.
-  var PAGE_TO_DASHBOARD = {
-    home:               'home',
-    physical:           'physical',
-    'physical-exams':   'physical',
-    'physical-vitals':  'physical',
-    'physical-genetics':'physical',
-    mental:             'mental',
-    spiritual:          'spiritual',
-  };
 
   function viewerClerkHeader() {
     var vc = sessionStorage.getItem('jc_viewer_clerk') || sessionStorage.getItem('jc_current_patient') || patient;
     return vc;
   }
 
-  function mdToHtml(md) {
-    // Plain markdown only (the system prompt forbids headings / bullets).
-    // Split on blank lines into paragraphs, apply minimal inline emphasis.
-    var paragraphs = String(md || '').replace(/\r\n/g, '\n').split(/\n{2,}/);
-    return paragraphs.map(function (para) {
-      var safe = escapeHtml(para.trim()).replace(/\n/g, '<br>');
-      safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      safe = safe.replace(/(^|[^*])\*([^*\n]+)\*/g, '$1<em>$2</em>');
-      return '<p>' + safe + '</p>';
-    }).join('');
-  }
-
-  function relativeWhen(iso) {
-    if (!iso) return '';
-    var ts = new Date(iso).getTime();
-    var secs = Math.max(1, Math.floor((Date.now() - ts) / 1000));
-    if (secs < 60)         return t(secs + 's ago',                  'há ' + secs + 's');
-    if (secs < 3600)       return t(Math.floor(secs / 60) + 'm ago', 'há ' + Math.floor(secs / 60) + 'min');
-    if (secs < 86400)      return t(Math.floor(secs / 3600) + 'h ago','há ' + Math.floor(secs / 3600) + 'h');
-    if (secs < 86400 * 30) return t(Math.floor(secs / 86400) + 'd ago','há ' + Math.floor(secs / 86400) + 'd');
-    return formatDate(iso);
-  }
 
   /* ── SVG chart helpers ─────────────────────────────────────────── */
 
@@ -4123,105 +3876,6 @@
     return s + (unit ? ' ' + escapeHtml(unit) : '');
   }
 
-  // Canon card shell (matches the chart-card family in styles.css + the template).
-  // kind -> a chart-card--<kind> modifier carries the per-section accent border.
-  function ovCardHead(title, subtitle, extraMeta) {
-    var meta = '';
-    if (subtitle) meta += '<div class="chart-card-meta">' + escapeHtml(subtitle) + '</div>';
-    if (extraMeta) meta += extraMeta;
-    return '<div class="chart-card-head"><div class="chart-card-title">' + escapeHtml(title) + '</div>' + meta + '</div>';
-  }
-
-  function renderCardNarrative(c) {
-    return (
-      '<section class="chart-card chart-card--narrative">' +
-        ovCardHead(c.title, c.subtitle) +
-        '<div class="card-body">' + mdToHtml(c.body_md || '') + '</div>' +
-      '</section>'
-    );
-  }
-
-  function renderCardPanelSnapshot(c) {
-    var tests = (c.markers || []).map(renderLabTest).join('');
-    return (
-      '<section class="chart-card chart-card--panel">' +
-        ovCardHead(c.title, c.subtitle) +
-        '<div class="lab-panel-body">' + tests + '</div>' +
-      '</section>'
-    );
-  }
-
-  function renderCardMarkerTimeline(c) {
-    var points = (c.points || []).slice().sort(function (a, b) {
-      return dateMs(a.date) - dateMs(b.date);
-    });
-    var ref = refRangeStr(c.ref_low, c.ref_high);
-    var refLine = (ref !== '—' ? '<div class="chart-card-meta">' + t('Reference:', 'Referência:') + ' ' + escapeHtml(ref) + (c.unit ? ' ' + escapeHtml(c.unit) : '') + '</div>' : '');
-    var chart = svgLineChart({
-      series: [{ marker: c.marker, unit: c.unit, color: CHART_PALETTE[0], points: points }],
-      ref_low: c.ref_low, ref_high: c.ref_high,
-      width: 640, height: 200,
-    });
-    // Compact value list below the chart so exact numbers stay accessible.
-    var unit = c.unit ? ' ' + c.unit : '';
-    var pills = points.map(function (p) {
-      var flagged = p.flag ? fmtFlag(p.flag) : '';
-      return '<span class="ov-pt-pill">' +
-        '<span class="ov-pt-date">' + escapeHtml(formatDate(p.date)) + '</span>' +
-        '<span class="ov-pt-val">' + escapeHtml(fmtNum(p.value)) + escapeHtml(unit) + flagged + '</span>' +
-      '</span>';
-    }).join('');
-    return (
-      '<section class="chart-card chart-card--timeline">' +
-        ovCardHead(c.title, c.subtitle, refLine) +
-        '<div class="card-chart-svg">' + chart + '</div>' +
-        (pills ? '<div class="ov-pt-pills">' + pills + '</div>' : '') +
-      '</section>'
-    );
-  }
-
-  function renderCardMultiMarkerTimeline(c) {
-    var series = (c.series || []).map(function (s, i) {
-      return {
-        marker: s.marker,
-        unit: s.unit,
-        color: s.color || CHART_PALETTE[i % CHART_PALETTE.length],
-        points: (s.points || []).slice().sort(function (a, b) { return dateMs(a.date) - dateMs(b.date); }),
-      };
-    });
-    // Multi-series ref band only makes sense if all series share a range.
-    var sharedLow  = series.length && series.every(function (s) { return s.ref_low  === series[0].ref_low;  }) ? series[0].ref_low  : null;
-    var sharedHigh = series.length && series.every(function (s) { return s.ref_high === series[0].ref_high; }) ? series[0].ref_high : null;
-    var chart = svgLineChart({
-      series: series,
-      ref_low: sharedLow, ref_high: sharedHigh,
-      width: 640, height: 220,
-    });
-    return (
-      '<section class="chart-card chart-card--timeline">' +
-        ovCardHead(c.title, c.subtitle) +
-        '<div class="card-chart-svg">' + chart + '</div>' +
-      '</section>'
-    );
-  }
-
-  function renderCardFlagList(c) {
-    var tests = (c.items || []).map(renderLabTest).join('');
-    return (
-      '<section class="chart-card chart-card--flags">' +
-        ovCardHead(c.title, c.subtitle) +
-        '<div class="lab-panel-body">' + tests + '</div>' +
-      '</section>'
-    );
-  }
-
-  var CARD_RENDERERS = {
-    'narrative':              renderCardNarrative,
-    'panel-snapshot':         renderCardPanelSnapshot,
-    'marker-timeline':        renderCardMarkerTimeline,
-    'multi-marker-timeline':  renderCardMultiMarkerTimeline,
-    'flag-list':              renderCardFlagList,
-  };
 
   /* ── AI insights renderer (single-pass whole-record payload) ───────
      Consumes patient_dashboards.cards_json for section 'ai-insights'
@@ -4482,6 +4136,81 @@
     document.head.appendChild(s);
   }
 
+  /* Page → ai-insights domain backing the concise summary gate (G-DOMAIN). */
+  var PAGE_TO_DOMAIN = {
+    'physical': 'physical', 'physical-vitals': 'physical',
+    'physical-exams': 'physical', 'physical-genetics': 'physical',
+    'mental': 'mental', 'spiritual': 'spiritual',
+  };
+
+  /* Slot-2 concise AI summary (contract template step 2). Home gates on
+     G-DASH (payload exists); pillar pages gate on G-DOMAIN — the domain's
+     data_sufficient must be true, blocking fabricated synthesis on empty
+     domains. Returns '' when the gate fails.                              */
+  function aiConciseHtml(p, section) {
+    var sm = p.summary || {};
+    if (section === 'home') {
+      var headline = sm.headline ? aiBt(sm.headline) : '';
+      var overview = aiOverview(sm.overview);
+      if (!headline && !overview) return '';
+      return aiHeader('AI summary', 'Resumo por IA', headline) + overview;
+    }
+    var domain = PAGE_TO_DOMAIN[section];
+    var page = domain && p.pages && p.pages[domain];
+    if (!page || page.data_sufficient !== true) return '';
+    var ov = aiOverview(page.overview);
+    if (!ov) return '';
+    return aiHeader('AI summary', 'Resumo por IA') + ov;
+  }
+
+  /* Topic-position AI block: home → Health synthesis (points to work on /
+     leverage / cross-domain links); pillar pages → attention/strengths (+
+     mental writings); exam/vitals/genetics pages → Specific findings.     */
+  function aiTopicHtml(p, section) {
+    var pages = p.pages || {};
+    var sm = p.summary || {};
+    // Accept new subpage anchors AND the legacy short names.
+    var INLINE_FOR = {
+      'physical-exams': ['labs', 'imaging', 'physical-exams'],
+      'physical-vitals': ['vitals', 'ecg', 'physical-vitals'],
+      'physical-genetics': ['pgx', 'physical-genetics'],
+    };
+    if (section === 'home') {
+      var work = aiResolveRefs(p, sm.points_to_work_on || sm.top_attention_points).map(aiInsightCard).join('');
+      var lev = aiResolveRefs(p, sm.points_to_leverage || sm.top_strengths).map(aiInsightCard).join('');
+      var links = (sm.cross_domain_links || []).map(aiCrossCard).join('');
+      if (!work && !lev && !links) return '';
+      return aiHeader('Health synthesis', 'Síntese de saúde')
+        + (work ? '<h3 class="ai-sub">' + t('Points to work on', 'Pontos a trabalhar') + '</h3>' + work : '')
+        + (lev ? '<h3 class="ai-sub">' + t('Points to leverage', 'Pontos a favor') + '</h3>' + lev : '')
+        + (links ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links : '');
+    }
+    if (section === 'physical' || section === 'mental' || section === 'spiritual') {
+      var cards = aiPillarCards(pages[section]);
+      var extra = '';
+      if (section === 'mental') {
+        var w = (p.inline_insights || []).filter(function (x) {
+          return x.subpage === 'writings' || x.subpage === 'mental';
+        }).map(aiInlineCard).join('');
+        if (w) extra = '<h3 class="ai-sub">' + t('From your record', 'A partir do seu prontuário') + '</h3>' + w;
+      }
+      if (!cards && !extra) return '';
+      var lbl = { physical: ['Physical', 'Físico'], mental: ['Mental', 'Mental'], spiritual: ['Spiritual', 'Espiritual'] }[section];
+      return aiHeader(lbl[0] + ' — AI synthesis', lbl[1] + ' — síntese por IA') + cards + extra;
+    }
+    if (INLINE_FOR[section]) {
+      var subs = INLINE_FOR[section];
+      var inl = (p.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
+      if (!inl) return '';
+      return aiHeader('Specific findings', 'Achados específicos') + inl;
+    }
+    return '';
+  }
+
+  /* Static-bespoke pages (Patient Zero / Leo / John): fetch the ai-insights
+     payload once and place the two blocks per the contract — the concise
+     summary immediately AFTER the hero, the topic block just before the
+     assembler tail (else before the footer). No bottom-dock, no self-pin. */
   function decorateWithAiInsights(section) {
     fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
@@ -4490,19 +4219,34 @@
         var rec = data && data.sections && data.sections['ai-insights'];
         var payload = rec && rec.cards_json;
         if (!payload || !payload.pages) return;
-        var html = buildAiInsightsHtml(payload, section);
-        if (!html) return;
         injectAiInsightsStyles();
-        var prior = document.querySelector('section[data-ai-insights]');
-        if (prior) prior.remove();
-        var sec = document.createElement('section');
-        sec.className = 'ai-ins-block';
-        sec.setAttribute('data-ai-insights', '1');
-        sec.innerHTML = html;
-        var footer = document.querySelector('footer');
-        if (footer && footer.parentNode) footer.parentNode.insertBefore(sec, footer);
-        else document.body.appendChild(sec);
-        reflowBottomDock(); // dock the AI cards next to the danger zone
+        document.querySelectorAll('section[data-ai-insights]').forEach(function (n) { n.remove(); });
+
+        var concise = aiConciseHtml(payload, section);
+        if (concise) {
+          var sec1 = document.createElement('section');
+          sec1.className = 'ai-ins-block ai-ins-concise';
+          sec1.setAttribute('data-ai-insights', '1');
+          sec1.innerHTML = concise;
+          var hero = document.querySelector('.hero, .page-header, .sp-hero');
+          if (hero && hero.parentNode) hero.parentNode.insertBefore(sec1, hero.nextSibling);
+          else document.body.insertBefore(sec1, document.body.firstChild);
+        }
+
+        var topic = aiTopicHtml(payload, section);
+        if (topic) {
+          var sec2 = document.createElement('section');
+          sec2.className = 'ai-ins-block';
+          sec2.setAttribute('data-ai-insights', '1');
+          sec2.innerHTML = topic;
+          var tail = document.querySelector('.lumen-tail');
+          var footer = document.querySelector('footer');
+          if (tail && tail.parentNode) tail.parentNode.insertBefore(sec2, tail);
+          else if (footer && footer.parentNode) footer.parentNode.insertBefore(sec2, footer);
+          else document.body.appendChild(sec2);
+        }
+
+        if (window.LUMEN_ASSEMBLER) window.LUMEN_ASSEMBLER.ensureAiLegend();
       });
   }
 
@@ -4587,197 +4331,11 @@
   // removes any prior [data-ai-insights] block before re-inserting.
   window.jcRefreshAiInsights = function (sec) {
     try {
+      if (document.querySelector('.lumen-page-root')) { location.reload(); return; }
       decorateWithAiInsights(sec || currentSection());
       if ((sec || currentSection()) === 'physical-exams') decorateExamsWithAiOutliers();
     } catch (e) { /* keep existing cards */ }
   };
-
-  function dashboardCardHtml(dashSection, record, opts) {
-    opts = opts || {};
-    var isHome = !!opts.isHome;
-    var titleHtml = isHome
-      ? t('AI-authored summary', 'Resumo escrito pela IA')
-      : (SECTION_LABEL[dashSection] || escapeHtml(dashSection)) + ' · ' + t('AI-authored', 'escrito pela IA');
-    var cards = (record && Array.isArray(record.cards)) ? record.cards : [];
-    var hasCards = cards.length > 0;
-    // Build affordances ("Refresh" / "Build cards" / "Build all sections")
-    // and the empty-state "click Build cards to…" prompt are removed for
-    // now while the ingestion is being reworked. The cards themselves
-    // still render when they exist in patient_dashboards.
-    if (!hasCards) return ''; // nothing to show
-    var nCards = cards.length;
-    var cardsCountHtml = nCards + ' ' + t(nCards === 1 ? 'card' : 'cards', nCards === 1 ? 'cartão' : 'cartões');
-    var meta = (record && record.generated_at)
-      ? '<div class="ov-dashboard-meta">' +
-          t('Generated', 'Gerado') + ' ' + relativeWhen(record.generated_at) +
-          (record.model ? ' · <code>' + escapeHtml(record.model) + '</code>' : '') +
-          ' · ' + cardsCountHtml +
-        '</div>'
-      : '';
-    var cardsHtml = cards.map(function (c) {
-      var fn = CARD_RENDERERS[c.kind];
-      return fn ? fn(c) : '';
-    }).join('');
-    return (
-      '<div class="ov-cards" data-dash-section="' + escapeHtml(dashSection) + '">' +
-        '<header class="ov-cards-head">' +
-          '<div class="ov-cards-head-left">' +
-            '<h2>' + titleHtml + ' <span class="ai-pill">AI</span></h2>' + meta +
-          '</div>' +
-        '</header>' +
-        '<div class="ov-cards-stack">' + cardsHtml + '</div>' +
-      '</div>'
-    );
-  }
-
-  function findInsertionTarget(opts) {
-    if (opts && opts.isHome) {
-      // jc-home: insert between hero and the report-section.
-      var home = document.querySelector('main.jc-home');
-      if (!home) return null;
-      var reports = home.querySelector('.report-section');
-      var wrapper = document.createElement('div');
-      wrapper.className = 'jc-home-dash-wrap';
-      wrapper.innerHTML = '<div class="container"></div>';
-      if (reports) home.insertBefore(wrapper, reports);
-      else home.appendChild(wrapper);
-      return wrapper.querySelector('.container');
-    }
-    // ov-shell: insert just after .ov-header
-    var shell = document.querySelector('.jc-overview .ov-shell');
-    if (!shell) return null;
-    return shell;
-  }
-
-  function decorateWithDashboard(pageSection, opts) {
-    var dashSection = PAGE_TO_DASHBOARD[pageSection];
-    if (!dashSection) return;
-    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
-      .catch(function () { return { sections: {} }; })
-      .then(function (data) {
-        var record = (data && data.sections && data.sections[dashSection]) || null;
-        injectDashboardCard(dashSection, record, opts);
-      });
-  }
-
-  function injectDashboardCard(dashSection, record, opts) {
-    var html = dashboardCardHtml(dashSection, record, opts);
-    if (!html) return; // empty when there are no AI cards yet — skip the wrapper
-    var target = findInsertionTarget(opts);
-    if (!target) return;
-    // Remove any prior dashboard card for this section (defensive)
-    var prior = target.querySelector('[data-dash-section="' + dashSection + '"]');
-    if (prior) prior.remove();
-    if (opts && opts.isHome) {
-      target.insertAdjacentHTML('beforeend', html);
-    } else {
-      var header = target.querySelector('.ov-header');
-      if (header) header.insertAdjacentHTML('afterend', html);
-      else target.insertAdjacentHTML('afterbegin', html);
-    }
-  }
-
-  function wireDashboardButtons() {
-    Array.prototype.forEach.call(document.querySelectorAll('.dash-build-btn'), function (btn) {
-      if (btn.dataset.wired === '1') return;
-      btn.dataset.wired = '1';
-      btn.addEventListener('click', function () {
-        buildSections([btn.getAttribute('data-section')]);
-      });
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.dash-build-all-btn'), function (btn) {
-      if (btn.dataset.wired === '1') return;
-      btn.dataset.wired = '1';
-      btn.addEventListener('click', function () {
-        buildSections(btn.getAttribute('data-sections').split(','));
-      });
-    });
-  }
-
-  /* ── Donut overlay ─────────────────────────────────────────────── */
-  var donutEl = null;
-  function ensureDonut() {
-    if (donutEl) return donutEl;
-    donutEl = document.createElement('div');
-    donutEl.className = 'jc-donut-backdrop';
-    donutEl.innerHTML =
-      '<div class="jc-donut-card">' +
-        '<svg class="jc-donut" viewBox="0 0 100 100" aria-hidden="true">' +
-          '<circle cx="50" cy="50" r="42" fill="none" stroke="#E5E2DC" stroke-width="8"/>' +
-          '<circle class="jc-donut-fg" cx="50" cy="50" r="42" fill="none" stroke="#B8954A" stroke-width="8"' +
-            ' stroke-dasharray="263.9" stroke-dashoffset="263.9"' +
-            ' stroke-linecap="round" transform="rotate(-90 50 50)"/>' +
-        '</svg>' +
-        '<div class="jc-donut-text">' +
-          '<div class="jc-donut-pct">0 / 0</div>' +
-          '<div class="jc-donut-label">' + tPlain('Building…', 'Gerando…') + '</div>' +
-          '<ul class="jc-donut-trail"></ul>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(donutEl);
-    return donutEl;
-  }
-  function setDonut(done, total, label) {
-    var el = ensureDonut();
-    el.classList.add('open');
-    el.querySelector('.jc-donut-pct').textContent = done + ' / ' + total;
-    el.querySelector('.jc-donut-label').textContent = label || tPlain('Building…', 'Gerando…');
-    var pct = total > 0 ? done / total : 0;
-    var dashLen = 263.9;
-    el.querySelector('.jc-donut-fg').setAttribute('stroke-dashoffset', String(dashLen * (1 - pct)));
-  }
-  function sectionLabelPlain(section) {
-    var map = tPlain('en', 'pt') === 'pt' ? SECTION_LABEL_PLAIN_PT : SECTION_LABEL_PLAIN_EN;
-    return map[section] || section;
-  }
-  function pushDonutTrail(section, status, ms) {
-    var trail = (donutEl && donutEl.querySelector('.jc-donut-trail'));
-    if (!trail) return;
-    var li = document.createElement('li');
-    li.className = 'jc-donut-trail-item ' + status;
-    li.textContent = (status === 'ok' ? '✓ ' : '✗ ') + sectionLabelPlain(section) +
-                     (typeof ms === 'number' ? ' · ' + (ms/1000).toFixed(1) + 's' : '');
-    trail.appendChild(li);
-  }
-  function closeDonut() { if (donutEl) donutEl.classList.remove('open'); }
-
-  async function buildSections(sections) {
-    sections = (sections || []).filter(function (s) { return DASHBOARD_SECTIONS.indexOf(s) !== -1; });
-    if (sections.length === 0) return;
-    var total = sections.length;
-    setDonut(0, total, tPlain('Starting…', 'Iniciando…'));
-    var viewerClerk = viewerClerkHeader();
-    for (var i = 0; i < sections.length; i++) {
-      var section = sections[i];
-      setDonut(i, total, tPlain('Building ', 'Gerando ') + sectionLabelPlain(section) + '…');
-      var startedAt = Date.now();
-      try {
-        var resp = await fetch('/api/patient-dashboard-build', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Viewer-Clerk': viewerClerk },
-          body: JSON.stringify({ patient_clerk: patient, section: section }),
-        });
-        var bodyText = await resp.text();
-        var data; try { data = JSON.parse(bodyText); } catch (e) { data = null; }
-        if (!resp.ok || !data || data.error) {
-          pushDonutTrail(section, 'err', Date.now() - startedAt);
-          // If rate-limited, wait ~30s before continuing.
-          if (resp.status === 429 || /rate_limit/i.test(bodyText)) {
-            setDonut(i, total, tPlain('Rate-limited, waiting 30s…', 'Limite de taxa, aguardando 30s…'));
-            await new Promise(function (r) { setTimeout(r, 30000); });
-            i--; continue; // retry this section
-          }
-        } else {
-          pushDonutTrail(section, 'ok', Date.now() - startedAt);
-        }
-      } catch (e) {
-        pushDonutTrail(section, 'err', Date.now() - startedAt);
-      }
-    }
-    setDonut(total, total, tPlain('Done. Reloading…', 'Pronto. Recarregando…'));
-    setTimeout(function () { location.reload(); }, 700);
-  }
 
   /* ── Paulo Silotto · bespoke physical-exams page ────────────────────
      Two manually-curated DICOM exports (cervical + lumbar MRI, 15 May
@@ -4941,160 +4499,160 @@
     var s = document.createElement('style');
     s.id = 'paulo-exams-styles';
     s.textContent = [
-      'main.jc-paulo-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
-      'main.jc-paulo-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
-      'main.jc-paulo-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
-      'main.jc-paulo-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
-      'main.jc-paulo-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 70ch; }',
-      'main.jc-paulo-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
-      'main.jc-paulo-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
-      'main.jc-paulo-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
-      'main.jc-paulo-exams #imagery { padding: 48px 0 24px; }',
-      'main.jc-paulo-exams #imagery > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-exams #imagery .imagery-exam > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
+      '.jc-paulo-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
+      '.jc-paulo-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
+      '.jc-paulo-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
+      '.jc-paulo-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 70ch; }',
+      '.jc-paulo-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
+      '.jc-paulo-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
+      '.jc-paulo-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
+      '.jc-paulo-exams #imagery { padding: 48px 0 24px; }',
+      '.jc-paulo-exams #imagery > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-exams #imagery .imagery-exam > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
       // View-tab strip inside the .ct-viewer head
-      'main.jc-paulo-exams .ct-viewer-head { flex-wrap: wrap; gap: 10px; }',
-      'main.jc-paulo-exams .pl-view-tabs { display: inline-flex; gap: 4px; background: rgba(13, 27, 42, 0.06); border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 3px; }',
-      'main.jc-paulo-exams .pl-view-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
-      'main.jc-paulo-exams .pl-view-tab:hover { background: rgba(13, 27, 42, 0.06); }',
-      'main.jc-paulo-exams .pl-view-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab { color: rgba(255,255,255,0.85); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab:hover { background: rgba(255,255,255,0.08); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
+      '.jc-paulo-exams .ct-viewer-head { flex-wrap: wrap; gap: 10px; }',
+      '.jc-paulo-exams .pl-view-tabs { display: inline-flex; gap: 4px; background: rgba(13, 27, 42, 0.06); border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 3px; }',
+      '.jc-paulo-exams .pl-view-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
+      '.jc-paulo-exams .pl-view-tab:hover { background: rgba(13, 27, 42, 0.06); }',
+      '.jc-paulo-exams .pl-view-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab { color: rgba(255,255,255,0.85); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab:hover { background: rgba(255,255,255,0.08); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-view-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
       // Unified-viewer toggle bar (region + plane)
-      'main.jc-paulo-exams .pl-toggle-bar { display: flex; flex-wrap: wrap; gap: 18px; padding: 10px 14px; background: var(--blue-50, #EBF2F8); border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
-      'main.jc-paulo-exams .pl-tab-group { display: flex; align-items: center; gap: 8px; }',
-      'main.jc-paulo-exams .pl-tab-group-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-700, #244E6E); font-weight: 500; }',
-      'main.jc-paulo-exams .pl-tabs { display: inline-flex; gap: 2px; background: #FFFFFF; border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 2px; }',
-      'main.jc-paulo-exams .pl-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
-      'main.jc-paulo-exams .pl-tab:hover { background: rgba(13, 27, 42, 0.06); }',
-      'main.jc-paulo-exams .pl-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
-      'main.jc-paulo-exams .pl-sequence-tag { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; padding: 2px 8px; background: rgba(13, 27, 42, 0.08); border-radius: 999px; color: #244E6E; margin-right: 10px; vertical-align: 1px; }',
-      'main.jc-paulo-exams .pl-sequence-tag:empty { display: none; }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-toggle-bar { background: rgba(0,0,0,0.55); border-bottom-color: rgba(255,255,255,0.12); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab-group-label { color: rgba(255,255,255,0.78); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab { color: rgba(255,255,255,0.85); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab:hover { background: rgba(255,255,255,0.08); }',
-      'main.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
+      '.jc-paulo-exams .pl-toggle-bar { display: flex; flex-wrap: wrap; gap: 18px; padding: 10px 14px; background: var(--blue-50, #EBF2F8); border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
+      '.jc-paulo-exams .pl-tab-group { display: flex; align-items: center; gap: 8px; }',
+      '.jc-paulo-exams .pl-tab-group-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-700, #244E6E); font-weight: 500; }',
+      '.jc-paulo-exams .pl-tabs { display: inline-flex; gap: 2px; background: #FFFFFF; border: 1px solid var(--border-subtle, #E5E2DC); border-radius: 6px; padding: 2px; }',
+      '.jc-paulo-exams .pl-tab { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #1E2D3D; background: transparent; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: background 0.12s, color 0.12s; }',
+      '.jc-paulo-exams .pl-tab:hover { background: rgba(13, 27, 42, 0.06); }',
+      '.jc-paulo-exams .pl-tab[aria-pressed="true"] { background: #244E6E; color: #FFFFFF; }',
+      '.jc-paulo-exams .pl-sequence-tag { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; padding: 2px 8px; background: rgba(13, 27, 42, 0.08); border-radius: 999px; color: #244E6E; margin-right: 10px; vertical-align: 1px; }',
+      '.jc-paulo-exams .pl-sequence-tag:empty { display: none; }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-toggle-bar { background: rgba(0,0,0,0.55); border-bottom-color: rgba(255,255,255,0.12); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab-group-label { color: rgba(255,255,255,0.78); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tabs { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab { color: rgba(255,255,255,0.85); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab:hover { background: rgba(255,255,255,0.08); }',
+      '.jc-paulo-exams .ct-viewer.is-fullscreen .pl-tab[aria-pressed="true"] { background: #FFFFFF; color: #0D1B2A; }',
 
       // Side-by-side reports
-      'main.jc-paulo-exams .paulo-reports-heading { font-family: "Raleway", sans-serif; font-size: 20px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 2.5rem 0 0.75rem; }',
-      'main.jc-paulo-exams .paulo-reports-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }',
-      '@media (max-width: 960px) { main.jc-paulo-exams .paulo-reports-grid { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-exams .paulo-report-col { display: flex; flex-direction: column; gap: 12px; }',
-      'main.jc-paulo-exams .paulo-report-col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 0 0 6px; border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
-      'main.jc-paulo-exams .paulo-report-col-title { font-family: "Raleway", sans-serif; font-size: 15px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 0; }',
-      'main.jc-paulo-exams .paulo-report-col-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 8px; border-radius: 6px; }',
-      'main.jc-paulo-exams .paulo-report-col-pdf:hover { background: #FFF6E5; }',
+      '.jc-paulo-exams .paulo-reports-heading { font-family: "Raleway", sans-serif; font-size: 20px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 2.5rem 0 0.75rem; }',
+      '.jc-paulo-exams .paulo-reports-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }',
+      '@media (max-width: 960px) { .jc-paulo-exams .paulo-reports-grid { grid-template-columns: 1fr; } }',
+      '.jc-paulo-exams .paulo-report-col { display: flex; flex-direction: column; gap: 12px; }',
+      '.jc-paulo-exams .paulo-report-col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 0 0 6px; border-bottom: 1px solid var(--border-subtle, #E5E2DC); }',
+      '.jc-paulo-exams .paulo-report-col-title { font-family: "Raleway", sans-serif; font-size: 15px; font-weight: 700; color: var(--blue-800, #0D1B2A); margin: 0; }',
+      '.jc-paulo-exams .paulo-report-col-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 8px; border-radius: 6px; }',
+      '.jc-paulo-exams .paulo-report-col-pdf:hover { background: #FFF6E5; }',
       // Override the global .ct-grid-single cap (620px) so the viewer fills the page.
-      'main.jc-paulo-exams .ct-grid.ct-grid-single { max-width: none; margin-left: 0; margin-right: 0; }',
-      'main.jc-paulo-exams .ct-stage { aspect-ratio: 16 / 9; max-height: 720px; }',
+      '.jc-paulo-exams .ct-grid.ct-grid-single { max-width: none; margin-left: 0; margin-right: 0; }',
+      '.jc-paulo-exams .ct-stage { aspect-ratio: 16 / 9; max-height: 720px; }',
       // AI summary card slot above the exam blocks
-      'main.jc-paulo-exams .paulo-ai-summary-wrap { padding: 0 0 8px; }',
-      'main.jc-paulo-exams .paulo-ai-summary-wrap .container { max-width: 1080px; margin: 0 auto; padding: 24px 24px 0; }',
-      'main.jc-paulo-exams .paulo-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; }',
-      'main.jc-paulo-exams .paulo-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
-      'main.jc-paulo-exams .paulo-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
-      'main.jc-paulo-exams .paulo-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      '.jc-paulo-exams .paulo-ai-summary-wrap { padding: 0 0 8px; }',
+      '.jc-paulo-exams .paulo-ai-summary-wrap .container { max-width: 1080px; margin: 0 auto; padding: 24px 24px 0; }',
+      '.jc-paulo-exams .paulo-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; }',
+      '.jc-paulo-exams .paulo-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
+      '.jc-paulo-exams .paulo-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
+      '.jc-paulo-exams .paulo-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
       // Sub-heading row inside the synthesis card ("Current snapshot", "Longitudinal evolution")
-      'main.jc-paulo-exams .paulo-ai-subhead { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; margin: 8px 0 10px; }',
+      '.jc-paulo-exams .paulo-ai-subhead { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; margin: 8px 0 10px; }',
       // Evolution-arc block (cervical + lumbar arc cards inside the AI synthesis card)
-      'main.jc-paulo-exams .paulo-ai-arcs-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
-      'main.jc-paulo-exams .paulo-ai-arcs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }',
-      '@media (max-width: 820px) { main.jc-paulo-exams .paulo-ai-arcs { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-exams .paulo-ai-arc { background: #F9F7F4; border: 1px solid #E5E2DC; border-left: 3px solid #B8954A; border-radius: 8px; padding: 14px 16px; }',
-      'main.jc-paulo-exams .paulo-ai-arc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #E5E2DC; }',
-      'main.jc-paulo-exams .paulo-ai-arc-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0; }',
-      'main.jc-paulo-exams .paulo-ai-arc-span { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
-      'main.jc-paulo-exams .paulo-ai-arc-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 0; }',
-      'main.jc-paulo-exams .paulo-ai-arc-body strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .paulo-ai-arcs-cross { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
-      'main.jc-paulo-exams .paulo-ai-arcs-cross strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .paulo-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
-      'main.jc-paulo-exams .paulo-ai-summary-body p { margin: 0 0 10px; }',
-      'main.jc-paulo-exams .paulo-ai-summary-body p:last-child { margin-bottom: 0; }',
-      'main.jc-paulo-exams .paulo-ai-summary-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .paulo-ai-arcs-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      '.jc-paulo-exams .paulo-ai-arcs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }',
+      '@media (max-width: 820px) { .jc-paulo-exams .paulo-ai-arcs { grid-template-columns: 1fr; } }',
+      '.jc-paulo-exams .paulo-ai-arc { background: #F9F7F4; border: 1px solid #E5E2DC; border-left: 3px solid #B8954A; border-radius: 8px; padding: 14px 16px; }',
+      '.jc-paulo-exams .paulo-ai-arc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed #E5E2DC; }',
+      '.jc-paulo-exams .paulo-ai-arc-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 14px; color: #0D1B2A; margin: 0; }',
+      '.jc-paulo-exams .paulo-ai-arc-span { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; }',
+      '.jc-paulo-exams .paulo-ai-arc-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 0; }',
+      '.jc-paulo-exams .paulo-ai-arc-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .paulo-ai-arcs-cross { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.65; color: #1E2D3D; margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
+      '.jc-paulo-exams .paulo-ai-arcs-cross strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .paulo-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
+      '.jc-paulo-exams .paulo-ai-summary-body p { margin: 0 0 10px; }',
+      '.jc-paulo-exams .paulo-ai-summary-body p:last-child { margin-bottom: 0; }',
+      '.jc-paulo-exams .paulo-ai-summary-body strong { color: #0D1B2A; }',
       // Three holistic insights — Physical / Mental / Spiritual
-      'main.jc-paulo-exams .paulo-ai-insights-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
-      'main.jc-paulo-exams .paulo-ai-insights-head { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 12px; }',
-      'main.jc-paulo-exams .paulo-ai-insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
-      'main.jc-paulo-exams .paulo-ai-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; }',
-      'main.jc-paulo-exams .paulo-ai-insight-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin-bottom: 8px; }',
-      'main.jc-paulo-exams .paulo-ai-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
-      'main.jc-paulo-exams .paulo-ai-insight-body strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .paulo-ai-insight.is-tbd { background: #FFFFFF; border-style: dashed; }',
-      'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-label { color: #7A8FA6; }',
-      'main.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-body { color: #7A8FA6; font-style: italic; }',
-      '@media (max-width: 820px) { main.jc-paulo-exams .paulo-ai-insights { grid-template-columns: 1fr; } }',
+      '.jc-paulo-exams .paulo-ai-insights-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      '.jc-paulo-exams .paulo-ai-insights-head { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 12px; }',
+      '.jc-paulo-exams .paulo-ai-insights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      '.jc-paulo-exams .paulo-ai-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 8px; padding: 14px 16px; }',
+      '.jc-paulo-exams .paulo-ai-insight-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; margin-bottom: 8px; }',
+      '.jc-paulo-exams .paulo-ai-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      '.jc-paulo-exams .paulo-ai-insight-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .paulo-ai-insight.is-tbd { background: #FFFFFF; border-style: dashed; }',
+      '.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-label { color: #7A8FA6; }',
+      '.jc-paulo-exams .paulo-ai-insight.is-tbd .paulo-ai-insight-body { color: #7A8FA6; font-style: italic; }',
+      '@media (max-width: 820px) { .jc-paulo-exams .paulo-ai-insights { grid-template-columns: 1fr; } }',
 
       // ── History section (cervical + lumbar timelines) ─────────────
-      'main.jc-paulo-exams #paulo-history { padding: 16px 0 40px; }',
-      'main.jc-paulo-exams #paulo-history > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-exams .ph-timeline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }',
-      '@media (max-width: 960px) { main.jc-paulo-exams .ph-timeline-grid { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-exams .ph-timeline { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; }',
-      'main.jc-paulo-exams .ph-timeline-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid #E5E2DC; }',
-      'main.jc-paulo-exams .ph-timeline-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; margin: 0; }',
-      'main.jc-paulo-exams .ph-timeline-span { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; color: #7A8FA6; }',
-      'main.jc-paulo-exams .ph-entry { position: relative; padding: 0 0 20px 22px; border-left: 1px solid #E5E2DC; }',
-      'main.jc-paulo-exams .ph-entry:last-child { padding-bottom: 0; }',
-      'main.jc-paulo-exams .ph-entry::before { content: ""; position: absolute; left: -5px; top: 5px; width: 9px; height: 9px; background: #B8954A; border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #B8954A; }',
-      'main.jc-paulo-exams .ph-entry-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
-      'main.jc-paulo-exams .ph-entry-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 2px 0 8px; }',
-      'main.jc-paulo-exams .ph-entry-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0 0 10px; }',
-      'main.jc-paulo-exams .ph-entry-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams #paulo-history { padding: 16px 0 40px; }',
+      '.jc-paulo-exams #paulo-history > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-exams .ph-timeline-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }',
+      '@media (max-width: 960px) { .jc-paulo-exams .ph-timeline-grid { grid-template-columns: 1fr; } }',
+      '.jc-paulo-exams .ph-timeline { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; }',
+      '.jc-paulo-exams .ph-timeline-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding-bottom: 14px; margin-bottom: 18px; border-bottom: 1px solid #E5E2DC; }',
+      '.jc-paulo-exams .ph-timeline-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; margin: 0; }',
+      '.jc-paulo-exams .ph-timeline-span { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; color: #7A8FA6; }',
+      '.jc-paulo-exams .ph-entry { position: relative; padding: 0 0 20px 22px; border-left: 1px solid #E5E2DC; }',
+      '.jc-paulo-exams .ph-entry:last-child { padding-bottom: 0; }',
+      '.jc-paulo-exams .ph-entry::before { content: ""; position: absolute; left: -5px; top: 5px; width: 9px; height: 9px; background: #B8954A; border-radius: 50%; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px #B8954A; }',
+      '.jc-paulo-exams .ph-entry-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      '.jc-paulo-exams .ph-entry-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 2px 0 8px; }',
+      '.jc-paulo-exams .ph-entry-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0 0 10px; }',
+      '.jc-paulo-exams .ph-entry-body strong { color: #0D1B2A; }',
       // Per-entry AI evolution callout (between meta and body)
-      'main.jc-paulo-exams .ph-evolution { background: #FFFBF1; border: 1px solid #EAD9A8; border-left: 3px solid #B8954A; border-radius: 8px; padding: 12px 14px; margin: 8px 0 12px; }',
-      'main.jc-paulo-exams .ph-evolution-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
-      'main.jc-paulo-exams .ph-evolution-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C5B15; font-weight: 700; }',
-      'main.jc-paulo-exams .ph-evolution-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
-      'main.jc-paulo-exams .ph-evolution-body strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .ph-evolution-body em { color: #7C5B15; font-style: italic; }',
+      '.jc-paulo-exams .ph-evolution { background: #FFFBF1; border: 1px solid #EAD9A8; border-left: 3px solid #B8954A; border-radius: 8px; padding: 12px 14px; margin: 8px 0 12px; }',
+      '.jc-paulo-exams .ph-evolution-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }',
+      '.jc-paulo-exams .ph-evolution-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7C5B15; font-weight: 700; }',
+      '.jc-paulo-exams .ph-evolution-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      '.jc-paulo-exams .ph-evolution-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .ph-evolution-body em { color: #7C5B15; font-style: italic; }',
       // Section title with inline AI pill
-      'main.jc-paulo-exams .ph-section-title { display: inline-flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }',
-      'main.jc-paulo-exams .ph-section-title .ai-pill { font-size: 10px; }',
-      'main.jc-paulo-exams .ph-entry-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }',
-      'main.jc-paulo-exams .ph-badge { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }',
-      'main.jc-paulo-exams .ph-badge-stable { background: #E8F2E8; color: #2E5A2E; }',
-      'main.jc-paulo-exams .ph-badge-progress { background: #FFF1D6; color: #7C5B15; }',
-      'main.jc-paulo-exams .ph-badge-flag { background: #F7E1E1; color: #7E2929; }',
-      'main.jc-paulo-exams .ph-badge-baseline { background: rgba(13, 27, 42, 0.06); color: #244E6E; }',
-      'main.jc-paulo-exams .ph-entry-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 9px; border-radius: 6px; margin-left: 6px; }',
-      'main.jc-paulo-exams .ph-entry-pdf:hover { background: #FFF6E5; }',
-      'main.jc-paulo-exams .ph-takeaway { margin-top: 16px; padding-top: 14px; border-top: 1px dashed #E5E2DC; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
-      'main.jc-paulo-exams .ph-takeaway strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .ph-takeaway::before { content: "11-year arc · "; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 700; }',
-      'main.jc-paulo-exams .ph-takeaway.is-lumbar::before { content: "3-year arc · "; }',
+      '.jc-paulo-exams .ph-section-title { display: inline-flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }',
+      '.jc-paulo-exams .ph-section-title .ai-pill { font-size: 10px; }',
+      '.jc-paulo-exams .ph-entry-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }',
+      '.jc-paulo-exams .ph-badge { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }',
+      '.jc-paulo-exams .ph-badge-stable { background: #E8F2E8; color: #2E5A2E; }',
+      '.jc-paulo-exams .ph-badge-progress { background: #FFF1D6; color: #7C5B15; }',
+      '.jc-paulo-exams .ph-badge-flag { background: #F7E1E1; color: #7E2929; }',
+      '.jc-paulo-exams .ph-badge-baseline { background: rgba(13, 27, 42, 0.06); color: #244E6E; }',
+      '.jc-paulo-exams .ph-entry-pdf { display: inline-flex; align-items: center; gap: 4px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 3px 9px; border-radius: 6px; margin-left: 6px; }',
+      '.jc-paulo-exams .ph-entry-pdf:hover { background: #FFF6E5; }',
+      '.jc-paulo-exams .ph-takeaway { margin-top: 16px; padding-top: 14px; border-top: 1px dashed #E5E2DC; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      '.jc-paulo-exams .ph-takeaway strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .ph-takeaway::before { content: "11-year arc · "; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 700; }',
+      '.jc-paulo-exams .ph-takeaway.is-lumbar::before { content: "3-year arc · "; }',
 
       // ── Other studies section ─────────────────────────────────────
-      'main.jc-paulo-exams #paulo-other-studies { padding: 16px 0 48px; }',
-      'main.jc-paulo-exams #paulo-other-studies > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-exams .po-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }',
-      '@media (max-width: 820px) { main.jc-paulo-exams .po-grid { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-exams .po-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }',
-      'main.jc-paulo-exams .po-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }',
-      'main.jc-paulo-exams .po-card-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
-      'main.jc-paulo-exams .po-card-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 2px 0 0; line-height: 1.25; }',
-      'main.jc-paulo-exams .po-card-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 4px 0 0; }',
-      'main.jc-paulo-exams .po-card-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; font-weight: 600; white-space: nowrap; }',
-      'main.jc-paulo-exams .po-findings { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; padding-left: 18px; }',
-      'main.jc-paulo-exams .po-findings li { margin-bottom: 6px; }',
-      'main.jc-paulo-exams .po-findings li:last-child { margin-bottom: 0; }',
-      'main.jc-paulo-exams .po-findings strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .po-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
-      'main.jc-paulo-exams .po-pending { display: inline-flex; align-items: center; gap: 6px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
-      'main.jc-paulo-exams .po-pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #B8954A; }',
-      'main.jc-paulo-exams .po-pdf { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
-      'main.jc-paulo-exams .po-pdf:hover { background: #FFF6E5; }',
-      'main.jc-paulo-exams .po-ai { margin-top: 2px; padding: 12px 14px; background: #FFFCF5; border: 1px solid #F0E4C8; border-radius: 8px; }',
-      'main.jc-paulo-exams .po-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }',
-      'main.jc-paulo-exams .po-ai-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
-      'main.jc-paulo-exams .po-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
-      'main.jc-paulo-exams .po-ai-body strong { color: #0D1B2A; }',
-      'main.jc-paulo-exams .po-ai-body em { font-style: italic; color: #244E6E; }',
+      '.jc-paulo-exams #paulo-other-studies { padding: 16px 0 48px; }',
+      '.jc-paulo-exams #paulo-other-studies > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-exams .po-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }',
+      '@media (max-width: 820px) { .jc-paulo-exams .po-grid { grid-template-columns: 1fr; } }',
+      '.jc-paulo-exams .po-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 10px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }',
+      '.jc-paulo-exams .po-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }',
+      '.jc-paulo-exams .po-card-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      '.jc-paulo-exams .po-card-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 2px 0 0; line-height: 1.25; }',
+      '.jc-paulo-exams .po-card-meta { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; color: #7A8FA6; margin: 4px 0 0; }',
+      '.jc-paulo-exams .po-card-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; font-weight: 600; white-space: nowrap; }',
+      '.jc-paulo-exams .po-findings { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; margin: 0; padding-left: 18px; }',
+      '.jc-paulo-exams .po-findings li { margin-bottom: 6px; }',
+      '.jc-paulo-exams .po-findings li:last-child { margin-bottom: 0; }',
+      '.jc-paulo-exams .po-findings strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .po-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; padding-top: 12px; border-top: 1px dashed #E5E2DC; }',
+      '.jc-paulo-exams .po-pending { display: inline-flex; align-items: center; gap: 6px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
+      '.jc-paulo-exams .po-pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #B8954A; }',
+      '.jc-paulo-exams .po-pdf { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #B8954A; text-decoration: none; border: 1px solid #B8954A; padding: 4px 10px; border-radius: 6px; }',
+      '.jc-paulo-exams .po-pdf:hover { background: #FFF6E5; }',
+      '.jc-paulo-exams .po-ai { margin-top: 2px; padding: 12px 14px; background: #FFFCF5; border: 1px solid #F0E4C8; border-radius: 8px; }',
+      '.jc-paulo-exams .po-ai-head { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }',
+      '.jc-paulo-exams .po-ai-label { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #B8954A; font-weight: 600; }',
+      '.jc-paulo-exams .po-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 12.5px; line-height: 1.6; color: #1E2D3D; margin: 0; }',
+      '.jc-paulo-exams .po-ai-body strong { color: #0D1B2A; }',
+      '.jc-paulo-exams .po-ai-body em { font-style: italic; color: #244E6E; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -6223,7 +5781,7 @@
     if (document.getElementById('paulo-labs-styles')) return;
     var s = document.createElement('style');
     s.id = 'paulo-labs-styles';
-    var P = 'main.jc-paulo-exams ';
+    var P = '.jc-paulo-exams ';
     s.textContent = [
       P + '.silv-hist { margin-top: 10px; }',
       P + '.silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
@@ -6301,71 +5859,71 @@
   function injectPauloMentalStyles() {
     if (document.getElementById('paulo-mental-styles')) return;
     var css = [
-      'main.jc-paulo-mental { display: block; background: #F9F7F4; padding: 0 0 64px; }',
-      'main.jc-paulo-mental .hero { background: #0A1428; color: #fff; padding: 46px 0 50px; }',
-      'main.jc-paulo-mental .hero .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-mental .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(244,185,66,0.9); margin-bottom: 10px; }',
-      'main.jc-paulo-mental .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 34px; line-height: 1.12; margin: 0 0 10px; }',
-      'main.jc-paulo-mental .hero-sub { color: rgba(255,255,255,0.82); font-size: 16px; line-height: 1.6; margin: 0; max-width: 60ch; }',
-      'main.jc-paulo-mental .rp-wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-paulo-mental .rp-frame { margin: 22px auto 0; }',
-      'main.jc-paulo-mental .rp-frame-inner { background: #fff; border: 1px solid #ECE7DD; border-left: 3px solid #F4B942; border-radius: 10px; padding: 15px 19px; font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.6; color: #3A4654; }',
-      'main.jc-paulo-mental .rp-section { margin: 40px auto 0; }',
-      'main.jc-paulo-mental .rp-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
-      'main.jc-paulo-mental .rp-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 21px; color: #0A1428; margin: 0 0 4px; }',
-      'main.jc-paulo-mental .rp-sub { font-family: "Mulish", sans-serif; font-size: 14px; color: #5A6675; margin: 0 0 18px; line-height: 1.55; }',
-      'main.jc-paulo-mental .rp-johari { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }',
-      '@media (max-width: 680px) { main.jc-paulo-mental .rp-johari { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-mental .rp-jcell { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
-      'main.jc-paulo-mental .rp-jcell.is-empty { background: #F6F4EF; border-style: dashed; }',
-      'main.jc-paulo-mental .rp-jhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }',
-      'main.jc-paulo-mental .rp-jtitle { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0A1428; }',
-      'main.jc-paulo-mental .rp-jcount { font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 600; color: #244E6E; }',
-      'main.jc-paulo-mental .rp-jcell.is-empty .rp-jcount { color: #B6AD98; }',
-      'main.jc-paulo-mental .rp-jdesc { font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.5; color: #5A6675; margin: 0; }',
-      'main.jc-paulo-mental .rp-cards { display: flex; flex-direction: column; gap: 14px; }',
-      'main.jc-paulo-mental .rp-card { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
-      'main.jc-paulo-mental .rp-card.rp-card-warm { border-left: 3px solid #F4B942; }',
-      'main.jc-paulo-mental .rp-card.rp-card-care { border-left: 3px solid #6BA3C7; background: #FBFAF7; }',
-      'main.jc-paulo-mental .rp-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; flex-wrap: wrap; }',
-      'main.jc-paulo-mental .rp-body { font-family: "Mulish", sans-serif; font-size: 15.5px; line-height: 1.62; color: #24323F; margin: 0; }',
-      'main.jc-paulo-mental .rp-evidence { font-family: "Mulish", sans-serif; font-size: 13px; font-style: italic; color: #7A8694; margin: 10px 0 0; padding-left: 10px; border-left: 2px solid #E2DCCF; }',
-      'main.jc-paulo-mental .rp-chip { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }',
-      'main.jc-paulo-mental .rp-chip-other { background: #EAF2F7; color: #244E6E; border-color: #CFE0EB; }',
-      'main.jc-paulo-mental .rp-chip-self { background: #FCF3DC; color: #8A6A18; border-color: #F4DD9C; }',
-      'main.jc-paulo-mental .rp-chip-ai { background: #FDF8EC; color: #6B4FA0; border-color: #F4DD9C; }',
-      'main.jc-paulo-mental .ai-pill { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; background: #6B4FA0; color: #fff; padding: 1px 5px; border-radius: 4px; }',
-      'main.jc-paulo-mental .rp-respond { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #E7E2D8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }',
-      'main.jc-paulo-mental .rp-respond-q { font-family: "Mulish", sans-serif; font-size: 12.5px; color: #7A8694; margin-right: 2px; }',
-      'main.jc-paulo-mental .rp-btn { font-family: "Mulish", sans-serif; font-size: 13px; color: #244E6E; background: #fff; border: 1px solid #CFD8DF; border-radius: 999px; padding: 5px 12px; cursor: pointer; transition: all 0.12s; }',
-      'main.jc-paulo-mental .rp-btn:hover { border-color: #6BA3C7; }',
-      'main.jc-paulo-mental .rp-btn.is-active { background: #244E6E; color: #fff; border-color: #244E6E; }',
-      'main.jc-paulo-mental .rp-note-box { flex-basis: 100%; margin-top: 8px; display: flex; gap: 8px; }',
-      'main.jc-paulo-mental .rp-note-input { flex: 1; font-family: "Mulish", sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid #CFD8DF; border-radius: 8px; resize: vertical; min-height: 56px; }',
-      'main.jc-paulo-mental .rp-note-save { align-self: flex-start; font-family: "Mulish", sans-serif; font-size: 13px; background: #F4B942; color: #0A1428; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; }',
-      'main.jc-paulo-mental .rp-status { flex-basis: 100%; font-family: "Mulish", sans-serif; font-size: 12px; color: #3E7D5A; margin-top: 4px; min-height: 14px; }',
-      'main.jc-paulo-mental .rp-support { margin-top: 12px; background: #EAF2F7; border: 1px solid #CFE0EB; border-radius: 8px; padding: 10px 12px; font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.55; color: #244E6E; }',
-      'main.jc-paulo-mental details.rp-collapse { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; margin-top: 14px; overflow: hidden; }',
-      'main.jc-paulo-mental details.rp-collapse > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: flex; align-items: center; gap: 8px; font-family: "Raleway", sans-serif; font-weight: 600; font-size: 15px; color: #0A1428; }',
-      'main.jc-paulo-mental details.rp-collapse > summary::-webkit-details-marker { display: none; }',
-      'main.jc-paulo-mental details.rp-collapse[open] > summary { border-bottom: 1px solid #EFEADF; }',
-      'main.jc-paulo-mental .rp-collapse-body { padding: 8px 18px 18px; }',
-      'main.jc-paulo-mental .rp-dismiss { margin-left: auto; font-family: "Mulish", sans-serif; font-size: 12px; color: #9AA4B0; background: none; border: none; cursor: pointer; }',
-      'main.jc-paulo-mental .rp-reading { display: flex; flex-direction: column; gap: 12px; }',
-      'main.jc-paulo-mental .rp-q { background: #fff; border: 1px solid #E7E2D8; border-left: 3px solid #6BA3C7; border-radius: 10px; padding: 14px 18px; font-family: "Mulish", sans-serif; font-size: 16px; line-height: 1.55; color: #24323F; }',
-      'main.jc-paulo-mental .rp-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
-      '@media (max-width: 680px) { main.jc-paulo-mental .rp-pillars { grid-template-columns: 1fr; } }',
-      'main.jc-paulo-mental .rp-pillar { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
-      'main.jc-paulo-mental .rp-pillar.is-tbd { background: #F6F4EF; }',
-      'main.jc-paulo-mental .rp-pillar-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
-      'main.jc-paulo-mental .rp-pillar.is-tbd .rp-pillar-label { color: #B6AD98; }',
-      'main.jc-paulo-mental .rp-pillar-body { font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.55; color: #3A4654; margin: 0; }',
-      'main.jc-paulo-mental .rp-cta { margin: 40px auto 0; }',
-      'main.jc-paulo-mental .rp-cta-inner { background: #0A1428; color: #fff; border-radius: 12px; padding: 26px 28px; }',
-      'main.jc-paulo-mental .rp-cta-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 19px; margin: 0 0 8px; }',
-      'main.jc-paulo-mental .rp-cta-p { font-family: "Mulish", sans-serif; font-size: 14.5px; line-height: 1.6; color: rgba(255,255,255,0.85); margin: 0; }',
-      'main.jc-paulo-mental .rp-loading { margin: 40px auto; font-family: "Mulish", sans-serif; color: #7A8694; }',
-      'main.jc-paulo-mental .pm-transcript p { font-family: "Mulish", sans-serif; font-size: 15px; line-height: 1.7; color: #34414E; margin: 0 0 16px; }'
+      '.jc-paulo-mental { display: block; background: #F9F7F4; padding: 0 0 64px; }',
+      '.jc-paulo-mental .hero { background: #0A1428; color: #fff; padding: 46px 0 50px; }',
+      '.jc-paulo-mental .hero .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-mental .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(244,185,66,0.9); margin-bottom: 10px; }',
+      '.jc-paulo-mental .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 34px; line-height: 1.12; margin: 0 0 10px; }',
+      '.jc-paulo-mental .hero-sub { color: rgba(255,255,255,0.82); font-size: 16px; line-height: 1.6; margin: 0; max-width: 60ch; }',
+      '.jc-paulo-mental .rp-wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-paulo-mental .rp-frame { margin: 22px auto 0; }',
+      '.jc-paulo-mental .rp-frame-inner { background: #fff; border: 1px solid #ECE7DD; border-left: 3px solid #F4B942; border-radius: 10px; padding: 15px 19px; font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.6; color: #3A4654; }',
+      '.jc-paulo-mental .rp-section { margin: 40px auto 0; }',
+      '.jc-paulo-mental .rp-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
+      '.jc-paulo-mental .rp-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 21px; color: #0A1428; margin: 0 0 4px; }',
+      '.jc-paulo-mental .rp-sub { font-family: "Mulish", sans-serif; font-size: 14px; color: #5A6675; margin: 0 0 18px; line-height: 1.55; }',
+      '.jc-paulo-mental .rp-johari { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }',
+      '@media (max-width: 680px) { .jc-paulo-mental .rp-johari { grid-template-columns: 1fr; } }',
+      '.jc-paulo-mental .rp-jcell { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      '.jc-paulo-mental .rp-jcell.is-empty { background: #F6F4EF; border-style: dashed; }',
+      '.jc-paulo-mental .rp-jhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }',
+      '.jc-paulo-mental .rp-jtitle { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; color: #0A1428; }',
+      '.jc-paulo-mental .rp-jcount { font-family: "IBM Plex Mono", monospace; font-size: 18px; font-weight: 600; color: #244E6E; }',
+      '.jc-paulo-mental .rp-jcell.is-empty .rp-jcount { color: #B6AD98; }',
+      '.jc-paulo-mental .rp-jdesc { font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.5; color: #5A6675; margin: 0; }',
+      '.jc-paulo-mental .rp-cards { display: flex; flex-direction: column; gap: 14px; }',
+      '.jc-paulo-mental .rp-card { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      '.jc-paulo-mental .rp-card.rp-card-warm { border-left: 3px solid #F4B942; }',
+      '.jc-paulo-mental .rp-card.rp-card-care { border-left: 3px solid #6BA3C7; background: #FBFAF7; }',
+      '.jc-paulo-mental .rp-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; flex-wrap: wrap; }',
+      '.jc-paulo-mental .rp-body { font-family: "Mulish", sans-serif; font-size: 15.5px; line-height: 1.62; color: #24323F; margin: 0; }',
+      '.jc-paulo-mental .rp-evidence { font-family: "Mulish", sans-serif; font-size: 13px; font-style: italic; color: #7A8694; margin: 10px 0 0; padding-left: 10px; border-left: 2px solid #E2DCCF; }',
+      '.jc-paulo-mental .rp-chip { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }',
+      '.jc-paulo-mental .rp-chip-other { background: #EAF2F7; color: #244E6E; border-color: #CFE0EB; }',
+      '.jc-paulo-mental .rp-chip-self { background: #FCF3DC; color: #8A6A18; border-color: #F4DD9C; }',
+      '.jc-paulo-mental .rp-chip-ai { background: #FDF8EC; color: #6B4FA0; border-color: #F4DD9C; }',
+      '.jc-paulo-mental .ai-pill { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.06em; background: #6B4FA0; color: #fff; padding: 1px 5px; border-radius: 4px; }',
+      '.jc-paulo-mental .rp-respond { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #E7E2D8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }',
+      '.jc-paulo-mental .rp-respond-q { font-family: "Mulish", sans-serif; font-size: 12.5px; color: #7A8694; margin-right: 2px; }',
+      '.jc-paulo-mental .rp-btn { font-family: "Mulish", sans-serif; font-size: 13px; color: #244E6E; background: #fff; border: 1px solid #CFD8DF; border-radius: 999px; padding: 5px 12px; cursor: pointer; transition: all 0.12s; }',
+      '.jc-paulo-mental .rp-btn:hover { border-color: #6BA3C7; }',
+      '.jc-paulo-mental .rp-btn.is-active { background: #244E6E; color: #fff; border-color: #244E6E; }',
+      '.jc-paulo-mental .rp-note-box { flex-basis: 100%; margin-top: 8px; display: flex; gap: 8px; }',
+      '.jc-paulo-mental .rp-note-input { flex: 1; font-family: "Mulish", sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid #CFD8DF; border-radius: 8px; resize: vertical; min-height: 56px; }',
+      '.jc-paulo-mental .rp-note-save { align-self: flex-start; font-family: "Mulish", sans-serif; font-size: 13px; background: #F4B942; color: #0A1428; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; }',
+      '.jc-paulo-mental .rp-status { flex-basis: 100%; font-family: "Mulish", sans-serif; font-size: 12px; color: #3E7D5A; margin-top: 4px; min-height: 14px; }',
+      '.jc-paulo-mental .rp-support { margin-top: 12px; background: #EAF2F7; border: 1px solid #CFE0EB; border-radius: 8px; padding: 10px 12px; font-family: "Mulish", sans-serif; font-size: 13px; line-height: 1.55; color: #244E6E; }',
+      '.jc-paulo-mental details.rp-collapse { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; margin-top: 14px; overflow: hidden; }',
+      '.jc-paulo-mental details.rp-collapse > summary { list-style: none; cursor: pointer; padding: 14px 18px; display: flex; align-items: center; gap: 8px; font-family: "Raleway", sans-serif; font-weight: 600; font-size: 15px; color: #0A1428; }',
+      '.jc-paulo-mental details.rp-collapse > summary::-webkit-details-marker { display: none; }',
+      '.jc-paulo-mental details.rp-collapse[open] > summary { border-bottom: 1px solid #EFEADF; }',
+      '.jc-paulo-mental .rp-collapse-body { padding: 8px 18px 18px; }',
+      '.jc-paulo-mental .rp-dismiss { margin-left: auto; font-family: "Mulish", sans-serif; font-size: 12px; color: #9AA4B0; background: none; border: none; cursor: pointer; }',
+      '.jc-paulo-mental .rp-reading { display: flex; flex-direction: column; gap: 12px; }',
+      '.jc-paulo-mental .rp-q { background: #fff; border: 1px solid #E7E2D8; border-left: 3px solid #6BA3C7; border-radius: 10px; padding: 14px 18px; font-family: "Mulish", sans-serif; font-size: 16px; line-height: 1.55; color: #24323F; }',
+      '.jc-paulo-mental .rp-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      '@media (max-width: 680px) { .jc-paulo-mental .rp-pillars { grid-template-columns: 1fr; } }',
+      '.jc-paulo-mental .rp-pillar { background: #fff; border: 1px solid #E7E2D8; border-radius: 10px; padding: 16px 18px; }',
+      '.jc-paulo-mental .rp-pillar.is-tbd { background: #F6F4EF; }',
+      '.jc-paulo-mental .rp-pillar-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6BA3C7; margin-bottom: 6px; }',
+      '.jc-paulo-mental .rp-pillar.is-tbd .rp-pillar-label { color: #B6AD98; }',
+      '.jc-paulo-mental .rp-pillar-body { font-family: "Mulish", sans-serif; font-size: 14px; line-height: 1.55; color: #3A4654; margin: 0; }',
+      '.jc-paulo-mental .rp-cta { margin: 40px auto 0; }',
+      '.jc-paulo-mental .rp-cta-inner { background: #0A1428; color: #fff; border-radius: 12px; padding: 26px 28px; }',
+      '.jc-paulo-mental .rp-cta-h { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 19px; margin: 0 0 8px; }',
+      '.jc-paulo-mental .rp-cta-p { font-family: "Mulish", sans-serif; font-size: 14.5px; line-height: 1.6; color: rgba(255,255,255,0.85); margin: 0; }',
+      '.jc-paulo-mental .rp-loading { margin: 40px auto; font-family: "Mulish", sans-serif; color: #7A8694; }',
+      '.jc-paulo-mental .pm-transcript p { font-family: "Mulish", sans-serif; font-size: 15px; line-height: 1.7; color: #34414E; margin: 0 0 16px; }'
     ].join('\n');
     var st = document.createElement('style');
     st.id = 'paulo-mental-styles';
@@ -6373,9 +5931,12 @@
     document.head.appendChild(st);
   }
 
+  /* Paulo's reflective portrait, now an assembler provider: returns the
+     container immediately (loading state) and fills it from /api/reflective.
+     The dark portrait banner stays as section-level chrome; the page hero,
+     tail and footer are assembler-owned. */
   function renderPauloMental() {
     injectPauloMentalStyles();
-    document.title = 'Lumen Health — Mental · Reflective portrait · Paulo Silotto Souza';
 
     function heroHtml() {
       return '<section class="hero"><div class="container">' +
@@ -6597,15 +6158,12 @@
           'What matters to you', 'O que importa para você',
           'What João sees you living by, day to day.',
           'Aquilo que João vê você vivendo, no dia a dia.', canRespond, 'rp-card-warm') +
-        // standard tier — supporting architecture, Complete view only
-        '<div data-tier="standard">' +
-          themesHtml(byCat.theme, canRespond) +
+        themesHtml(byCat.theme, canRespond) +
           jungianHtml(byCat.jungian) +
           readingHtml(byCat.recommendation) +
           questionsHtml(byCat.question) +
-        '</div>' +
         pillarsHtml() +
-        '<div data-tier="standard">' + sourceDisclosureHtml() + '</div>' +
+        sourceDisclosureHtml() +
         ctaHtml();
     }
 
@@ -6656,24 +6214,23 @@
       });
     }
 
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-paulo-mental';
     main.innerHTML = heroHtml() +
       '<div class="rp-loading rp-wrap"><span class="lang-en">Assembling the portrait…</span><span class="lang-pt">Montando o retrato…</span></div>';
-    document.body.appendChild(main);
 
     fetch('/api/reflective?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (data) {
         main.innerHTML = heroHtml() + buildPortrait(data);
         wireResponders(main);
-        injectDangerZone(main);
       })
       .catch(function () {
         main.innerHTML = heroHtml() +
           '<div class="rp-loading rp-wrap"><span class="lang-en">This portrait could not be loaded right now.</span><span class="lang-pt">Não foi possível carregar este retrato agora.</span></div>';
-        injectDangerZone(main);
       });
+
+    return main;
   }
 
   function renderPauloLabsSection() {
@@ -6723,7 +6280,7 @@
     if (document.getElementById('paulo-ergo-styles')) return;
     var s = document.createElement('style');
     s.id = 'paulo-ergo-styles';
-    var P = 'main.jc-paulo-exams ';
+    var P = '.jc-paulo-exams ';
     s.textContent = [
       P + '.pl-ergo-latest { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 3px solid #244E6E; border-radius: 10px; padding: 20px 22px; margin-top: 8px; }',
       P + '.pl-ergo-latest-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-bottom: 4px; }',
@@ -6938,7 +6495,7 @@
     if (document.getElementById('paulo-sleep-styles')) return;
     var s = document.createElement('style');
     s.id = 'paulo-sleep-styles';
-    var P = 'main.jc-paulo-exams ';
+    var P = '.jc-paulo-exams ';
     s.textContent = [
       P + '.pl-sleep-card { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 3px solid #244E6E; border-radius: 10px; padding: 20px 22px; margin-top: 14px; }',
       P + '.pl-sleep-card.is-dise { border-left-color: #7A4E9E; }',
@@ -7151,50 +6708,13 @@
     );
   }
 
+  /* Paulo Silotto's bespoke exams content, now an assembler provider: the
+     assembler owns the hero/title/tail; this returns the topic content
+     (registered under physical-exams ONLY — his other physical sub-pages
+     fall through to the default registry gates, fixing the old sub-route
+     collapse by construction).                                            */
   function renderPauloPhysicalExams() {
     injectPauloExamsStyles();
-
-    document.title = 'Lumen Health — Physical · Imaging exams · Paulo Silotto Souza';
-
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
-          '<h1 class="hero-title">' +
-            t('Imaging & laboratory exams · Paulo Silotto Souza',
-              'Exames de imagem e laboratoriais · Paulo Silotto Souza') +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            t('Eleven years of spine imaging — three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. The latest pair (15 May 2026, Dr. Marco Antonio de Carvalho · CRM-99607) loads in the unified viewer below; each repeated study is commented by AI in the longitudinal section, with the radiologists&apos; original reports rendered in full underneath.',
-              'Onze anos de imagens da coluna — três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. O par mais recente (15 de maio de 2026, Dr. Marco Antonio de Carvalho · CRM-99607) carrega no visualizador unificado abaixo; cada estudo repetido recebe comentário da IA na seção longitudinal, com os laudos originais dos radiologistas renderizados em seguida.') +
-          '</p>' +
-          '<div class="hero-meta">' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Patient', 'Paciente') + '</span><span>Paulo Silotto Souza</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('DOB · age', 'Nasc. · idade') + '</span>' +
-              '<span>' + t('14 Jul 1961 · 64', '14 jul 1961 · 64') + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Imaging arc', 'Arco de imagens') + '</span>' +
-              '<span>' + t('2015 → 2026 · 5 MRIs', '2015 → 2026 · 5 RMs') + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Lab arc', 'Arco laboratorial') + '</span>' +
-              '<span>' + t('2011 → 2024 · 26 panels', '2011 → 2024 · 26 painéis') + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Latest exam', 'Exame mais recente') + '</span>' +
-              '<span>' + t('15 May 2026', '15 mai 2026') + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Provider', 'Prestador') + '</span>' +
-              '<span>CETAM Diagnóstico</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</section>';
 
     var examsHtml = buildPauloUnifiedSection(PAULO_STUDIES);
 
@@ -7210,35 +6730,6 @@
               t('Synthesised from 5 spine MRI reports · CETAM Diagnóstico · 2015 → 2026 · plus 13 single-occurrence studies · 2013 → 2025',
                 'Sintetizado a partir de 5 laudos de RM da coluna · CETAM Diagnóstico · 2015 → 2026 · mais 13 estudos isolados · 2013 → 2025') +
             '</div>' +
-            // ── Simplified register: coverage-complete, depth-shallow.
-            //    Names every essential finding + acknowledges each domain.
-            '<div class="view-simplified paulo-ai-simplified">' +
-              '<div class="paulo-ai-subhead">' +
-                t('Overview · what needs attention', 'Visão geral · o que precisa de atenção') +
-              '</div>' +
-              '<div class="paulo-ai-summary-body lang-en">' +
-                '<p><strong>Spine (15 May 2026) — needs attention.</strong> Three active findings: an L5–S1 disc extrusion pressing the left S1 nerve root, L3–L4 spinal-canal narrowing, and a C5–C6 bulge now touching the spinal cord (no cord damage yet). Together these explain the current low-back, left-leg and neck symptoms.</p>' +
-                '<p><strong>Sleep — needs attention.</strong> Mild obstructive sleep apnoea (2017 study), with the airway shown collapsing at three levels on the 2019 endoscopy; a mandibular-advancement device looked promising.</p>' +
-                '<p><strong>Blood work — one flag.</strong> Latest panel (Apr 2024) shows mildly low red cells and haematocrit; everything else reviewed and within range.</p>' +
-                '<p><strong>Heart — reviewed, reassuring.</strong> Four exercise stress tests (2011 → 2023) were all negative for ischaemia.</p>' +
-                '<p><strong>Chest CT (6 Jul 2026) — reviewed.</strong> Conclusion: <strong>inflammatory bronchopathy</strong> (diffuse bronchial-wall thickening) with otherwise clear, normally-aerated lungs — no effusion, masses or enlarged nodes. Minor incidental notes: mild diffuse atheromatosis (incl. coronary), thoracic spondylosis and a probable tiny right renal cyst. Full study, findings and AI summary in the imaging section below.</p>' +
-                '<p><strong>Other dimensions.</strong> Mental: see the reflective portrait. Spiritual: no data captured yet.</p>' +
-              '</div>' +
-              '<div class="paulo-ai-summary-body lang-pt">' +
-                '<p><strong>Coluna (15 de maio de 2026) — requer atenção.</strong> Três achados ativos: extrusão discal em L5–S1 comprimindo a raiz S1 à esquerda, estreitamento do canal vertebral em L3–L4 e abaulamento em C5–C6 que agora toca a medula (sem lesão medular ainda). Juntos explicam os sintomas atuais de lombar, perna esquerda e cervical.</p>' +
-                '<p><strong>Sono — requer atenção.</strong> Apneia obstrutiva do sono leve (estudo de 2017), com colapso da via aérea em três níveis na endoscopia de 2019; o avanço mandibular mostrou-se promissor.</p>' +
-                '<p><strong>Exames de sangue — um alerta.</strong> O painel mais recente (abr 2024) mostra hemácias e hematócrito levemente baixos; o restante foi revisado e está dentro do intervalo.</p>' +
-                '<p><strong>Coração — revisado, tranquilizador.</strong> Quatro testes ergométricos (2011 → 2023) foram todos negativos para isquemia.</p>' +
-                '<p><strong>TC de tórax (6 jul 2026) — revisada.</strong> Conclusão: <strong>broncopatia inflamatória</strong> (espessamento parietal brônquico difuso), com pulmões normalmente aerados e sem alterações — sem derrame, massas ou linfonodos aumentados. Achados incidentais menores: ateromatose difusa leve (inclusive coronariana), espondilose torácica e provável diminuto cisto renal à direita. Estudo completo, achados e resumo por IA na seção de imagem abaixo.</p>' +
-                '<p><strong>Outras dimensões.</strong> Mental: ver o retrato reflexivo. Espiritual: ainda sem dados.</p>' +
-              '</div>' +
-              '<div class="paulo-ai-disclaimer ai-pill-note">' +
-                t('AI interpretation of your records — not a clinical diagnosis. Switch to Complete for the full detail behind each line.',
-                  'Interpretação por IA dos seus registros — não é um diagnóstico clínico. Use a visão Completa para todo o detalhe por trás de cada linha.') +
-              '</div>' +
-            '</div>' +
-            // ── Complete register: the existing detailed narrative.
-            '<div class="view-complete">' +
             '<div class="paulo-ai-subhead">' +
               t('Current snapshot · 15 May 2026', 'Quadro atual · 15 de maio de 2026') +
             '</div>' +
@@ -7278,7 +6769,6 @@
               '<p class="paulo-ai-arcs-cross lang-en"><strong>Cross-region pattern.</strong> Sinistro-convex axis deviation appeared in the cervical only in 2023 but was already present in the lumbar 2023 baseline — consistent with whole-spine postural adaptation rather than a focal mechanical event. Paravertebral muscle hypotrophy is present in both regions (mild cervical, moderate lumbar) — a muscular dimension that constrains how far conservative management can go without targeted strengthening.</p>' +
               '<p class="paulo-ai-arcs-cross lang-pt"><strong>Padrão entre regiões.</strong> O desvio sinistro-convexo do eixo só aparece na cervical em 2023 mas já estava presente na lombar de 2023 — compatível com adaptação postural de toda a coluna, e não com evento mecânico focal. A hipotrofia paravertebral está presente nas duas regiões (discreta na cervical, moderada na lombar) — um eixo muscular que limita até onde o manejo conservador pode ir sem fortalecimento direcionado.</p>' +
             '</div>' +
-          '</div>' +                                  // close .view-complete
             '<div class="paulo-ai-insights-block">' +
               '<div class="paulo-ai-insights-head">' +
                 t('Three holistic insights', 'Três insights holísticos') +
@@ -7417,38 +6907,24 @@
     var ergometric   = renderPauloErgoSection();
     var sleep        = renderPauloSleepSection();
 
-    // Visibility tiers (deterministic, approved): the 2026 spine viewer and the
-    // sleep studies are essential (abnormal, most-recent-of-type → both views);
-    // imaging history is historical; other-studies / overall-evolution /
-    // ergometric are standard (most-recent-normal or superseded → Complete only,
-    // absorbed into the Simplified overview above). Labs are essential (the
-    // 13+yr blood/urine series is primary clinical content → both views).
-    // hero + aiSummary card carry
-    // no tier — they never hide; only the inner summary register swaps.
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = hero + aiSummary +
-      '<div data-tier="essential">' + imagery + '</div>' +
-      '<div data-tier="essential">' + chestCt + '</div>' +
-      '<div data-tier="historical">' + history + '</div>' +
-      '<div data-tier="standard">' + otherStudies + overall + '</div>' +
-      '<div data-tier="essential">' + labs + '</div>' +
-      '<div data-tier="standard">' + ergometric + '</div>' +
-      '<div data-tier="essential">' + sleep + '</div>';
-    document.body.appendChild(main);
+    main.innerHTML = aiSummary + imagery + chestCt + history + otherStudies + overall +
+      labs + ergometric + sleep;
 
-    // Wire the unified viewer (handles both anatomies + orientations)
-    var unifiedViewer = main.querySelector('.pl-ct-viewer[data-paulo-study="spine-combined"]');
-    if (unifiedViewer) wirePauloUnifiedViewer(unifiedViewer, PAULO_STUDIES);
-
-    // Wire the generic .ct-viewer(s) injected above (chest CT · manifest-driven).
-    // The spine viewer is bespoke (.pl-ct-viewer); the chest CT uses app.js's
-    // generic engine, which only auto-runs at load — so re-scan after injection.
-    if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
-
-    // Place the danger zone beneath the new main, mirroring how the
-    // jc-overview view does it for other patients.
-    injectDangerZone(main);
+    return {
+      el: main,
+      after: function () {
+        // Wire the unified viewer (handles both anatomies + orientations)
+        var unifiedViewer = main.querySelector('.pl-ct-viewer[data-paulo-study="spine-combined"]');
+        if (unifiedViewer) wirePauloUnifiedViewer(unifiedViewer, PAULO_STUDIES);
+        // Wire the generic .ct-viewer(s) injected above (chest CT · manifest-
+        // driven). The spine viewer is bespoke (.pl-ct-viewer); the chest CT
+        // uses app.js's generic engine, which only auto-runs at load — so
+        // re-scan after injection.
+        if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+      },
+    };
   }
 
   /* ── Silvana Creste · bespoke lab-history page ──────────────────────
@@ -7863,106 +7339,106 @@
     var s = document.createElement('style');
     s.id = 'silvana-exams-styles';
     s.textContent = [
-      'main.jc-silvana-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
-      'main.jc-silvana-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
-      'main.jc-silvana-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-silvana-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
-      'main.jc-silvana-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
-      'main.jc-silvana-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 72ch; }',
-      'main.jc-silvana-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
-      'main.jc-silvana-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
-      'main.jc-silvana-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
-      'main.jc-silvana-exams #silv-content { padding: 36px 0 16px; }',
-      'main.jc-silvana-exams #silv-content > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-silvana-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
+      '.jc-silvana-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
+      '.jc-silvana-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-silvana-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
+      '.jc-silvana-exams .hero-title { font-family: "Raleway", sans-serif; font-weight: 300; font-size: 32px; line-height: 1.15; color: #FFFFFF; margin: 0 0 12px; }',
+      '.jc-silvana-exams .hero-sub { color: rgba(255,255,255,0.78); font-size: 15px; line-height: 1.6; margin: 0 0 18px; max-width: 72ch; }',
+      '.jc-silvana-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
+      '.jc-silvana-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
+      '.jc-silvana-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
+      '.jc-silvana-exams #silv-content { padding: 36px 0 16px; }',
+      '.jc-silvana-exams #silv-content > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
 
       // AI summary card
-      'main.jc-silvana-exams .silv-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; }',
-      'main.jc-silvana-exams .silv-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
-      'main.jc-silvana-exams .silv-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
-      'main.jc-silvana-exams .silv-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
-      'main.jc-silvana-exams .silv-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
-      'main.jc-silvana-exams .silv-ai-summary-body p { margin: 0 0 10px; }',
-      'main.jc-silvana-exams .silv-ai-summary-body p:last-child { margin-bottom: 0; }',
-      'main.jc-silvana-exams .silv-ai-summary-body strong { color: #0D1B2A; }',
+      '.jc-silvana-exams .silv-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; }',
+      '.jc-silvana-exams .silv-ai-summary-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }',
+      '.jc-silvana-exams .silv-ai-summary-head h2 { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0; }',
+      '.jc-silvana-exams .silv-ai-summary-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 14px; }',
+      '.jc-silvana-exams .silv-ai-summary-body { font-family: "IBM Plex Sans", sans-serif; font-size: 14px; line-height: 1.65; color: #1E2D3D; }',
+      '.jc-silvana-exams .silv-ai-summary-body p { margin: 0 0 10px; }',
+      '.jc-silvana-exams .silv-ai-summary-body p:last-child { margin-bottom: 0; }',
+      '.jc-silvana-exams .silv-ai-summary-body strong { color: #0D1B2A; }',
 
       // Three big insights (Physical / Mental / Spiritual)
-      'main.jc-silvana-exams .silv-insights { margin-top: 22px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
-      'main.jc-silvana-exams .silv-insights-heading { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0 0 14px; }',
-      'main.jc-silvana-exams .silv-insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
-      '@media (max-width: 880px) { main.jc-silvana-exams .silv-insights-grid { grid-template-columns: 1fr; } }',
-      'main.jc-silvana-exams .silv-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }',
-      'main.jc-silvana-exams .silv-insight-physical  { border-top: 3px solid #244E6E; }',
-      'main.jc-silvana-exams .silv-insight-mental    { border-top: 3px solid #B8954A; }',
-      'main.jc-silvana-exams .silv-insight-spiritual { border-top: 3px solid #7A8FA6; }',
-      'main.jc-silvana-exams .silv-insight-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
-      'main.jc-silvana-exams .silv-insight-headline { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3; color: #0D1B2A; }',
-      'main.jc-silvana-exams .silv-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
-      'main.jc-silvana-exams .silv-insight-body p { margin: 0 0 8px; }',
-      'main.jc-silvana-exams .silv-insight-body p:last-child { margin-bottom: 0; }',
-      'main.jc-silvana-exams .silv-insight-body strong { color: #0D1B2A; }',
-      'main.jc-silvana-exams .silv-insight-tbd .silv-insight-headline { color: #7A8FA6; font-weight: 300; font-size: 22px; letter-spacing: 0.04em; }',
-      'main.jc-silvana-exams .silv-insight-tbd .silv-insight-body { color: #7A8FA6; font-style: italic; }',
+      '.jc-silvana-exams .silv-insights { margin-top: 22px; padding-top: 18px; border-top: 1px solid #E5E2DC; }',
+      '.jc-silvana-exams .silv-insights-heading { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #0D1B2A; margin: 0 0 14px; }',
+      '.jc-silvana-exams .silv-insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }',
+      '@media (max-width: 880px) { .jc-silvana-exams .silv-insights-grid { grid-template-columns: 1fr; } }',
+      '.jc-silvana-exams .silv-insight { background: #F9F7F4; border: 1px solid #E5E2DC; border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }',
+      '.jc-silvana-exams .silv-insight-physical  { border-top: 3px solid #244E6E; }',
+      '.jc-silvana-exams .silv-insight-mental    { border-top: 3px solid #B8954A; }',
+      '.jc-silvana-exams .silv-insight-spiritual { border-top: 3px solid #7A8FA6; }',
+      '.jc-silvana-exams .silv-insight-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; }',
+      '.jc-silvana-exams .silv-insight-headline { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3; color: #0D1B2A; }',
+      '.jc-silvana-exams .silv-insight-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      '.jc-silvana-exams .silv-insight-body p { margin: 0 0 8px; }',
+      '.jc-silvana-exams .silv-insight-body p:last-child { margin-bottom: 0; }',
+      '.jc-silvana-exams .silv-insight-body strong { color: #0D1B2A; }',
+      '.jc-silvana-exams .silv-insight-tbd .silv-insight-headline { color: #7A8FA6; font-weight: 300; font-size: 22px; letter-spacing: 0.04em; }',
+      '.jc-silvana-exams .silv-insight-tbd .silv-insight-body { color: #7A8FA6; font-style: italic; }',
 
       // Per-marker history table
-      'main.jc-silvana-exams .silv-hist { margin-top: 10px; }',
-      'main.jc-silvana-exams .silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
-      'main.jc-silvana-exams .silv-hist summary::-webkit-details-marker { display: none; }',
-      'main.jc-silvana-exams .silv-hist summary::before { content: "▸"; display: inline-block; width: 12px; margin-right: 4px; transition: transform 0.15s; }',
-      'main.jc-silvana-exams .silv-hist[open] summary::before { transform: rotate(90deg); }',
-      'main.jc-silvana-exams .silv-hist-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
-      'main.jc-silvana-exams .silv-hist-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
-      'main.jc-silvana-exams .silv-hist-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: top; color: #1E2D3D; }',
-      'main.jc-silvana-exams .silv-hist-row-latest td { background: rgba(184, 149, 74, 0.06); font-weight: 500; }',
-      'main.jc-silvana-exams .silv-hist-row-flag .silv-hist-val { color: #7A2E22; }',
-      'main.jc-silvana-exams .silv-hist-date { font-family: "IBM Plex Mono", monospace; color: #7A8FA6; white-space: nowrap; }',
-      'main.jc-silvana-exams .silv-hist-val { font-family: "IBM Plex Mono", monospace; }',
-      'main.jc-silvana-exams .silv-hist-note { font-size: 11px; color: #7A8FA6; }',
-      'main.jc-silvana-exams .silv-latest-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      '.jc-silvana-exams .silv-hist { margin-top: 10px; }',
+      '.jc-silvana-exams .silv-hist summary { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.04em; color: #244E6E; cursor: pointer; padding: 6px 8px; background: #F4F1EA; border: 1px solid #E5E2DC; border-radius: 6px; list-style: none; }',
+      '.jc-silvana-exams .silv-hist summary::-webkit-details-marker { display: none; }',
+      '.jc-silvana-exams .silv-hist summary::before { content: "▸"; display: inline-block; width: 12px; margin-right: 4px; transition: transform 0.15s; }',
+      '.jc-silvana-exams .silv-hist[open] summary::before { transform: rotate(90deg); }',
+      '.jc-silvana-exams .silv-hist-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      '.jc-silvana-exams .silv-hist-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
+      '.jc-silvana-exams .silv-hist-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: top; color: #1E2D3D; }',
+      '.jc-silvana-exams .silv-hist-row-latest td { background: rgba(184, 149, 74, 0.06); font-weight: 500; }',
+      '.jc-silvana-exams .silv-hist-row-flag .silv-hist-val { color: #7A2E22; }',
+      '.jc-silvana-exams .silv-hist-date { font-family: "IBM Plex Mono", monospace; color: #7A8FA6; white-space: nowrap; }',
+      '.jc-silvana-exams .silv-hist-val { font-family: "IBM Plex Mono", monospace; }',
+      '.jc-silvana-exams .silv-hist-note { font-size: 11px; color: #7A8FA6; }',
+      '.jc-silvana-exams .silv-latest-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
 
       // Historical comparison table cell coloring
-      'main.jc-silvana-exams .lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
-      'main.jc-silvana-exams .lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
+      '.jc-silvana-exams .lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
+      '.jc-silvana-exams .lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
 
       // Source PDF list
-      'main.jc-silvana-exams .silv-docs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }',
-      'main.jc-silvana-exams .silv-doc-link { display: block; padding: 12px 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; color: #0D1B2A; text-decoration: none; transition: border-color 0.12s, transform 0.06s; }',
-      'main.jc-silvana-exams .silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
-      'main.jc-silvana-exams .silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
-      'main.jc-silvana-exams .silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
+      '.jc-silvana-exams .silv-docs { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }',
+      '.jc-silvana-exams .silv-doc-link { display: block; padding: 12px 14px; border: 1px solid #E5E2DC; border-radius: 8px; background: #FFFFFF; color: #0D1B2A; text-decoration: none; transition: border-color 0.12s, transform 0.06s; }',
+      '.jc-silvana-exams .silv-doc-link:hover { border-color: #B8954A; transform: translateY(-1px); }',
+      '.jc-silvana-exams .silv-doc-title { display: block; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 500; margin-bottom: 4px; }',
+      '.jc-silvana-exams .silv-doc-meta { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; }',
 
       // Imaging & diagnostic studies
-      'main.jc-silvana-exams .silv-studies { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }',
-      'main.jc-silvana-exams .silv-study { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 4px solid #7A8FA6; border-radius: 10px; padding: 16px 18px; }',
-      'main.jc-silvana-exams .silv-study-imaging    { border-left-color: #244E6E; }',
-      'main.jc-silvana-exams .silv-study-pathology  { border-left-color: #7A2E22; }',
-      'main.jc-silvana-exams .silv-study-endoscopy  { border-left-color: #B8954A; }',
-      'main.jc-silvana-exams .silv-study-functional { border-left-color: #3E7CA3; }',
-      'main.jc-silvana-exams .silv-study-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }',
-      'main.jc-silvana-exams .silv-study-cat { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: #EEF1F4; color: #566; }',
-      'main.jc-silvana-exams .silv-study-cat-imaging    { background: #E7EEF5; color: #244E6E; }',
-      'main.jc-silvana-exams .silv-study-cat-pathology  { background: #F4E7E3; color: #7A2E22; }',
-      'main.jc-silvana-exams .silv-study-cat-endoscopy  { background: #F7F0DD; color: #8a6d23; }',
-      'main.jc-silvana-exams .silv-study-cat-functional { background: #E8F0F4; color: #2c6080; }',
-      'main.jc-silvana-exams .silv-study-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
-      'main.jc-silvana-exams .silv-study-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.25; color: #0D1B2A; margin-bottom: 5px; }',
-      'main.jc-silvana-exams .silv-study-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 9px; line-height: 1.5; }',
-      'main.jc-silvana-exams .silv-study-concl { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.55; color: #1E2D3D; margin: 0 0 10px; }',
-      'main.jc-silvana-exams .silv-study-srcs { display: flex; flex-wrap: wrap; gap: 8px; }',
-      'main.jc-silvana-exams .silv-study-src { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #244E6E; text-decoration: none; border: 1px solid #E5E2DC; border-radius: 6px; padding: 4px 10px; background: #F4F1EA; }',
-      'main.jc-silvana-exams .silv-study-src:hover { border-color: #B8954A; }',
+      '.jc-silvana-exams .silv-studies { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }',
+      '.jc-silvana-exams .silv-study { background: #FFFFFF; border: 1px solid #E5E2DC; border-left: 4px solid #7A8FA6; border-radius: 10px; padding: 16px 18px; }',
+      '.jc-silvana-exams .silv-study-imaging    { border-left-color: #244E6E; }',
+      '.jc-silvana-exams .silv-study-pathology  { border-left-color: #7A2E22; }',
+      '.jc-silvana-exams .silv-study-endoscopy  { border-left-color: #B8954A; }',
+      '.jc-silvana-exams .silv-study-functional { border-left-color: #3E7CA3; }',
+      '.jc-silvana-exams .silv-study-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }',
+      '.jc-silvana-exams .silv-study-cat { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: #EEF1F4; color: #566; }',
+      '.jc-silvana-exams .silv-study-cat-imaging    { background: #E7EEF5; color: #244E6E; }',
+      '.jc-silvana-exams .silv-study-cat-pathology  { background: #F4E7E3; color: #7A2E22; }',
+      '.jc-silvana-exams .silv-study-cat-endoscopy  { background: #F7F0DD; color: #8a6d23; }',
+      '.jc-silvana-exams .silv-study-cat-functional { background: #E8F0F4; color: #2c6080; }',
+      '.jc-silvana-exams .silv-study-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      '.jc-silvana-exams .silv-study-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 15px; line-height: 1.25; color: #0D1B2A; margin-bottom: 5px; }',
+      '.jc-silvana-exams .silv-study-meta { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-bottom: 9px; line-height: 1.5; }',
+      '.jc-silvana-exams .silv-study-concl { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.55; color: #1E2D3D; margin: 0 0 10px; }',
+      '.jc-silvana-exams .silv-study-srcs { display: flex; flex-wrap: wrap; gap: 8px; }',
+      '.jc-silvana-exams .silv-study-src { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #244E6E; text-decoration: none; border: 1px solid #E5E2DC; border-radius: 6px; padding: 4px 10px; background: #F4F1EA; }',
+      '.jc-silvana-exams .silv-study-src:hover { border-color: #B8954A; }',
 
       // Grouped sections (Imaging / Endoscopy / Pathology / Functional) + amber AI card
-      'main.jc-silvana-exams .silv-study-group { margin-bottom: 30px; }',
-      'main.jc-silvana-exams .silv-study-group-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 20px 0 12px; display: flex; align-items: center; gap: 9px; }',
-      'main.jc-silvana-exams .silv-study-group-count { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500; color: #7A8FA6; background: #EEF1F4; border-radius: 999px; padding: 1px 9px; }',
+      '.jc-silvana-exams .silv-study-group { margin-bottom: 30px; }',
+      '.jc-silvana-exams .silv-study-group-head { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 17px; color: #0D1B2A; margin: 20px 0 12px; display: flex; align-items: center; gap: 9px; }',
+      '.jc-silvana-exams .silv-study-group-count { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500; color: #7A8FA6; background: #EEF1F4; border-radius: 999px; padding: 1px 9px; }',
       // amber background + stroke come from the shared .ai-insight-card token rule in styles.css
-      'main.jc-silvana-exams .silv-study-ai { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }',
-      'main.jc-silvana-exams .silv-study-ai-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }',
-      'main.jc-silvana-exams .silv-study-ai-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: #0D1B2A; }',
-      'main.jc-silvana-exams .silv-study-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
-      'main.jc-silvana-exams .silv-study-ai-body p { margin: 0; }',
-      'main.jc-silvana-exams .silv-study-ai-body strong { color: #0D1B2A; }',
-      'main.jc-silvana-exams .silv-study-ai-disc { font-size: 11px; font-style: italic; color: #8a6d23; margin: 8px 0 0; }',
+      '.jc-silvana-exams .silv-study-ai { border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }',
+      '.jc-silvana-exams .silv-study-ai-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }',
+      '.jc-silvana-exams .silv-study-ai-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: #0D1B2A; }',
+      '.jc-silvana-exams .silv-study-ai-body { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; line-height: 1.6; color: #1E2D3D; }',
+      '.jc-silvana-exams .silv-study-ai-body p { margin: 0; }',
+      '.jc-silvana-exams .silv-study-ai-body strong { color: #0D1B2A; }',
+      '.jc-silvana-exams .silv-study-ai-disc { font-size: 11px; font-style: italic; color: #8a6d23; margin: 8px 0 0; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -7970,25 +7446,11 @@
   /* Physical → overview landing for Silvana. Two entry cards, modeled
      on Joao's physical.html: Sinais Vitais and Exames. Genetics is
      intentionally out for now — no data uploaded yet. */
+  /* Silvana's physical landing (assembler provider): the 2-card hub only —
+     hero/tail/footer are assembler-owned. */
   function renderSilvanaPhysicalLanding() {
     injectSilvanaStyles();
     injectSilvanaLandingStyles();
-    document.title = 'Lumen Health — Physical · Silvana Creste';
-
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' + t('Physical', 'Físico') + '</div>' +
-          '<h1 class="hero-title">' +
-            t('Physical health overview · Silvana Creste',
-              'Visão geral da saúde física · Silvana Creste') +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            t('Two views of the same patient — daily and periodic vitals (body composition, future wearables), and point-in-time labs spanning 2019 to 2026.',
-              'Duas visões do mesmo paciente — sinais vitais diários e periódicos (composição corporal e, no futuro, wearables) e exames laboratoriais pontuais de 2019 a 2026.') +
-          '</p>' +
-        '</div>' +
-      '</section>';
 
     var cards =
       '<section class="silv-landing">' +
@@ -8045,11 +7507,10 @@
         '</div>' +
       '</section>';
 
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-silvana-exams jc-silvana-landing';
-    main.innerHTML = hero + cards;
-    document.body.appendChild(main);
-    injectDangerZone(main);
+    main.innerHTML = cards;
+    return main;
   }
 
   function injectSilvanaLandingStyles() {
@@ -8057,19 +7518,19 @@
     var s = document.createElement('style');
     s.id = 'silvana-landing-styles';
     s.textContent = [
-      'main.jc-silvana-landing .silv-landing { padding: 36px 0 24px; }',
-      'main.jc-silvana-landing .silv-landing > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
-      'main.jc-silvana-landing .silv-landing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }',
-      '@media (max-width: 880px) { main.jc-silvana-landing .silv-landing-grid { grid-template-columns: 1fr; } }',
-      'main.jc-silvana-landing .silv-landing-card { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px; background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #244E6E; border-radius: 10px; text-decoration: none; color: inherit; transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s; }',
-      'main.jc-silvana-landing .silv-landing-card:hover { transform: translateY(-2px); border-color: #B8954A; box-shadow: 0 6px 18px rgba(13,27,42,0.08); }',
-      'main.jc-silvana-landing .silv-landing-icon { width: 56px; height: 56px; }',
-      'main.jc-silvana-landing .silv-landing-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; }',
-      'main.jc-silvana-landing .silv-landing-status { display: flex; flex-wrap: wrap; gap: 6px; }',
-      'main.jc-silvana-landing .silv-landing-bullets { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; line-height: 1.45; }',
-      'main.jc-silvana-landing .silv-landing-bullets li { position: relative; padding-left: 14px; }',
-      'main.jc-silvana-landing .silv-landing-bullets li::before { content: "·"; position: absolute; left: 4px; color: #B8954A; font-weight: 700; }',
-      'main.jc-silvana-landing .silv-landing-cta { margin-top: auto; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #244E6E; letter-spacing: 0.04em; }',
+      '.jc-silvana-landing .silv-landing { padding: 36px 0 24px; }',
+      '.jc-silvana-landing .silv-landing > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-silvana-landing .silv-landing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }',
+      '@media (max-width: 880px) { .jc-silvana-landing .silv-landing-grid { grid-template-columns: 1fr; } }',
+      '.jc-silvana-landing .silv-landing-card { display: flex; flex-direction: column; gap: 12px; padding: 22px 24px; background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #244E6E; border-radius: 10px; text-decoration: none; color: inherit; transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s; }',
+      '.jc-silvana-landing .silv-landing-card:hover { transform: translateY(-2px); border-color: #B8954A; box-shadow: 0 6px 18px rgba(13,27,42,0.08); }',
+      '.jc-silvana-landing .silv-landing-icon { width: 56px; height: 56px; }',
+      '.jc-silvana-landing .silv-landing-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; }',
+      '.jc-silvana-landing .silv-landing-status { display: flex; flex-wrap: wrap; gap: 6px; }',
+      '.jc-silvana-landing .silv-landing-bullets { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 13px; color: #1E2D3D; line-height: 1.45; }',
+      '.jc-silvana-landing .silv-landing-bullets li { position: relative; padding-left: 14px; }',
+      '.jc-silvana-landing .silv-landing-bullets li::before { content: "·"; position: absolute; left: 4px; color: #B8954A; font-weight: 700; }',
+      '.jc-silvana-landing .silv-landing-cta { margin-top: auto; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: #244E6E; letter-spacing: 0.04em; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -8077,11 +7538,9 @@
   function renderSilvanaPhysicalExams() {
     if (!window.SILVANA_LABS) {
       console.error('SILVANA_LABS data not loaded — expected via assets/silvana-labs.js');
-      renderEmptyShell(patient, 'Silvana Creste', t('Physical → Exams', 'Físico → Exames'));
-      return;
+      return null; // assembler renders the honest empty state
     }
     injectSilvanaStyles();
-    document.title = 'Lumen Health — Physical · Exams · Silvana Creste';
 
     var data = window.SILVANA_LABS;
     var dates = [];
@@ -8093,46 +7552,6 @@
     dates.sort();
     var firstDate = dates[0];
     var lastDate  = dates[dates.length - 1];
-
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
-          '<h1 class="hero-title">' +
-            t('Lab history · Silvana Creste',
-              'Histórico laboratorial · Silvana Creste') +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            t('Lab markers consolidated from ' + data.documents.length + ' source PDFs spanning ' + formatDate(firstDate) + ' to ' + formatDate(lastDate) + '. Each panel below shows the latest result with reference range and status pill; expand the per-marker history toggle to see every prior sample. A single side-by-side comparison table at the bottom puts every date on one grid.',
-              'Marcadores laboratoriais consolidados a partir de ' + data.documents.length + ' PDFs originais, de ' + formatDate(firstDate) + ' a ' + formatDate(lastDate) + '. Cada painel abaixo mostra o resultado mais recente com intervalo de referência e o status; expanda o histórico de cada marcador para ver as amostras anteriores. Uma tabela única no fim coloca todas as datas lado a lado.') +
-          '</p>' +
-          '<div class="hero-meta">' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Patient', 'Paciente') + '</span><span>' + escapeHtml(data.patient.full_name) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('DOB · age', 'Nasc. · idade') + '</span>' +
-              '<span>29 ' + t('Sep', 'set') + ' 1967 · 58</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Date range', 'Intervalo') + '</span>' +
-              '<span>' + escapeHtml(formatDate(firstDate)) + ' → ' + escapeHtml(formatDate(lastDate)) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Source PDFs', 'PDFs originais') + '</span>' +
-              '<span>' + data.documents.length + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Markers tracked', 'Marcadores') + '</span>' +
-              '<span>' + data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Imaging & studies', 'Imagem & estudos') + '</span>' +
-              '<span>' + ((data.studies && data.studies.length) || 0) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</section>';
 
     var ai =
       '<section class="silv-ai-summary">' +
@@ -8250,12 +7669,9 @@
         '</div>' +
       '</section>';
 
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-silvana-exams';
-    main.innerHTML = hero + imagery;
-    document.body.appendChild(main);
-
-    injectDangerZone(main);
+    main.innerHTML = imagery;
 
     // Medications & Supplements: this page is hand-curated from SILVANA_LABS and
     // has no summary object, so pull meds/supps from the DB (/api/patient-summary)
@@ -8264,13 +7680,13 @@
     fetch('/api/patient-summary?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (summary) {
-        var mount = document.getElementById('silv-meds-mount');
+        var mount = main.querySelector('#silv-meds-mount');
         if (!mount || !summary) return;
         var inner = medsTablesInner(summary);
         if (!inner) return;
         mount.innerHTML =
           '<div class="section-label" style="margin-top:32px;">' +
-            '<span class="lang-en">02 · Treatment</span><span class="lang-pt">02 · Tratamento</span>' +
+            '<span class="lang-en">Treatment</span><span class="lang-pt">Tratamento</span>' +
           '</div>' +
           '<h2 class="section-title">' +
             '<span class="lang-en">Medications &amp; Supplements</span>' +
@@ -8283,6 +7699,8 @@
           inner;
       })
       .catch(function () { /* meds are additive — never break the labs page */ });
+
+    return main;
   }
 
   /* Cristina imaging studies — full report text (verbatim PT + EN), the
@@ -8381,11 +7799,9 @@
   function renderCristinaPhysicalExams() {
     if (!window.CRISTINA_LABS) {
       console.error('CRISTINA_LABS data not loaded — expected via assets/cristina-labs.js');
-      renderEmptyShell(patient, 'Cristina Cresti', t('Physical → Exams', 'Físico → Exames'));
-      return;
+      return null; // assembler renders the honest empty state
     }
     injectSilvanaStyles();
-    document.title = 'Lumen Health — Physical · Exams · Cristina Cresti';
 
     var data = window.CRISTINA_LABS;
     var nMarkers = data.panels.reduce(function (acc, pn) { return acc + pn.markers.length; }, 0);
@@ -8393,40 +7809,7 @@
     var doc = (data.documents && data.documents[0]) || {};
     var examDate = doc.date || '2026-03-11';
 
-    var hero =
-      '<section class="hero">' +
-        '<div class="container">' +
-          '<div class="hero-eyebrow">' + t('Physical → Exams', 'Físico → Exames') + '</div>' +
-          '<h1 class="hero-title">' +
-            t('Exams · Cristina Cresti', 'Exames · Cristina Cresti') +
-          '</h1>' +
-          '<p class="hero-sub">' +
-            t('The newest exam is a right-shoulder MRI (DIAGi, 15 Jun 2026) showing a full-thickness rotator-cuff tear — the radiologist’s full report and a plain-language explanation are below. A thyroid-autoantibody panel follows, with each marker’s reference range and status. As more reports are added they appear here automatically.',
-              'O exame mais recente é uma RM do ombro direito (DIAGi, 15 jun 2026) que mostra uma rotura de espessura completa do manguito rotador — o laudo completo do radiologista e uma explicação em linguagem simples estão abaixo. Em seguida vem um painel de autoanticorpos tireoidianos, com o intervalo de referência e o status de cada marcador. À medida que novos laudos forem adicionados, eles aparecem aqui automaticamente.') +
-          '</p>' +
-          '<div class="hero-meta">' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Patient', 'Paciente') + '</span><span>' + escapeHtml(data.patient.full_name) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Latest document', 'Documento mais recente') + '</span>' +
-              '<span>' + escapeHtml(formatDate(examDate)) + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Imaging studies', 'Exames de imagem') + '</span>' +
-              '<span>' + nStudies + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Lab markers', 'Marcadores') + '</span>' +
-              '<span>' + nMarkers + '</span>' +
-            '</div>' +
-            '<div class="hero-meta-item">' +
-              '<span>' + t('Source documents', 'Documentos') + '</span>' +
-              '<span>' + (data.documents ? data.documents.length : 0) + '</span>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-      '</section>';
+
 
     var ai =
       '<section class="silv-ai-summary">' +
@@ -8472,12 +7855,10 @@
         '</div>' +
       '</section>';
 
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-silvana-exams jc-cristina-exams';
-    main.innerHTML = hero + content;
-    document.body.appendChild(main);
-
-    injectDangerZone(main);
+    main.innerHTML = content;
+    return main;
   }
 
   /* ── Silvana Creste · bespoke Physical → Vitals view ─────────────
@@ -8801,43 +8182,43 @@
     s.id = 'silvana-vitals-styles';
     s.textContent = [
       // Composition + Muscle-Fat panels share a 2-column row
-      'main.jc-silvana-vitals .silv-vitals-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }',
-      'main.jc-silvana-vitals .silv-vitals-pair > .lab-panel { margin-bottom: 0 !important; }',
-      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-vitals-pair { grid-template-columns: 1fr; } }',
+      '.jc-silvana-vitals .silv-vitals-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }',
+      '.jc-silvana-vitals .silv-vitals-pair > .lab-panel { margin-bottom: 0 !important; }',
+      '@media (max-width: 880px) { .jc-silvana-vitals .silv-vitals-pair { grid-template-columns: 1fr; } }',
 
       // Segmental analysis grid — two figures side by side
-      'main.jc-silvana-vitals .silv-segmental-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }',
-      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-segmental-grid { grid-template-columns: 1fr; } }',
-      'main.jc-silvana-vitals .silv-segmental { display: flex; flex-direction: column; align-items: center; }',
-      'main.jc-silvana-vitals .silv-segmental-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: #244E6E; margin: 0 0 8px; text-align: center; }',
-      'main.jc-silvana-vitals .silv-figure-wrap { position: relative; width: 100%; max-width: 360px; aspect-ratio: 220 / 380; }',
-      'main.jc-silvana-vitals .silv-fig { position: absolute; inset: 0; width: 100%; height: 100%; }',
-      'main.jc-silvana-vitals .silv-fig-label { position: absolute; min-width: 72px; padding: 4px 8px; background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 6px; font-family: "IBM Plex Mono", monospace; line-height: 1.35; text-align: center; box-shadow: 0 1px 3px rgba(13,27,42,0.06); }',
-      'main.jc-silvana-vitals .silv-fig-val { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; font-weight: 600; color: #0D1B2A; }',
-      'main.jc-silvana-vitals .silv-fig-pct { font-size: 10px; color: #7A8FA6; margin: 1px 0 3px; }',
-      'main.jc-silvana-vitals .silv-fig-status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: "IBM Plex Sans", sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }',
-      'main.jc-silvana-vitals .silv-fig-status-normal { background: #E6F4EA; color: #2D5F3F; border: 1px solid #85B595; }',
-      'main.jc-silvana-vitals .silv-fig-status-flag   { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }',
+      '.jc-silvana-vitals .silv-segmental-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }',
+      '@media (max-width: 880px) { .jc-silvana-vitals .silv-segmental-grid { grid-template-columns: 1fr; } }',
+      '.jc-silvana-vitals .silv-segmental { display: flex; flex-direction: column; align-items: center; }',
+      '.jc-silvana-vitals .silv-segmental-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; color: #244E6E; margin: 0 0 8px; text-align: center; }',
+      '.jc-silvana-vitals .silv-figure-wrap { position: relative; width: 100%; max-width: 360px; aspect-ratio: 220 / 380; }',
+      '.jc-silvana-vitals .silv-fig { position: absolute; inset: 0; width: 100%; height: 100%; }',
+      '.jc-silvana-vitals .silv-fig-label { position: absolute; min-width: 72px; padding: 4px 8px; background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 6px; font-family: "IBM Plex Mono", monospace; line-height: 1.35; text-align: center; box-shadow: 0 1px 3px rgba(13,27,42,0.06); }',
+      '.jc-silvana-vitals .silv-fig-val { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; font-weight: 600; color: #0D1B2A; }',
+      '.jc-silvana-vitals .silv-fig-pct { font-size: 10px; color: #7A8FA6; margin: 1px 0 3px; }',
+      '.jc-silvana-vitals .silv-fig-status { display: inline-block; padding: 1px 6px; border-radius: 4px; font-family: "IBM Plex Sans", sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }',
+      '.jc-silvana-vitals .silv-fig-status-normal { background: #E6F4EA; color: #2D5F3F; border: 1px solid #85B595; }',
+      '.jc-silvana-vitals .silv-fig-status-flag   { background: #FBE9E7; color: #7A2E22; border: 1px solid #E5B5AB; }',
       // Label positions relative to wrapper
-      'main.jc-silvana-vitals .silv-fig-label-left-arm  { top: 22%; left: -4px; }',
-      'main.jc-silvana-vitals .silv-fig-label-right-arm { top: 22%; right: -4px; }',
-      'main.jc-silvana-vitals .silv-fig-label-trunk     { top: 44%; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.92); }',
-      'main.jc-silvana-vitals .silv-fig-label-left-leg  { top: 72%; left: -4px; }',
-      'main.jc-silvana-vitals .silv-fig-label-right-leg { top: 72%; right: -4px; }',
+      '.jc-silvana-vitals .silv-fig-label-left-arm  { top: 22%; left: -4px; }',
+      '.jc-silvana-vitals .silv-fig-label-right-arm { top: 22%; right: -4px; }',
+      '.jc-silvana-vitals .silv-fig-label-trunk     { top: 44%; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.92); }',
+      '.jc-silvana-vitals .silv-fig-label-left-leg  { top: 72%; left: -4px; }',
+      '.jc-silvana-vitals .silv-fig-label-right-leg { top: 72%; right: -4px; }',
 
       // History panel — three sparkline charts in a row
-      'main.jc-silvana-vitals .silv-history-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 14px; }',
-      '@media (max-width: 880px) { main.jc-silvana-vitals .silv-history-charts { grid-template-columns: 1fr; } }',
-      'main.jc-silvana-vitals .silv-history-chart { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 8px; padding: 12px 14px; }',
-      'main.jc-silvana-vitals .silv-history-chart-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; color: #244E6E; margin-bottom: 4px; }',
-      'main.jc-silvana-vitals .silv-history-chart-title small { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; font-weight: 400; }',
+      '.jc-silvana-vitals .silv-history-charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 14px; }',
+      '@media (max-width: 880px) { .jc-silvana-vitals .silv-history-charts { grid-template-columns: 1fr; } }',
+      '.jc-silvana-vitals .silv-history-chart { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 8px; padding: 12px 14px; }',
+      '.jc-silvana-vitals .silv-history-chart-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; color: #244E6E; margin-bottom: 4px; }',
+      '.jc-silvana-vitals .silv-history-chart-title small { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; font-weight: 400; }',
 
       // Delta table
-      'main.jc-silvana-vitals .silv-history-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
-      'main.jc-silvana-vitals .silv-history-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
-      'main.jc-silvana-vitals .silv-history-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: middle; color: #1E2D3D; font-family: "IBM Plex Mono", monospace; }',
-      'main.jc-silvana-vitals .silv-history-table .silv-hist-cmp-marker { font-family: "IBM Plex Sans", sans-serif; color: #0D1B2A; font-weight: 500; }',
-      'main.jc-silvana-vitals .silv-history-table .silv-hist-cmp-delta { font-weight: 600; color: #244E6E; }',
+      '.jc-silvana-vitals .silv-history-table { width: 100%; border-collapse: collapse; margin-top: 6px; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
+      '.jc-silvana-vitals .silv-history-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 6px 8px; border-bottom: 1px solid #E5E2DC; }',
+      '.jc-silvana-vitals .silv-history-table td { padding: 6px 8px; border-bottom: 1px solid #EFEBE3; vertical-align: middle; color: #1E2D3D; font-family: "IBM Plex Mono", monospace; }',
+      '.jc-silvana-vitals .silv-history-table .silv-hist-cmp-marker { font-family: "IBM Plex Sans", sans-serif; color: #0D1B2A; font-weight: 500; }',
+      '.jc-silvana-vitals .silv-history-table .silv-hist-cmp-delta { font-weight: 600; color: #244E6E; }',
     ].join('\n');
     document.head.appendChild(s);
   }
@@ -8942,7 +8323,6 @@
   function renderSilvanaVitals() {
     injectSilvanaStyles();
     injectSilvanaVitalsStyles();
-    document.title = 'Lumen Health — Vitals · Silvana Creste';
 
     var data = SILVANA_INBODY;
 
@@ -8970,10 +8350,9 @@
         '</div>' +
       '</section>';
 
-    var main = document.createElement('main');
+    var main = document.createElement('div');
     main.className = 'jc-silvana-exams jc-silvana-vitals';
-    main.innerHTML = silvanaVitalsHero(data) + content;
-    document.body.appendChild(main);
-    injectDangerZone(main);
+    main.innerHTML = content;
+    return main;
   }
 })();

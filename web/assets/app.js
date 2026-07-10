@@ -185,51 +185,6 @@
     document.documentElement.lang = initial;
   })();
 
-  /* ── VIEW-MODE TOGGLE (Simplified / Complete) ──
-   * Second display axis, parallel to the bilingual toggle and built the same
-   * way. Reads ?view= query first, then localStorage, defaults to "simplified".
-   * Sets body[data-view] and updates aria-pressed on the .view-btn buttons.
-   * CSS (body[data-view="simplified"]) hides [data-tier=standard|historical]
-   * cards and swaps .view-complete / .view-simplified summary registers.
-   */
-  (function initViewMode() {
-    const STORE_KEY = 'lumen_view_mode';
-    const VALID = new Set(['simplified', 'complete']);
-    function readChoice() {
-      const url = new URLSearchParams(location.search).get('view');
-      if (VALID.has(url)) return url;
-      const saved = localStorage.getItem(STORE_KEY);
-      if (VALID.has(saved)) return saved;
-      return 'simplified';                       // intake default
-    }
-    function applyView(view) {
-      if (!VALID.has(view)) return;
-      if (document.body) document.body.setAttribute('data-view', view);
-      localStorage.setItem(STORE_KEY, view);
-      document.querySelectorAll('.view-btn').forEach((btn) => {
-        btn.setAttribute('aria-pressed', String(btn.dataset.viewBtn === view));
-      });
-    }
-    function bind() {
-      document.querySelectorAll('.view-btn').forEach((btn) => {
-        btn.addEventListener('click', () => applyView(btn.dataset.viewBtn));
-      });
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        applyView(readChoice());
-        bind();
-      });
-    } else {
-      applyView(readChoice());
-      bind();
-    }
-    // Apply synchronously on load (app.js sits at end of <body>, so body
-    // exists) to avoid a flash of the wrong view before the patient renderer
-    // injects its [data-tier] cards.
-    if (document.body) document.body.setAttribute('data-view', readChoice());
-  })();
-
   if (window.Chart) {
     Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
     Chart.defaults.font.size = 11;

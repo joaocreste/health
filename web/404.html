@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found — Lumen Health</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{var l=localStorage.getItem('jc_lang')||'en';if(l!=='en'&&l!=='pt')l='en';document.documentElement.setAttribute('data-lang',l);if(l==='pt'){document.documentElement.setAttribute('lang','pt-BR');}}catch(e){}</script>
+<style>
+  /* Tokens — /mnt/project/lumenhealth-branding.html (dark theme) */
+  :root{
+    --bg-page:#0A1428; --bg-surface:#131F37; --bg-subtle:#1A2542;
+    --border-subtle:#283655; --border-default:#3E5070;
+    --text-primary:#F0F4F8; --text-secondary:#A4B2CC; --text-tertiary:#6F7E9A;
+    --accent-gold:#F4B942; --accent-petrol:#6BA3C7; --accent-petrol-light:#94BBD3;
+    --petrol-fill:rgba(107,163,199,0.10);
+    --red-bg:rgba(155,53,53,0.20); --red-bd:rgba(155,53,53,0.45); --red-fg:#E89494;
+    --ff-display:'Raleway',sans-serif; --ff-body:'IBM Plex Sans',system-ui,sans-serif; --ff-mono:'IBM Plex Mono',monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--ff-body);-webkit-font-smoothing:antialiased;background:var(--bg-page);color:var(--text-primary);line-height:1.55}
+  body::before{ /* the brand's 64px measurement grid */
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+    background-size:64px 64px;
+  }
+  img,svg{display:block;max-width:100%}
+  [hidden]{display:none!important}
+  [data-lang="en"] .lang-pt{display:none!important}
+  [data-lang="pt"] .lang-en{display:none!important}
+
+  .wrap{position:relative;z-index:2;min-height:100dvh;display:flex;flex-direction:column;padding:24px 28px}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .mid{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 0}
+  .foot{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--ff-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-tertiary);text-align:center}
+
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+  .brand-mark{width:38px;height:38px}
+  .icon-body{fill:var(--petrol-fill);stroke:var(--accent-petrol);stroke-width:0.7;stroke-linejoin:round}
+  .icon-ecg{stroke:var(--accent-gold);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .brand-text{display:flex;flex-direction:column;line-height:1.2}
+  .brand-name{font-family:var(--ff-display);font-weight:300;font-size:18px;letter-spacing:0.04em;color:var(--text-primary)}
+  .brand-tag{font-family:var(--ff-mono);font-size:9px;letter-spacing:0.20em;text-transform:uppercase;color:var(--text-tertiary);margin-top:3px}
+
+  .lang-switch{display:flex;padding:3px;background:var(--bg-subtle);border-radius:6px}
+  .lang-btn{min-width:30px;height:24px;border:0;background:transparent;font-family:var(--ff-mono);font-size:10px;font-weight:500;letter-spacing:0.06em;color:var(--text-tertiary);cursor:pointer;border-radius:4px;padding:0 8px}
+  .lang-btn.active{background:var(--bg-surface);color:var(--accent-petrol)}
+  .lang-btn:focus-visible{outline:2px solid var(--accent-petrol);outline-offset:2px}
+
+  .card{width:min(410px,100%);background:rgba(19,31,55,0.66);border:1px solid var(--border-subtle);border-radius:14px;padding:36px 32px 30px;backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);box-shadow:0 36px 80px -40px rgba(0,0,0,0.7);text-align:center}
+  @supports not (backdrop-filter:blur(1px)){.card{background:rgba(19,31,55,0.94)}}
+  .card-eyebrow{font-family:var(--ff-mono);font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--text-tertiary);margin:0 0 10px}
+  .card h1{font-family:var(--ff-display);font-weight:200;font-size:30px;letter-spacing:0.02em;color:#fff;margin:0 0 6px}
+  .card-sub{font-size:14px;color:var(--text-secondary);margin:0 0 26px}
+
+  .submit{display:block;width:100%;margin-top:4px;padding:12px 18px;border-radius:8px;border:1px solid var(--accent-petrol);background:var(--accent-petrol);color:var(--bg-page);font:500 14px var(--ff-body);letter-spacing:0.02em;cursor:pointer;text-decoration:none;text-align:center;transition:background .15s,border-color .15s,transform .06s}
+  .submit:hover{background:var(--accent-petrol-light);border-color:var(--accent-petrol-light)}
+  .submit:active{transform:translateY(1px)}
+  .submit:focus-visible{outline:2px solid var(--accent-gold);outline-offset:2px}
+
+  .alt-link{display:inline-block;margin-top:18px;font-size:13px;color:var(--text-tertiary);text-decoration:none;border-bottom:1px solid var(--border-default);padding-bottom:1px;transition:color .15s,border-color .15s}
+  .alt-link:hover{color:var(--text-secondary);border-color:var(--text-secondary)}
+  .alt-link:focus-visible{outline:2px solid var(--accent-petrol);outline-offset:2px}
+
+  @media (max-width:560px){
+    .wrap{padding:18px}
+    .card{padding:30px 22px 26px}
+    .brand-tag{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g transform="translate(32, 32) scale(1.1)">
+          <path class="icon-body" d="M 0 22 C -20 6, -28 -2, -20 -14 C -12 -22, -4 -18, 0 -10 C 4 -18, 12 -22, 20 -14 C 28 -2, 20 6, 0 22 Z"/>
+          <path class="icon-ecg" d="M -36 0 L -22 0 L -16 4 L -10 -4 L -2 -16 L 6 14 L 12 -4 L 18 0 L 36 0"/>
+        </g>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-name">Lumen Health</span>
+        <span class="brand-tag"><span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
+      </span>
+    </a>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="pt">PT</button>
+    </div>
+  </div>
+
+  <div class="mid">
+    <div class="card">
+      <p class="card-eyebrow">404</p>
+      <h1><span class="lang-en">Page not found</span><span class="lang-pt">Página não encontrada</span></h1>
+      <p class="card-sub">
+        <span class="lang-en">This page does not exist or has moved.</span>
+        <span class="lang-pt">Esta página não existe ou foi movida.</span>
+      </p>
+      <a class="submit" href="/home">
+        <span class="lang-en">Go to health summary</span><span class="lang-pt">Ir para o resumo de saúde</span>
+      </a>
+      <a class="alt-link" href="/">
+        <span class="lang-en">Lumen Health home</span><span class="lang-pt">Página inicial da Lumen Health</span>
+      </a>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div>© 2026 Lumen Health</div>
+  </footer>
+</div>
+
+<script>
+/* ---------- Language toggle (jc_lang, dual-span) — mirrors app.js so the
+     choice carries over to the rest of the app. ---------- */
+(function(){
+  var KEY='jc_lang';
+  function apply(l){
+    if(l!=='en'&&l!=='pt') l='en';
+    document.documentElement.setAttribute('data-lang',l);
+    document.documentElement.setAttribute('lang', l==='pt' ? 'pt-BR' : 'en');
+    document.title = l==='pt' ? 'Página não encontrada — Lumen Health' : 'Page not found — Lumen Health';
+    document.querySelectorAll('.lang-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-lang')===l);
+    });
+    try{ localStorage.setItem(KEY,l); }catch(e){}
+  }
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
+  });
+  var saved='en';
+  try{ saved=localStorage.getItem(KEY)||'en'; }catch(e){}
+  apply(saved);
+})();
+</script>
+</body>
+</html>

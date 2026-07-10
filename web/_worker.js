@@ -4,7 +4,7 @@ import { makeZip } from "client-zip";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
-import { buildOneSection, fetchAllDashboards, DASHBOARD_SECTIONS } from "../lib/dashboard.js";
+import { fetchAllDashboards } from "../lib/dashboard.js";
 import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
 import { buildManifest, validateSections } from "../lib/export-manifest.js";
 import { buildReportPdf, reportFilename } from "../lib/export-render.js";
@@ -201,8 +201,29 @@ const SCAN_OWNERS = [
 // (patient-context.js rewrites them client-side), so: admins and
 // patient-role viewers pass; doctors/family need the page's scope on at
 // least one live grant. Page-level granularity per the confirmed map.
+/* Routing fails closed (contract I-9 / D4): only these extensionless routes
+   serve a page. Anything else — /assessment, /loops, typos — gets the real
+   404 page with HTTP 404, never the marketing index.html (old soft-404). */
+const VALID_PAGES = new Set([
+  "home", "physical", "physical-vitals", "physical-exams", "physical-genetics",
+  "mental", "spiritual", "patients", "admin", "account", "upload", "login",
+  "uploads-review",
+]);
+
+async function serveNotFound(request, env, url) {
+  try {
+    const nf = await env.ASSETS.fetch(new Request(new URL("/404.html", url).toString(), request));
+    return new Response(nf.body, {
+      status: 404,
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache, must-revalidate" },
+    });
+  } catch {
+    return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain" } });
+  }
+}
+
 const PAGE_RULES = [
-  { re: /^\/(mental|loops)(\.html)?$/, anyOf: ["mental"] },
+  { re: /^\/mental(\.html)?$/, anyOf: ["mental"] },
   { re: /^\/spiritual(\.html)?$/, anyOf: ["journal"] },
   { re: /^\/physical-exams(\.html)?$/, anyOf: ["imaging", "labs"] },
   { re: /^\/physical-vitals(\.html)?$/, anyOf: ["vitals"] },
@@ -1741,10 +1762,11 @@ async function resolveInsightAccess(sql, viewerClerk, patientId) {
 const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
 
 /* POST /api/patient-dashboard-build
-   - New (async) contract: body { patient } (or { patient_clerk }) with no/AI
-     section -> START a whole-patient AI Insight Update job, return 202 { job_id }.
-   - Legacy (sync) contract: body { patient_clerk, section } for a real dashboard
-     section -> the per-section LLM build (admin tool), unchanged. */
+   One contract only: body { patient } (or { patient_clerk }) -> START a
+   whole-patient AI Insight Update job, return 202 { job_id }. Access is
+   self-or-admin via resolveInsightAccess. The legacy synchronous per-section
+   build (which ran an LLM build + DB write with NO access check) is removed
+   (D9 / defects-register #5). */
 async function handlePatientDashboardBuild(request, env, ctx) {
   if (request.method !== "POST") return jsonError(405, "method_not_allowed");
   if (!env.DATABASE_URL)       return jsonError(500, "DATABASE_URL not configured.");
@@ -1753,11 +1775,8 @@ async function handlePatientDashboardBuild(request, env, ctx) {
   try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
   const patientClerk = String(body?.patient || body?.patient_clerk || "").trim();
   const section = String(body?.section || "").trim();
-  const mode = String(body?.mode || "").trim();
   if (!patientClerk) return jsonError(400, "patient_required");
-
-  // Whole-patient async rebuild unless an explicit legacy dashboard section is asked for.
-  const wantsRebuild = mode === "ai-insights" || section === AI_INSIGHTS_SECTION || (!section && !mode);
+  if (section && section !== AI_INSIGHTS_SECTION) return jsonError(400, "section_builds_removed");
   const viewerClerk = request.headers.get("X-Viewer-Clerk") || "";
 
   try {
@@ -1766,19 +1785,6 @@ async function handlePatientDashboardBuild(request, env, ctx) {
           AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
     if (patientRows.length === 0) return jsonError(404, "patient_not_found");
     const patientId = patientRows[0].id;
-
-    // ── Legacy per-section dashboard build (admin tool) — synchronous, unchanged ──
-    if (!wantsRebuild) {
-      if (!DASHBOARD_SECTIONS.includes(section)) return jsonError(400, "section_invalid");
-      const viewerRows = viewerClerk
-        ? await sql`SELECT id FROM users WHERE clerk_user_id = ${viewerClerk} AND archived_at IS NULL LIMIT 1`
-        : [];
-      const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
-      const result = await buildOneSection({
-        sql, anthropic, patientId, section, viewerId: viewerRows[0]?.id || null,
-      });
-      return new Response(JSON.stringify({ ok: true, ...result }), { headers: JSON_HEADERS });
-    }
 
     // ── Async whole-patient AI Insight Update ──
     await ensureInsightJobsTable(sql);
@@ -4278,11 +4284,29 @@ export default {
         },
       });
     }
+    // Routing fails closed: enumerate valid top-level routes; unknown
+    // extensionless paths and unknown top-level .html files 404 for real.
+    // Nested paths (/assets/*, /scans/*, /log/*) pass through to the gate.
+    {
+      const norm = url.pathname.replace(/\/+$/, "");
+      const seg = norm.slice(1);
+      if (seg && !seg.includes("/")) {
+        const isHtml = /\.html$/i.test(seg);
+        const base = isHtml ? seg.replace(/\.html$/i, "") : seg;
+        const hasExt = /\.[a-z0-9]+$/i.test(seg);
+        if (!hasExt && !VALID_PAGES.has(base)) return serveNotFound(request, env, url);
+        if (isHtml && base !== "index" && base !== "404" && !VALID_PAGES.has(base)) {
+          return serveNotFound(request, env, url);
+        }
+      }
+    }
     // Scoped-access gate for static surfaces (pages, scans, patient assets).
     // Returns a redirect/403 to short-circuit, or null to serve normally.
     const gated = await gateStaticRequest(request, env, url);
     if (gated) return gated;
     const assetResp = await env.ASSETS.fetch(request);
+    // A missing file must be a real 404 page, never a soft-404 to index.html.
+    if (assetResp.status === 404) return serveNotFound(request, env, url);
     // HTML pages carry no content hash in their URL, so a browser that caches
     // one keeps loading whatever ?v= asset refs it was minted with — stale data
     // survives deploys until a manual cache clear. Force HTML to revalidate every

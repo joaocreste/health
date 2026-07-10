@@ -57,6 +57,7 @@
     [/\bJoão Creste\b/g, 'Leo Keller'],
     [/\bJoao\b/g, 'Leo'],
     [/\bJoão\b/g, 'Leo'],
+    [/\bDias de Souza\b/g, 'Keller'],
 
     // DOB / age — Joao 17 Oct 1992 (DB shows 1992-10-16 due to UTC) → Leo 17 Jul 1990
     [/17 October 1992/g, '17 July 1990'],
@@ -65,6 +66,8 @@
     [/16 Oct 1992/g, '17 Jul 1990'],
     [/17 outubro 1992/g, '17 julho 1990'],
     [/16 outubro 1992/g, '17 julho 1990'],
+    [/17 de outubro de 1992/g, '17 de julho de 1990'],
+    [/16 de outubro de 1992/g, '16 de julho de 1990'],
     [/17\/10\/1992/g, '17/07/1990'],
     [/16\/10\/1992/g, '17/07/1990'],
     // Age — only swap in obvious age contexts to avoid touching "33" used elsewhere.
@@ -93,6 +96,37 @@
     // GB → FR only on word boundaries where it's clearly the country code.
     // We don't touch arbitrary GB/FR text since the static pages use
     // "GB" in only a few demographic contexts.
+
+    // Report identifiers (MRN / accession / visit / registration numbers) -> synthetic
+    [/\b3402824\b/g, '4815162'],
+    [/\b3129863\b/g, '2718281'],
+    [/\b190830993\b/g, '180550001'],
+    [/\b190824100\b/g, '180550002'],
+    [/\bE25873959\b/g, 'E31415926'],
+    [/\b32088962\/12\b/g, '55110234/12'],
+    [/\b4647288\b/g, '5912604'],
+    [/\b17723927\b/g, '18904412'],
+    [/\b117134640\b/g, '119220555'],
+    [/\bNV1X01005196090\b/g, 'NV1X01009999001'],
+    [/\bAE23-016535\b/g, 'AE23-099001'],
+    [/\b30099223397\b/g, '30011122233'],
+    [/\b96425\b/g, '90001'],
+    [/\b220106\b/g, '90002'],
+    [/\b99607\b/g, '90003'],
+    [/\b157890\b/g, '90004'],
+    [/\b7096445\b/g, '7000001'],
+    [/\b54911\b/g, '90005'],
+    [/\b93948\b/g, '90006'],
+    [/\b75340\b/g, '90007'],
+    [/\b185087\b/g, '90008'],
+    [/\b96\.083\b/g, '90.009'],
+    [/\b168889\b/g, '90010'],
+    [/\b150803\b/g, '90011'],
+    [/\b90\.835\b/g, '90.012'],
+    [/\b120785\b/g, '90013'],
+    [/\b230127\b/g, '90014'],
+    [/\b90787\b/g, '90015'],
+    [/\b06\/9732\b/g, '06/0001'],
   ];
 
   function walkText(node) {
@@ -101,6 +135,7 @@
       var changed = false;
       for (var i = 0; i < REPLACEMENTS.length; i++) {
         var pair = REPLACEMENTS[i];
+        pair[0].lastIndex = 0;
         if (pair[0].test(t)) {
           // Reset regex.lastIndex for global patterns
           pair[0].lastIndex = 0;
