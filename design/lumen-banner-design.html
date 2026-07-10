@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumen Health — Page Banner Component · Design Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Tokens: verbatim from lumenhealth-branding.html (dark theme) */
+  :root{
+    --bg-page:#0A1428; --bg-surface:#131F37; --bg-subtle:#1A2542;
+    --border-subtle:#283655; --border-default:#3E5070;
+    --text-primary:#F0F4F8; --text-secondary:#A4B2CC; --text-tertiary:#6F7E9A;
+    --accent-gold:#F4B942; --accent-gold-soft:rgba(244,185,66,0.10);
+    --accent-petrol:#6BA3C7; --accent-petrol-light:#94BBD3;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;background:#060D1C;color:var(--text-primary);-webkit-font-smoothing:antialiased;line-height:1.55}
+  .spec{max-width:1080px;margin:0 auto;padding:56px 32px 24px}
+  .spec h1{font-family:'Raleway',sans-serif;font-weight:200;font-size:34px;letter-spacing:.04em;margin:0 0 8px}
+  .spec p{color:var(--text-secondary);font-size:14px;max-width:720px;margin:0 0 6px}
+  .variant-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent-petrol);max-width:1080px;margin:48px auto 12px;padding:0 32px}
+
+  /* ================= BANNER COMPONENT ================= */
+  .page-banner{
+    background:var(--bg-page);
+    border-bottom:1px solid var(--border-subtle);
+    position:relative;overflow:hidden;
+  }
+  .page-banner::before{ /* house 64px grid */
+    content:'';position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);
+    background-size:64px 64px;pointer-events:none;
+  }
+  .page-banner::after{ /* gold hairline signature */
+    content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+    background:linear-gradient(90deg,var(--accent-gold) 0%,rgba(244,185,66,0.15) 55%,transparent 100%);
+  }
+  .banner-inner{position:relative;max-width:1080px;margin:0 auto;padding:44px 32px 0}
+
+  .banner-crumb{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--text-tertiary);margin:0 0 14px;
+  }
+  .banner-crumb .crumb-sep{color:var(--accent-gold);padding:0 6px}
+  .banner-title{
+    font-family:'Raleway',sans-serif;font-weight:300;font-size:44px;line-height:1.08;letter-spacing:-0.01em;
+    color:var(--text-primary);margin:0 0 12px;max-width:760px;
+  }
+  .banner-desc{
+    font-size:15.5px;line-height:1.65;color:var(--text-secondary);max-width:640px;margin:0 0 30px;
+  }
+
+  /* Identity strip — the part that was missing */
+  .banner-identity{
+    display:flex;flex-wrap:wrap;gap:0 44px;row-gap:16px;
+    border-top:1px solid var(--border-subtle);
+    padding:18px 0 22px;
+  }
+  .id-item{min-width:120px}
+  .id-label{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent-gold);margin-bottom:5px;
+  }
+  .id-value{font-size:14px;font-weight:500;color:var(--text-primary);letter-spacing:.01em}
+  .id-value .id-soft{color:var(--text-tertiary);font-weight:400}
+  .id-item--patient .id-value{font-size:15px}
+
+  @media (max-width:640px){
+    .banner-inner{padding:32px 20px 0}
+    .banner-title{font-size:30px}
+    .banner-desc{font-size:14px;margin-bottom:22px}
+    .banner-identity{gap:0 28px;row-gap:14px}
+  }
+
+  .demo-body{max-width:1080px;margin:0 auto;padding:26px 32px 40px;color:var(--text-tertiary);font-size:13px}
+  .narrow{max-width:390px;margin:0 auto;border:1px dashed var(--border-default);border-radius:8px;overflow:hidden}
+</style>
+</head>
+<body>
+
+<div class="spec">
+  <h1>Page Banner — unified hero component</h1>
+  <p>One component, assembler-rendered on every patient page. Anatomy: breadcrumb → page title → one-line section description → identity strip (patient · born · locale · prepared). Identity comes exclusively from <code>/api/patient-summary</code>; missing fields are omitted, never dashed. Bilingual via dual spans (PT variant shown below).</p>
+</div>
+
+<div class="variant-label">V1 · Rich patient — Patient Zero · /physical-exams · EN</div>
+<section class="page-banner">
+  <div class="banner-inner">
+    <p class="banner-crumb">PHYSICAL<span class="crumb-sep">·</span>EXAMS</p>
+    <h1 class="banner-title">Exams</h1>
+    <p class="banner-desc">Imaging studies and laboratory panels, read across time.</p>
+    <div class="banner-identity">
+      <div class="id-item id-item--patient"><div class="id-label">Patient</div><div class="id-value">João Victor Creste</div></div>
+      <div class="id-item"><div class="id-label">Born</div><div class="id-value">17 Oct 1992 <span class="id-soft">· 33y</span></div></div>
+      <div class="id-item"><div class="id-label">Locale</div><div class="id-value">Madrid, Spain</div></div>
+      <div class="id-item"><div class="id-label">Prepared</div><div class="id-value">10 Jul 2026</div></div>
+    </div>
+  </div>
+</section>
+<div class="demo-body">… page content begins (concise AI summary sits directly below) …</div>
+
+<div class="variant-label">V2 · Same page — Portuguese register</div>
+<section class="page-banner">
+  <div class="banner-inner">
+    <p class="banner-crumb">FÍSICO<span class="crumb-sep">·</span>EXAMES</p>
+    <h1 class="banner-title">Exames</h1>
+    <p class="banner-desc">Exames de imagem e painéis laboratoriais, lidos ao longo do tempo.</p>
+    <div class="banner-identity">
+      <div class="id-item id-item--patient"><div class="id-label">Paciente</div><div class="id-value">João Victor Creste</div></div>
+      <div class="id-item"><div class="id-label">Nascimento</div><div class="id-value">17 out 1992 <span class="id-soft">· 33a</span></div></div>
+      <div class="id-item"><div class="id-label">Local</div><div class="id-value">Madri, Espanha</div></div>
+      <div class="id-item"><div class="id-label">Preparado</div><div class="id-value">10 jul 2026</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="variant-label">V3 · Thin patient — Paulo · /physical-exams · fields present render, absent are omitted</div>
+<section class="page-banner">
+  <div class="banner-inner">
+    <p class="banner-crumb">PHYSICAL<span class="crumb-sep">·</span>EXAMS</p>
+    <h1 class="banner-title">Exams</h1>
+    <p class="banner-desc">Imaging studies and laboratory panels, read across time.</p>
+    <div class="banner-identity">
+      <div class="id-item id-item--patient"><div class="id-label">Patient</div><div class="id-value">Paulo Silotto Souza</div></div>
+      <div class="id-item"><div class="id-label">Born</div><div class="id-value">14 Jul 1961 <span class="id-soft">· 64y</span></div></div>
+      <div class="id-item"><div class="id-label">Prepared</div><div class="id-value">08 Jul 2026</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="variant-label">V4 · Empty patient — name only; no dashes, no placeholders, no "prepared" (nothing generated yet)</div>
+<section class="page-banner">
+  <div class="banner-inner">
+    <p class="banner-crumb">SUMMARY</p>
+    <h1 class="banner-title">Health Summary</h1>
+    <p class="banner-desc">Your complete health picture — every source, one narrative.</p>
+    <div class="banner-identity">
+      <div class="id-item id-item--patient"><div class="id-label">Patient</div><div class="id-value">Andre Test</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="variant-label">V5 · Mobile (390px) — title scales, identity wraps, nothing overflows</div>
+<div class="narrow">
+  <section class="page-banner">
+    <div class="banner-inner">
+      <p class="banner-crumb">PHYSICAL<span class="crumb-sep">·</span>VITALS</p>
+      <h1 class="banner-title">Vitals</h1>
+      <p class="banner-desc">Continuous signals from wearables and devices — heart, sleep, movement, glucose.</p>
+      <div class="banner-identity">
+        <div class="id-item id-item--patient"><div class="id-label">Patient</div><div class="id-value">João Victor Creste</div></div>
+        <div class="id-item"><div class="id-label">Born</div><div class="id-value">17 Oct 1992 <span class="id-soft">· 33y</span></div></div>
+        <div class="id-item"><div class="id-label">Locale</div><div class="id-value">Madrid, Spain</div></div>
+        <div class="id-item"><div class="id-label">Prepared</div><div class="id-value">10 Jul 2026</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="demo-body" style="padding-top:40px">
+  Per-page description copy (EN / PT) ships in the build prompt as LUMEN_PAGE_META content — Summary, Physical, Vitals, Exams, Genetics, Mental, Spiritual.
+</div>
+
+</body>
+</html>
