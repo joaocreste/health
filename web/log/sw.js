@@ -1,10 +1,10 @@
 /* Lumen Log — service worker (offline-first app shell) */
-const CACHE = 'lumen-log-v3';
+const CACHE = 'lumen-log-v4';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=2',
-  './app.js?v=1',
+  './styles.css?v=3',
+  './app.js?v=2',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/apple-touch-icon.png',

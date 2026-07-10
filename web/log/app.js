@@ -18,6 +18,7 @@ const TRACKERS = [
     title: 'Valium',
     unit: 'mg',
     accent: 'var(--c-valium)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-45 12 12)"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>',
     kind: 'increment',
     steps: [2.5, 5],
     sub: 'Tap to log a dose',
@@ -27,6 +28,7 @@ const TRACKERS = [
     title: 'Alcohol',
     unit: 'units',
     accent: 'var(--c-alcohol)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5 H17.5 C17.5 9.5 14.5 12.5 12 12.5 C9.5 12.5 6.5 9.5 6.5 3.5 Z"/><line x1="12" y1="12.5" x2="12" y2="19.5"/><line x1="8" y1="20.5" x2="16" y2="20.5"/></svg>',
     kind: 'increment',
     steps: [1],
     sub: '1 beer or 1 glass of wine = 1 unit',
@@ -36,6 +38,7 @@ const TRACKERS = [
     title: 'Protein',
     unit: 'grams',
     accent: 'var(--c-protein)',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 7.5 C9 5 14.5 4.7 17.6 7 C20 8.8 20.2 13 17.7 15.5 C15 18.2 9.2 18.2 6.6 15.6 C4.4 13.4 4.3 9.6 6.5 7.5 Z"/><path d="M9 9.2 C11 7.8 14.3 7.8 16.2 9.4 C17.5 10.5 17.6 12.6 16.4 14"/></svg>',
     kind: 'numeric',
     quick: [20, 30, 40, 50],
     sub: 'Enter grams and add',
@@ -194,7 +197,7 @@ function renderToday() {
     card.innerHTML = `
       <div class="card-head">
         <div>
-          <div class="card-title">${t.title}</div>
+          <div class="card-title">${t.title}${t.icon ? `<span class="card-icon">${t.icon}</span>` : ''}</div>
           <div class="card-sub">${t.sub}</div>
         </div>
         <div class="card-total">
