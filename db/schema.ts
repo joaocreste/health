@@ -157,6 +157,28 @@ export const patientAccess = pgTable(
   ],
 );
 
+/* ───── AI dashboards (raw-SQL migrations 0005 + 0006; contract §3) ──
+   Definition only — the table predates Drizzle here; no migration alters it.
+   One row per (patient, section); section 'ai-insights' holds the whole-
+   record payload in cards_json (inline_insights[] carry the persisted D1
+   `rank`). `highlights` is written but never read (documented-unused). */
+export const patientDashboards = pgTable(
+  "patient_dashboards",
+  {
+    patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    section: text("section").notNull(),
+    summaryMd: text("summary_md"),
+    highlights: jsonb("highlights"),
+    model: text("model"),
+    inputTokens: integer("input_tokens"),
+    outputTokens: integer("output_tokens"),
+    generatedAt: timestamp("generated_at", { withTimezone: true }).notNull(),
+    generatedBy: uuid("generated_by").references(() => users.id),
+    cardsJson: jsonb("cards_json"),
+  },
+  (t) => [primaryKey({ columns: [t.patientId, t.section] })],
+);
+
 /* ───── 2. Clinical structured data ───────────────── */
 
 export const medications = pgTable("medications", {

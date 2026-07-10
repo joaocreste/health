@@ -3521,7 +3521,7 @@
       aiFromYourRecord: function (ctx) {
         var pl = aiPayloadOf(ctx);
         if (!pl) return null;
-        var w = (pl.inline_insights || []).filter(function (x) {
+        var w = sortCardsByRank(pl.inline_insights).filter(function (x) {
           return x.subpage === 'writings' || x.subpage === 'mental';
         }).map(aiInlineCard).join('');
         if (!w) return null;
@@ -3538,7 +3538,7 @@
         };
         var subs = SUBS[ctx.page];
         if (!subs) return null;
-        var inl = (pl.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
+        var inl = sortCardsByRank(pl.inline_insights).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
         if (!inl) return null;
         return aiBlockEl(aiHeader('Specific findings', 'Achados específicos') + inl);
       },
@@ -3969,21 +3969,57 @@
   function aiInlineSub(headEn, headPt, inner) {
     return '<div class="ai-inline-sub"><span class="ai-inline-sub-h">' + t(headEn, headPt) + '</span>' + inner + '</div>';
   }
+  /* ── Deterministic card order (D1) — MIRROR of lib/card-order.js ──────
+     That module is the source of truth (write path + backfill); this classic
+     IIFE cannot import ESM, so the comparator is mirrored here for the
+     defensive read-side sort. Change BOTH together. */
+  var CARD_SUBPAGE_ORD = {
+    'home': 0, 'physical': 1, 'physical-vitals': 2, 'physical-exams': 3,
+    'physical-genetics': 4, 'mental': 5, 'spiritual': 6,
+  };
+  var CARD_PREFIX_ORD = { lab: 0, imaging: 1, ecg: 2, vitals: 3, pgx: 4, interaction: 5, journal: 6 };
+  var CARD_RISK_ORD = { high: 0, medium: 1, low: 2 };
+  function cardSortKey(card) {
+    var c = (card && typeof card === 'object') ? card : {};
+    var subpage = typeof c.subpage === 'string' ? c.subpage : '';
+    var anchor = typeof c.anchor === 'string' ? c.anchor : '';
+    var prefix = anchor.indexOf(':') >= 0 ? anchor.slice(0, anchor.indexOf(':')) : '';
+    var sub = (subpage in CARD_SUBPAGE_ORD) ? CARD_SUBPAGE_ORD[subpage] : 99;
+    var pre = (prefix in CARD_PREFIX_ORD) ? CARD_PREFIX_ORD[prefix] : 99;
+    var riskKey = typeof c.risk_level === 'string' ? c.risk_level : '';
+    var risk = (riskKey in CARD_RISK_ORD) ? CARD_RISK_ORD[riskKey] : 3;
+    return [sub, pre, pre === 99 ? prefix : '', risk, anchor];
+  }
+  function compareCards(a, b) {
+    var ka = cardSortKey(a), kb = cardSortKey(b);
+    for (var i = 0; i < ka.length; i++) {
+      if (ka[i] < kb[i]) return -1;
+      if (ka[i] > kb[i]) return 1;
+    }
+    return 0;
+  }
+  /* Sort by persisted rank; fall back to the key when any card lacks one
+     (pre-backfill payloads still render deterministically ordered). */
+  function sortCardsByRank(cards) {
+    var arr = (cards || []).slice();
+    var allRanked = arr.length > 0 && arr.every(function (c) { return c && typeof c.rank === 'number'; });
+    arr.sort(allRanked ? function (a, b) { return a.rank - b.rank; } : compareCards);
+    return arr;
+  }
+
   function aiInlineCard(x) {
     if (!x || !x.title) return '';
-    var isImaging = x.trigger === 'concerning_imaging' || x.trigger === 'imaging_followup';
     var isLab = x.trigger === 'out_of_range_lab' || x.trigger === 'trending_lab';
     var has = function (b) { return b && (b.en || b.pt); };
+    // Canonical channel only (contract section 3): `interpretation` carries the
+    // card text for every trigger — the deprecated body /
+    // plain_language_reading / what_the_report_says fields are never read.
     var body = '';
-    if (isImaging) {
-      if (has(x.plain_language_reading)) body += '<p class="ai-card-summary">' + aiBt(x.plain_language_reading) + '</p>';
-      if (has(x.what_the_report_says)) body += aiInlineSub('What the report says', 'O que o laudo diz', aiBt(x.what_the_report_says));
-    } else if (isLab) {
-      if (has(x.interpretation)) body += '<p class="ai-card-summary">' + aiBt(x.interpretation) + '</p>';
+    if (has(x.interpretation)) body += '<p class="ai-card-summary">' + aiBt(x.interpretation) + '</p>';
+    if (isLab) {
       var cf = (x.contributing_factors || []).filter(Boolean).map(function (f) { return '<li>' + aiBt(f) + '</li>'; }).join('');
       if (cf) body += aiInlineSub('Possible contributing factors', 'Possíveis fatores contribuintes', '<ul class="ai-inline-list">' + cf + '</ul>');
     }
-    if (!body && has(x.body)) body = '<p class="ai-card-summary">' + aiBt(x.body) + '</p>';
     var ns = (x.next_steps || []).filter(Boolean).map(function (s) { return '<li>' + aiBt(s) + '</li>'; }).join('');
     var nsHtml = ns ? aiInlineSub('Next steps', 'Próximos passos', '<ul class="ai-inline-list">' + ns + '</ul>') : '';
     return '<div class="ai-card ai-insight-card ai-edge-risk-' + normRisk(x.risk_level || x.severity) + '">'
@@ -4024,119 +4060,6 @@
   }
   function aiOverview(b) { return (b && (b.en || b.pt)) ? '<p class="ai-overview">' + aiBt(b) + '</p>' : ''; }
 
-  function buildAiInsightsHtml(p, section) {
-    var pages = p.pages || {};
-    var sm = p.summary || {};
-    var headline = sm.headline ? aiBt(sm.headline) : '';
-    // Accept new subpage anchors AND the legacy short names.
-    var INLINE_FOR = {
-      'physical-exams': ['labs', 'imaging', 'physical-exams'],
-      'physical-vitals': ['vitals', 'ecg', 'physical-vitals'],
-      'physical-genetics': ['pgx', 'physical-genetics'],
-    };
-
-    if (section === 'home') {
-      var work = aiResolveRefs(p, sm.points_to_work_on || sm.top_attention_points).map(aiInsightCard).join('');
-      var lev = aiResolveRefs(p, sm.points_to_leverage || sm.top_strengths).map(aiInsightCard).join('');
-      var links = (sm.cross_domain_links || []).map(aiCrossCard).join('');
-      var overview = aiOverview(sm.overview);
-      if (!headline && !overview && !work && !lev && !links) return '';
-      return aiHeader('Health synthesis', 'Síntese de saúde', headline)
-        + overview
-        + (work ? '<h3 class="ai-sub">' + t('Points to work on', 'Pontos a trabalhar') + '</h3>' + work : '')
-        + (lev ? '<h3 class="ai-sub">' + t('Points to leverage', 'Pontos a favor') + '</h3>' + lev : '')
-        + (links ? '<h3 class="ai-sub">' + t('Cross-domain links', 'Conexões entre domínios') + '</h3>' + links : '');
-    }
-    if (section === 'physical' || section === 'mental' || section === 'spiritual') {
-      var ov = aiOverview(pages[section] && pages[section].overview);
-      var cards = aiPillarCards(pages[section]);
-      var extra = '';
-      if (section === 'mental') {
-        var w = (p.inline_insights || []).filter(function (x) {
-          return x.subpage === 'writings' || x.subpage === 'mental';
-        }).map(aiInlineCard).join('');
-        if (w) extra = '<h3 class="ai-sub">' + t('From your record', 'A partir do seu prontuário') + '</h3>' + w;
-      }
-      if (!ov && !cards && !extra) return '';
-      var lbl = { physical: ['Physical', 'Físico'], mental: ['Mental', 'Mental'], spiritual: ['Spiritual', 'Espiritual'] }[section];
-      return aiHeader(lbl[0] + ' — AI synthesis', lbl[1] + ' — síntese por IA') + ov + cards + extra;
-    }
-    if (INLINE_FOR[section]) {
-      var subs = INLINE_FOR[section];
-      var inl = (p.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
-      if (!inl) return '';
-      return aiHeader('Specific findings', 'Achados específicos') + inl;
-    }
-    return '';
-  }
-
-  function injectAiInsightsStyles() {
-    if (document.getElementById('ai-ins-styles')) return;
-    var css = [
-      '.ai-ins-block{max-width:880px;margin:32px auto 8px;padding:28px 22px 8px;border-top:1px solid #E5E2DC;}',
-      '.ai-ins-header{margin-bottom:18px;}',
-      '.ai-ins-titlerow{display:flex;align-items:center;gap:10px;}',
-      '.ai-ins-title{font-family:Raleway,system-ui,sans-serif;font-size:1.25rem;color:#0D1B2A;margin:0;}',
-      '.ai-ins-disc{font-size:.78rem;color:#7A8FA6;margin:6px 0 0;}',
-      '.ai-ins-sub{font-size:1rem;line-height:1.5;color:#1E2D3D;margin:12px 0 0;font-weight:500;}',
-      '.ai-sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#7A8FA6;margin:22px 0 10px;}',
-      '.ai-sub.ai-pillar-h{color:#B8954A;border-top:1px solid #EFEAE0;padding-top:14px;}',
-      // Amber AI-insight card (design-system rule 7a): every text-based AI insight
-      // reads amber. Tokens from styles.css; literal fallbacks keep it robust.
-      '.ai-card{background:var(--ai-insight-bg,#FDF8EC);border:1px solid var(--ai-insight-stroke,#F4DD9C);border-left:4px solid #7A8FA6;border-radius:10px;padding:14px 16px;margin:10px 0;box-shadow:0 1px 2px rgba(13,27,42,.04);}',
-      '.ai-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
-      '.ai-card-title{font-weight:600;color:#0D1B2A;font-size:.96rem;}',
-      '.ai-card-summary{margin:4px 0 0;color:#1E2D3D;font-size:.9rem;line-height:1.5;}',
-      '.ai-sevedge-high{border-left-color:#c0392b;}.ai-sevedge-elevated{border-left-color:#d97706;}',
-      '.ai-sevedge-watch{border-left-color:#B8954A;}.ai-sevedge-info{border-left-color:#7A8FA6;}',
-      '.ai-sevedge-strength{border-left-color:#2e7d52;}.ai-sevedge-cross{border-left-color:#B8954A;background:#FBF8F2;}',
-      // New schema: risk_level / strength_level edges + chips + trajectory.
-      '.ai-edge-risk-high{border-left-color:#c0392b;}.ai-edge-risk-medium{border-left-color:#d97706;}.ai-edge-risk-low{border-left-color:#7A8FA6;}',
-      '.ai-edge-str-high{border-left-color:#2e7d52;}.ai-edge-str-medium{border-left-color:#3a9d6a;}.ai-edge-str-low{border-left-color:#7Fae93;}',
-      '.ai-chip-risk-high{background:#fbe9e7;color:#c0392b;}.ai-chip-risk-medium{background:#fef3e2;color:#b45309;}.ai-chip-risk-low{background:#eef1f4;color:#566;}',
-      '.ai-chip-str-high{background:#e6f4ec;color:#2e7d52;}.ai-chip-str-medium{background:#e9f5ef;color:#2e7d52;}.ai-chip-str-low{background:#eef6f1;color:#4a8a68;}',
-      '.ai-traj{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#EEF1F4;color:#566;}',
-      '.ai-traj-improving{background:#e6f4ec;color:#2e7d52;}.ai-traj-worsening{background:#fbe9e7;color:#c0392b;}',
-      '.ai-traj-stable{background:#eef1f4;color:#566;}.ai-traj-new{background:#ede7f6;color:#6B4FA0;}.ai-traj-insufficient_history{background:#f3f1ea;color:#8a7d5a;}',
-      '.ai-traj-note{margin:6px 0 0;font-size:.82rem;color:#5a6b5f;font-style:italic;line-height:1.45;}',
-      '.ai-overview{margin:10px 0 4px;color:#1E2D3D;font-size:.92rem;line-height:1.55;}',
-      '.ai-inline-sub{margin:8px 0 0;}',
-      '.ai-inline-sub-h{display:block;font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:#8a6d23;font-weight:700;margin-bottom:3px;}',
-      '.ai-inline-list{list-style:disc;margin:0;padding-left:18px;}.ai-inline-list li{font-size:.84rem;color:#3a4a5a;margin:2px 0;line-height:1.45;}',
-      '.ai-chip{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#EEF1F4;color:#566;}',
-      '.ai-sevchip-high{background:#fbe9e7;color:#c0392b;}.ai-sevchip-elevated{background:#fef3e2;color:#b45309;}',
-      '.ai-sevchip-watch{background:#f7f0dd;color:#8a6d23;}.ai-sevchip-info{background:#eef1f4;color:#566;}',
-      '.ai-sevchip-strength{background:#e6f4ec;color:#2e7d52;}',
-      '.ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;color:#7A8FA6;}',
-      '.ai-anchor{font-size:.74rem;color:#7A8FA6;margin:2px 0 4px;}',
-      '.ai-ev{list-style:none;margin:8px 0 0;padding:0;border-top:1px dashed #EAE6DE;padding-top:8px;}',
-      '.ai-ev li{font-size:.8rem;color:#3a4a5a;margin:3px 0;line-height:1.4;}',
-      '.ai-ev-meta{color:#9aa7b4;font-size:.72rem;}',
-      '.ai-detail{margin-top:8px;}.ai-detail summary{cursor:pointer;font-size:.78rem;color:#B8954A;font-weight:600;}',
-      '.ai-detail-body{margin:8px 0 0;color:#1E2D3D;font-size:.86rem;line-height:1.55;}',
-      '.ai-clin{margin:8px 0 0;font-size:.82rem;color:#0D1B2A;}.ai-clin-body{color:#3a4a5a;}',
-      // Exam outlier explanation (9a) — attached inside each .lab-test card.
-      '.lab-ai-explain{margin-top:12px;padding-top:12px;border-top:1px dashed #EAE6DE;}',
-      '.lab-ai-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
-      '.lab-ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;color:#7A8FA6;}',
-      '.lab-ai-interp{margin:2px 0 10px;color:#1E2D3D;font-size:.88rem;line-height:1.5;}',
-      '.lab-ai-cf{border-radius:10px;padding:12px 14px;margin:8px 0;}',
-      '.lab-ai-cf-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:#8a6d23;font-weight:700;}',
-      '.lab-ai-cf-disc{font-size:.74rem;font-style:italic;color:#8a6d23;margin:4px 0 8px;}',
-      '.lab-ai-cf-list{list-style:disc;margin:0;padding-left:18px;}',
-      '.lab-ai-cf-list li{font-size:.84rem;color:#3a4a5a;margin:3px 0;line-height:1.45;}',
-      '.lab-ai-next{margin-top:8px;}',
-      '.lab-ai-next-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:#7A8FA6;margin-bottom:3px;}',
-      '.lab-ai-next ul{list-style:disc;margin:0;padding-left:18px;}',
-      '.lab-ai-next li{font-size:.82rem;color:#3a4a5a;margin:2px 0;line-height:1.45;}',
-    ].join('');
-    var s = document.createElement('style');
-    s.id = 'ai-ins-styles';
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
-
-  /* Page → ai-insights domain backing the concise summary gate (G-DOMAIN). */
   var PAGE_TO_DOMAIN = {
     'physical': 'physical', 'physical-vitals': 'physical',
     'physical-exams': 'physical', 'physical-genetics': 'physical',
@@ -4189,7 +4112,7 @@
       var cards = aiPillarCards(pages[section]);
       var extra = '';
       if (section === 'mental') {
-        var w = (p.inline_insights || []).filter(function (x) {
+        var w = sortCardsByRank(p.inline_insights).filter(function (x) {
           return x.subpage === 'writings' || x.subpage === 'mental';
         }).map(aiInlineCard).join('');
         if (w) extra = '<h3 class="ai-sub">' + t('From your record', 'A partir do seu prontuário') + '</h3>' + w;
@@ -4200,7 +4123,7 @@
     }
     if (INLINE_FOR[section]) {
       var subs = INLINE_FOR[section];
-      var inl = (p.inline_insights || []).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
+      var inl = sortCardsByRank(p.inline_insights).filter(function (x) { return subs.indexOf(x.subpage) >= 0; }).map(aiInlineCard).join('');
       if (!inl) return '';
       return aiHeader('Specific findings', 'Achados específicos') + inl;
     }

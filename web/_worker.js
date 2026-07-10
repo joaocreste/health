@@ -6,6 +6,7 @@ import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
 import { fetchAllDashboards } from "../lib/dashboard.js";
 import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
+import { assignRanks, foldDeprecatedCard } from "../lib/card-order.js";
 import { buildManifest, validateSections } from "../lib/export-manifest.js";
 import { buildReportPdf, reportFilename } from "../lib/export-render.js";
 import { buildPatientContext, PATIENT_ZERO, PAULO_SILOTTO, SILVANA_CRESTE } from "../lib/chat-context.js";
@@ -3470,6 +3471,67 @@ async function handleAdmin(request, env) {
       const msg = e?.message || String(e);
       const rateLimited = /\b429\b|rate_limit/i.test(msg);
       return jsonError(rateLimited ? 429 : 500, `Backfill failed: ${msg}`);
+    }
+  }
+
+  // POST /api/admin/backfill-card-ranks — { fold_deprecated? }
+  // D1: recompute the deterministic card order for every stored dashboard.
+  // For each patient_dashboards row whose cards_json carries inline_insights,
+  // sort with cardSortKey, assign rank 0..n-1 and persist in rank order.
+  // Rows holding legacy-shaped cards ({kind,...} — old per-section builds, or
+  // legacy shapes inside inline_insights) are COUNTED and left entirely
+  // untouched pending a human decision. Idempotent: re-running yields
+  // identical output. fold_deprecated=true additionally folds the deprecated
+  // body/plain_language_reading/what_the_report_says channels into canonical
+  // `interpretation` on the stored cards (content-preserving; default OFF).
+  if (path === "/api/admin/backfill-card-ranks" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { body = {}; }
+    const foldDeprecated = body?.fold_deprecated === true;
+    try {
+      const rows = await sql`
+        SELECT d.patient_id, d.section, d.cards_json, u.clerk_user_id
+        FROM patient_dashboards d JOIN users u ON u.id = d.patient_id
+        ORDER BY u.clerk_user_id, d.section`;
+      let dashboardsUpdated = 0;
+      let cardsRanked = 0;
+      const legacy = [];
+      const isLegacyCard = (c) => c && typeof c === "object" && "kind" in c && !c.trigger;
+      for (const row of rows) {
+        const cj = row.cards_json;
+        if (!cj || typeof cj !== "object") continue;
+        // Legacy per-section rows: { cards: [{kind,...}] } — count, never touch.
+        if (Array.isArray(cj.cards)) {
+          const n = cj.cards.filter(isLegacyCard).length;
+          if (n) legacy.push({ patient: row.clerk_user_id, page: row.section, count: n });
+          continue;
+        }
+        if (!Array.isArray(cj.inline_insights)) continue;
+        const legacyInline = cj.inline_insights.filter(isLegacyCard).length;
+        if (legacyInline) {
+          // Mixed rows are reported and skipped whole — nothing touched.
+          legacy.push({ patient: row.clerk_user_id, page: row.section, count: legacyInline });
+          continue;
+        }
+        let cards = cj.inline_insights;
+        if (foldDeprecated) cards = cards.map(foldDeprecatedCard);
+        const ranked = assignRanks(cards);
+        cardsRanked += ranked.length;
+        const next = { ...cj, inline_insights: ranked };
+        await sql`
+          UPDATE patient_dashboards SET cards_json = ${JSON.stringify(next)}::jsonb
+          WHERE patient_id = ${row.patient_id} AND section = ${row.section}`;
+        dashboardsUpdated += 1;
+      }
+      return new Response(JSON.stringify({
+        ok: true,
+        dashboards_updated: dashboardsUpdated,
+        cards_ranked: cardsRanked,
+        legacy_cards_found: legacy,
+        fold_deprecated: foldDeprecated,
+      }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    } catch (e) {
+      return jsonError(500, `Backfill failed: ${e?.message || e}`);
     }
   }
 
