@@ -360,6 +360,7 @@
 
     var afters = [];
     var topicCount = 0;
+    var summaryCount = 0;
     var shared = {}; // per-render scratch shared across providers (memoized computations)
     registry.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); })
       .forEach(function (entry) {
@@ -376,10 +377,13 @@
         topics.appendChild(out.el);
         if (out.after) afters.push(out.after);
         if (!entry.summary) topicCount++;
+        else summaryCount++;
       });
 
-    /* 4 · empty state — only when zero topic sections rendered */
-    if (topicCount === 0) root.appendChild(buildEmptyState());
+    /* 4 · empty state — only when NOTHING rendered. Its copy claims nothing
+       is on record; below a data-backed AI summary (prompt #2c guarantees one
+       whenever the domain has data) that claim would be false. */
+    if (topicCount === 0 && summaryCount === 0) root.appendChild(buildEmptyState());
 
     /* registry-driven footnote (spiritual pastoral line) */
     if (meta.footnote) {
