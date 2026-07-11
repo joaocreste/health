@@ -2796,6 +2796,10 @@
       // so it must NOT inherit the padded/centered card layout used by jc-overview.
       '.jc-home { display: block; padding: 0; margin: 0; background: #F9F7F4; }',
       '.jc-overview { padding: 32px 24px 96px; background: #F9F7F4; }',
+      // The home root carries BOTH classes; the compound selector outranks the
+      // .jc-overview rule above regardless of order, so home stays unpadded
+      // (full-bleed banner + report-section bands). Cascade-order bug fix.
+      '.jc-overview.jc-home { padding: 0; }',
       '.ov-shell { max-width: 1080px; margin: 0 auto; }',
       '.ov-header { margin-bottom: 24px; }',
       '.ov-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #7A8FA6; margin-bottom: 6px; }',
