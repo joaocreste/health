@@ -36,15 +36,29 @@
     return l === 'pt' ? pt : en;
   }
 
-  var MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
-  var MONTHS_PT = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-  function dateBoth(iso) {
+  var MONTHS_EN_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var MONTHS_PT_SHORT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+    'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  /* Locale-formatted short date, EN '17 Oct 1992' / PT '17 out 1992'.
+     ISO day kept verbatim (already zero-padded, matching the design file). */
+  function dateShort(iso) {
     var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (!m) return null;
-    var d = parseInt(m[3], 10), mo = parseInt(m[2], 10) - 1, y = m[1];
-    return { en: d + ' ' + MONTHS_EN[mo] + ' ' + y, pt: d + ' de ' + MONTHS_PT[mo] + ' de ' + y };
+    var mo = parseInt(m[2], 10) - 1;
+    if (mo < 0 || mo > 11) return null;
+    return { en: m[3] + ' ' + MONTHS_EN_SHORT[mo] + ' ' + m[1], pt: m[3] + ' ' + MONTHS_PT_SHORT[mo] + ' ' + m[1] };
+  }
+  /* Full years elapsed since DOB — calendar comparison, no ms-division
+     birthday bugs: subtract a year until the birthday has passed this year. */
+  function ageFromDob(iso) {
+    var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) return null;
+    var y = parseInt(m[1], 10), mo = parseInt(m[2], 10), d = parseInt(m[3], 10);
+    var now = new Date();
+    var age = now.getFullYear() - y;
+    if ((now.getMonth() + 1) < mo || ((now.getMonth() + 1) === mo && now.getDate() < d)) age--;
+    return (age >= 0 && age < 150) ? age : null;
   }
 
   /* ── gate predicate library (contract §2) ── */
@@ -141,62 +155,49 @@
     }
     return newest;
   }
-  function heroMetaItem(labelEn, labelPt, valueHtml) {
-    return '<div class="hero-meta-item">' +
-      '<span class="lang-en">' + labelEn + '</span><span class="lang-pt">' + labelPt + '</span>' +
-      '<span>' + valueHtml + '</span></div>';
+  /* Pillar crumb: subpage pillar strings carry the middot ('PHYSICAL · VITALS');
+     split and rejoin so each separator renders as a gold .crumb-sep span. */
+  function crumbHtml(pillarStr) {
+    return String(pillarStr).split('·').map(function (s) { return esc(s.trim()); })
+      .join('<span class="crumb-sep">·</span>');
   }
-  function buildHomeHero(payloads) {
-    var p = (payloads.summary && payloads.summary.patient) || {};
-    var name = p.full_name || '';
-    var prepared = dateBoth(newestGeneratedAt(payloads));
-    var dob = dateBoth(p.date_of_birth);
-    var age = null;
-    if (p.date_of_birth) {
-      var b = new Date(p.date_of_birth), now = new Date();
-      if (!isNaN(b)) {
-        age = now.getFullYear() - b.getFullYear();
-        if (now.getMonth() < b.getMonth() || (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())) age--;
-      }
-    }
-    var meta = '';
-    if (name) meta += heroMetaItem('Patient', 'Paciente', esc(name));
-    if (dob) meta += heroMetaItem('Date of birth', 'Data de nascimento',
-      '<span class="lang-en">' + dob.en + (age != null ? ' · age ' + age : '') + '</span>' +
-      '<span class="lang-pt">' + dob.pt + (age != null ? ' · ' + age + ' anos' : '') + '</span>');
-    if (p.sex) meta += heroMetaItem('Sex', 'Sexo', t(esc(p.sex), esc(p.sex === 'male' ? 'masculino' : (p.sex === 'female' ? 'feminino' : p.sex))));
-    if (p.country_of_residence) meta += heroMetaItem('Residence', 'Residência', esc(p.country_of_residence));
-    if (prepared) meta += heroMetaItem('Prepared', 'Preparado em',
-      '<span class="lang-en">' + prepared.en + '</span><span class="lang-pt">' + prepared.pt + '</span>');
-    meta += heroMetaItem('Classification', 'Classificação', t('Strictly confidential', 'Estritamente confidencial'));
+  function bannerIdItem(labelEn, labelPt, valueHtml, extraClass) {
+    return '<div class="id-item' + (extraClass ? ' ' + extraClass : '') + '">' +
+      '<div class="id-label">' + t(labelEn, labelPt) + '</div>' +
+      '<div class="id-value">' + valueHtml + '</div></div>';
+  }
+  /* The unified page banner (prompt #2b): breadcrumb → title → description →
+     identity strip. Identity strictly from /api/patient-summary (I-3);
+     absent fields are omitted entirely — no dashes, no placeholders. */
+  function renderPageBanner(summary, pageMeta, generatedAt) {
+    var meta = pageMeta || {};
+    var p = (summary && summary.patient) || {};
+    var crumb = meta.pillar ? t(crumbHtml(meta.pillar.en), crumbHtml(meta.pillar.pt)) : '';
+    var title = meta.title ? t(esc(meta.title.en), esc(meta.title.pt)) : '';
+    var desc = meta.description ? t(esc(meta.description.en), esc(meta.description.pt)) : '';
 
-    return '<section class="hero"><div class="container">' +
-      '<div class="hero-eyebrow">' +
-        '<span class="lang-en">Health Summary' + (prepared ? ' · ' + prepared.en : '') + '</span>' +
-        '<span class="lang-pt">Resumo de saúde' + (prepared ? ' · ' + prepared.pt : '') + '</span>' +
-      '</div>' +
-      '<h1 class="hero-title">' +
-        t('From scattered data to a clinical picture.', 'Dos dados dispersos a um quadro clínico.') +
-      '</h1>' +
-      (name
-        ? '<p class="hero-sub">' +
-            '<span class="lang-en">A single, structured view of ' + esc(name) + '’s physical, mental and spiritual health.</span>' +
-            '<span class="lang-pt">Uma visão única e estruturada da saúde física, mental e espiritual de ' + esc(name) + '.</span>' +
-          '</p>'
-        : '') +
-      '<div class="hero-meta">' + meta + '</div>' +
-    '</div></section>';
-  }
-  function buildPageHero(page, payloads) {
-    var meta = (window.LUMEN_PAGE_META || {})[page] || {};
-    if (meta.hero === 'home') return buildHomeHero(payloads);
-    var p = (payloads.summary && payloads.summary.patient) || {};
-    var eyebrow = meta.eyebrow ? t(esc(meta.eyebrow.en), esc(meta.eyebrow.pt)) : '';
-    var title = meta.title ? t(esc(meta.title.en), esc(meta.title.pt)) : esc(page);
-    return '<header class="page-header"><div class="container">' +
-      (eyebrow ? '<div class="page-eyebrow">' + eyebrow + '</div>' : '') +
-      '<h1 class="page-title">' + title + '</h1>' +
-      (p.full_name ? '<p class="page-patient">' + esc(p.full_name) + '</p>' : '') +
+    var items = '';
+    if (p.full_name) items += bannerIdItem('Patient', 'Paciente', esc(p.full_name), 'id-item--patient');
+    var dob = dateShort(p.date_of_birth);
+    if (dob) {
+      var age = ageFromDob(p.date_of_birth);
+      items += bannerIdItem('Born', 'Nascimento',
+        '<span class="lang-en">' + dob.en + (age != null ? ' <span class="id-soft">· ' + age + 'y</span>' : '') + '</span>' +
+        '<span class="lang-pt">' + dob.pt + (age != null ? ' <span class="id-soft">· ' + age + 'a</span>' : '') + '</span>');
+    }
+    if (p.country_of_residence) items += bannerIdItem('Locale', 'Local', esc(p.country_of_residence));
+    var prep = dateShort(generatedAt);
+    if (prep) items += bannerIdItem('Prepared', 'Preparado',
+      '<span class="lang-en">' + prep.en + '</span><span class="lang-pt">' + prep.pt + '</span>');
+
+    /* <header>, not <section>: on the static shells the banner replaces a
+       <header> element in place, and section.report-section zebra striping
+       keys on nth-of-type — a <section> here would flip that parity. */
+    return '<header class="page-banner"><div class="banner-inner">' +
+      (crumb ? '<p class="banner-crumb">' + crumb + '</p>' : '') +
+      (title ? '<h1 class="banner-title">' + title + '</h1>' : '') +
+      (desc ? '<p class="banner-desc">' + desc + '</p>' : '') +
+      (items ? '<div class="banner-identity">' + items + '</div>' : '') +
     '</div></header>';
   }
 
@@ -343,10 +344,10 @@
     var root = document.createElement('main');
     root.className = 'lumen-page-root jc-overview' + (page === 'home' ? ' jc-home' : '');
 
-    /* 1 · hero */
+    /* 1 · hero — the unified page banner */
     var heroWrap = document.createElement('div');
     heroWrap.className = 'lumen-hero';
-    heroWrap.innerHTML = buildPageHero(page, payloads);
+    heroWrap.innerHTML = renderPageBanner(payloads.summary, meta, newestGeneratedAt(payloads));
     root.appendChild(heroWrap);
 
     /* 2+3 · concise AI summary, then topic sections, in registry order.
@@ -423,6 +424,8 @@
     buildTail: buildTail,
     buildFooter: buildFooter,
     ensureAiLegend: ensureAiLegend,
+    renderPageBanner: renderPageBanner,
+    newestGeneratedAt: newestGeneratedAt,
     t: t,
     tPlain: tPlain,
     esc: esc,

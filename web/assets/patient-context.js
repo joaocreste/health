@@ -3635,6 +3635,58 @@
     };
   }
 
+  /* One /api/patient-dashboard fetch per page view, shared by the banner and
+     both AI decorators (it is the largest API response on the page).
+     jcRefreshAiInsights busts the memo so a rebuild re-reads fresh data. */
+  var dashboardJsonPromise = null;
+  function fetchDashboardJson(fresh) {
+    if (fresh) dashboardJsonPromise = null;
+    if (!dashboardJsonPromise) {
+      dashboardJsonPromise = fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    }
+    return dashboardJsonPromise;
+  }
+
+  /* Unified page banner on the static-bespoke shells (prompt #2b): swap the
+     hardcoded hero for the shared component — identity strictly from
+     /api/patient-summary, "Prepared" from the newest dashboard generated_at
+     (I-3). No swap without live identity (the inert static hero stays).
+     The vitals range selector is moved into the new banner; the old heroes'
+     back-links retire with them by design — the banner has none, matching
+     the assembler pages, and pillar navigation lives in the top nav. */
+  function decorateStaticBanner(section) {
+    var A = window.LUMEN_ASSEMBLER;
+    if (!A || !A.renderPageBanner) return;
+    var meta = (window.LUMEN_PAGE_META || {})[section];
+    if (!meta) return;
+    function getJson(url) {
+      return fetch(url, { headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    }
+    Promise.all([getJson('/api/patient-summary?clerk=' + encodeURIComponent(patient)), fetchDashboardJson()])
+      .then(function (res) {
+        var summary = res[0];
+        if (!summary || !summary.patient || !summary.patient.full_name) return;
+        var hero = document.querySelector('.hero, .page-header, .sp-hero');
+        if (!hero || !hero.parentNode) return;
+        var generatedAt = A.newestGeneratedAt ? A.newestGeneratedAt({ dashboard: res[1] }) : null;
+        var wrap = document.createElement('div');
+        wrap.innerHTML = A.renderPageBanner(summary, meta, generatedAt);
+        var banner = wrap.firstElementChild;
+        if (!banner) return;
+        var inner = banner.querySelector('.banner-inner') || banner;
+        hero.querySelectorAll('.vr-bar').forEach(function (n) { inner.appendChild(n); });
+        hero.parentNode.replaceChild(banner, hero);
+        /* tab title localizes with real identity, like the assembler (I-7) */
+        document.title = 'Lumen Health — ' +
+          (meta.title ? A.tPlain(meta.title.en, meta.title.pt) : section) +
+          ' · ' + summary.patient.full_name;
+      });
+  }
+
   /* Assembler tail on the static-bespoke shells: Upload → Update-AI-Insights
      (→ Delete on home only, D3), inserted before the shell footer. */
   function injectStaticTail(section) {
@@ -3674,6 +3726,7 @@
       // block can anchor before it), then the split AI decorator places the
       // concise summary right after the hero and the topic block before the
       // tail. The legend line lands under the first AI-badged block.
+      decorateStaticBanner(section0);
       injectStaticTail(section0);
       decorateWithAiInsights(section0);
       if (window.LUMEN_ASSEMBLER) window.LUMEN_ASSEMBLER.ensureAiLegend();
@@ -4135,10 +4188,9 @@
      summary immediately AFTER the hero, the topic block just before the
      assembler tail (else before the footer). No bottom-dock, no self-pin. */
   function decorateWithAiInsights(section) {
-    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
-      .catch(function () { return { sections: {} }; })
+    fetchDashboardJson()
       .then(function (data) {
+        data = data || { sections: {} };
         var rec = data && data.sections && data.sections['ai-insights'];
         var payload = rec && rec.cards_json;
         if (!payload || !payload.pages) return;
@@ -4151,7 +4203,7 @@
           sec1.className = 'ai-ins-block ai-ins-concise';
           sec1.setAttribute('data-ai-insights', '1');
           sec1.innerHTML = concise;
-          var hero = document.querySelector('.hero, .page-header, .sp-hero');
+          var hero = document.querySelector('.page-banner, .hero, .page-header, .sp-hero');
           if (hero && hero.parentNode) hero.parentNode.insertBefore(sec1, hero.nextSibling);
           else document.body.insertBefore(sec1, document.body.firstChild);
         }
@@ -4203,10 +4255,9 @@
     return html;
   }
   function decorateExamsWithAiOutliers() {
-    fetch('/api/patient-dashboard?clerk=' + encodeURIComponent(patient), { headers: { 'Accept': 'application/json' } })
-      .then(function (r) { return r.ok ? r.json() : { sections: {} }; })
-      .catch(function () { return { sections: {} }; })
+    fetchDashboardJson()
       .then(function (data) {
+        data = data || { sections: {} };
         var rec = data && data.sections && data.sections['ai-insights'];
         var payload = rec && rec.cards_json;
         var inl = payload && payload.inline_insights;
@@ -4255,6 +4306,7 @@
   window.jcRefreshAiInsights = function (sec) {
     try {
       if (document.querySelector('.lumen-page-root')) { location.reload(); return; }
+      fetchDashboardJson(true); // bust the shared memo: the rebuild just changed the payload
       decorateWithAiInsights(sec || currentSection());
       if ((sec || currentSection()) === 'physical-exams') decorateExamsWithAiOutliers();
     } catch (e) { /* keep existing cards */ }

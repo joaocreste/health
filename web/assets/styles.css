@@ -443,6 +443,7 @@ body.has-side-nav .sp-nav a.active {
    topnav and the sidebar itself are intentionally excluded from this rule. */
 body.has-side-nav > .page-header,
 body.has-side-nav > .sp-hero,
+body.has-side-nav > .page-banner,
 body.has-side-nav > section.report-section,
 body.has-side-nav > section.sp-section,
 body.has-side-nav > .doc-footer,
@@ -3460,4 +3461,107 @@ body.ct-fs-active { overflow: hidden; }
   .hero, .page-header { padding-left: 1.25rem; padding-right: 1.25rem; }
   section.report-section { padding: 3rem 1.25rem; }
   .section-nav { padding: 0.75rem 1.25rem; }
+}
+
+/* ─────────────────────────────────────────────
+   UNIFIED PAGE BANNER (build prompt #2b)
+   One shared hero component on every patient page:
+   breadcrumb → title → description → identity strip.
+   Geometry from design/lumen-banner-design.html; all
+   colors via existing tokens — no new color literals.
+   ───────────────────────────────────────────── */
+.page-banner {
+  background: var(--surface-dark-base);
+  border-bottom: 1px solid var(--surface-dark-elevated);
+  position: relative;
+  overflow: hidden;
+}
+.page-banner::before { /* house 64px grid */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  pointer-events: none;
+}
+.page-banner::after { /* gold hairline signature */
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--accent-gold-dark) 0%,
+    color-mix(in srgb, var(--accent-gold-dark) 15%, transparent) 55%,
+    transparent 100%);
+}
+.page-banner .banner-inner {
+  position: relative;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 44px 32px 0;
+  font-family: var(--font-body);
+}
+.page-banner .banner-crumb {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+}
+.page-banner .banner-crumb .crumb-sep { color: var(--accent-gold-dark); padding: 0 6px; }
+.page-banner .banner-title {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 44px;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--blue-50);
+  margin: 0 0 12px;
+  max-width: 760px;
+}
+.page-banner .banner-desc {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--blue-200);
+  max-width: 640px;
+  margin: 0 0 30px;
+}
+.page-banner .banner-identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 44px;
+  row-gap: 16px;
+  border-top: 1px solid var(--surface-dark-elevated);
+  padding: 18px 0 22px;
+}
+.page-banner .id-item { min-width: 120px; }
+.page-banner .id-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-gold-dark);
+  margin-bottom: 5px;
+}
+.page-banner .id-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blue-50);
+  letter-spacing: 0.01em;
+}
+.page-banner .id-value .id-soft { color: var(--text-muted); font-weight: 400; }
+.page-banner .id-item--patient .id-value { font-size: 15px; }
+/* functional controls preserved from a replaced static hero (e.g. the
+   vitals range selector) sit inside the band, below the identity strip */
+.page-banner .banner-inner .vr-bar { padding-bottom: 22px; }
+@media (max-width: 640px) {
+  .page-banner .banner-inner { padding: 32px 20px 0; }
+  .page-banner .banner-title { font-size: 30px; }
+  .page-banner .banner-desc { font-size: 14px; margin-bottom: 22px; }
+  .page-banner .banner-identity { gap: 0 28px; row-gap: 14px; }
 }

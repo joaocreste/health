@@ -34,40 +34,54 @@
   var SILVANA  = 'pending:silvana-creste-18ba19';
   var CRISTINA = 'pending:cristina-cresti-d7479c';
 
-  /* Per-page chrome metadata consumed by the assembler: hero eyebrow/title,
+  /* Per-page chrome metadata consumed by the assembler: the unified page
+     banner (pillar crumb / title / description — prompt #2b canonical copy),
      the AI-insights domain backing G-DOMAIN on that page, and (spiritual) the
-     registry-driven pastoral footnote line that replaces its bespoke footer. */
+     registry-driven pastoral footnote line that replaces its bespoke footer.
+     Subpage pillar strings carry the middot; the banner renderer splits on it
+     and wraps each separator in a gold .crumb-sep span. */
   window.LUMEN_PAGE_META = {
-    'home': { domain: null, hero: 'home' },
+    'home': {
+      domain: null,
+      pillar: { en: 'SUMMARY', pt: 'SUMÁRIO' },
+      title: { en: 'Health Summary', pt: 'Resumo de Saúde' },
+      description: { en: 'From scattered data to a clinical picture.', pt: 'De dados dispersos a um quadro clínico.' },
+    },
     'physical': {
       domain: 'physical',
-      eyebrow: { en: 'Section I · Physical health', pt: 'Seção I · Saúde física' },
+      pillar: { en: 'PHYSICAL', pt: 'FÍSICO' },
       title: { en: 'Physical Health Overview', pt: 'Visão Geral da Saúde Física' },
+      description: { en: 'Body systems, clinical history and physician assessments.', pt: 'Sistemas do corpo, histórico clínico e avaliações médicas.' },
     },
     'physical-vitals': {
       domain: 'physical',
-      eyebrow: { en: 'Physical · Vitals', pt: 'Físico · Vitais' },
+      pillar: { en: 'PHYSICAL · VITALS', pt: 'FÍSICO · VITAIS' },
       title: { en: 'Vitals', pt: 'Vitais' },
+      description: { en: 'Continuous signals from wearables and devices — heart, sleep, movement, glucose.', pt: 'Sinais contínuos de wearables e dispositivos — coração, sono, movimento, glicose.' },
     },
     'physical-exams': {
       domain: 'physical',
-      eyebrow: { en: 'Physical · Exams', pt: 'Físico · Exames' },
+      pillar: { en: 'PHYSICAL · EXAMS', pt: 'FÍSICO · EXAMES' },
       title: { en: 'Exams', pt: 'Exames' },
+      description: { en: 'Imaging studies and laboratory panels, read across time.', pt: 'Exames de imagem e painéis laboratoriais, lidos ao longo do tempo.' },
     },
     'physical-genetics': {
       domain: 'physical',
-      eyebrow: { en: 'Physical · Genetics', pt: 'Físico · Genética' },
+      pillar: { en: 'PHYSICAL · GENETICS', pt: 'FÍSICO · GENÉTICA' },
       title: { en: 'Genetics', pt: 'Genética' },
+      description: { en: 'Pharmacogenomics — how your genes shape medication response.', pt: 'Farmacogenômica — como seus genes moldam a resposta a medicamentos.' },
     },
     'mental': {
       domain: 'mental',
-      eyebrow: { en: 'Section II · Mental health', pt: 'Seção II · Saúde mental' },
+      pillar: { en: 'MENTAL', pt: 'MENTAL' },
       title: { en: 'Mental Health Overview', pt: 'Visão Geral da Saúde Mental' },
+      description: { en: 'Psychological architecture, therapy trends and life history.', pt: 'Arquitetura psicológica, tendências terapêuticas e história de vida.' },
     },
     'spiritual': {
       domain: 'spiritual',
-      eyebrow: { en: 'Section III · Spiritual health', pt: 'Seção III · Saúde espiritual' },
+      pillar: { en: 'SPIRITUAL', pt: 'ESPIRITUAL' },
       title: { en: 'Spiritual Health Overview', pt: 'Visão Geral da Saúde Espiritual' },
+      description: { en: 'Faith practice, values and meaning — the third pillar.', pt: 'Prática de fé, valores e significado — o terceiro pilar.' },
       footnote: {
         en: 'For pastoral and clinical communication only · Does not replace spiritual direction or licensed medical advice.',
         pt: 'Apenas para comunicação pastoral e clínica · Não substitui direção espiritual nem aconselhamento médico licenciado.',
