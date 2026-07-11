@@ -3456,6 +3456,75 @@
     var pl = rec && rec.cards_json;
     return (pl && pl.pages) ? pl : null;
   }
+  /* Restored: deleted by c8ecaafe (D1 refactor) while three call sites
+     remained — every aiBlockEl-wrapped AI block silently failed to render
+     platform-wide (ReferenceError swallowed by the provider try/catch). */
+  function injectAiInsightsStyles() {
+    if (document.getElementById('ai-ins-styles')) return;
+    var css = [
+      '.ai-ins-block{max-width:880px;margin:32px auto 8px;padding:28px 22px 8px;border-top:1px solid #E5E2DC;}',
+      '.ai-ins-header{margin-bottom:18px;}',
+      '.ai-ins-titlerow{display:flex;align-items:center;gap:10px;}',
+      '.ai-ins-title{font-family:Raleway,system-ui,sans-serif;font-size:1.25rem;color:#0D1B2A;margin:0;}',
+      '.ai-ins-disc{font-size:.78rem;color:#7A8FA6;margin:6px 0 0;}',
+      '.ai-ins-sub{font-size:1rem;line-height:1.5;color:#1E2D3D;margin:12px 0 0;font-weight:500;}',
+      '.ai-sub{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#7A8FA6;margin:22px 0 10px;}',
+      '.ai-sub.ai-pillar-h{color:#B8954A;border-top:1px solid #EFEAE0;padding-top:14px;}',
+      // Amber AI-insight card (design-system rule 7a): every text-based AI insight
+      // reads amber. Tokens from styles.css; literal fallbacks keep it robust.
+      '.ai-card{background:var(--ai-insight-bg,#FDF8EC);border:1px solid var(--ai-insight-stroke,#F4DD9C);border-left:4px solid #7A8FA6;border-radius:10px;padding:14px 16px;margin:10px 0;box-shadow:0 1px 2px rgba(13,27,42,.04);}',
+      '.ai-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
+      '.ai-card-title{font-weight:600;color:#0D1B2A;font-size:.96rem;}',
+      '.ai-card-summary{margin:4px 0 0;color:#1E2D3D;font-size:.9rem;line-height:1.5;}',
+      '.ai-sevedge-high{border-left-color:#c0392b;}.ai-sevedge-elevated{border-left-color:#d97706;}',
+      '.ai-sevedge-watch{border-left-color:#B8954A;}.ai-sevedge-info{border-left-color:#7A8FA6;}',
+      '.ai-sevedge-strength{border-left-color:#2e7d52;}.ai-sevedge-cross{border-left-color:#B8954A;background:#FBF8F2;}',
+      // New schema: risk_level / strength_level edges + chips + trajectory.
+      '.ai-edge-risk-high{border-left-color:#c0392b;}.ai-edge-risk-medium{border-left-color:#d97706;}.ai-edge-risk-low{border-left-color:#7A8FA6;}',
+      '.ai-edge-str-high{border-left-color:#2e7d52;}.ai-edge-str-medium{border-left-color:#3a9d6a;}.ai-edge-str-low{border-left-color:#7Fae93;}',
+      '.ai-chip-risk-high{background:#fbe9e7;color:#c0392b;}.ai-chip-risk-medium{background:#fef3e2;color:#b45309;}.ai-chip-risk-low{background:#eef1f4;color:#566;}',
+      '.ai-chip-str-high{background:#e6f4ec;color:#2e7d52;}.ai-chip-str-medium{background:#e9f5ef;color:#2e7d52;}.ai-chip-str-low{background:#eef6f1;color:#4a8a68;}',
+      '.ai-traj{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#EEF1F4;color:#566;}',
+      '.ai-traj-improving{background:#e6f4ec;color:#2e7d52;}.ai-traj-worsening{background:#fbe9e7;color:#c0392b;}',
+      '.ai-traj-stable{background:#eef1f4;color:#566;}.ai-traj-new{background:#ede7f6;color:#6B4FA0;}.ai-traj-insufficient_history{background:#f3f1ea;color:#8a7d5a;}',
+      '.ai-traj-note{margin:6px 0 0;font-size:.82rem;color:#5a6b5f;font-style:italic;line-height:1.45;}',
+      '.ai-overview{margin:10px 0 4px;color:#1E2D3D;font-size:.92rem;line-height:1.55;}',
+      '.ai-inline-sub{margin:8px 0 0;}',
+      '.ai-inline-sub-h{display:block;font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:#8a6d23;font-weight:700;margin-bottom:3px;}',
+      '.ai-inline-list{list-style:disc;margin:0;padding-left:18px;}.ai-inline-list li{font-size:.84rem;color:#3a4a5a;margin:2px 0;line-height:1.45;}',
+      '.ai-chip{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:#EEF1F4;color:#566;}',
+      '.ai-sevchip-high{background:#fbe9e7;color:#c0392b;}.ai-sevchip-elevated{background:#fef3e2;color:#b45309;}',
+      '.ai-sevchip-watch{background:#f7f0dd;color:#8a6d23;}.ai-sevchip-info{background:#eef1f4;color:#566;}',
+      '.ai-sevchip-strength{background:#e6f4ec;color:#2e7d52;}',
+      '.ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;color:#7A8FA6;}',
+      '.ai-anchor{font-size:.74rem;color:#7A8FA6;margin:2px 0 4px;}',
+      '.ai-ev{list-style:none;margin:8px 0 0;padding:0;border-top:1px dashed #EAE6DE;padding-top:8px;}',
+      '.ai-ev li{font-size:.8rem;color:#3a4a5a;margin:3px 0;line-height:1.4;}',
+      '.ai-ev-meta{color:#9aa7b4;font-size:.72rem;}',
+      '.ai-detail{margin-top:8px;}.ai-detail summary{cursor:pointer;font-size:.78rem;color:#B8954A;font-weight:600;}',
+      '.ai-detail-body{margin:8px 0 0;color:#1E2D3D;font-size:.86rem;line-height:1.55;}',
+      '.ai-clin{margin:8px 0 0;font-size:.82rem;color:#0D1B2A;}.ai-clin-body{color:#3a4a5a;}',
+      // Exam outlier explanation (9a) — attached inside each .lab-test card.
+      '.lab-ai-explain{margin-top:12px;padding-top:12px;border-top:1px dashed #EAE6DE;}',
+      '.lab-ai-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}',
+      '.lab-ai-trigger{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;color:#7A8FA6;}',
+      '.lab-ai-interp{margin:2px 0 10px;color:#1E2D3D;font-size:.88rem;line-height:1.5;}',
+      '.lab-ai-cf{border-radius:10px;padding:12px 14px;margin:8px 0;}',
+      '.lab-ai-cf-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:#8a6d23;font-weight:700;}',
+      '.lab-ai-cf-disc{font-size:.74rem;font-style:italic;color:#8a6d23;margin:4px 0 8px;}',
+      '.lab-ai-cf-list{list-style:disc;margin:0;padding-left:18px;}',
+      '.lab-ai-cf-list li{font-size:.84rem;color:#3a4a5a;margin:3px 0;line-height:1.45;}',
+      '.lab-ai-next{margin-top:8px;}',
+      '.lab-ai-next-head{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:#7A8FA6;margin-bottom:3px;}',
+      '.lab-ai-next ul{list-style:disc;margin:0;padding-left:18px;}',
+      '.lab-ai-next li{font-size:.82rem;color:#3a4a5a;margin:2px 0;line-height:1.45;}',
+    ].join('');
+    var s = document.createElement('style');
+    s.id = 'ai-ins-styles';
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
   function aiBlockEl(html) {
     injectAiInsightsStyles();
     var sec = document.createElement('section');
