@@ -3735,6 +3735,10 @@
 
     injectStyles();
     hidePageBody();
+    // The static shells' fixed side rail is hidden by hidePageBody, but the
+    // body class would keep shifting the assembler root 240px right into a
+    // phantom gutter — drop it so the page (and banner) span the viewport.
+    document.body.classList.remove('has-side-nav');
     gatePillarNav(patient); // canon: hide nav entries for pillars with no data
 
     var section = currentSection();

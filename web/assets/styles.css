@@ -3500,9 +3500,10 @@ body.ct-fs-active { overflow: hidden; }
 }
 .page-banner .banner-inner {
   position: relative;
-  max-width: 1080px;
+  /* fallback aligns with the static shells' .container (1200px, 2rem pad) */
+  max-width: var(--lumen-content-w, 1200px);
   margin: 0 auto;
-  padding: 44px 32px 0;
+  padding: 44px 2rem 0;
   font-family: var(--font-body);
 }
 .page-banner .banner-crumb {
@@ -3564,4 +3565,37 @@ body.ct-fs-active { overflow: hidden; }
   .page-banner .banner-title { font-size: 30px; }
   .page-banner .banner-desc { font-size: 14px; margin-bottom: 22px; }
   .page-banner .banner-identity { gap: 0 28px; row-gap: 14px; }
+}
+
+/* ─────────────────────────────────────────────
+   ASSEMBLER CONTENT WIDTH (prompt #2b follow-up)
+   The banner band always spans the full available
+   width; the content column scales to ~60vw on
+   wide screens (never narrower than the previous
+   1080px, capped for ultrawides). Banner text and
+   card edge share one width variable so they align
+   at every viewport. Home keeps the .container
+   (1200px) system its report cards already use;
+   static shells use the banner-inner fallback,
+   which matches .container exactly.
+   ───────────────────────────────────────────── */
+.lumen-page-root { --lumen-content-w: clamp(1080px, 60vw, 1600px); }
+.lumen-page-root.jc-home { --lumen-content-w: 1200px; }
+.lumen-page-root .ov-shell,
+.lumen-page-root .lumen-tail,
+.lumen-page-root .lumen-ai-legend {
+  max-width: var(--lumen-content-w);
+}
+/* .ov-shell has no side padding — zero the banner's and the tail's so the
+   banner text and tail cards start exactly at the topic-card edge */
+.lumen-page-root .banner-inner,
+.lumen-page-root .lumen-tail,
+.lumen-page-root .lumen-ai-legend {
+  padding-left: 0;
+  padding-right: 0;
+}
+/* home is the exception: its cards sit inside .container (2rem inset) */
+.lumen-page-root.jc-home .banner-inner {
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
