@@ -3581,6 +3581,13 @@ body.ct-fs-active { overflow: hidden; }
    ───────────────────────────────────────────── */
 .lumen-page-root { --lumen-content-w: clamp(1080px, 60vw, 1600px); }
 .lumen-page-root.jc-home { --lumen-content-w: 1200px; }
+/* The banner escapes the jc-overview padded canvas (padding: 32px 24px 96px,
+   injected by patient-context.js): negative margins make the band full-bleed
+   and flush under the topnav; the 32px bottom margin restores the original
+   banner-to-content spacing. Home's root is unpadded — no escape there. */
+.lumen-page-root.jc-overview:not(.jc-home) > .lumen-hero {
+  margin: -32px -24px 32px;
+}
 .lumen-page-root .ov-shell,
 .lumen-page-root .lumen-tail,
 .lumen-page-root .lumen-ai-legend {
