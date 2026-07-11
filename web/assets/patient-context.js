@@ -4211,7 +4211,11 @@
     var domain = PAGE_TO_DOMAIN[section];
     var page = domain && p.pages && p.pages[domain];
     if (!page || page.data_sufficient !== true) return '';
-    var ov = aiOverview(page.overview);
+    /* Depth ladder: subpages prefer their own deeper page_overviews entry
+       (prompt #2c follow-up); pillar overview is the fallback for payloads
+       built before page_overviews existed. */
+    var po = p.page_overviews && p.page_overviews[section];
+    var ov = aiOverview(po) || aiOverview(page.overview);
     if (!ov) return '';
     return aiHeader('AI summary', 'Resumo por IA') + ov;
   }

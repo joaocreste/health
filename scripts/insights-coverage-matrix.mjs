@@ -104,25 +104,32 @@ for (const p of patients) {
   console.log(W("page") + W("data(pillar)") + W("data(record)") + W("data_sufficient") + W("summary en+pt") + "GAP?");
 
   for (const { page, domain } of PAGES) {
-    let dataP, dataR, suff, summ;
+    let dataP, dataR, suff, summLabel, summ;
+    const isSub = !!(cov.pages && Object.prototype.hasOwnProperty.call(cov.pages, page));
     if (page === "home") {
       dataP = Object.values(pillar).some(n => n > 0);
       dataR = Object.values(record).some(n => n > 0);
       suff = "-";
       summ = hasBoth(cj?.summary?.headline) && hasBoth(cj?.summary?.overview);
+      summLabel = summ ? "YES" : "no";
     } else {
       dataP = pillar[domain] > 0;
-      dataR = record[domain] > 0;
+      dataR = isSub ? !!cov.pages[page] : record[domain] > 0;
       const pg = cj?.pages?.[domain];
       suff = pg ? String(pg.data_sufficient === true) : "no-section";
-      summ = hasBoth(pg?.overview);
+      /* Depth ladder: a subpage's own page_overviews entry beats the pillar
+         fallback; the label shows which one renders. */
+      const own = isSub && hasBoth(cj?.page_overviews?.[page]);
+      const fb = hasBoth(pg?.overview);
+      summ = own || fb;
+      summLabel = own ? "YES(page)" : (fb ? "YES(pillar)" : "no");
     }
     const gap = dataR && !summ;
     if (gap) gaps.push({ patient: p.full_name, clerk: p.clerk_user_id, page });
     console.log(W(page) +
       W(page === "home" ? (dataP ? "any:yes" : "any:no") : `${dataP} (${pillar[domain]})`) +
-      W(page === "home" ? (dataR ? "any:yes" : "any:no") : `${dataR} (${record[domain]})`) +
-      W(suff) + W(summ ? "YES" : "no") + (gap ? "<-- GAP" : ""));
+      W(page === "home" ? (dataR ? "any:yes" : "any:no") : String(dataR)) +
+      W(suff) + W(summLabel) + (gap ? "<-- GAP" : ""));
   }
 }
 
