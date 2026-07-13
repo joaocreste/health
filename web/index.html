@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-lang="en">
+<html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
   var l = null;
   try { l = window.localStorage.getItem('lumen-lang') || window.localStorage.getItem('jc_lang'); } catch (e) { l = null; }
   if (l !== 'en' && l !== 'pt') {
-    l = (navigator.language || 'en').toLowerCase().indexOf('pt') === 0 ? 'pt' : 'en';
+    l = 'pt'; // Brazilian Portuguese is the platform default
   }
   document.documentElement.setAttribute('data-lang', l);
   document.documentElement.setAttribute('lang', l === 'pt' ? 'pt-BR' : 'en');
@@ -1302,7 +1302,7 @@ html.lumen-static .cy-lab b{color:var(--text-primary)}
   $all('.lang-btn').forEach(function (b) {
     b.addEventListener('click', function () { setLang(b.getAttribute('data-setlang')); });
   });
-  setLang(document.documentElement.getAttribute('data-lang') || 'en');
+  setLang(document.documentElement.getAttribute('data-lang') || 'pt');
 
   /* ---------------- returning visitor: login -> dashboard ---------------- */
   /* If a live session exists, the "Log in" button becomes a dashboard link. */

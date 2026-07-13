@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-lang="en">
+<html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page not found — Lumen Health</title>
+<title>Página não encontrada — Lumen Health</title>
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script>try{var l=localStorage.getItem('jc_lang')||'en';if(l!=='en'&&l!=='pt')l='en';document.documentElement.setAttribute('data-lang',l);if(l==='pt'){document.documentElement.setAttribute('lang','pt-BR');}}catch(e){}</script>
+<script>try{var l=localStorage.getItem('jc_lang')||'pt';if(l!=='en'&&l!=='pt')l='pt';document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l==='pt'?'pt-BR':'en');}catch(e){}</script>
 <style>
   /* Tokens — /mnt/project/lumenhealth-branding.html (dark theme) */
   :root{
@@ -124,7 +124,7 @@
 (function(){
   var KEY='jc_lang';
   function apply(l){
-    if(l!=='en'&&l!=='pt') l='en';
+    if(l!=='en'&&l!=='pt') l='pt';
     document.documentElement.setAttribute('data-lang',l);
     document.documentElement.setAttribute('lang', l==='pt' ? 'pt-BR' : 'en');
     document.title = l==='pt' ? 'Página não encontrada — Lumen Health' : 'Page not found — Lumen Health';
@@ -136,8 +136,8 @@
   document.querySelectorAll('.lang-btn').forEach(function(b){
     b.addEventListener('click', function(){ apply(b.getAttribute('data-lang')); });
   });
-  var saved='en';
-  try{ saved=localStorage.getItem(KEY)||'en'; }catch(e){}
+  var saved='pt';
+  try{ saved=localStorage.getItem(KEY)||'pt'; }catch(e){}
   apply(saved);
 })();
 </script>

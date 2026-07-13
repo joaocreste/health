@@ -18,8 +18,8 @@
   var firstName = FIRST[patientClerk] || '';
 
   function lang() {
-    var l = document.documentElement.lang || localStorage.getItem('jc_lang') || 'en';
-    return l === 'pt' ? 'pt' : 'en';
+    var l = document.documentElement.lang || localStorage.getItem('jc_lang') || 'pt';
+    return l === 'en' ? 'en' : 'pt';
   }
 
   var STORE_KEY = 'lumen_chat_' + patientClerk;

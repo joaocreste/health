@@ -1630,7 +1630,7 @@ async function handleLogin(request, env) {
       clerk_user_id: rows[0].clerk_user_id,
       role: rows[0].role,
       full_name: rows[0].full_name,
-      locale: rows[0].locale || "en",
+      locale: rows[0].locale || "pt",
       username,
     }), { headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
     const cookie = await makeSessionCookie(env, rows[0].clerk_user_id);
@@ -2849,7 +2849,7 @@ async function handleProfile(request, env) {
         role:            me.role,
         full_name:       me.full_name || "",
         username:        me.demo_username || "",
-        locale:          me.locale || "en",
+        locale:          me.locale || "pt",
         location:        me.country_of_residence || "",
         native_language: me.native_language || "",
         has_password:    !!me.demo_password,
@@ -3001,7 +3001,7 @@ async function handleAdmin(request, env) {
     const fullName = String(body?.full_name || "").trim();
     if (!fullName) return jsonError(400, "full_name_required");
     const email = String(body?.email || "").trim() || `${slugifyForClerkPlaceholder(fullName).replace(/^pending:/, "")}@placeholder.local`;
-    const locale = body?.locale === "pt" ? "pt" : "en";
+    const locale = body?.locale === "en" ? "en" : "pt";
     const dob = body?.date_of_birth || null;
     const sex = body?.sex || null;
     const nativeLanguage = body?.native_language || null;
@@ -3049,7 +3049,7 @@ async function handleAdmin(request, env) {
     if (role !== "patient" && role !== "doctor") return jsonError(400, "role_must_be_patient_or_doctor");
 
     const email = String(body?.email || "").trim() || `${username}@placeholder.local`;
-    const locale = body?.locale === "pt" ? "pt" : "en";
+    const locale = body?.locale === "en" ? "en" : "pt";
     const clerk = slugifyForClerkPlaceholder(fullName);
 
     try {
@@ -3955,7 +3955,7 @@ async function handleExportPdf(request, env) {
   let body;
   try { body = await request.json(); } catch { return jsonError(400, "bad_json"); }
   const patient = body.patientId || body.patient || body.clerk;
-  const language = body.language === "pt" ? "pt" : "en";
+  const language = body.language === "en" ? "en" : "pt";
   if (!patient) return jsonError(400, "patient_required");
   try {
     const sql = neon(env.DATABASE_URL);

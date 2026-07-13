@@ -131,7 +131,8 @@
   };
 
   /* ── BILINGUAL TOGGLE ──
-   * Reads ?lang= query string first, then localStorage, defaults to "en".
+   * Reads ?lang= query string first, then localStorage, defaults to "pt"
+   * (Brazilian Portuguese is the platform default).
    * Sets <html lang="..."> and updates aria-pressed on the .lang-btn buttons.
    * Persists choice in localStorage.lang. CSS hides .lang-en or .lang-pt
    * blocks based on the html[lang] selector.
@@ -144,7 +145,7 @@
       if (VALID.has(url)) return url;
       const saved = localStorage.getItem(STORE_KEY);
       if (VALID.has(saved)) return saved;
-      return 'en';
+      return 'pt';
     }
     function applyLang(lang) {
       if (!VALID.has(lang)) return;
