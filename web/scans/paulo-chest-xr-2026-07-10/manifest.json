@@ -1,0 +1,64 @@
+{
+ "patient": "Paulo Augusto Silotto Dias de Souza",
+ "patientSlug": "paulo-silotto",
+ "study": "Chest X-ray (2 views)",
+ "studySlug": "paulo-chest-xr-2026-07-10",
+ "studyInstanceUID": "1.2.826.0.1.3680043.2.951.1905436",
+ "accessionNumber": "1056974",
+ "date": "2026-07-10",
+ "modality": "XR",
+ "facility": "HURP — Hospital Unimed Ribeirão Preto · Centro de Diagnóstico por Imagem",
+ "facilityCity": "Ribeirão Preto",
+ "facilityCountry": "Brazil",
+ "reportingDoctor": "Renato Campos Soares de Faria — CRM 82077",
+ "requestingDoctor": "Helton de Oliveira Couto",
+ "ways": [
+  {
+   "key": "view",
+   "labelEn": "View",
+   "labelPt": "Incidência",
+   "control": "segmented",
+   "values": [
+    {
+     "key": "pa",
+     "labelEn": "PA",
+     "labelPt": "PA"
+    },
+    {
+     "key": "lateral",
+     "labelEn": "Lateral",
+     "labelPt": "Perfil"
+    }
+   ]
+  }
+ ],
+ "defaultSelect": {
+  "view": "pa"
+ },
+ "stacks": [
+  {
+   "select": {
+    "view": "pa"
+   },
+   "count": 1,
+   "slices": [
+    "view-pa/0001.jpg"
+   ]
+  },
+  {
+   "select": {
+    "view": "lateral"
+   },
+   "count": 1,
+   "slices": [
+    "view-lateral/0001.jpg"
+   ]
+  }
+ ],
+ "report": {
+  "pdf": "report.pdf",
+  "textPt": "RADIOGRAFIA DO TÓRAX\n\nArcos costais visualizados íntegros.\nHilos e trama vascular pulmonar normais.\nMediastino centrado, sem evidências de alargamentos.\nParênquima pulmonar sem áreas de opacidades, consolidações ou nódulos.\nCúpulas e seios costofrênicos livres.\nAorta de morfologia, dimensões e topografia normais.\nÁrea cardíaca mostrando índice cardiotorácico dentro da normalidade.\n\nI.D.: Tórax radiologicamente normal.\n\nRENATO CAMPOS SOARES DE FARIA — CRM: 82077\nHURP - Hospital Unimed Ribeirão Preto · Centro de Diagnóstico por Imagem",
+  "textEn": null,
+  "aiSummary": null
+ }
+}

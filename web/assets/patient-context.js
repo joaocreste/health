@@ -4414,8 +4414,8 @@
   var PAULO_STUDIES = [
     {
       slug: 'paulo-cervical-mri-2026-05-15',
-      labelEn: '4A · MRI · Cervical spine',
-      labelPt: '4A · RM · Coluna cervical',
+      labelEn: '5A · MRI · Cervical spine',
+      labelPt: '5A · RM · Coluna cervical',
       titleEn: 'MRI cervical spine · 15 May 2026',
       titlePt: 'RM da coluna cervical · 15 de maio de 2026',
       blurbEn: 'MRI of the cervical spine without intravenous contrast. Three orientations were acquired — axial T2 (35 slices), coronal T2 (12) and sagittal (45, across T1 / T2 / STIR weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -4478,8 +4478,8 @@
     },
     {
       slug: 'paulo-lombar-mri-2026-05-15',
-      labelEn: '4B · MRI · Lumbar spine',
-      labelPt: '4B · RM · Coluna lombar',
+      labelEn: '5B · MRI · Lumbar spine',
+      labelPt: '5B · RM · Coluna lombar',
       titleEn: 'MRI lumbar spine · 15 May 2026',
       titlePt: 'RM da coluna lombar · 15 de maio de 2026',
       blurbEn: 'MRI of the lumbar spine without intravenous contrast. Three orientations were acquired — axial T2 (25 slices), coronal T2 (12) and sagittal (48, across STIR / T2 CLEAR / T1 weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -4776,7 +4776,7 @@
 
     return (
       '<div class="imagery-exam" id="paulo-spine-mri"><div class="container">' +
-        '<div class="section-label">' + t('4 · MRI · Spine', '4 · RM · Coluna') + '</div>' +
+        '<div class="section-label">' + t('5 · MRI · Spine', '5 · RM · Coluna') + '</div>' +
         '<h2 class="section-title">' + t('Spine MRI · 15 May 2026', 'RM da coluna · 15 de maio de 2026') + '</h2>' +
         '<p class="section-desc">' +
           t('Same-day cervical and lumbar MRI at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Pick the region (Cervical / Lumbar) and the plane (AXI / COR / SAG), then drag the slider, scroll the wheel, click-and-drag the image, or use the arrow keys to walk through the slices. The two reports follow side-by-side beneath the viewer.',
@@ -4958,7 +4958,7 @@
       '<section class="report-section" id="paulo-history">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('5 · AI longitudinal analysis', '5 · Análise longitudinal por IA') +
+            t('6 · AI longitudinal analysis', '6 · Análise longitudinal por IA') +
           '</div>' +
           '<h2 class="section-title ph-section-title">' +
             t('How cervical and lumbar findings evolved',
@@ -4972,7 +4972,7 @@
           '<div class="ph-timeline-grid">' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('5A · Cervical spine', '5A · Coluna cervical') + '</h3>' +
+                '<h3 class="ph-timeline-title">' + t('6A · Cervical spine', '6A · Coluna cervical') + '</h3>' +
                 '<span class="ph-timeline-span">' + t('2026 → 2015 · 3 studies', '2026 → 2015 · 3 estudos') + '</span>' +
               '</div>' +
               cervical.slice().reverse().map(buildPauloHistoryEntry).join('') +
@@ -4983,7 +4983,7 @@
             '</div>' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('5B · Lumbar spine', '5B · Coluna lombar') + '</h3>' +
+                '<h3 class="ph-timeline-title">' + t('6B · Lumbar spine', '6B · Coluna lombar') + '</h3>' +
                 '<span class="ph-timeline-span">' + t('2026 → 2023 · 2 studies', '2026 → 2023 · 2 estudos') + '</span>' +
               '</div>' +
               lumbar.slice().reverse().map(buildPauloHistoryEntry).join('') +
@@ -5009,7 +5009,7 @@
      report-only — no source imagery to view. */
 
   /* Cards render in date-descending order (newest first — house rule for all
-     imagery exams), so the 6A/6B/... letters are assigned from the sorted
+     imagery exams), so the 7A/7B/... letters are assigned from the sorted
      position, not stored in the data. */
   function pauloOtherStudyDateMs(c) {
     // Every card's dateEn is 'DD Mon YYYY' (e.g. '23 Nov 2015').
@@ -5025,7 +5025,7 @@
         '<span class="lang-pt">' + c.findingsPt[i] + '</span></li>'
       );
     }).join('');
-    var letter = '6' + String.fromCharCode(65 + idx) + ' · ';
+    var letter = '7' + String.fromCharCode(65 + idx) + ' · ';
     return (
       '<article class="po-card">' +
         '<header class="po-card-head">' +
@@ -5429,7 +5429,7 @@
       '<section class="report-section" id="paulo-other-studies">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('6 · Other studies on file', '6 · Outros exames disponíveis') +
+            t('7 · Other studies on file', '7 · Outros exames disponíveis') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Beyond the spine — thirteen additional reports',
@@ -5448,9 +5448,9 @@
   }
 
   /* ── Overall clinical evolution · the major cross-study link ──────
-     The capstone synthesis. Sections 1–6 each look at one axis (the
-     current snapshot, the two chest CTs, the spine viewer, the per-region
-     longitudinal arcs, the isolated studies). This ties ALL eighteen studies — spine,
+     The capstone synthesis. Sections 1–7 each look at one axis (the
+     current snapshot, the two chest CTs, the chest X-ray, the spine viewer,
+     the per-region longitudinal arcs, the isolated studies). This ties ALL eighteen studies — spine,
      peripheral joints, chest, abdomen/urological and systemic CT — into
      one thirteen-year clinical story, and surfaces the non-spine
      follow-up that the spine narrative tends to bury. */
@@ -5461,7 +5461,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('7 · Overall clinical evolution', '7 · Evolução clínica geral') + '</h2>' +
+              '<h2>' + t('8 · Overall clinical evolution', '8 · Evolução clínica geral') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -5885,7 +5885,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('8 · AI synthesis · Lab history', '8 · Síntese da IA · Histórico laboratorial') + '</h2>' +
+              '<h2>' + t('9 · AI synthesis · Lab history', '9 · Síntese da IA · Histórico laboratorial') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -6310,7 +6310,7 @@
 
     var head =
       '<div class="container">' +
-        '<div class="section-label">' + t('8 · Laboratory', '8 · Laboratorial') + '</div>' +
+        '<div class="section-label">' + t('9 · Laboratory', '9 · Laboratorial') + '</div>' +
         '<h2 class="section-title">' + t('Laboratory exams', 'Exames laboratoriais') + '</h2>' +
         '<p class="section-desc">' +
           t('Fifteen years of blood and urine work (2011-2026), reconciled from 28 scanned reports across 11+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. Original reports are linked beneath.',
@@ -6406,7 +6406,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('9 · AI synthesis · Ergometric series', '9 · Síntese da IA · Série ergométrica') + '</h2>' +
+              '<h2>' + t('10 · AI synthesis · Ergometric series', '10 · Síntese da IA · Série ergométrica') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -6533,7 +6533,7 @@
 
     var head2 =
       '<div class="container">' +
-        '<div class="section-label">' + t('9 · Cardiac', '9 · Cardíaco') + '</div>' +
+        '<div class="section-label">' + t('10 · Cardiac', '10 · Cardíaco') + '</div>' +
         '<h2 class="section-title">' + t('Ergometric stress tests', 'Testes ergométricos') + '</h2>' +
         '<p class="section-desc">' +
           t('Four exercise stress tests over twelve years (2011 → 2023), reconciled from scanned reports across four cardiologists and three protocols (Bruce, Rampa, Ellestad). All four were negative for ischaemia. The latest test is shown first; the comparison table and per-exam detail sit below, collapsed.',
@@ -6761,7 +6761,7 @@
 
     var head =
       '<div class="container">' +
-        '<div class="section-label">' + t('10 · Sleep medicine', '10 · Medicina do sono') + '</div>' +
+        '<div class="section-label">' + t('11 · Sleep medicine', '11 · Medicina do sono') + '</div>' +
         '<h2 class="section-title">' + t('Sleep studies', 'Estudos do sono') + '</h2>' +
         '<p class="section-desc">' +
           t('Two studies two years apart: a 2017 whole-night polysomnogram establishing mild obstructive sleep apnoea, and a 2019 drug-induced sleep endoscopy (DISE) mapping where the airway actually collapses. Each shows an at-a-glance readout — AHI severity for the PSG, the VOTE airway grade for the DISE — with the physicians’ original reports preserved verbatim underneath.',
@@ -6868,7 +6868,7 @@
       '<section class="report-section" id="imagery">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('4 · Imagery · Spine MRI', '4 · Imagem · RM da coluna') +
+            t('5 · Imagery · Spine MRI', '5 · Imagem · RM da coluna') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Imaging exam', 'Exame de imagem') +
@@ -6969,6 +6969,83 @@
         '</div>' +
       '</section>';
 
+    // ── Chest X-ray (2 views) · 10 Jul 2026 (HURP, Ribeirão Preto) ──────
+    // Same visit as the contrast CT (X-ray 18:32, CT 19:09). One way
+    // (view = PA / lateral), each a count-1 stack (scrubber auto-hides).
+    // Normal study. imaging_studies row scans/paulo-chest-xr-2026-07-10.
+    var chestXr =
+      '<section class="report-section" id="chest-xr-2026-07-10">' +
+        '<div class="container">' +
+          '<div class="section-label">' + t('3 · Imagery · Chest X-ray', '3 · Imagem · RX de tórax') + '</div>' +
+          '<h2 class="section-title">' + t('Chest X-ray (2 views) · 10 July 2026', 'RX de tórax (2 incidências) · 10 de julho de 2026') + '</h2>' +
+          '<p class="section-desc">' +
+            t('Two-view chest radiograph — PA and lateral — taken at 18:32 on the same visit as the contrast CT above (19:09). Use the <strong>View</strong> buttons to switch incidence. The radiologist read the study as <strong>entirely normal</strong>; the full report follows below, with the original laudo available to download.',
+              'Radiografia de tórax em duas incidências — PA e perfil — realizada às 18:32 na mesma visita da TC com contraste acima (19:09). Use os botões de <strong>Incidência</strong> para alternar. O radiologista interpretou o estudo como <strong>inteiramente normal</strong>; o laudo completo segue abaixo, com o original disponível para download.') +
+          '</p>' +
+          '<div class="report-export-row">' +
+            '<a class="export-btn-primary" href="scans/paulo-chest-xr-2026-07-10/report.pdf?v=1" download>' +
+              '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+              t('Export report (PDF)', 'Exportar laudo (PDF)') +
+            '</a>' +
+          '</div>' +
+          '<div class="ct-grid ct-grid-single">' +
+            '<div class="ct-viewer" data-prefix="scans/paulo-chest-xr-2026-07-10/" data-manifest="scans/paulo-chest-xr-2026-07-10/manifest.json?v=1">' +
+              '<div class="ct-viewer-head">' +
+                '<div class="ct-viewer-title">' + t('Radiograph viewer', 'Visualizador de radiografias') + '</div>' +
+                '<div class="ct-viewer-meta">' + t('Image', 'Imagem') + ' <span class="ct-idx">1</span> / <span class="ct-total">1</span></div>' +
+              '</div>' +
+              '<div class="ct-controls"></div>' +
+              '<div class="ct-stage"><img class="ct-img" alt="Chest X-ray image" loading="lazy"></div>' +
+              '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="Chest X-ray image">' +
+            '</div>' +
+          '</div>' +
+          '<h3 style="font-family:\'Raleway\',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:2.5rem 0 0.75rem;">' +
+            t('Radiologist&apos;s report', 'Laudo do radiologista') + ' <span class="mono" style="color:var(--text-muted);font-size:12px;font-weight:400;letter-spacing:0.06em;">' + t('(translated)', '(traduzido)') + '</span>' +
+          '</h3>' +
+          '<div class="two-col mb-3">' +
+            '<div class="list-card">' +
+              '<h4>' + t('Identifiers', 'Identificadores') + '</h4>' +
+              '<ul>' +
+                '<li><strong>' + t('Patient.', 'Paciente.') + '</strong> Paulo Augusto Silotto Dias de Souza</li>' +
+                '<li><strong>' + t('DOB.', 'Nascimento.') + '</strong> ' + t('14 July 1961', '14 de julho de 1961') + '</li>' +
+                '<li><strong>' + t('Exam date.', 'Data do exame.') + '</strong> ' + t('10 July 2026 · 18:32', '10 de julho de 2026 · 18:32') + '</li>' +
+                '<li><strong>' + t('Exam.', 'Exame.') + '</strong> ' + t('Chest X-ray, 2 views (PA + lateral)', 'RX de tórax, 2 incidências (PA + perfil)') + '</li>' +
+                '<li><strong>' + t('Accession.', 'Identificador.') + '</strong> 1056974 · ' + t('MRN', 'Prontuário') + ' 91619</li>' +
+                '<li><strong>' + t('Requesting physician.', 'Médico solicitante.') + '</strong> Dr. Helton de Oliveira Couto</li>' +
+                '<li><strong>' + t('Reporting physician.', 'Médico responsável.') + '</strong> Dr. Renato Campos Soares de Faria · CRM 82077</li>' +
+                '<li><strong>' + t('Institution.', 'Instituição.') + '</strong> HURP · Hospital Unimed Ribeirão Preto · ' + t('Imaging Diagnostic Centre', 'Centro de Diagnóstico por Imagem') + '</li>' +
+              '</ul>' +
+            '</div>' +
+            '<div class="list-card">' +
+              '<h4>' + t('Findings', 'Achados') + '</h4>' +
+              '<ul>' +
+                '<li>' + t('Rib arches intact.', 'Arcos costais visualizados íntegros.') + '</li>' +
+                '<li>' + t('Normal hila and pulmonary vasculature.', 'Hilos e trama vascular pulmonar normais.') + '</li>' +
+                '<li>' + t('Mediastinum centered, no widening.', 'Mediastino centrado, sem evidências de alargamentos.') + '</li>' +
+                '<li>' + t('Lung parenchyma without opacities, consolidations or nodules.', 'Parênquima pulmonar sem áreas de opacidades, consolidações ou nódulos.') + '</li>' +
+                '<li>' + t('Free diaphragmatic domes and costophrenic angles.', 'Cúpulas e seios costofrênicos livres.') + '</li>' +
+                '<li>' + t('Aorta of normal morphology, dimensions and topography.', 'Aorta de morfologia, dimensões e topografia normais.') + '</li>' +
+                '<li>' + t('Cardiothoracic index within normal limits.', 'Área cardíaca mostrando índice cardiotorácico dentro da normalidade.') + '</li>' +
+              '</ul>' +
+            '</div>' +
+          '</div>' +
+          '<div class="alert alert-ok">' +
+            '<strong>' + t('Impression:', 'Impressão diagnóstica:') + '</strong> ' +
+            t(' <strong>Radiologically normal chest.</strong>', ' <strong>Tórax radiologicamente normal.</strong>') +
+          '</div>' +
+          '<div class="list-card ai-insight-card mb-3">' +
+            '<h4><span class="ai-pill">' + t('AI summary', 'Resumo por IA') + '</span> ' + t('Plain-language read', 'Leitura em linguagem simples') + '</h4>' +
+            '<p style="font-size:14px;color:var(--text-secondary);line-height:1.65;">' +
+              '<span class="lang-en">A <strong>completely normal chest X-ray</strong> — lungs, heart size, mediastinum, diaphragm and ribs all read as unremarkable. Worth knowing: this was the first-line exam of the 10 July visit, followed forty minutes later by the contrast CT above. That the X-ray is normal while the CT shows bronchial wall thickening and a 3 mm micronodule is expected, not contradictory — plain radiographs simply cannot resolve findings that small; the CT is the more sensitive study of the pair. As a clean baseline radiograph it remains useful for comparison against any future chest films.</span>' +
+              '<span class="lang-pt">Um <strong>RX de tórax completamente normal</strong> — pulmões, área cardíaca, mediastino, diafragma e costelas sem alterações. Vale saber: este foi o exame de primeira linha da visita de 10 de julho, seguido quarenta minutos depois pela TC com contraste acima. O RX normal ao lado da TC com espessamento brônquico e micronódulo de 3 mm é esperado, não contraditório — a radiografia simples não tem resolução para achados tão pequenos; a TC é o estudo mais sensível dos dois. Como radiografia de base limpa, segue útil para comparação com filmes futuros.</span>' +
+            '</p>' +
+            '<p style="font-size:11.5px;color:var(--text-muted);margin-top:10px;line-height:1.5;">' +
+              t('AI-generated plain-language summary of the radiologist&apos;s report — not a diagnosis. Read alongside the full report above.', 'Resumo em linguagem simples gerado por IA a partir do laudo do radiologista — não é um diagnóstico. Leia junto com o laudo completo acima.') +
+            '</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+
     // ── Chest CT · 6 Jul 2026 (Hospital São Luiz Campinas) ──────────────
     // Generic manifest-driven viewer (app.js auto-wires .ct-viewer): a single
     // "Series" way (dropdown) over the 6 diagnostic reconstructions. The dose
@@ -6978,7 +7055,7 @@
     var chestCt =
       '<section class="report-section" id="chest-ct-2026">' +
         '<div class="container">' +
-          '<div class="section-label">' + t('3 · Imagery · Chest CT', '3 · Imagem · TC de tórax') + '</div>' +
+          '<div class="section-label">' + t('4 · Imagery · Chest CT', '4 · Imagem · TC de tórax') + '</div>' +
           '<h2 class="section-title">' + t('Chest CT · 6 July 2026', 'TC de tórax · 6 de julho de 2026') + '</h2>' +
           '<p class="section-desc">' +
             t('Volumetric multidetector chest CT acquired in both inspiration and expiration, reconstructed six ways. Pick a reconstruction from the <strong>Series</strong> dropdown — lung parenchyma and mediastinal (soft-tissue) windows on the inspiration volume, the expiration acquisition and a high-resolution expiration series for air-trapping, plus thin axial and coronal reformats — then scrub the slider, scroll, drag, or use the arrow keys. The radiologist&apos;s findings and conclusion follow below, with a plain-language AI summary; the original laudo is available to download.',
@@ -7067,8 +7144,9 @@
     var main = document.createElement('div');
     main.className = 'jc-paulo-exams';
     // Imagery exams render newest-first (house rule): contrast chest CT
-    // (10 Jul) -> non-contrast chest CT (6 Jul) -> spine MRI (15 May).
-    main.innerHTML = aiSummary + chestCtContrast + chestCt + imagery + history + otherStudies + overall +
+    // (10 Jul 19:09) -> chest X-ray (10 Jul 18:32) -> non-contrast chest CT
+    // (6 Jul) -> spine MRI (15 May).
+    main.innerHTML = aiSummary + chestCtContrast + chestXr + chestCt + imagery + history + otherStudies + overall +
       labs + ergometric + sleep;
 
     return {
