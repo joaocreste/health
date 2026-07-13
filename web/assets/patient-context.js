@@ -4414,8 +4414,8 @@
   var PAULO_STUDIES = [
     {
       slug: 'paulo-cervical-mri-2026-05-15',
-      labelEn: '2A · MRI · Cervical spine',
-      labelPt: '2A · RM · Coluna cervical',
+      labelEn: '3A · MRI · Cervical spine',
+      labelPt: '3A · RM · Coluna cervical',
       titleEn: 'MRI cervical spine · 15 May 2026',
       titlePt: 'RM da coluna cervical · 15 de maio de 2026',
       blurbEn: 'MRI of the cervical spine without intravenous contrast. Three orientations were acquired — axial T2 (35 slices), coronal T2 (12) and sagittal (45, across T1 / T2 / STIR weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -4478,8 +4478,8 @@
     },
     {
       slug: 'paulo-lombar-mri-2026-05-15',
-      labelEn: '2B · MRI · Lumbar spine',
-      labelPt: '2B · RM · Coluna lombar',
+      labelEn: '3B · MRI · Lumbar spine',
+      labelPt: '3B · RM · Coluna lombar',
       titleEn: 'MRI lumbar spine · 15 May 2026',
       titlePt: 'RM da coluna lombar · 15 de maio de 2026',
       blurbEn: 'MRI of the lumbar spine without intravenous contrast. Three orientations were acquired — axial T2 (25 slices), coronal T2 (12) and sagittal (48, across STIR / T2 CLEAR / T1 weightings, grouped in that order on the slider). Use the AXI / COR / SAG buttons inside the viewer to switch plane, then scrub the slider to walk through the slices.',
@@ -4776,7 +4776,7 @@
 
     return (
       '<div class="imagery-exam" id="paulo-spine-mri"><div class="container">' +
-        '<div class="section-label">' + t('2 · MRI · Spine', '2 · RM · Coluna') + '</div>' +
+        '<div class="section-label">' + t('3 · MRI · Spine', '3 · RM · Coluna') + '</div>' +
         '<h2 class="section-title">' + t('Spine MRI · 15 May 2026', 'RM da coluna · 15 de maio de 2026') + '</h2>' +
         '<p class="section-desc">' +
           t('Same-day cervical and lumbar MRI at CETAM Diagnóstico, reported by Dr. Marco Antonio de Carvalho (CRM-99607). Pick the region (Cervical / Lumbar) and the plane (AXI / COR / SAG), then drag the slider, scroll the wheel, click-and-drag the image, or use the arrow keys to walk through the slices. The two reports follow side-by-side beneath the viewer.',
@@ -4958,7 +4958,7 @@
       '<section class="report-section" id="paulo-history">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('3 · AI longitudinal analysis', '3 · Análise longitudinal por IA') +
+            t('4 · AI longitudinal analysis', '4 · Análise longitudinal por IA') +
           '</div>' +
           '<h2 class="section-title ph-section-title">' +
             t('How cervical and lumbar findings evolved',
@@ -4966,16 +4966,16 @@
             ' <span class="ai-pill">AI</span>' +
           '</h2>' +
           '<p class="section-desc">' +
-            t('Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico. Each entry carries an <strong>AI Δ-from-previous read</strong> at the top — what moved, what stabilised, what is genuinely new — followed by the underlying radiologist&apos;s synthesis. Read top-to-bottom to see the dominant lesion migrate and the disease envelope widen level by level.',
-              'Três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico. Cada entrada traz uma <strong>leitura Δ-vs.-anterior da IA</strong> no topo — o que mudou, o que estabilizou, o que é genuinamente novo — seguida da síntese do radiologista. Leia de cima para baixo para ver a lesão dominante migrar e o envoltório degenerativo se ampliar nível a nível.') +
+            t('Three cervical MRIs (2015, 2023, 2026) and two lumbar (2023, 2026), all from CETAM Diagnóstico, <strong>newest study first</strong>. Each entry carries an <strong>AI Δ-from-previous read</strong> at the top — what moved, what stabilised, what is genuinely new versus the older study below it — followed by the underlying radiologist&apos;s synthesis. Scroll down each column to trace the findings back to their baseline.',
+              'Três RMs cervicais (2015, 2023, 2026) e duas lombares (2023, 2026), todas do CETAM Diagnóstico, <strong>do exame mais recente para o mais antigo</strong>. Cada entrada traz uma <strong>leitura Δ-vs.-anterior da IA</strong> no topo — o que mudou, o que estabilizou, o que é genuinamente novo em relação ao estudo mais antigo logo abaixo — seguida da síntese do radiologista. Desça em cada coluna para acompanhar os achados até a linha de base.') +
           '</p>' +
           '<div class="ph-timeline-grid">' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('3A · Cervical spine', '3A · Coluna cervical') + '</h3>' +
-                '<span class="ph-timeline-span">' + t('2015 → 2026 · 3 studies', '2015 → 2026 · 3 estudos') + '</span>' +
+                '<h3 class="ph-timeline-title">' + t('4A · Cervical spine', '4A · Coluna cervical') + '</h3>' +
+                '<span class="ph-timeline-span">' + t('2026 → 2015 · 3 studies', '2026 → 2015 · 3 estudos') + '</span>' +
               '</div>' +
-              cervical.map(buildPauloHistoryEntry).join('') +
+              cervical.slice().reverse().map(buildPauloHistoryEntry).join('') +
               '<div class="ph-takeaway">' +
                 '<span class="lang-en">The dominant lesion <strong>migrated upward</strong> over eleven years — from C6–C7 (2015) to C5–C6 (2023, still dominant in 2026). What was a focal disc protrusion in 2015 became a <strong>diffuse disco-osteophytic bulge with ventral cord contact</strong> by 2026, with explicit involvement of the uncovertebral and facet joints. Cord signal remains normal — no myelopathy, but the cord is being touched.</span>' +
                 '<span class="lang-pt">A lesão dominante <strong>migrou cranialmente</strong> ao longo de onze anos — de C6–C7 (2015) para C5–C6 (2023, ainda dominante em 2026). O que era protrusão discal focal em 2015 tornou-se <strong>abaulamento disco-osteofitário difuso com contato medular ventral</strong> em 2026, com envolvimento explícito das articulações uncovertebrais e facetárias. O sinal medular permanece normal — sem mielopatia, mas a medula está sendo tocada.</span>' +
@@ -4983,10 +4983,10 @@
             '</div>' +
             '<div class="ph-timeline">' +
               '<div class="ph-timeline-head">' +
-                '<h3 class="ph-timeline-title">' + t('3B · Lumbar spine', '3B · Coluna lombar') + '</h3>' +
-                '<span class="ph-timeline-span">' + t('2023 → 2026 · 2 studies', '2023 → 2026 · 2 estudos') + '</span>' +
+                '<h3 class="ph-timeline-title">' + t('4B · Lumbar spine', '4B · Coluna lombar') + '</h3>' +
+                '<span class="ph-timeline-span">' + t('2026 → 2023 · 2 studies', '2026 → 2023 · 2 estudos') + '</span>' +
               '</div>' +
-              lumbar.map(buildPauloHistoryEntry).join('') +
+              lumbar.slice().reverse().map(buildPauloHistoryEntry).join('') +
               '<div class="ph-takeaway is-lumbar">' +
                 '<span class="lang-en">The L5–S1 left-S1 compression pattern is <strong>stable across both studies</strong>, but the surrounding picture worsened: <strong>L3–L4 canal stenosis</strong> emerges as a second focus, and the addition of <strong>Modic I (oedema)</strong> signal at multiple levels means the degeneration is currently <em>active</em>, not chronically settled.</span>' +
                 '<span class="lang-pt">O padrão de compressão da raiz S1 esquerda em L5–S1 é <strong>estável entre os dois estudos</strong>, mas o quadro ao redor piorou: <strong>estenose do canal em L3–L4</strong> aparece como segundo foco, e o aparecimento de sinal <strong>Modic I (edema)</strong> em múltiplos níveis indica que a degeneração está atualmente <em>ativa</em>, e não cronicamente estabilizada.</span>' +
@@ -5008,18 +5008,29 @@
      key findings, an AI read, and a link to the original PDF. These are
      report-only — no source imagery to view. */
 
-  function buildPauloOtherStudyCard(c) {
+  /* Cards render in date-descending order (newest first — house rule for all
+     imagery exams), so the 5A/5B/... letters are assigned from the sorted
+     position, not stored in the data. */
+  function pauloOtherStudyDateMs(c) {
+    // Every card's dateEn is 'DD Mon YYYY' (e.g. '23 Nov 2015').
+    var M = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+    var p = (c.dateEn || '').split(' ');
+    return Date.UTC(+p[2] || 0, M[p[1]] || 0, +p[0] || 1);
+  }
+
+  function buildPauloOtherStudyCard(c, idx) {
     var findingsHtml = (c.findingsEn || []).map(function (_, i) {
       return (
         '<li><span class="lang-en">' + c.findingsEn[i] + '</span>' +
         '<span class="lang-pt">' + c.findingsPt[i] + '</span></li>'
       );
     }).join('');
+    var letter = '5' + String.fromCharCode(65 + idx) + ' · ';
     return (
       '<article class="po-card">' +
         '<header class="po-card-head">' +
           '<div>' +
-            '<div class="po-card-eyebrow">' + t(c.eyebrowEn, c.eyebrowPt) + '</div>' +
+            '<div class="po-card-eyebrow">' + t(letter + c.eyebrowEn, letter + c.eyebrowPt) + '</div>' +
             '<h3 class="po-card-title">' + t(c.titleEn, c.titlePt) + '</h3>' +
             '<div class="po-card-meta">' + c.physician + ' · ' + c.provider + '</div>' +
           '</div>' +
@@ -5052,8 +5063,8 @@
   function buildPauloOtherStudiesSection() {
     var cards = [
       {
-        eyebrowEn: '4A · MRI · Right shoulder',
-        eyebrowPt: '4A · RM · Ombro direito',
+        eyebrowEn: 'MRI · Right shoulder',
+        eyebrowPt: 'RM · Ombro direito',
         titleEn:   'Right shoulder MRI',
         titlePt:   'RM do ombro direito',
         dateEn: '23 Nov 2015',
@@ -5077,8 +5088,8 @@
         aiPt: 'Empatado com a RM cervical de 2015 como o <strong>estudo mais antigo do histórico</strong>, e o primeiro sinal de que a degeneração do Paulo <strong>não se restringe à coluna</strong>: a articulação acromioclavicular está intensamente artrósica (osteófitos, cistos subcondrais, edema ósseo) com manguito rotador íntegro. Logo, o gerador de dor é a própria articulação AC, e não uma ruptura — fonte mecânica, dolorosa à palpação, tratável por infiltração local. Lido junto ao joelho (2019) e à coluna dorsolombar, configura uma <strong>tendência osteoartrósica sistêmica</strong>, não uma região isolada.',
       },
       {
-        eyebrowEn: '4B · MRI · Right knee',
-        eyebrowPt: '4B · RM · Joelho direito',
+        eyebrowEn: 'MRI · Right knee',
+        eyebrowPt: 'RM · Joelho direito',
         titleEn:   'Right knee MRI',
         titlePt:   'RM do joelho direito',
         dateEn: '01 Aug 2019',
@@ -5104,8 +5115,8 @@
         aiPt: 'Quatro anos após o ombro, uma <strong>segunda articulação de carga degenera</strong> — condropatia femoropatelar grau III, degeneração meniscal mucinoide e derrame moderado, num joelho já marcado por lesão antiga (provável sequela de Osgood-Schlatter, ruptura radial prévia do menisco lateral). Reforça o padrão sistêmico e acrescenta uma <strong>sobrecarga mecânica no membro inferior</strong>: uma marcha antálgica, poupando o joelho, sobrecarregaria ainda mais os segmentos lombares esquerdos e a raiz S1 — joelho e coluna não são problemas independentes.',
       },
       {
-        eyebrowEn: '4C · CT · Abdomen & pelvis',
-        eyebrowPt: '4C · TC · Abdome e pelve',
+        eyebrowEn: 'CT · Abdomen & pelvis',
+        eyebrowPt: 'TC · Abdome e pelve',
         titleEn:   'Abdomen & pelvis CT (with contrast)',
         titlePt:   'TC de abdome e pelve (com contraste)',
         dateEn: '31 Mar 2022',
@@ -5133,8 +5144,8 @@
         aiPt: 'O estudo não-coluna mais acionável, em duas frentes. Primeiro, <strong>corrobora a doença da coluna por outra modalidade</strong> e já mostra atrofia muscular paravertebral <em>e</em> glútea em 2022 — quatro anos antes de a RM de 2026 quantificá-la, ou seja, o descondicionamento é antigo, não recente. Segundo, genuinamente novo e <strong>fora do eixo musculoesquelético</strong>: espessamento da parede vesical com próstata globosa (o próprio laudo recomenda <strong>investigação urológica</strong>) e diverticulose sigmoide. Merecem um acompanhamento próprio e não devem se perder atrás da narrativa da coluna.',
       },
       {
-        eyebrowEn: '4D · CT · Cranium',
-        eyebrowPt: '4D · TC · Crânio',
+        eyebrowEn: 'CT · Cranium',
+        eyebrowPt: 'TC · Crânio',
         titleEn:   'Cranium CT (non-contrast)',
         titlePt:   'TC de crânio (sem contraste)',
         dateEn: '26 Apr 2023',
@@ -5160,8 +5171,8 @@
         aiPt: 'Em geral <strong>tranquilizador</strong> — sem sangramento, sem massa, sem desvio de linha média; o alargamento dos sulcos é involução compatível com a idade. O detalhe revelador é o <strong>resíduo de contraste de mielografia</strong> nas cisternas basais: o Paulo foi submetido, anos atrás, a imagem contrastada invasiva do canal vertebral — prova de que a doença da coluna é <strong>de décadas</strong> e já foi significativa o bastante para justificar uma investigação da era pré-RM. Nada aqui exige ação aguda; situa há quanto tempo a história da coluna corre.',
       },
       {
-        eyebrowEn: '4E · CT · Face / sinuses',
-        eyebrowPt: '4E · TC · Face / seios',
+        eyebrowEn: 'CT · Face / sinuses',
+        eyebrowPt: 'TC · Face / seios',
         titleEn:   'Face & sinuses CT (non-contrast)',
         titlePt:   'TC dos seios da face (sem contraste)',
         dateEn: '14 Mar 2023',
@@ -5187,8 +5198,8 @@
         aiPt: 'Conjunto <strong>benigno e encaminhável ao otorrino</strong>: sinusopatia crônica de baixo grau somada a um desvio anatômico do septo — juntos, causa plausível de obstrução nasal crônica / sintomas sinusais recorrentes, e um problema estrutural corrigível que vale registrar mesmo estando fora da história da coluna. O mesmo resíduo de mielografia antiga visto na TC de crânio reaparece, confirmando-o de forma cruzada. Sem doença sinonasal agressiva.',
       },
       {
-        eyebrowEn: '4F · MRI · Right hand',
-        eyebrowPt: '4F · RM · Mão direita',
+        eyebrowEn: 'MRI · Right hand',
+        eyebrowPt: 'RM · Mão direita',
         titleEn:   'Right hand MRI',
         titlePt:   'RM da mão direita',
         dateEn: '12 Jun 2025',
@@ -5213,8 +5224,8 @@
         aiPt: 'Uma terceira articulação com o mesmo quadro: alteração degenerativa metacarpofalângica / carpometacárpica uma década após o ombro (2015) e o joelho (2019). Estende o <strong>fio osteoartrósico sistêmico até a mão</strong> e acrescenta um componente ativo de partes moles — tendinopatia flexora e tenossinovite do 4º dedo — tratável por si só. Sendo o estudo periférico mais recente do histórico (2025), confirma que a tendência segue progredindo fora da coluna.',
       },
       {
-        eyebrowEn: '4G · X-ray · Chest',
-        eyebrowPt: '4G · RX · Tórax',
+        eyebrowEn: 'X-ray · Chest',
+        eyebrowPt: 'RX · Tórax',
         titleEn:   'Chest X-ray',
         titlePt:   'RX de tórax',
         dateEn: '23 Jan 2019',
@@ -5237,8 +5248,8 @@
         aiPt: 'Tórax <strong>radiologicamente normal</strong> — sem infiltrado, derrame ou cardiomegalia. Lido junto à TC de tórax oito semanas depois (também benigna) e a um segundo RX de tórax normal em março, fixa uma <strong>linha de base cardiopulmonar limpa</strong> no início de 2019: a carga degenerativa de outras regiões não tem correlato torácico.',
       },
       {
-        eyebrowEn: '4H · X-ray · Chest & sinuses',
-        eyebrowPt: '4H · RX · Tórax e seios da face',
+        eyebrowEn: 'X-ray · Chest & sinuses',
+        eyebrowPt: 'RX · Tórax e seios da face',
         titleEn:   'Chest & sinus X-ray',
         titlePt:   'RX de tórax e seios da face',
         dateEn: '05 Mar 2019',
@@ -5259,8 +5270,8 @@
         aiPt: 'Confirma o tórax normal e acrescenta um olhar precoce, por radiografia simples, sobre os seios da face: <strong>sem sinusite, apenas septo nasal tortuoso / desviado</strong> — o mesmo desvio que a TC de face de 2023 detalharia depois. O achado estrutural nasal antecede a TC em quatro anos, enquanto a sinusopatia inflamatória estava ausente na radiografia de 2019.',
       },
       {
-        eyebrowEn: '4I · CT · Chest',
-        eyebrowPt: '4I · TC · Tórax',
+        eyebrowEn: 'CT · Chest',
+        eyebrowPt: 'TC · Tórax',
         titleEn:   'Chest CT (non-contrast)',
         titlePt:   'TC de tórax (sem contraste)',
         dateEn: '15 Mar 2019',
@@ -5285,8 +5296,8 @@
         aiPt: 'Investigada por tosse e <strong>essencialmente tranquilizadora</strong>: parênquima pulmonar limpo, apenas pequenos linfonodos mediastinais reacionais (≤ 0,7 cm), sem massa ou adenomegalia. O único elo com a história dominante é incidental — <strong>espondiloartrose dorsal (torácica)</strong>, a coluna degenerativa aparecendo até numa TC de tórax e fazendo a ponte entre a doença cervical e a lombar no segmento torácico.',
       },
       {
-        eyebrowEn: '4J · Ultrasound · Abdomen',
-        eyebrowPt: '4J · US · Abdome',
+        eyebrowEn: 'Ultrasound · Abdomen',
+        eyebrowPt: 'US · Abdome',
         titleEn:   'Abdominal ultrasound',
         titlePt:   'Ultrassom de abdome total',
         dateEn: '27 Jul 2013',
@@ -5309,8 +5320,8 @@
         aiPt: 'O estudo <strong>mais antigo de todo o histórico do Paulo (2013)</strong> e o <strong>início do fio do fígado gorduroso</strong>: hepatomegalia com esteatose discreta, ainda presente nove anos depois no ultrassom de abdome de 2022. A esteatose acompanha o padrão lipídico limítrofe-aterogênico do sangue, tornando o fígado o elo metabólico mais claro — e, como o fio muscular, modificável. A próstata ainda estava normal aqui; o aumento aparece depois.',
       },
       {
-        eyebrowEn: '4K · Ultrasound · Abdomen & prostate',
-        eyebrowPt: '4K · US · Abdome e próstata',
+        eyebrowEn: 'Ultrasound · Abdomen & prostate',
+        eyebrowPt: 'US · Abdome e próstata',
         titleEn:   'Abdomen & prostate ultrasound',
         titlePt:   'Ultrassom de abdome e próstata',
         dateEn: '24 Mar 2022',
@@ -5335,8 +5346,8 @@
         aiPt: 'Dois fios num só estudo. Primeiro, <strong>abre a trilha urológica</strong>: aumento prostático benigno (44 cm³) com resíduo pós-miccional mensurável (62 cm³) — o mesmo quadro que a TC de abdome / pelve encaminhou para investigação urológica no mesmo ano e que os ultrassons de 2023 acompanham. Segundo, o fígado gorduroso persiste desde 2013, agora com uma <strong>área hipoecóica de 40 × 45 mm que o próprio laudo não define</strong> (nódulo vs. preservação focal) — o único achado aqui que pede imagem de seguimento dedicada, e não tranquilização.',
       },
       {
-        eyebrowEn: '4L · Ultrasound · Kidneys & urinary tract',
-        eyebrowPt: '4L · US · Rins e vias urinárias',
+        eyebrowEn: 'Ultrasound · Kidneys & urinary tract',
+        eyebrowPt: 'US · Rins e vias urinárias',
         titleEn:   'Kidneys & urinary tract ultrasound',
         titlePt:   'Ultrassom de rins e vias urinárias',
         dateEn: '25 Aug 2022',
@@ -5361,8 +5372,8 @@
         aiPt: 'A metade renal da investigação urológica, cinco meses após o ultrassom de próstata: <strong>vias urinárias altas essencialmente normais</strong>, com o único achado de um cisto cortical simples de 0,7 cm à direita — incidental, benigno, sem conduta. Tranquilizador que o quadro de esvaziamento vesical (HPB, resíduo elevado) <strong>ainda não causou dano renal ou do sistema coletor a montante</strong>.',
       },
       {
-        eyebrowEn: '4M · Ultrasound · Urinary tract & prostate',
-        eyebrowPt: '4M · US · Vias urinárias e próstata',
+        eyebrowEn: 'Ultrasound · Urinary tract & prostate',
+        eyebrowPt: 'US · Vias urinárias e próstata',
         titleEn:   'Urinary tract & prostate ultrasound',
         titlePt:   'Ultrassom de vias urinárias e próstata',
         dateEn: '13 Feb 2023',
@@ -5387,8 +5398,8 @@
         aiPt: 'O <strong>estudo urológico mais recente</strong> e o seguimento natural do par de 2022. Cada laudo, isolado, é lido como &ldquo;habitual&rdquo;, mas ao longo do ano o <strong>resíduo pós-miccional subiu de 62 para ~77 cm³</strong> — esvaziamento vesical incompleto tendendo na direção errada, ainda que os rins permaneçam normais. É o fio que a TC de 2022 previu: um quadro de obstrução prostática benigna lentamente progressivo, que merece vigilância própria, à parte da coluna.',
       },
       {
-        eyebrowEn: '4N · Colonoscopy · Lower GI',
-        eyebrowPt: '4N · Colonoscopia · Trato GI baixo',
+        eyebrowEn: 'Colonoscopy · Lower GI',
+        eyebrowPt: 'Colonoscopia · Trato GI baixo',
         titleEn:   'Total colonoscopy',
         titlePt:   'Colonoscopia total',
         dateEn: '10 Sep 2013',
@@ -5412,19 +5423,21 @@
       },
     ];
 
+    cards.sort(function (a, b) { return pauloOtherStudyDateMs(b) - pauloOtherStudyDateMs(a); });
+
     return (
       '<section class="report-section" id="paulo-other-studies">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('4 · Other studies on file', '4 · Outros exames disponíveis') +
+            t('5 · Other studies on file', '5 · Outros exames disponíveis') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Beyond the spine — thirteen additional reports',
               'Além da coluna — outros treze laudos') +
           '</h2>' +
           '<p class="section-desc">' +
-            t('Thirteen additional radiology reports on file, spanning 2013 to 2025 — peripheral joints (shoulder, knee, hand), chest (X-ray and CT), the abdomen / liver and a four-study urological series, plus the head and face CTs. Each card carries the radiologist&apos;s key findings, an AI read, and the full PDF; these are report-only studies, with no source imagery to view.',
-              'Treze laudos de radiologia no histórico, de 2013 a 2025 — articulações periféricas (ombro, joelho, mão), tórax (RX e TC), abdome / fígado e uma série urológica de quatro estudos, além das TCs de crânio e face. Cada cartão traz os achados-chave do radiologista, uma leitura da IA e o PDF completo; são estudos somente-laudo, sem imagens de origem para visualizar.') +
+            t('Thirteen additional radiology reports on file, spanning 2013 to 2025 and ordered newest first — peripheral joints (shoulder, knee, hand), chest (X-ray and CT), the abdomen / liver and a four-study urological series, plus the head and face CTs. Each card carries the radiologist&apos;s key findings, an AI read, and the full PDF; these are report-only studies, with no source imagery to view.',
+              'Treze laudos de radiologia no histórico, de 2013 a 2025, do exame mais recente para o mais antigo — articulações periféricas (ombro, joelho, mão), tórax (RX e TC), abdome / fígado e uma série urológica de quatro estudos, além das TCs de crânio e face. Cada cartão traz os achados-chave do radiologista, uma leitura da IA e o PDF completo; são estudos somente-laudo, sem imagens de origem para visualizar.') +
           '</p>' +
           '<div class="po-grid">' +
             cards.map(buildPauloOtherStudyCard).join('') +
@@ -5435,9 +5448,9 @@
   }
 
   /* ── Overall clinical evolution · the major cross-study link ──────
-     The capstone synthesis. Sections 1–4 each look at one axis (the
-     current snapshot, the spine viewer, the per-region longitudinal
-     arcs, the isolated studies). This ties ALL eighteen studies — spine,
+     The capstone synthesis. Sections 1–5 each look at one axis (the
+     current snapshot, the chest CT, the spine viewer, the per-region
+     longitudinal arcs, the isolated studies). This ties ALL eighteen studies — spine,
      peripheral joints, chest, abdomen/urological and systemic CT — into
      one thirteen-year clinical story, and surfaces the non-spine
      follow-up that the spine narrative tends to bury. */
@@ -5448,7 +5461,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('5 · Overall clinical evolution', '5 · Evolução clínica geral') + '</h2>' +
+              '<h2>' + t('6 · Overall clinical evolution', '6 · Evolução clínica geral') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -5872,7 +5885,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('3 · AI synthesis · Lab history', '3 · Síntese da IA · Histórico laboratorial') + '</h2>' +
+              '<h2>' + t('7 · AI synthesis · Lab history', '7 · Síntese da IA · Histórico laboratorial') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -6297,7 +6310,7 @@
 
     var head =
       '<div class="container">' +
-        '<div class="section-label">' + t('3 · Laboratory', '3 · Laboratorial') + '</div>' +
+        '<div class="section-label">' + t('7 · Laboratory', '7 · Laboratorial') + '</div>' +
         '<h2 class="section-title">' + t('Laboratory exams', 'Exames laboratoriais') + '</h2>' +
         '<p class="section-desc">' +
           t('Fifteen years of blood and urine work (2011-2026), reconciled from 28 scanned reports across 11+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. Original reports are linked beneath.',
@@ -6393,7 +6406,7 @@
         '<div class="container">' +
           '<div class="paulo-ai-summary">' +
             '<header class="paulo-ai-summary-head">' +
-              '<h2>' + t('4 · AI synthesis · Ergometric series', '4 · Síntese da IA · Série ergométrica') + '</h2>' +
+              '<h2>' + t('8 · AI synthesis · Ergometric series', '8 · Síntese da IA · Série ergométrica') + '</h2>' +
               '<span class="ai-pill">AI</span>' +
             '</header>' +
             '<div class="paulo-ai-summary-meta">' +
@@ -6520,7 +6533,7 @@
 
     var head2 =
       '<div class="container">' +
-        '<div class="section-label">' + t('4 · Cardiac', '4 · Cardíaco') + '</div>' +
+        '<div class="section-label">' + t('8 · Cardiac', '8 · Cardíaco') + '</div>' +
         '<h2 class="section-title">' + t('Ergometric stress tests', 'Testes ergométricos') + '</h2>' +
         '<p class="section-desc">' +
           t('Four exercise stress tests over twelve years (2011 → 2023), reconciled from scanned reports across four cardiologists and three protocols (Bruce, Rampa, Ellestad). All four were negative for ischaemia. The latest test is shown first; the comparison table and per-exam detail sit below, collapsed.',
@@ -6748,7 +6761,7 @@
 
     var head =
       '<div class="container">' +
-        '<div class="section-label">' + t('5 · Sleep medicine', '5 · Medicina do sono') + '</div>' +
+        '<div class="section-label">' + t('9 · Sleep medicine', '9 · Medicina do sono') + '</div>' +
         '<h2 class="section-title">' + t('Sleep studies', 'Estudos do sono') + '</h2>' +
         '<p class="section-desc">' +
           t('Two studies two years apart: a 2017 whole-night polysomnogram establishing mild obstructive sleep apnoea, and a 2019 drug-induced sleep endoscopy (DISE) mapping where the airway actually collapses. Each shows an at-a-glance readout — AHI severity for the PSG, the VOTE airway grade for the DISE — with the physicians’ original reports preserved verbatim underneath.',
@@ -6855,7 +6868,7 @@
       '<section class="report-section" id="imagery">' +
         '<div class="container">' +
           '<div class="section-label">' +
-            t('2 · Imagery', '2 · Imagem') +
+            t('3 · Imagery · Spine MRI', '3 · Imagem · RM da coluna') +
           '</div>' +
           '<h2 class="section-title">' +
             t('Imaging exam', 'Exame de imagem') +
@@ -6877,7 +6890,7 @@
     var chestCt =
       '<section class="report-section" id="chest-ct-2026">' +
         '<div class="container">' +
-          '<div class="section-label">' + t('3 · Imagery · Chest CT', '3 · Imagem · TC de tórax') + '</div>' +
+          '<div class="section-label">' + t('2 · Imagery · Chest CT', '2 · Imagem · TC de tórax') + '</div>' +
           '<h2 class="section-title">' + t('Chest CT · 6 July 2026', 'TC de tórax · 6 de julho de 2026') + '</h2>' +
           '<p class="section-desc">' +
             t('Volumetric multidetector chest CT acquired in both inspiration and expiration, reconstructed six ways. Pick a reconstruction from the <strong>Series</strong> dropdown — lung parenchyma and mediastinal (soft-tissue) windows on the inspiration volume, the expiration acquisition and a high-resolution expiration series for air-trapping, plus thin axial and coronal reformats — then scrub the slider, scroll, drag, or use the arrow keys. The radiologist&apos;s findings and conclusion follow below, with a plain-language AI summary; the original laudo is available to download.',
@@ -6965,7 +6978,9 @@
 
     var main = document.createElement('div');
     main.className = 'jc-paulo-exams';
-    main.innerHTML = aiSummary + imagery + chestCt + history + otherStudies + overall +
+    // Imagery exams render newest-first (house rule): chest CT (Jul 2026)
+    // precedes the spine MRI session (May 2026).
+    main.innerHTML = aiSummary + chestCt + imagery + history + otherStudies + overall +
       labs + ergometric + sleep;
 
     return {
