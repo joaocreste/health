@@ -3403,10 +3403,16 @@
     });
   }
 
-  // Joao's static physical-exams page: fill #ecg-mount from /api/patient-exams.
-  function decorateEcgStudies(clerk) {
-    var section = document.getElementById('ecg-section');
-    var mount = document.getElementById('ecg-mount');
+  // Fill an ECG section/mount pair from /api/patient-exams (the shared DB-driven
+  // path). Defaults to the static shell's global #ecg-section/#ecg-mount
+  // (Joao/Leo/John). Bespoke assembler pages (e.g. Paulo) pass a scoped root +
+  // selectors so their OWN mount is filled — the static shell's duplicate-id
+  // mount survives hidePageBody() hidden-but-present, and must never be targeted.
+  function decorateEcgStudies(clerk, opts) {
+    opts = opts || {};
+    var scope = opts.root || document;
+    var section = scope.querySelector(opts.sectionSel || '#ecg-section');
+    var mount = scope.querySelector(opts.mountSel || '#ecg-mount');
     if (!section || !mount) return;
     fetch('/api/patient-exams?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json' } })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -6761,7 +6767,7 @@
 
     var head =
       '<div class="container">' +
-        '<div class="section-label">' + t('11 · Sleep medicine', '11 · Medicina do sono') + '</div>' +
+        '<div class="section-label">' + t('12 · Sleep medicine', '12 · Medicina do sono') + '</div>' +
         '<h2 class="section-title">' + t('Sleep studies', 'Estudos do sono') + '</h2>' +
         '<p class="section-desc">' +
           t('Two studies two years apart: a 2017 whole-night polysomnogram establishing mild obstructive sleep apnoea, and a 2019 drug-induced sleep endoscopy (DISE) mapping where the airway actually collapses. Each shows an at-a-glance readout — AHI severity for the PSG, the VOTE airway grade for the DISE — with the physicians’ original reports preserved verbatim underneath.',
@@ -7141,13 +7147,32 @@
     var ergometric   = renderPauloErgoSection();
     var sleep        = renderPauloSleepSection();
 
+    // ── 11 · Cardiac · ECG — DB-driven, shared ecg_studies pipeline ──────
+    // Same mechanism as the static physical-exams page: the mount below is
+    // filled at runtime by decorateEcgStudies() from /api/patient-exams,
+    // hydrating the Lumen SVG inline with the date pill + version switcher.
+    // Scoped IDs (paulo-*) so we never collide with the static shell's hidden
+    // #ecg-mount, which hidePageBody() leaves present-but-hidden in the DOM.
+    // Hidden until >=1 study exists (decorate reveals it).
+    var ecg =
+      '<section class="report-section" id="paulo-ecg-section" style="display:none;">' +
+        '<div class="container">' +
+          '<div class="section-label">' + t('11 · Cardiac · ECG', '11 · Cardíaco · ECG') + '</div>' +
+          '<p class="section-desc">' +
+            t('Resting 12-lead ECG recorded during the 10 July 2026 hospital stay at HURP. The tracing below is the source printout framed for the dashboard — a visual rendering, not a diagnostic instrument — and the device’s automated reading was not physician-confirmed. The date pill switches between ECGs as more are added.',
+              'ECG de repouso de 12 derivações registrado durante a internação de 10 de julho de 2026 no HURP. O traçado abaixo é a impressão original emoldurada para o painel — uma representação visual, não um instrumento diagnóstico — e a leitura automática do aparelho não foi confirmada por médico. A pílula de data alterna entre ECGs à medida que forem adicionados.') +
+          '</p>' +
+          '<div id="paulo-ecg-mount"></div>' +
+        '</div>' +
+      '</section>';
+
     var main = document.createElement('div');
     main.className = 'jc-paulo-exams';
     // Imagery exams render newest-first (house rule): contrast chest CT
     // (10 Jul 19:09) -> chest X-ray (10 Jul 18:32) -> non-contrast chest CT
-    // (6 Jul) -> spine MRI (15 May).
+    // (6 Jul) -> spine MRI (15 May). Cardiac cluster: ergometric (10) then ECG (11).
     main.innerHTML = aiSummary + chestCtContrast + chestXr + chestCt + imagery + history + otherStudies + overall +
-      labs + ergometric + sleep;
+      labs + ergometric + ecg + sleep;
 
     return {
       el: main,
@@ -7160,6 +7185,9 @@
         // uses app.js's generic engine, which only auto-runs at load — so
         // re-scan after injection.
         if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+        // DB-driven ECG block — scoped to Paulo's subtree + IDs so the static
+        // shell's hidden #ecg-mount is never touched.
+        decorateEcgStudies(PAULO_SILOTTO, { root: main, sectionSel: '#paulo-ecg-section', mountSel: '#paulo-ecg-mount' });
       },
     };
   }

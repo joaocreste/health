@@ -66,6 +66,10 @@ const study = {
   qrs_ms: arg("--qrs") ? parseInt(arg("--qrs"), 10) : null,
   qt_ms: arg("--qt") ? parseInt(arg("--qt"), 10) : null,
   qtc_ms: arg("--qtc") ? parseInt(arg("--qtc"), 10) : null,
+  // Frontal-plane axes (P / QRS / T, degrees) — printed on most 12-lead reports.
+  axis_p: arg("--axis-p") ? parseInt(arg("--axis-p"), 10) : null,
+  axis_qrs: arg("--axis-qrs") ? parseInt(arg("--axis-qrs"), 10) : null,
+  axis_t: arg("--axis-t") ? parseInt(arg("--axis-t"), 10) : null,
   interpretation: arg("--interpretation") || null,
   report_text: arg("--report-text") || null,
 };
