@@ -3396,7 +3396,8 @@
     Array.prototype.forEach.call(nodes, function (node) {
       var id = node.getAttribute('data-ecg-id');
       var ck = node.getAttribute('data-clerk') || clerk;
-      fetch('/api/patient-ecg-object?clerk=' + encodeURIComponent(ck) + '&id=' + encodeURIComponent(id) + '&kind=svg')
+      fetch('/api/patient-ecg-object?clerk=' + encodeURIComponent(ck) + '&id=' + encodeURIComponent(id) + '&kind=svg',
+            { headers: { 'X-Viewer-Clerk': viewerClerkHeader() } })
         .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
         .then(function (svg) { node.innerHTML = svg; })
         .catch(function () { node.innerHTML = '<div class="ecg-chart-loading">' + t('Chart unavailable', 'Traçado indisponível') + '</div>'; });
@@ -3414,7 +3415,10 @@
     var section = scope.querySelector(opts.sectionSel || '#ecg-section');
     var mount = scope.querySelector(opts.mountSel || '#ecg-mount');
     if (!section || !mount) return;
-    fetch('/api/patient-exams?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json' } })
+    // Send the viewer header (self -> own clerk; admin -> proxied clerk) so the
+    // ECG block also renders under admin/proxy-view, consistent with the rest of
+    // patient-context.js's fetches — cookie-only auth left non-owning viewers 401.
+    fetch('/api/patient-exams?clerk=' + encodeURIComponent(clerk), { headers: { Accept: 'application/json', 'X-Viewer-Clerk': viewerClerkHeader() } })
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (e) {
         var studies = (e && e.ecg_studies) || [];
