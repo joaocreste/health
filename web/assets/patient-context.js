@@ -3276,7 +3276,10 @@
       '<h2 class="section-title"><span class="lang-en">Electrocardiogram (ECG) · ' + dn.en + '</span>' +
         '<span class="lang-pt">Eletrocardiograma (ECG) · ' + dn.pt + '</span></h2>' +
       (s.clinic || s.ordering_doctor
-        ? ('<p class="section-desc">' + escapeHtml([s.clinic, s.ordering_doctor ? ('· ' + t('ordered by', 'solicitado por') + ' ' + s.ordering_doctor) : ''].filter(Boolean).join(' ')) + '</p>')
+        ? ('<p class="section-desc">' + [
+            s.clinic ? escapeHtml(s.clinic) : '',
+            s.ordering_doctor ? ('· ' + t('ordered by', 'solicitado por') + ' ' + escapeHtml(s.ordering_doctor)) : '',
+          ].filter(Boolean).join(' ') + '</p>')
         : '') +
       '<div class="ecg-chart" data-ecg-id="' + escapeHtml(String(s.id)) + '" data-clerk="' + escapeHtml(String(clerk)) + '">' +
         '<div class="ecg-chart-loading">' + t('Loading chart…', 'Carregando traçado…') + '</div></div>' +
