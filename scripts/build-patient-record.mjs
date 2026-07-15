@@ -9,7 +9,9 @@ const root = join(__dirname, "..");
 
 // Bump on every change to what this assembler emits, so the chatbot context is
 // visibly versioned. v2 = folded in reviewed therapy-session synthesis.
-const RECORD_VERSION = "v2";
+// v3 = current medications block from db/medications (daily doses) — the meds
+// table is DB-rendered client-side, so the static-HTML strip never sees it.
+const RECORD_VERSION = "v3";
 const JOAO_CLERK = "pending:joao";
 
 const PAGES = [
@@ -127,6 +129,54 @@ async function buildTherapySection() {
   lines.push(``, `Theoretical-lens highlights (AI inference, one register among several):`);
   for (const l of lens) lines.push(`- ${l.lens}/${l.construct}: ${l.observation}`);
   return lines.join("\n");
+}
+
+/* Current medications (db/medications) + supplements. Emitted with the
+   normalized DAILY dose so the model can reason pharmacologically (check the
+   med list FIRST when interpreting any lab / vital / symptom — a finding a
+   current drug explains is attributed to the drug, not to pathology). */
+async function buildMedicationsSection() {
+  const dsn = loadDatabaseUrl();
+  if (!dsn) {
+    console.warn("  [meds] no DATABASE_URL — skipping medications (offline build).");
+    return null;
+  }
+  const sql = neon(dsn);
+  const prow = await sql`SELECT id FROM users WHERE clerk_user_id = ${JOAO_CLERK} AND role = 'patient' LIMIT 1`;
+  if (!prow.length) return null;
+  const pid = prow[0].id;
+  const [meds, supps] = await Promise.all([
+    sql`SELECT name, dose, frequency, daily_dose_amount, daily_dose_unit, drug_class, status, note
+          FROM medications WHERE patient_id = ${pid}
+          ORDER BY (status = 'active') DESC, name`,
+    sql`SELECT name, dose FROM supplements WHERE patient_id = ${pid} ORDER BY name`,
+  ]);
+  if (!meds.length && !supps.length) return null;
+
+  const lines = [];
+  lines.push(`Current medication list (informational record confirmed by the patient — not a prescription).`);
+  lines.push(`Daily dose = strength x units per dose x doses per day. Null daily dose = PRN / non-daily / needs review.`);
+  lines.push(``, `Medications:`);
+  for (const m of meds) {
+    const daily = m.daily_dose_amount != null ? `${m.daily_dose_amount} ${m.daily_dose_unit || ""}/day` : "no fixed daily total";
+    const bits = [daily];
+    if (m.frequency) bits.push(`schedule: ${m.frequency}`);
+    if (m.drug_class) bits.push(m.drug_class);
+    bits.push(m.status || "status unknown");
+    lines.push(`- ${m.name} — ${bits.join("; ")}`);
+    if (m.note) lines.push(`  ${m.note}`);
+  }
+  if (supps.length) {
+    lines.push(``, `Supplements:`);
+    for (const s of supps) lines.push(`- ${s.name}${s.dose ? ` — ${s.dose}` : ""}`);
+  }
+  lines.push(``, `When interpreting any lab, vital or symptom in this record, check this list first: attribute drug-explained findings to the drug rather than to pathology, and surface plausible drug-finding correlations.`);
+  return lines.join("\n");
+}
+
+const medsText = await buildMedicationsSection();
+if (medsText) {
+  sections.push(`========================================\nSECTION: Current Medications\nSOURCE: db/medications (daily doses)\n========================================\n\n${medsText}`);
 }
 
 const therapyText = await buildTherapySection();
