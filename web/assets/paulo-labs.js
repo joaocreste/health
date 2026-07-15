@@ -2745,6 +2745,22 @@ window.PAULO_LABS = {
               "value": 2.24
             }
           ]
+        },
+        {
+          "marker_en": "Sodium",
+          "marker_pt": "Sódio",
+          "unit": "mEq/L",
+          "ref_low": 137,
+          "ref_high": 145,
+          "ref_text_en": "137 – 145 mEq/L",
+          "ref_text_pt": "137 – 145 mEq/L",
+          "points": [
+            {
+              "date": "2026-07-14",
+              "value": 129,
+              "flag": "L"
+            }
+          ]
         }
       ]
     },
