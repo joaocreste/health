@@ -334,9 +334,14 @@ async function gateStaticRequest(request, env, url) {
   if (rule.selfAdmin) return isPrivileged(g) ? null : deny(true);
   if (!g.scopes.size || !scopeHasAny(g, rule.anyOf)) return deny(true);
   if (rule.honorFilter && g.status === "grant" && Array.isArray(g.filter?.imaging_study_ids) && g.filter.imaging_study_ids.length) {
-    const rows = await sql`SELECT jpeg_preview_prefix FROM imaging_studies
+    const rows = await sql`SELECT jpeg_preview_prefix, report_blob_key FROM imaging_studies
       WHERE patient_id = ${g.patientId} AND id = ANY(${g.filter.imaging_study_ids}::uuid[])`;
-    const prefixes = rows.map((r) => (r.jpeg_preview_prefix || "").replace(/^web\//, "/"))
+    // Stored keys come in two shapes ("web/scans/…" for PZ, "scans/…" for
+    // later ingests); report_blob_key covers report-only studies with no
+    // jpeg prefix. Normalize all to the served "/scans/…" path.
+    const prefixes = rows.flatMap((r) => [r.jpeg_preview_prefix, r.report_blob_key])
+      .filter(Boolean)
+      .map((p) => "/" + p.replace(/^\/?(?:web\/)?/, ""))
       .filter((p) => p.startsWith("/scans/"));
     if (!prefixes.some((p) => path.startsWith(p))) return deny(true);
   }
