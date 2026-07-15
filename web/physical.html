@@ -224,16 +224,15 @@
     <h2 class="section-title"><span class="lang-en">Prescribed medications &amp; supplementation</span><span class="lang-pt">Medicações prescritas e suplementação</span></h2>
     <p class="section-desc"><span class="lang-en">Mirrors the backend record (<code>medications</code> table). Day-to-day dose adjustments coordinated with Dr. Eduardo Tisher.</span><span class="lang-pt">Espelha o registro do backend (tabela <code>medications</code>). Ajustes de dose do dia a dia coordenados com o Dr. Eduardo Tisher.</span></p>
 
+    <!-- Rows below are DB-driven: patient-context.js fills these tbodies from
+         /api/patient-summary (medications/supplements), same pattern as the
+         #injury tables on home.html. The section hides when the record is
+         empty; hardcoded rows were going stale on every dose change. -->
     <table class="data-table mb-3">
       <thead>
-        <tr><th><span class="lang-en">Medication</span><span class="lang-pt">Medicação</span></th><th><span class="lang-en">Dose</span><span class="lang-pt">Dose</span></th><th><span class="lang-en">Class</span><span class="lang-pt">Classe</span></th><th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th><th><span class="lang-en">Clinical note</span><span class="lang-pt">Observação clínica</span></th></tr>
+        <tr><th><span class="lang-en">Medication</span><span class="lang-pt">Medicação</span></th><th><span class="lang-en">Daily dose</span><span class="lang-pt">Dose diária</span></th><th><span class="lang-en">Class</span><span class="lang-pt">Classe</span></th><th><span class="lang-en">Status</span><span class="lang-pt">Status</span></th><th><span class="lang-en">Clinical note</span><span class="lang-pt">Observação clínica</span></th></tr>
       </thead>
-      <tbody>
-        <tr><td class="strong">Depakote ER</td><td class="num">1000 mg/day</td><td>—</td><td><span class="pill pill-info"><span class="lang-en">Active</span><span class="lang-pt">Ativa</span></span></td><td>—</td></tr>
-        <tr><td class="strong">Lyrica</td><td class="num">300 mg/day</td><td>—</td><td><span class="pill pill-info"><span class="lang-en">Active</span><span class="lang-pt">Ativa</span></span></td><td>—</td></tr>
-        <tr><td class="strong">Quetiapine</td><td class="num">50 mg/day</td><td>—</td><td><span class="pill pill-info"><span class="lang-en">Active</span><span class="lang-pt">Ativa</span></span></td><td>—</td></tr>
-        <tr><td class="strong">Valium</td><td class="num">32.5 mg/day</td><td>—</td><td><span class="pill pill-info"><span class="lang-en">Active</span><span class="lang-pt">Ativa</span></span></td><td>—</td></tr>
-      </tbody>
+      <tbody id="meds-db-body"></tbody>
     </table>
 
     <h3 style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:var(--blue-800);margin:1.5rem 0 1rem;"><span class="lang-en">Supplementation</span><span class="lang-pt">Suplementação</span></h3>
@@ -241,7 +240,7 @@
       <thead>
         <tr><th><span class="lang-en">Supplement</span><span class="lang-pt">Suplemento</span></th><th><span class="lang-en">Dose</span><span class="lang-pt">Dose</span></th><th><span class="lang-en">Clinical note</span><span class="lang-pt">Observação clínica</span></th></tr>
       </thead>
-      <tbody>
+      <tbody id="supps-db-body">
         <tr><td colspan="3" style="color:var(--text-muted);font-style:italic;"><span class="lang-en">No supplements on record in the backend.</span><span class="lang-pt">Nenhum suplemento registrado no backend.</span></td></tr>
       </tbody>
     </table>
@@ -303,7 +302,7 @@
 <script src="assets/john-mode.js?v=2"></script>
 <script src="assets/section-registry.js?v=3"></script>
 <script src="assets/page-assembler.js?v=4"></script>
-<script src="assets/patient-context.js?v=100"></script>
+<script src="assets/patient-context.js?v=102"></script>
 <script src="assets/insights-update.js?v=4"></script>
 <script src="assets/upload-card.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>

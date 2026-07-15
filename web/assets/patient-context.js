@@ -3142,6 +3142,60 @@
       });
   }
 
+  /* ── Static-shell medications (DB-driven) ───────────────────────────────
+     Fills the #meds pharmacology tables on Patient Zero's static physical.html
+     from /api/patient-summary (medications + supplements) — the same pattern
+     as the #injury tables on home.html. The DB is the source of truth
+     (scripts/ingest-*-medications.mjs); the previously hardcoded rows went
+     stale on every dose change. Shows the normalized DAILY dose; the note
+     cell shows the first sentence (generic name), full note in the tooltip. */
+  function decorateMedsFromDb(clerk) {
+    var section = document.getElementById('meds');
+    if (!section) return;
+    var medsBody = document.getElementById('meds-db-body');
+    var suppsBody = document.getElementById('supps-db-body');
+    if (!medsBody && !suppsBody) return; // shell predates the DB-driven tbodies
+    fetch('/api/patient-summary?clerk=' + encodeURIComponent(clerk), {
+      headers: { 'Accept': 'application/json', 'X-Viewer-Clerk': viewerClerkHeader() },
+    })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (s) {
+        var meds = (s && s.medications) || [];
+        var supps = (s && s.supplements) || [];
+        if (!meds.length && !supps.length) { section.style.display = 'none'; return; }
+        if (medsBody) {
+          medsBody.innerHTML = meds.map(function (m) {
+            var daily = (m.daily_dose_amount != null && isFinite(Number(m.daily_dose_amount)))
+              ? fmtLabNum(Number(m.daily_dose_amount)) + ' ' + escapeHtml(m.daily_dose_unit || '') + t('/day', '/dia')
+              : (m.frequency ? escapeHtml(m.frequency) : '—');
+            var active = (m.status || 'active') === 'active';
+            var pill = '<span class="pill ' + (active ? 'pill-info' : 'pill-flag') + '">' +
+              (active ? t('Active', 'Ativa') : escapeHtml(m.status)) + '</span>';
+            var note = String(m.note || '');
+            var firstSentence = note.split('. ')[0];
+            var noteCell = note
+              ? '<td title="' + escapeHtml(note) + '">' + escapeHtml(firstSentence.replace(/\.$/, '')) + '</td>'
+              : '<td>—</td>';
+            return '<tr><td class="strong">' + escapeHtml(m.name || '') + '</td>' +
+              '<td class="num">' + daily + '</td>' +
+              '<td>' + escapeHtml(m.drug_class || '—') + '</td>' +
+              '<td>' + pill + '</td>' +
+              noteCell + '</tr>';
+          }).join('');
+        }
+        if (suppsBody && supps.length) {
+          suppsBody.innerHTML = supps.map(function (sp) {
+            return '<tr><td class="strong">' + escapeHtml(sp.name || '') + '</td>' +
+              '<td class="num">' + escapeHtml(sp.dose || '—') + '</td><td>—</td></tr>';
+          }).join('');
+        }
+      })
+      .catch(function () {
+        // Fetch failure -> hide rather than show empty tables (house pattern).
+        section.style.display = 'none';
+      });
+  }
+
   /* ── Clinical ECG studies (DB-driven, migration 0012) ──────────────────
      One reusable render path for EVERY patient (no special-casing). The shared
      renderExams() injects buildEcgSectionHtml() for database-default patients;
@@ -3802,6 +3856,9 @@
       if (section0 === 'home') {
         injectStyles();
         decorateProceduresFromDb(patient); // fill #injury tables from the DB
+      } else if (section0 === 'physical') {
+        injectStyles();
+        decorateMedsFromDb(patient); // fill the #meds pharmacology tables from the DB
       } else if (section0 === 'physical-exams') {
         injectStyles();
         retrofitStaticLabHistory();
