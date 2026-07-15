@@ -3511,7 +3511,7 @@
      file(s) and awaits the load before the providers run. */
   var PATIENT_DATA_ASSETS = {};
   PATIENT_DATA_ASSETS[PAULO_SILOTTO] = [
-    'assets/paulo-labs.js?v=4', 'assets/paulo-ergometric.js?v=1',
+    'assets/paulo-labs.js?v=5', 'assets/paulo-ergometric.js?v=1',
     'assets/paulo-sleep.js?v=1', 'assets/paulo-mental.js?v=1',
   ];
   PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=3', 'assets/silvana-vitals.js?v=1'];
