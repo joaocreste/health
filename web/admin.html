@@ -221,6 +221,16 @@
     line-height: 1;
     padding: 0 2px;
   }
+  .access-pill button.edit-grant-btn { color: #244E6E; font-size: 12px; }
+  .grant-editing-note {
+    flex-basis: 100%;
+    font-size: 11px;
+    color: #785818;
+    background: #FBF6EA;
+    border: 1px solid #E8D9B5;
+    border-radius: 6px;
+    padding: 5px 8px;
+  }
 
   .grant-form {
     margin-top: 10px;
@@ -594,6 +604,9 @@
                    '<span class="role-tag">' + escapeHtml(a.user_role) + (a.notes ? ' · ' + escapeHtml(a.notes) : '') + '</span>' +
                    scopesTag + viewTag + (isSelf ? '' : expiryTag) +
                    (isSelf ? '' :
+                     '<button type="button" class="edit-grant-btn" title="Edit grant" data-action="edit-grant" ' +
+                       'data-user="' + escapeHtml(a.user_clerk) + '" ' +
+                       'data-patient="' + escapeHtml(a.patient_clerk) + '">✎</button>' +
                      '<button type="button" title="Revoke" data-action="revoke" ' +
                        'data-user="' + escapeHtml(a.user_clerk) + '" ' +
                        'data-patient="' + escapeHtml(a.patient_clerk) + '">×</button>') +
@@ -634,6 +647,7 @@
                 '<label><input type="radio" name="view_mode" value="scroll"> ' + langSpan('Scroll — single consultation page', 'Rolagem — página única de consulta') + '</label>' +
               '</div>' +
               '<div class="study-picker" hidden data-loaded="0"></div>' +
+              '<div class="grant-editing-note" hidden></div>' +
               '<div class="grant-row"><button class="btn btn-gold" type="submit">' + langSpan('Grant', 'Conceder') + '</button></div>' +
             '</form>' +
           '</div>'
@@ -717,6 +731,25 @@
         });
       });
 
+      // Wire grant-edit (✎) buttons: open the patient's grant form pre-filled
+      // with the existing row (scopes, view mode, expiry, study selection).
+      Array.prototype.forEach.call(listEl.querySelectorAll('button[data-action="edit-grant"]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var user = btn.getAttribute('data-user');
+          var patientClerk = btn.getAttribute('data-patient');
+          var row = state.access.find(function (a) {
+            return a.user_clerk === user && a.patient_clerk === patientClerk;
+          });
+          if (!row) return;
+          var form = listEl.querySelector('form.grant-form[data-patient="' + patientClerk + '"]');
+          if (!form) return;
+          var sel = form.querySelector('select[name="user_clerk"]');
+          sel.value = user;
+          if (typeof form._prefillFromRow === 'function') form._prefillFromRow(row);
+          form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      });
+
       // Wire revoke buttons
       Array.prototype.forEach.call(listEl.querySelectorAll('button[data-action="revoke"]'), function (btn) {
         btn.addEventListener('click', function () {
@@ -737,16 +770,43 @@
         var imagingBox = form.querySelector('input[name="scope"][value="imaging"]');
         var dateInput = form.querySelector('input[name="expiry_date"]');
 
-        // Selecting a user who already holds a grant pre-fills the form from
-        // the existing row — a re-grant is a full replace (scopes, view_mode,
-        // expiry, filter), so starting from defaults would silently reset a
-        // scroll grant back to navigation.
+        // Grant editing: selecting a user who already holds a grant (or
+        // clicking a pill's ✎) pre-fills the WHOLE form from the existing row
+        // — a re-grant is a full replace (scopes, view_mode, expiry, filter),
+        // so starting from defaults would silently reset the grant. The
+        // editing note + button label make the replace semantics explicit.
         var userSelect = form.querySelector('select[name="user_clerk"]');
-        userSelect.addEventListener('change', function () {
-          var row = state.access.find(function (a) {
-            return a.user_clerk === userSelect.value && a.patient_clerk === patient;
+        var editingNote = form.querySelector('.grant-editing-note');
+        var submitBtn = form.querySelector('button[type="submit"]');
+        var notesInput = form.querySelector('input[name="notes"]');
+        var reasonInput = form.querySelector('input[name="reason"]');
+
+        function setEditing(row) {
+          editingNote.hidden = !row;
+          if (row) {
+            editingNote.innerHTML = langSpan(
+              'Editing the existing access of ' + (row.user_name || row.user_clerk) + ' — saving replaces its permissions.',
+              'Editando o acesso existente de ' + (row.user_name || row.user_clerk) + ' — salvar substitui as permissões.');
+          }
+          submitBtn.innerHTML = row ? langSpan('Save changes', 'Salvar alterações') : langSpan('Grant', 'Conceder');
+        }
+
+        function applyFilterSelection(filter) {
+          if (!imagingBox.checked) { picker.hidden = true; return; }
+          picker.hidden = false;
+          var img = (filter && filter.imaging_study_ids) || [];
+          var ecg = (filter && filter.ecg_study_ids) || [];
+          loadPicker().then(function () {
+            Array.prototype.forEach.call(form.querySelectorAll('input[name="study_id"]'), function (cb) {
+              cb.checked = img.indexOf(cb.value) !== -1;
+            });
+            Array.prototype.forEach.call(form.querySelectorAll('input[name="ecg_id"]'), function (cb) {
+              cb.checked = ecg.indexOf(cb.value) !== -1;
+            });
           });
-          if (!row) return;
+        }
+
+        function prefillFromRow(row) {
           var scopes = Array.isArray(row.scopes) ? row.scopes : [];
           Array.prototype.forEach.call(form.querySelectorAll('input[name="scope"]'), function (cb) {
             if (cb.value === 'profile_basic') return; // locked, always on
@@ -759,13 +819,40 @@
           var modeRadio = form.querySelector('input[name="expiry_mode"][value="' + mode + '"]');
           if (modeRadio) modeRadio.checked = true;
           dateInput.disabled = mode !== 'until';
-          if (row.expires_at) dateInput.value = String(row.expires_at).slice(0, 10);
-          var notesInput = form.querySelector('input[name="notes"]');
-          if (notesInput && row.notes) notesInput.value = row.notes;
-          var reasonInput = form.querySelector('input[name="reason"]');
-          if (reasonInput && row.reason) reasonInput.value = row.reason;
-          imagingBox.dispatchEvent(new Event('change'));
+          dateInput.value = row.expires_at ? String(row.expires_at).slice(0, 10) : '';
+          if (notesInput) notesInput.value = row.notes || '';
+          if (reasonInput) reasonInput.value = row.reason || '';
+          applyFilterSelection(row.resource_filter);
+          setEditing(row);
+        }
+
+        function resetGrantDefaults() {
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="scope"]'), function (cb) {
+            if (cb.value !== 'profile_basic') cb.checked = false;
+          });
+          var vmRadio = form.querySelector('input[name="view_mode"][value="navigation"]');
+          if (vmRadio) vmRadio.checked = true;
+          var modeRadio = form.querySelector('input[name="expiry_mode"][value="never"]');
+          if (modeRadio) modeRadio.checked = true;
+          dateInput.disabled = true;
+          dateInput.value = '';
+          if (notesInput) notesInput.value = '';
+          if (reasonInput) reasonInput.value = '';
+          picker.hidden = true;
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="study_id"], input[name="ecg_id"]'), function (cb) {
+            cb.checked = false;
+          });
+          setEditing(null);
+        }
+
+        userSelect.addEventListener('change', function () {
+          var row = state.access.find(function (a) {
+            return a.user_clerk === userSelect.value && a.patient_clerk === patient;
+          });
+          if (row) prefillFromRow(row);
+          else resetGrantDefaults();
         });
+        form._prefillFromRow = prefillFromRow; // used by the pill ✎ buttons
 
         // Presets pre-fill the checkboxes only — no new DB concept.
         Array.prototype.forEach.call(form.querySelectorAll('.preset-btn'), function (btn) {
@@ -786,13 +873,14 @@
           });
         });
 
-        // Optional study picker — only when imaging is checked; lazy-loaded.
-        imagingBox.addEventListener('change', function () {
-          if (!imagingBox.checked) { picker.hidden = true; return; }
-          picker.hidden = false;
-          if (picker.getAttribute('data-loaded') === '1') return;
+        // Optional study picker — only when imaging is checked; lazy-loaded
+        // once per form. loadPicker() resolves when the checkboxes exist, so
+        // prefillFromRow can restore a grant's saved study selection.
+        var pickerPromise = null;
+        function loadPicker() {
+          if (pickerPromise) return pickerPromise;
           picker.innerHTML = langSpan('Loading studies…', 'Carregando estudos…');
-          api('/api/admin/imaging-studies?patient=' + encodeURIComponent(patient))
+          pickerPromise = api('/api/admin/imaging-studies?patient=' + encodeURIComponent(patient))
             .then(function (d) {
               picker.setAttribute('data-loaded', '1');
               var ecg = d.ecg || [];
@@ -825,6 +913,12 @@
               picker.innerHTML = html;
             })
             .catch(function (e) { picker.innerHTML = 'Failed to load studies: ' + escapeHtml(e.message); });
+          return pickerPromise;
+        }
+        imagingBox.addEventListener('change', function () {
+          if (!imagingBox.checked) { picker.hidden = true; return; }
+          picker.hidden = false;
+          loadPicker();
         });
 
         form.addEventListener('submit', function (e) {
@@ -898,6 +992,9 @@
                    (a.view_mode === 'scroll'
                      ? '<span class="expiry-tag bound">' + langSpan('Scroll view', 'Visão de consulta') + '</span>' : '') +
                    (a.expired ? '<span class="expiry-tag">' + langSpan('Expired', 'Expirado') + '</span>' : '') +
+                   '<button type="button" class="edit-grant-btn" title="Edit grant" data-action="edit-grant" ' +
+                     'data-user="' + escapeHtml(a.user_clerk) + '" ' +
+                     'data-patient="' + escapeHtml(a.patient_clerk) + '">✎</button>' +
                  '</li>';
         }).join('');
         return (
@@ -922,6 +1019,25 @@
           var u = state.users.find(function (x) { return x.clerk_user_id === clerk; });
           if (!u) return;
           openEditModal(u, u.role);
+        });
+      });
+
+      // Roster grant pills also carry a ✎ — it jumps to the patient row's
+      // grant form (in the patients list above) pre-filled with the grant.
+      Array.prototype.forEach.call(listEl.querySelectorAll('button[data-action="edit-grant"]'), function (btn) {
+        btn.addEventListener('click', function () {
+          var user = btn.getAttribute('data-user');
+          var patientClerk = btn.getAttribute('data-patient');
+          var row = state.access.find(function (a) {
+            return a.user_clerk === user && a.patient_clerk === patientClerk;
+          });
+          if (!row) return;
+          var form = document.querySelector('#patients-list form.grant-form[data-patient="' + patientClerk + '"]');
+          if (!form) return;
+          var sel = form.querySelector('select[name="user_clerk"]');
+          sel.value = user;
+          if (typeof form._prefillFromRow === 'function') form._prefillFromRow(row);
+          form.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
       });
     }
