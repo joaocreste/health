@@ -126,11 +126,11 @@ async function viewerFromRequest(request, env) {
  * no row -> none; expires_at in the past -> expired (deny, row kept for
  * audit); else the row's scopes (+ implied profile_basic) and filter. */
 async function loadScopeGrant(sql, viewerClerk, patientClerk) {
-  const none = { status: "none", scopes: new Set(), filter: null, permanent: null, viewerId: null, viewerRole: null, patientId: null };
+  const none = { status: "none", scopes: new Set(), filter: null, permanent: null, viewMode: null, viewerId: null, viewerRole: null, patientId: null };
   if (!viewerClerk || !patientClerk) return none;
   const rows = await sql`
     SELECT v.id AS viewer_id, v.role AS viewer_role, p.id AS patient_id,
-           pa.scopes, pa.resource_filter, pa.expires_at
+           pa.scopes, pa.resource_filter, pa.expires_at, pa.view_mode
     FROM users v
     JOIN users p ON p.clerk_user_id = ${patientClerk} AND p.archived_at IS NULL
     LEFT JOIN patient_access pa ON pa.user_id = v.id AND pa.patient_id = p.id
@@ -138,7 +138,7 @@ async function loadScopeGrant(sql, viewerClerk, patientClerk) {
     LIMIT 1`;
   if (!rows.length) return none;
   const r = rows[0];
-  const base = { viewerId: r.viewer_id, viewerRole: r.viewer_role, patientId: r.patient_id, filter: null, permanent: null };
+  const base = { viewerId: r.viewer_id, viewerRole: r.viewer_role, patientId: r.patient_id, filter: null, permanent: null, viewMode: null };
   if (viewerClerk === patientClerk) return { ...base, status: "self", scopes: new Set(SCOPE_KEYS) };
   if (r.viewer_role === "admin") return { ...base, status: "admin", scopes: new Set(SCOPE_KEYS) };
   if (!r.scopes) return { ...base, status: "none", scopes: new Set() };
@@ -147,7 +147,11 @@ async function loadScopeGrant(sql, viewerClerk, patientClerk) {
   }
   const scopes = new Set((Array.isArray(r.scopes) ? r.scopes : []).filter((s) => SCOPE_KEYS.includes(s)));
   if (scopes.size) scopes.add("profile_basic"); // implied by any valid grant
-  return { ...base, status: "grant", scopes, filter: r.resource_filter || null, permanent: r.expires_at == null };
+  return {
+    ...base, status: "grant", scopes, filter: r.resource_filter || null,
+    permanent: r.expires_at == null,
+    viewMode: r.view_mode === "scroll" ? "scroll" : "navigation",
+  };
 }
 
 const isPrivileged = (g) => g.status === "self" || g.status === "admin";
@@ -181,7 +185,14 @@ const GATED_ASSETS = [
   { re: /^\/assets\/(data|add-data)\.js$/, patient: PATIENT_CLERKS.joao, anyOf: ["vitals"] },
   { re: /^\/assets\/metrics\.json$/, patient: PATIENT_CLERKS.joao, anyOf: ["vitals"] },
   { re: /^\/assets\/silvana-labs\.js$/, patient: PATIENT_CLERKS.silvana, anyOf: ["labs"] },
+  { re: /^\/assets\/silvana-vitals\.js$/, patient: PATIENT_CLERKS.silvana, anyOf: ["vitals"] },
   { re: /^\/assets\/cristina-labs\.js$/, patient: PATIENT_CLERKS.cristina, anyOf: ["labs"] },
+  // Paulo's bespoke data files matched no rule and were served to ANY request
+  // (incl. anonymous) — closed as a precondition of granted doctor viewers.
+  { re: /^\/assets\/paulo-labs\.js$/, patient: PATIENT_CLERKS.paulo, anyOf: ["labs"] },
+  { re: /^\/assets\/paulo-ergometric\.js$/, patient: PATIENT_CLERKS.paulo, anyOf: ["imaging", "vitals"] },
+  { re: /^\/assets\/paulo-sleep\.js$/, patient: PATIENT_CLERKS.paulo, anyOf: ["imaging", "labs"] },
+  { re: /^\/assets\/paulo-mental\.js$/, patient: PATIENT_CLERKS.paulo, anyOf: ["mental"] },
 ];
 
 // /scans/** ownership by path prefix. Anything under /scans/ that matches NO
@@ -208,7 +219,7 @@ const SCAN_OWNERS = [
 const VALID_PAGES = new Set([
   "home", "physical", "physical-vitals", "physical-exams", "physical-genetics",
   "mental", "spiritual", "patients", "admin", "account", "upload", "login",
-  "uploads-review", "log",
+  "uploads-review", "log", "consult",
 ]);
 
 async function serveNotFound(request, env, url) {
@@ -232,9 +243,18 @@ const PAGE_RULES = [
   { re: /^\/physical-vitals(\.html)?$/, anyOf: ["vitals"] },
   { re: /^\/physical-genetics(\.html)?$/, anyOf: ["genetics"] },
   { re: /^\/physical(\.html)?$/, anyOf: ["imaging", "labs", "vitals"] },
+  // The consultation scroll page: any clinical scope unlocks the shell; the
+  // data APIs then filter each section to the viewer's actual grant.
+  { re: /^\/consult(\.html)?$/, anyOf: ["imaging", "labs", "vitals", "medications", "clinical_history", "genetics", "mental", "journal"] },
   { re: /^\/(home(\.html)?|patients(\.html)?|upload(\.html)?)$/, anyAuth: true },
   { re: /^\/(admin|uploads-review)(\.html)?$/, adminOnly: true },
 ];
+
+/* Pages that make up the normal multi-page navigation experience. A grant
+ * with view_mode='scroll' pins its viewer to /consult for that patient, so
+ * requests for these pages (with an explicit ?patient=) 302 there instead —
+ * the two modes are mutually exclusive per grant. */
+const NAV_PAGE_RE = /^\/(home|physical|physical-vitals|physical-exams|physical-genetics|mental|spiritual)(\.html)?$/;
 
 /* The gate. Returns a Response (redirect/403) to short-circuit, or null to
  * let env.ASSETS serve the file. Pages redirect to /home (authed) or the
@@ -251,8 +271,12 @@ async function gateStaticRequest(request, env, url) {
   if (!assetRule && !scanRule && !pageRule) return null; // public shell (css, libs, login)
 
   const isPage = !!pageRule;
+  // A denied /consult goes to the patient picker, not /home — the picker is
+  // the sensible landing for a granted viewer, and /home?patient= would
+  // 302-loop against the scroll pin for scroll-mode grants.
+  const authedTarget = path.startsWith("/consult") ? "/patients" : "/home";
   const deny = (authed) => isPage
-    ? Response.redirect(new URL(authed ? "/home" : "/login.html", url).toString(), 302)
+    ? Response.redirect(new URL(authed ? authedTarget : "/login.html", url).toString(), 302)
     : jsonError(403, "forbidden");
 
   if (!env.DATABASE_URL) return isPage ? deny(false) : jsonError(500, "DATABASE_URL not configured.");
@@ -266,15 +290,38 @@ async function gateStaticRequest(request, env, url) {
     const { id: vid, role } = vr[0];
     if (role === "admin") return null;
     if (pageRule.adminOnly) return deny(true);
+    // Scroll-mode enforcement: a granted viewer whose grant on ?patient= says
+    // view_mode='scroll' is redirected off every navigation page to /consult.
+    // Runs before the anyAuth/patient shortcuts so /home is covered and a
+    // patient-role family viewer is pinned too; self-view is never redirected.
+    const targetPatient = url.searchParams.get("patient") || "";
+    if (targetPatient && targetPatient !== viewerClerk && NAV_PAGE_RE.test(path)) {
+      const tg = await loadScopeGrant(sql, viewerClerk, targetPatient);
+      if (tg.status === "grant" && tg.viewMode === "scroll") {
+        const dest = new URL("/consult", url);
+        dest.searchParams.set("patient", targetPatient);
+        // Preserve ?viewer= so the curl-based gated-page verification flow
+        // (clerk-as-identity, no cookie) survives the redirect hop.
+        const v = url.searchParams.get("viewer");
+        if (v) dest.searchParams.set("viewer", v);
+        return Response.redirect(dest.toString(), 302);
+      }
+    }
     if (pageRule.anyAuth) return null;
     if (role === "patient") return null; // own app shell (data comes via scoped APIs)
+    // Navigation pages never count scroll-mode grants: a doctor whose only
+    // grants are scroll-pinned has NO nav surface, with or without ?patient=
+    // (/consult keeps counting them via its own PAGE_RULES row).
+    const notNavPage = !NAV_PAGE_RE.test(path);
     const hit = pageRule.requireAll
       ? await sql`SELECT 1 FROM patient_access
           WHERE user_id = ${vid} AND (expires_at IS NULL OR expires_at > now())
-            AND scopes @> ${JSON.stringify(SCOPE_KEYS)}::jsonb LIMIT 1`
+            AND scopes @> ${JSON.stringify(SCOPE_KEYS)}::jsonb
+            AND (${notNavPage} OR view_mode IS DISTINCT FROM 'scroll') LIMIT 1`
       : await sql`SELECT 1 FROM patient_access
           WHERE user_id = ${vid} AND (expires_at IS NULL OR expires_at > now())
-            AND scopes ?| ${pageRule.anyOf} LIMIT 1`;
+            AND scopes ?| ${pageRule.anyOf}
+            AND (${notNavPage} OR view_mode IS DISTINCT FROM 'scroll') LIMIT 1`;
     return hit.length ? null : deny(true);
   }
 
@@ -736,6 +783,12 @@ async function handleEcgObject(request, env) {
     const grant = await loadScopeGrant(sql, viewerClerk, clerk);
     if (!isPrivileged(grant) && !grant.scopes.has("imaging")) {
       return jsonError(viewerClerk ? 403 : 401, "imaging_scope_required");
+    }
+    // Per-exam selection: a grant limited to specific ECG studies serves only
+    // those blobs (mirrors resource_filter.imaging_study_ids on /scans/).
+    if (grant.status === "grant" && Array.isArray(grant.filter?.ecg_study_ids)
+        && grant.filter.ecg_study_ids.length && !grant.filter.ecg_study_ids.includes(id)) {
+      return jsonError(403, "ecg_study_not_granted");
     }
     const rows = await sql`
       SELECT s.svg_key, s.report_key, s.original_key
@@ -1311,13 +1364,17 @@ async function handlePatientExams(request, env) {
       return { panel: panelName, markers };
     });
 
-    // Scope-filter each slice; honor resource_filter.imaging_study_ids.
+    // Scope-filter each slice; honor resource_filter.imaging_study_ids and
+    // resource_filter.ecg_study_ids (per-exam grant selection).
     const has = (s) => grant.scopes.has(s);
     let imagingOut = has("imaging") ? imaging : [];
     let ecgOut = has("imaging") ? ecg_studies : [];   // clinical ECG studies map to imaging
     const ids = grant.status === "grant" && Array.isArray(grant.filter?.imaging_study_ids)
       ? grant.filter.imaging_study_ids : null;
     if (ids && ids.length) imagingOut = imagingOut.filter((s) => ids.includes(s.id));
+    const ecgIds = grant.status === "grant" && Array.isArray(grant.filter?.ecg_study_ids)
+      ? grant.filter.ecg_study_ids : null;
+    if (ecgIds && ecgIds.length) ecgOut = ecgOut.filter((s) => ecgIds.includes(s.id));
 
     // Electrodiagnostic studies straddle labs/imaging; surface to either scope.
     // Only ADMIN bypasses the review gate (the clinician/review surface). The
@@ -2523,7 +2580,9 @@ async function handlePatients(request, env) {
             pp.date_of_birth,
             pp.sex,
             pp.country_of_residence,
-            NULL::text AS relation
+            NULL::text AS relation,
+            NULL::text AS view_mode,
+            NULL::jsonb AS scopes
           FROM users u
           LEFT JOIN patient_profiles pp ON pp.user_id = u.id
           WHERE u.role = 'patient' AND u.archived_at IS NULL
@@ -2538,7 +2597,9 @@ async function handlePatients(request, env) {
             pp.date_of_birth,
             pp.sex,
             pp.country_of_residence,
-            pa.notes AS relation
+            pa.notes AS relation,
+            pa.view_mode,
+            pa.scopes
           FROM patient_access pa
           JOIN users u ON u.id = pa.patient_id
           LEFT JOIN patient_profiles pp ON pp.user_id = u.id
@@ -2939,16 +3000,17 @@ async function handleAdmin(request, env) {
           ORDER BY u.full_name
         `,
         sql`
-          SELECT id, clerk_user_id, full_name, email, role, locale,
-                 demo_username, demo_password
-          FROM users
-          WHERE archived_at IS NULL
-          ORDER BY role, full_name
+          SELECT u.id, u.clerk_user_id, u.full_name, u.email, u.role, u.locale,
+                 u.demo_username, u.demo_password, dp.specialty
+          FROM users u
+          LEFT JOIN doctor_profiles dp ON dp.user_id = u.id
+          WHERE u.archived_at IS NULL
+          ORDER BY u.role, u.full_name
         `,
         sql`
           SELECT
             pa.user_id, pa.patient_id, pa.notes, pa.granted_at,
-            pa.scopes, pa.resource_filter, pa.expires_at, pa.reason,
+            pa.scopes, pa.resource_filter, pa.expires_at, pa.reason, pa.view_mode,
             (pa.expires_at IS NOT NULL AND pa.expires_at <= now()) AS expired,
             u_user.clerk_user_id   AS user_clerk,
             u_user.full_name       AS user_name,
@@ -3304,7 +3366,9 @@ async function handleAdmin(request, env) {
   }
 
   // GET /api/admin/imaging-studies?patient=<clerk> — id/modality/body_part/date
-  // list for the grant UI's optional study picker (resource_filter).
+  // list for the grant UI's optional study picker (resource_filter). Also
+  // returns the patient's clinical ECG studies (resource_filter.ecg_study_ids)
+  // in a separate `ecg` array; ECGs live in ecg_studies, not imaging_studies.
   if (path === "/api/admin/imaging-studies" && request.method === "GET") {
     const patientClerk = String(url.searchParams.get("patient") || "").trim();
     if (!patientClerk) return jsonError(400, "patient_required");
@@ -3314,7 +3378,15 @@ async function handleAdmin(request, env) {
         FROM imaging_studies i JOIN users u ON u.id = i.patient_id
         WHERE u.clerk_user_id = ${patientClerk}
         ORDER BY i.study_date DESC`;
-      return new Response(JSON.stringify({ studies: rows }), {
+      let ecg = [];
+      try {
+        ecg = await sql`
+          SELECT e.id, e.modality, e.clinic, e.study_date::text AS study_date
+          FROM ecg_studies e JOIN users u ON u.id = e.patient_id
+          WHERE u.clerk_user_id = ${patientClerk}
+          ORDER BY e.study_date DESC`;
+      } catch { ecg = []; } // table may not exist on a fresh env
+      return new Response(JSON.stringify({ studies: rows, ecg }), {
         headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
       });
     } catch (e) {
@@ -3367,24 +3439,53 @@ async function handleAdmin(request, env) {
           expiresAt = new Date(t).toISOString();
         }
 
-        // resource_filter: only { imaging_study_ids: string[] } is understood.
+        // resource_filter: { imaging_study_ids?: string[], ecg_study_ids?: string[] }.
+        // Fail closed on anything else — a typo'd key must 400, never silently
+        // widen the grant to unrestricted. All-empty collapses to null (= no filter).
         let resourceFilter = body?.resource_filter ?? null;
         if (resourceFilter !== null) {
-          const ids = resourceFilter?.imaging_study_ids;
-          if (!Array.isArray(ids) || ids.some((x) => typeof x !== "string")) {
-            return jsonError(400, "resource_filter_imaging_study_ids_must_be_string_array");
+          if (typeof resourceFilter !== "object" || Array.isArray(resourceFilter)) {
+            return jsonError(400, "resource_filter_must_be_object");
           }
-          resourceFilter = ids.length ? { imaging_study_ids: ids } : null;
+          const KNOWN_FILTER_KEYS = ["imaging_study_ids", "ecg_study_ids"];
+          const unknownKeys = Object.keys(resourceFilter).filter((k) => !KNOWN_FILTER_KEYS.includes(k));
+          if (unknownKeys.length) return jsonError(400, `resource_filter_unknown_keys: ${unknownKeys.join(",")}`);
+          const out = {};
+          for (const key of KNOWN_FILTER_KEYS) {
+            const ids = resourceFilter[key];
+            if (ids === undefined || ids === null) continue;
+            if (!Array.isArray(ids) || ids.some((x) => typeof x !== "string")) {
+              return jsonError(400, `resource_filter_${key}_must_be_string_array`);
+            }
+            if (ids.length) out[key] = ids;
+          }
+          resourceFilter = Object.keys(out).length ? out : null;
+        }
+
+        // view_mode: how the granted viewer experiences the record —
+        // 'navigation' (default, multi-page app) or 'scroll' (/consult page:
+        // one continuous view of only the granted sections, no site nav).
+        const viewMode = body?.view_mode === undefined || body?.view_mode === null
+          ? "navigation" : String(body.view_mode);
+        if (viewMode !== "navigation" && viewMode !== "scroll") {
+          return jsonError(400, "view_mode_must_be_navigation_or_scroll");
+        }
+        // A scroll grant must carry at least one scope the /consult page can
+        // actually render (genetics/journal have no consult section yet) —
+        // otherwise the viewer is pinned to a guaranteed-blank page.
+        const CONSULT_RENDERABLE = ["imaging", "labs", "vitals", "medications", "clinical_history", "mental"];
+        if (viewMode === "scroll" && !scopes.some((s) => CONSULT_RENDERABLE.includes(s))) {
+          return jsonError(400, "scroll_view_requires_a_consult_renderable_scope");
         }
 
         const reason = String(body?.reason || "").trim() || null;
 
         await sql`
-          INSERT INTO patient_access (user_id, patient_id, notes, granted_by, scopes, resource_filter, expires_at, reason)
+          INSERT INTO patient_access (user_id, patient_id, notes, granted_by, scopes, resource_filter, expires_at, reason, view_mode)
           VALUES (${userRow[0].id}, ${patRow[0].id}, ${notes}, ${admin.id},
                   ${JSON.stringify(scopes)}::jsonb,
                   ${resourceFilter === null ? null : JSON.stringify(resourceFilter)}::jsonb,
-                  ${expiresAt}, ${reason})
+                  ${expiresAt}, ${reason}, ${viewMode})
           ON CONFLICT (user_id, patient_id) DO UPDATE SET
             notes = COALESCE(EXCLUDED.notes, patient_access.notes),
             granted_by = EXCLUDED.granted_by,
@@ -3392,7 +3493,8 @@ async function handleAdmin(request, env) {
             scopes = EXCLUDED.scopes,
             resource_filter = EXCLUDED.resource_filter,
             expires_at = EXCLUDED.expires_at,
-            reason = EXCLUDED.reason
+            reason = EXCLUDED.reason,
+            view_mode = EXCLUDED.view_mode
         `;
       } else {
         await sql`

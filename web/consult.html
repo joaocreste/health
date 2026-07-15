@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta · Lumen Health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css?v=59">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<!-- Chart libs: consult stacks vitals sections too, so it needs the full
+     physical-vitals set (Chart.js + boxplot plugin + Plotly). -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<!-- CONSULTATION VIEW — one continuous scrolling page of the granted sections.
+     Deliberately nav-less: no .topnav-links pillars, no .section-nav rail.
+     The brand links to the patient picker (never back into the nav pages a
+     scroll-mode grant is pinned away from); patient-context.js injects the
+     change-patient button, app.js the account avatar. All content is built
+     by the page assembler from scope-filtered API payloads. -->
+<nav class="topnav">
+  <a class="brand" href="patients.html">
+    <img src="assets/logo-on-dark.svg" alt="">
+    <span>Lumen Health<small><span class="lang-en">Consultation view</span><span class="lang-pt">Visão de consulta</span></small></span>
+  </a>
+  <div class="lang-switch" role="group" aria-label="Language">
+    <button class="lang-btn" data-lang="en" aria-pressed="true" aria-label="English"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#FFFFFF" stroke-width="6"/><path d="M0,0 L60,40 M60,0 L0,40" stroke="#C8102E" stroke-width="3"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#FFFFFF" stroke-width="10"/><path d="M30,0 L30,40 M0,20 L60,20" stroke="#C8102E" stroke-width="6"/></svg></button>
+    <button class="lang-btn" data-lang="pt" aria-pressed="false" aria-label="Português brasileiro"><svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="60" height="40" fill="#009C3B"/><polygon points="30,4 56,20 30,36 4,20" fill="#FFDF00"/><circle cx="30" cy="20" r="9" fill="#002776"/></svg></button>
+    <button class="signout-btn" onclick="jcSignOut()" aria-label="Sign out" title="Sign out"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="signout-label"><span class="lang-en">Sign out</span><span class="lang-pt">Sair</span></span></button>
+  </div>
+</nav>
+
+<script src="assets/app.js?v=36"></script>
+<script src="assets/lab-taxonomy.js?v=2"></script>
+<script src="assets/section-registry.js?v=4"></script>
+<script src="assets/page-assembler.js?v=5"></script>
+<script src="assets/patient-context.js?v=104"></script>
+</body>
+</html>

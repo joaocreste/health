@@ -385,6 +385,14 @@
     <h2>Patients &amp; access (<span id="patient-count">…</span>)</h2>
     <div id="patients-list"></div>
   </section>
+
+  <!-- Non-patient accounts (doctors, staff, admin). These users have no
+       health record row of their own, so they never appear in the patients
+       list above — this roster is where they are seen and edited. -->
+  <section class="admin-section">
+    <h2>Doctors &amp; staff (<span id="users-count">…</span>)</h2>
+    <div id="users-list"></div>
+  </section>
 </main>
 
 <!-- Edit patient modal -->
@@ -579,10 +587,12 @@
           } else {
             expiryTag = '<span class="expiry-tag">' + langSpan('Never expires', 'Nunca expira') + '</span>';
           }
+          var viewTag = (!isSelf && a.view_mode === 'scroll')
+            ? '<span class="expiry-tag bound">' + langSpan('Scroll view', 'Visão de consulta') + '</span>' : '';
           return '<li class="access-pill' + (isSelf ? ' self' : '') + (a.expired ? ' expired' : '') + '">' +
                    '<span>' + escapeHtml(a.user_name || a.user_clerk) + '</span>' +
                    '<span class="role-tag">' + escapeHtml(a.user_role) + (a.notes ? ' · ' + escapeHtml(a.notes) : '') + '</span>' +
-                   scopesTag + (isSelf ? '' : expiryTag) +
+                   scopesTag + viewTag + (isSelf ? '' : expiryTag) +
                    (isSelf ? '' :
                      '<button type="button" title="Revoke" data-action="revoke" ' +
                        'data-user="' + escapeHtml(a.user_clerk) + '" ' +
@@ -617,6 +627,11 @@
                 '<label><input type="radio" name="expiry_mode" value="never" checked> ' + langSpan('Never', 'Nunca') + '</label>' +
                 '<label><input type="radio" name="expiry_mode" value="until"> ' + langSpan('Until', 'Até') + ' </label>' +
                 '<input name="expiry_date" type="date" disabled>' +
+              '</div>' +
+              '<div class="grant-row expiry-row">' +
+                '<strong>' + langSpan('View:', 'Visão:') + '</strong>' +
+                '<label><input type="radio" name="view_mode" value="navigation" checked> ' + langSpan('Navigation — full app pages', 'Navegação — app completo') + '</label>' +
+                '<label><input type="radio" name="view_mode" value="scroll"> ' + langSpan('Scroll — single consultation page', 'Rolagem — página única de consulta') + '</label>' +
               '</div>' +
               '<div class="study-picker" hidden data-loaded="0"></div>' +
               '<div class="grant-row"><button class="btn btn-gold" type="submit">' + langSpan('Grant', 'Conceder') + '</button></div>' +
@@ -661,7 +676,7 @@
           var clerk = btn.getAttribute('data-patient');
           var p = state.patients.find(function (x) { return x.clerk_user_id === clerk; });
           if (!p) return;
-          openEditModal(p);
+          openEditModal(p, 'patient');
         });
       });
 
@@ -722,6 +737,36 @@
         var imagingBox = form.querySelector('input[name="scope"][value="imaging"]');
         var dateInput = form.querySelector('input[name="expiry_date"]');
 
+        // Selecting a user who already holds a grant pre-fills the form from
+        // the existing row — a re-grant is a full replace (scopes, view_mode,
+        // expiry, filter), so starting from defaults would silently reset a
+        // scroll grant back to navigation.
+        var userSelect = form.querySelector('select[name="user_clerk"]');
+        userSelect.addEventListener('change', function () {
+          var row = state.access.find(function (a) {
+            return a.user_clerk === userSelect.value && a.patient_clerk === patient;
+          });
+          if (!row) return;
+          var scopes = Array.isArray(row.scopes) ? row.scopes : [];
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="scope"]'), function (cb) {
+            if (cb.value === 'profile_basic') return; // locked, always on
+            cb.checked = scopes.indexOf(cb.value) !== -1;
+          });
+          var vm = row.view_mode === 'scroll' ? 'scroll' : 'navigation';
+          var vmRadio = form.querySelector('input[name="view_mode"][value="' + vm + '"]');
+          if (vmRadio) vmRadio.checked = true;
+          var mode = row.expires_at ? 'until' : 'never';
+          var modeRadio = form.querySelector('input[name="expiry_mode"][value="' + mode + '"]');
+          if (modeRadio) modeRadio.checked = true;
+          dateInput.disabled = mode !== 'until';
+          if (row.expires_at) dateInput.value = String(row.expires_at).slice(0, 10);
+          var notesInput = form.querySelector('input[name="notes"]');
+          if (notesInput && row.notes) notesInput.value = row.notes;
+          var reasonInput = form.querySelector('input[name="reason"]');
+          if (reasonInput && row.reason) reasonInput.value = row.reason;
+          imagingBox.dispatchEvent(new Event('change'));
+        });
+
         // Presets pre-fill the checkboxes only — no new DB concept.
         Array.prototype.forEach.call(form.querySelectorAll('.preset-btn'), function (btn) {
           btn.addEventListener('click', function () {
@@ -750,19 +795,34 @@
           api('/api/admin/imaging-studies?patient=' + encodeURIComponent(patient))
             .then(function (d) {
               picker.setAttribute('data-loaded', '1');
-              if (!d.studies.length) {
+              var ecg = d.ecg || [];
+              if (!d.studies.length && !ecg.length) {
                 picker.innerHTML = langSpan('No imaging studies on record — grant covers all future imaging.',
                                             'Nenhum estudo de imagem registrado — a concessão cobre toda a imagem futura.');
                 return;
               }
-              picker.innerHTML =
-                '<div style="margin-bottom:4px;color:#7A8FA6;">' +
-                  langSpan('Limit to specific studies (none selected = all imaging):',
-                           'Limitar a estudos específicos (nenhum selecionado = toda a imagem):') + '</div>' +
-                d.studies.map(function (s) {
-                  var label = [s.modality, s.body_part, s.study_date].filter(Boolean).join(' · ');
-                  return '<label><input type="checkbox" name="study_id" value="' + escapeHtml(s.id) + '"> ' + escapeHtml(label) + '</label>';
-                }).join('');
+              var html = '';
+              if (d.studies.length) {
+                html +=
+                  '<div style="margin-bottom:4px;color:#7A8FA6;">' +
+                    langSpan('Limit to specific studies (none selected = all imaging):',
+                             'Limitar a estudos específicos (nenhum selecionado = toda a imagem):') + '</div>' +
+                  d.studies.map(function (s) {
+                    var label = [s.modality, s.body_part, s.study_date].filter(Boolean).join(' · ');
+                    return '<label><input type="checkbox" name="study_id" value="' + escapeHtml(s.id) + '"> ' + escapeHtml(label) + '</label>';
+                  }).join('');
+              }
+              if (ecg.length) {
+                html +=
+                  '<div style="margin:8px 0 4px;color:#7A8FA6;">' +
+                    langSpan('Clinical ECGs (none selected = all ECGs):',
+                             'ECGs clínicos (nenhum selecionado = todos os ECGs):') + '</div>' +
+                  ecg.map(function (s) {
+                    var label = [(s.modality || 'ECG'), s.clinic, s.study_date].filter(Boolean).join(' · ');
+                    return '<label><input type="checkbox" name="ecg_id" value="' + escapeHtml(s.id) + '"> ' + escapeHtml(label) + '</label>';
+                  }).join('');
+              }
+              picker.innerHTML = html;
             })
             .catch(function (e) { picker.innerHTML = 'Failed to load studies: ' + escapeHtml(e.message); });
         });
@@ -786,16 +846,82 @@
           Array.prototype.forEach.call(form.querySelectorAll('input[name="study_id"]:checked'), function (cb) {
             studyIds.push(cb.value);
           });
+          var ecgIds = [];
+          Array.prototype.forEach.call(form.querySelectorAll('input[name="ecg_id"]:checked'), function (cb) {
+            ecgIds.push(cb.value);
+          });
+          var filter = {};
+          if (studyIds.length) filter.imaging_study_ids = studyIds;
+          if (ecgIds.length) filter.ecg_study_ids = ecgIds;
           var body = {
             action: 'grant', user_clerk: user, patient_clerk: patient,
             notes: String(fd.get('notes') || '').trim() || null,
             reason: String(fd.get('reason') || '').trim() || null,
             scopes: scopes,
             expires_at: expiresAt,
-            resource_filter: studyIds.length ? { imaging_study_ids: studyIds } : null,
+            view_mode: String(fd.get('view_mode') || 'navigation'),
+            resource_filter: Object.keys(filter).length ? filter : null,
           };
           api('/api/admin/access', { method: 'POST', body: JSON.stringify(body) })
             .then(reload).catch(function (e) { alert('Grant failed: ' + e.message); });
+        });
+      });
+    }
+
+    /* ---------- Doctors & staff roster ----------
+       Non-patient users (doctors, admin) have no patient row, so they are
+       invisible in the patients list — this section makes them visible and
+       editable via the same modal (role-aware: patient-only fields hidden). */
+    function renderUsers() {
+      var listEl = document.getElementById('users-list');
+      var staff = state.users.filter(function (u) { return u.role !== 'patient'; });
+      document.getElementById('users-count').textContent = staff.length;
+      if (!staff.length) {
+        listEl.innerHTML = '<p style="color:#7A8FA6;font-size:14px;">No doctors or staff yet. Create one above.</p>';
+        return;
+      }
+      listEl.innerHTML = staff.map(function (u) {
+        var meta = [u.role];
+        if (u.specialty) meta.push(u.specialty);
+        if (u.demo_username) meta.push('login: ' + u.demo_username);
+        if (u.email && !/@placeholder\.local$/.test(u.email)) meta.push(u.email);
+        meta.push('clerk: ' + u.clerk_user_id);
+        var grants = state.access.filter(function (a) { return a.user_clerk === u.clerk_user_id; });
+        var pills = grants.map(function (a) {
+          var scopes = Array.isArray(a.scopes) ? a.scopes : [];
+          var scopesTxt = scopes.length >= SCOPE_KEYS.length
+            ? langSpan('all scopes', 'todos os escopos')
+            : escapeHtml(scopes.filter(function (s) { return s !== 'profile_basic'; }).join(', ') || 'profile_basic');
+          return '<li class="access-pill' + (a.expired ? ' expired' : '') + '">' +
+                   '<span>' + escapeHtml(a.patient_name || a.patient_clerk) + '</span>' +
+                   '<span class="scopes-tag">' + scopesTxt + '</span>' +
+                   (a.view_mode === 'scroll'
+                     ? '<span class="expiry-tag bound">' + langSpan('Scroll view', 'Visão de consulta') + '</span>' : '') +
+                   (a.expired ? '<span class="expiry-tag">' + langSpan('Expired', 'Expirado') + '</span>' : '') +
+                 '</li>';
+        }).join('');
+        return (
+          '<div class="patient-row">' +
+            '<div class="row-head">' +
+              '<span class="name">' + escapeHtml(u.full_name || '(unnamed)') + '</span>' +
+              '<span class="meta">' + escapeHtml(meta.join(' · ')) + '</span>' +
+              '<button class="btn btn-ghost edit-user-btn" type="button" ' +
+                'data-user="' + escapeHtml(u.clerk_user_id) + '" ' +
+                'title="Edit user info" ' +
+                'style="margin-left:auto;padding:4px 10px;font-size:11px;">Edit</button>' +
+            '</div>' +
+            '<ul class="access-list">' + (pills ||
+              '<li class="access-pill">' + langSpan('No patient access granted', 'Nenhum acesso a paciente concedido') + '</li>') + '</ul>' +
+          '</div>'
+        );
+      }).join('');
+
+      Array.prototype.forEach.call(listEl.querySelectorAll('button.edit-user-btn'), function (btn) {
+        btn.addEventListener('click', function () {
+          var clerk = btn.getAttribute('data-user');
+          var u = state.users.find(function (x) { return x.clerk_user_id === clerk; });
+          if (!u) return;
+          openEditModal(u, u.role);
         });
       });
     }
@@ -810,7 +936,16 @@
       if (!el) return;
       el.value = (v === null || v === undefined) ? '' : String(v);
     }
-    function openEditModal(p) {
+    function openEditModal(p, role) {
+      role = role || 'patient';
+      // Patient-only fields (DOB, sex, body metrics…) hide for doctors/staff;
+      // their hidden inputs post as null, which the server ignores for
+      // non-patient roles (patient_profiles is only written for patients).
+      Array.prototype.forEach.call(document.querySelectorAll('[data-edit-role]'), function (el) {
+        el.style.display = (el.getAttribute('data-edit-role') === role) ? '' : 'none';
+      });
+      document.getElementById('edit-modal-title').textContent =
+        role === 'patient' ? 'Edit patient' : 'Edit user';
       setVal('edit-user-clerk',     p.clerk_user_id);
       setVal('edit-full-name',      p.full_name);
       setVal('edit-demo-username',  p.demo_username);
@@ -875,6 +1010,7 @@
         state.access   = data.access   || [];
         state.pending  = data.pending_by_patient || {};
         renderPatients();
+        renderUsers();
       }).catch(function (e) {
         document.getElementById('patients-list').innerHTML =
           '<p style="color:#7A2E22;font-size:14px;">Failed to load: ' + escapeHtml(e.message) + '</p>';

@@ -109,14 +109,50 @@
       return !!(ctx.entry.patientScope && ctx.patient === ctx.entry.patientScope);
     },
   };
+  function isSelfOrAdminViewer(patient) {
+    var viewer = '', role = '';
+    try {
+      viewer = sessionStorage.getItem('jc_viewer_clerk') || '';
+      role = sessionStorage.getItem('jc_viewer_role') || '';
+    } catch (_) {}
+    return role === 'admin' || !viewer || viewer === patient;
+  }
+  /* Per-entry bespoke coverage: a generic DB-driven section is suppressed
+     only when the bespoke renderer actually covers that content FOR THIS
+     VIEWER. Paulo's bespoke exams inline both imaging and labs (always
+     covered). Silvana/Cristina's bespoke pages cover labs only — their
+     curated self/admin view deliberately omits the DB imaging cards
+     (commit 7039b7d9), but a GRANTED viewer with the imaging scope must
+     get the generic scope-filtered imaging section or their grant renders
+     nothing. Laboratory coverage keys on the worker-gated labs global:
+     absent (403 = scope denied) means the generic section is the viewer's
+     only surface. */
+  var BESPOKE_COVERS = {
+    'pending:paulo-silotto-df3441': {
+      imaging: function () { return true; },
+      laboratory: function () { return true; },
+    },
+    'pending:silvana-creste-18ba19': {
+      imaging: function (patient) { return isSelfOrAdminViewer(patient); },
+      laboratory: function () { return !!window.SILVANA_LABS; },
+    },
+    'pending:cristina-cresti-d7479c': {
+      imaging: function (patient) { return isSelfOrAdminViewer(patient); },
+      laboratory: function () { return !!window.CRISTINA_LABS; },
+    },
+  };
   function gatePasses(entry, payloads, ctx) {
     /* patientScope is enforced regardless of the declared gate fn. */
     if (entry.patientScope && ctx.patient !== entry.patientScope) return false;
     /* excludeScopes: a generic section a bespoke renderer already covers is
-       suppressed for those patients (e.g. Paulo's bespoke exams renders his
-       imaging + labs, so the DB-driven imaging/laboratory sections must not
-       render again below it). */
-    if (entry.excludeScopes && entry.excludeScopes.indexOf(ctx.patient) >= 0) return false;
+       suppressed for those patients — unless BESPOKE_COVERS says this entry's
+       content is NOT covered for this viewer (scope-denied bespoke data), in
+       which case the generic section is the scope-filtered fallback. */
+    if (entry.excludeScopes && entry.excludeScopes.indexOf(ctx.patient) >= 0) {
+      var covers = BESPOKE_COVERS[ctx.patient];
+      var fn = covers && covers[entry.id];
+      if (!fn || fn(ctx.patient)) return false;
+    }
     var g = entry.gate || {};
     var fn = GATES[g.fn];
     if (!fn) return false; // unknown gate → fail closed
@@ -230,18 +266,32 @@
   }
 
   /* ── empty state (slot 4) ── */
-  function buildEmptyState() {
+  function buildEmptyState(hasUploadTail) {
     var el = document.createElement('section');
     el.className = 'lumen-empty';
-    el.innerHTML = '<p>' +
-      t('Nothing on record for this page yet. Use the Upload card below to add exams, vitals or documents.',
-        'Ainda não há dados registrados nesta página. Use o cartão Enviar dados abaixo para adicionar exames, sinais vitais ou documentos.') +
+    /* Only mention the Upload card when the tail actually renders one —
+       granted viewers (doctor/family) have no tail, and consult pages don't
+       load upload-card.js at all. */
+    el.innerHTML = '<p>' + (hasUploadTail
+      ? t('Nothing on record for this page yet. Use the Upload card below to add exams, vitals or documents.',
+          'Ainda não há dados registrados nesta página. Use o cartão Enviar dados abaixo para adicionar exames, sinais vitais ou documentos.')
+      : t('Nothing on record for this page yet.',
+          'Ainda não há dados registrados nesta página.')) +
       '</p>';
     return el;
   }
 
   /* ── tail (slot 5): Upload → Update-AI-Insights → Delete (home only, D3) ── */
   function buildTail(patient, page) {
+    /* Self-only affordances: upload, insights-rebuild and wipe are all
+       server-gated to self-or-admin — for a granted viewer (doctor, family)
+       these cards can only 403. Skip the whole tail for them. */
+    var viewer = '', role = '';
+    try {
+      viewer = sessionStorage.getItem('jc_viewer_clerk') || '';
+      role = sessionStorage.getItem('jc_viewer_role') || '';
+    } catch (_) {}
+    if (role !== 'admin' && viewer && patient && viewer !== patient) return null;
     injectAssemblerStyles();
     var tail = document.createElement('section');
     tail.className = 'lumen-tail';
@@ -295,9 +345,13 @@
       summary: getJson('/api/patient-summary?' + q),
       dashboard: getJson('/api/patient-dashboard?' + q),
     };
-    if (page === 'physical-exams') jobs.exams = getJson('/api/patient-exams?' + q);
-    if (page === 'mental') jobs.psych = getJson('/api/patient-psych?' + q);
-    if (page === 'physical-vitals') {
+    /* 'consult' is the single-scroll consultation page: it stacks sections
+       from every domain, so it fetches the union of the per-page payloads.
+       Each API scope-filters server-side; denied slices come back null/empty
+       and their sections simply don't render. */
+    if (page === 'physical-exams' || page === 'consult') jobs.exams = getJson('/api/patient-exams?' + q);
+    if (page === 'mental' || page === 'consult') jobs.psych = getJson('/api/patient-psych?' + q);
+    if (page === 'physical-vitals' || page === 'consult') {
       var viewer = '';
       try { viewer = sessionStorage.getItem('jc_viewer_clerk') || ''; } catch (_) {}
       var today = new Date().toISOString().slice(0, 10);
@@ -385,10 +439,14 @@
         else summaryCount++;
       });
 
+    /* 5 · tail — built early so the empty state knows whether an Upload
+       card will actually be on the page (granted viewers get no tail). */
+    var tail = buildTail(patient, page);
+
     /* 4 · empty state — only when NOTHING rendered. Its copy claims nothing
        is on record; below a data-backed AI summary (prompt #2c guarantees one
        whenever the domain has data) that claim would be false. */
-    if (topicCount === 0 && summaryCount === 0) root.appendChild(buildEmptyState());
+    if (topicCount === 0 && summaryCount === 0) root.appendChild(buildEmptyState(!!tail));
 
     /* registry-driven footnote (spiritual pastoral line) */
     if (meta.footnote) {
@@ -398,8 +456,6 @@
       root.appendChild(fn);
     }
 
-    /* 5 · tail */
-    var tail = buildTail(patient, page);
     if (tail) root.appendChild(tail);
 
     /* 6 · footer */

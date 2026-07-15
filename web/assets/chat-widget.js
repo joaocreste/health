@@ -13,6 +13,11 @@
   var patientClerk = params.get('patient') || sessionStorage.getItem('jc_current_patient') || PATIENT_ZERO;
   var viewerClerk = sessionStorage.getItem('jc_viewer_clerk') || patientClerk;
 
+  /* Chat is self-or-admin at the API (resolveChatPatient) — a granted viewer
+     (doctor, family) would get a launcher that can only 403. Don't mount it. */
+  var viewerRole = sessionStorage.getItem('jc_viewer_role') || '';
+  if (viewerRole !== 'admin' && viewerClerk !== patientClerk) return;
+
   // Best-effort first name for the header.
   var FIRST = { 'pending:joao': 'João', 'pending:paulo-silotto-df3441': 'Paulo', 'pending:silvana-creste-18ba19': 'Silvana', 'pending:john-smith-jr-9d4e21': 'John' };
   var firstName = FIRST[patientClerk] || '';

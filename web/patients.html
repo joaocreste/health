@@ -367,8 +367,17 @@
         if (p.relation && p.relation !== 'self') relation = '<div class="relation">' + escapeHtml(p.relation) + '</div>';
         else if (p.relation === 'self') relation = '<div class="relation"><span class="lang-en">Self</span><span class="lang-pt">Você</span></div>';
 
+        /* A grant with view_mode='scroll' opens the single-scroll consultation
+           view instead of the multi-page app (the worker enforces the same
+           routing server-side). Self and admin rows have no view_mode. */
+        var scroll = p.view_mode === 'scroll' && p.relation !== 'self';
+        if (scroll) {
+          relation += '<div class="relation"><span class="lang-en">Consultation view</span><span class="lang-pt">Visão de consulta</span></div>';
+        }
+
         html +=
-          '<button type="button" class="patient-card" data-clerk="' + escapeHtml(p.clerk_user_id) + '">' +
+          '<button type="button" class="patient-card" data-clerk="' + escapeHtml(p.clerk_user_id) + '"' +
+            (scroll ? ' data-view-mode="scroll"' : '') + '>' +
             '<div class="avatar">' + escapeHtml(initials(p.full_name)) + '</div>' +
             '<div class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</div>' +
             '<div class="meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>' +
@@ -382,7 +391,8 @@
           var clerk = card.getAttribute('data-clerk');
           if (!clerk) return;
           sessionStorage.setItem('jc_current_patient', clerk);
-          location.href = 'home.html?patient=' + encodeURIComponent(clerk);
+          var page = card.getAttribute('data-view-mode') === 'scroll' ? 'consult.html' : 'home.html';
+          location.href = page + '?patient=' + encodeURIComponent(clerk);
         });
       });
     }

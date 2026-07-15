@@ -16,6 +16,20 @@
   var params = new URLSearchParams(location.search);
   var PATIENT = params.get('patient') || sessionStorage.getItem('jc_current_patient') || '';
 
+  /* Export is self-or-admin at the API (gateExportViewer) — a granted viewer
+     (doctor, family) would get a button that can only 403. Hide it instead. */
+  var VIEWER = '', ROLE = '';
+  try {
+    VIEWER = sessionStorage.getItem('jc_viewer_clerk') || '';
+    ROLE = sessionStorage.getItem('jc_viewer_role') || '';
+  } catch (_) {}
+  if (ROLE !== 'admin' && VIEWER && PATIENT && VIEWER !== PATIENT) {
+    document.querySelectorAll('[data-export-btn]').forEach(function (btn) {
+      btn.style.display = 'none';
+    });
+    return;
+  }
+
   function lang() { return document.documentElement.lang === 'pt' ? 'pt' : 'en'; }
   function T(key) {
     var d = {

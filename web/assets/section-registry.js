@@ -84,6 +84,12 @@
       title: { en: 'Mental Health Overview', pt: 'Visão Geral da Saúde Mental' },
       description: { en: 'Psychological architecture, therapy trends and life history.', pt: 'Arquitetura psicológica, tendências terapêuticas e história de vida.' },
     },
+    'consult': {
+      domain: null,
+      pillar: { en: 'CONSULTATION', pt: 'CONSULTA' },
+      title: { en: 'Consultation View', pt: 'Visão de Consulta' },
+      description: { en: 'The shared record in one continuous view — only what was granted.', pt: 'O prontuário compartilhado em uma visão contínua — apenas o que foi autorizado.' },
+    },
     'spiritual': {
       domain: 'spiritual',
       pillar: { en: 'SPIRITUAL', pt: 'ESPIRITUAL' },
@@ -216,6 +222,65 @@
         gate: { fn: 'G-ARR', args: ['psych.life_events'] }, provider: 'psychLifeHistory', badge: false },
       { id: 'from-your-record', order: 50, title: { en: 'From your record', pt: 'Do seu prontuário' },
         gate: { fn: 'G-DOMAIN', args: ['mental'] }, provider: 'aiFromYourRecord', badge: true },
+    ],
+
+    /* The consultation scroll page (/consult): every granted section stacks in
+       clinical order on ONE page — no topnav, no side rail. Section presence is
+       decided by the same payload gates as the source pages, and the payloads
+       arrive already scope-filtered by the Worker (a doctor granted labs-only
+       receives empty imaging/vitals/psych slices), so a failing gate simply
+       means "not granted or no data" and the section emits nothing. */
+    'consult': [
+      { id: 'ai-summary', order: 10, title: { en: 'AI summary', pt: 'Resumo por IA' },
+        gate: { fn: 'G-DASH', args: [] }, provider: 'aiSummary', badge: true, summary: true },
+      { id: 'at-a-glance', order: 20, title: { en: 'At a glance', pt: 'Resumo rápido' },
+        gate: { fn: 'G-NUM', args: ['summary.pillars.*.total'] }, provider: 'homeAtAGlance', badge: false },
+      { id: 'medications', order: 30, title: { en: 'Medications & Supplements', pt: 'Medicações e Suplementos' },
+        gate: { fn: 'G-ARR', args: ['summary.medications', 'summary.supplements'] }, provider: 'homeMedications', badge: false },
+      { id: 'injuries-surgeries', order: 40, title: { en: 'Injury & surgical history', pt: 'Histórico de lesões e cirurgias' },
+        gate: { fn: 'G-ARR', args: ['summary.procedures'] }, provider: 'homeInjuries', badge: false },
+      /* Paulo's bespoke sections inline imaging narrative in the renderer, so
+         on consult they additionally gate on the scope-filtered exams payload:
+         a viewer without imaging|labs gets a 403 (null payload) and the
+         sections emit nothing (patientScope stays enforced by gatePasses). */
+      { id: 'paulo-painmap', order: 50, title: { en: 'AI pain map', pt: 'Mapa de dor · IA' },
+        gate: { fn: 'G-ARR', args: ['exams.imaging', 'exams.panels', 'exams.ecg_studies'] },
+        patientScope: PAULO, provider: 'pauloPainMap', badge: true },
+      { id: 'paulo-exams', order: 60, title: { en: 'Exams', pt: 'Exames' },
+        gate: { fn: 'G-ARR', args: ['exams.imaging', 'exams.panels', 'exams.ecg_studies'] },
+        patientScope: PAULO, provider: 'pauloExams', badge: false },
+      { id: 'silvana-exams', order: 61, title: { en: 'Exams', pt: 'Exames' },
+        gate: { fn: 'PATIENT', args: [] }, patientScope: SILVANA, provider: 'silvanaExams', badge: false },
+      { id: 'cristina-exams', order: 62, title: { en: 'Exams', pt: 'Exames' },
+        gate: { fn: 'PATIENT', args: [] }, patientScope: CRISTINA, provider: 'cristinaExams', badge: false },
+      { id: 'imaging', order: 70, title: { en: 'Imaging studies', pt: 'Estudos de imagem' },
+        gate: { fn: 'G-ARR', args: ['exams.imaging', 'exams.ecg_studies'] }, provider: 'examsImaging', badge: false,
+        excludeScopes: BESPOKE_EXAMS },
+      { id: 'laboratory', order: 80, title: { en: 'Laboratory', pt: 'Laboratório' },
+        gate: { fn: 'G-ARR', args: ['exams.panels', 'exams.lab_documents'] }, provider: 'examsLaboratory', badge: false,
+        excludeScopes: BESPOKE_EXAMS },
+      { id: 'silvana-vitals', order: 90, title: { en: 'Vitals', pt: 'Vitais' },
+        gate: { fn: 'PATIENT', args: [] }, patientScope: SILVANA, provider: 'silvanaVitals', badge: false },
+      { id: 'body-composition', order: 100, title: { en: 'Body composition', pt: 'Composição corporal' },
+        gate: { fn: 'G-ARR', args: ['vitals.weight'] }, provider: 'vitalsSection', badge: false },
+      { id: 'sleep', order: 110, title: { en: 'Sleep architecture', pt: 'Arquitetura do sono' },
+        gate: { fn: 'G-ARR', args: ['vitals.sleepStagesByWeek'] }, provider: 'vitalsSection', badge: false },
+      { id: 'movement', order: 120, title: { en: 'Movement', pt: 'Movimento' },
+        gate: { fn: 'G-ARR', args: ['vitals.steps'] }, provider: 'vitalsSection', badge: false },
+      { id: 'cardiovascular', order: 130, title: { en: 'Cardiovascular & recovery', pt: 'Cardiovascular e recuperação' },
+        gate: { fn: 'G-ARR', args: ['vitals.hrvRhr'] }, provider: 'vitalsSection', badge: false },
+      { id: 'stress-resilience', order: 140, title: { en: 'Stress & resilience', pt: 'Estresse e resiliência' },
+        gate: { fn: 'G-ARR', args: ['vitals.stressRes'] }, provider: 'vitalsSection', badge: false },
+      { id: 'blood-pressure', order: 150, title: { en: 'Blood pressure', pt: 'Pressão arterial' },
+        gate: { fn: 'G-ARR', args: ['vitals.bp'] }, provider: 'vitalsSection', badge: false },
+      { id: 'paulo-mental', order: 160, title: { en: 'Mental health', pt: 'Saúde mental' },
+        gate: { fn: 'PATIENT', args: [] }, patientScope: PAULO, provider: 'pauloMental', badge: true },
+      { id: 'psych-architecture', order: 170, title: { en: 'Psychological architecture', pt: 'Arquitetura psicológica' },
+        gate: { fn: 'G-ARR', args: ['psych.dimensions'] }, provider: 'psychArchitecture', badge: true },
+      { id: 'life-history', order: 180, title: { en: 'A life in events', pt: 'Uma vida em eventos' },
+        gate: { fn: 'G-ARR', args: ['psych.life_events'] }, provider: 'psychLifeHistory', badge: false },
+      { id: 'specific-findings', order: 190, title: { en: 'Specific findings', pt: 'Achados específicos' },
+        gate: { fn: 'G-DASH', args: [] }, provider: 'aiSpecificFindings', badge: true },
     ],
 
     'spiritual': [
