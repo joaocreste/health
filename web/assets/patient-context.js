@@ -829,7 +829,9 @@
     var s = (abs >= 1000) ? Number(n).toFixed(0)
           : (abs >= 100)  ? Number(n).toFixed(1)
           :                  Number(n).toFixed(2);
-    return s.replace(/\.?0+$/, '');
+    // Strip trailing zeros ONLY after a decimal point — the old /\.?0+$/
+    // (optional dot) truncated round integers: 1250 -> "125", 1500 -> "15".
+    return s.indexOf('.') === -1 ? s : s.replace(/0+$/, '').replace(/\.$/, '');
   }
 
   function classifyLab(value, refLow, refHigh, flag) {
