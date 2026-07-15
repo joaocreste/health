@@ -34,6 +34,13 @@
   var SILVANA  = 'pending:silvana-creste-18ba19';
   var CRISTINA = 'pending:cristina-cresti-d7479c';
 
+  /* Patients whose bespoke physical-exams renderer OWNS the whole exams page
+     (renders their imaging + labs itself). The DB-driven imaging/laboratory
+     sections must be suppressed for them, or they render a second time below
+     the bespoke content once the patient has imaging_studies / lab panels in
+     Postgres. */
+  var BESPOKE_EXAMS = [PAULO, SILVANA, CRISTINA];
+
   /* Per-page chrome metadata consumed by the assembler: the unified page
      banner (pillar crumb / title / description — prompt #2b canonical copy),
      the AI-insights domain backing G-DOMAIN on that page, and (spiritual) the
@@ -166,9 +173,11 @@
       { id: 'cristina-exams', order: 17, title: { en: 'Exams', pt: 'Exames' },
         gate: { fn: 'PATIENT', args: [] }, patientScope: CRISTINA, provider: 'cristinaExams', badge: false },
       { id: 'imaging', order: 20, title: { en: 'Imaging studies', pt: 'Estudos de imagem' },
-        gate: { fn: 'G-ARR', args: ['exams.imaging', 'exams.ecg_studies'] }, provider: 'examsImaging', badge: false },
+        gate: { fn: 'G-ARR', args: ['exams.imaging', 'exams.ecg_studies'] }, provider: 'examsImaging', badge: false,
+        excludeScopes: BESPOKE_EXAMS },
       { id: 'laboratory', order: 30, title: { en: 'Laboratory', pt: 'Laboratório' },
-        gate: { fn: 'G-ARR', args: ['exams.panels', 'exams.lab_documents'] }, provider: 'examsLaboratory', badge: false },
+        gate: { fn: 'G-ARR', args: ['exams.panels', 'exams.lab_documents'] }, provider: 'examsLaboratory', badge: false,
+        excludeScopes: BESPOKE_EXAMS },
       { id: 'gut-microbiota', order: 40, title: { en: 'Gut microbiota', pt: 'Microbiota intestinal' },
         gate: { fn: 'G-ARR', args: ['exams.microbiota'] }, provider: 'examsMicrobiota', badge: false }, // no payload array yet → closed
       { id: 'alcohol-audit', order: 50, title: { en: 'Alcohol · AUDIT', pt: 'Álcool · AUDIT' },

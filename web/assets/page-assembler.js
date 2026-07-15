@@ -112,6 +112,11 @@
   function gatePasses(entry, payloads, ctx) {
     /* patientScope is enforced regardless of the declared gate fn. */
     if (entry.patientScope && ctx.patient !== entry.patientScope) return false;
+    /* excludeScopes: a generic section a bespoke renderer already covers is
+       suppressed for those patients (e.g. Paulo's bespoke exams renders his
+       imaging + labs, so the DB-driven imaging/laboratory sections must not
+       render again below it). */
+    if (entry.excludeScopes && entry.excludeScopes.indexOf(ctx.patient) >= 0) return false;
     var g = entry.gate || {};
     var fn = GATES[g.fn];
     if (!fn) return false; // unknown gate → fail closed
