@@ -1185,10 +1185,12 @@
     return m[3] + '-' + pad(mo) + '-' + pad(+m[1]);
   }
 
-  // Static-table numbers are EN-formatted ("1,250.8"); qualitative results
-  // ("Negative", "< 0.01") stay table-only. Returns a Number or null.
+  // Static-table numbers are EN-formatted ("1,250.8"). Qualitative results
+  // ("Negative") AND censored ones ("< 0.21" — the true value is unknown,
+  // only its bound) stay table-only: plotting a censoring limit as a real
+  // measurement would assert data that doesn't exist. Returns Number|null.
   function parseCmpNum(raw) {
-    var t = String(raw || '').replace(/,/g, '').replace(/^[<>≤≥]\s*/, '').trim();
+    var t = String(raw || '').replace(/,/g, '').trim();
     if (!/^-?[\d.]+$/.test(t)) return null;
     var n = parseFloat(t);
     return isFinite(n) ? n : null;
@@ -1218,11 +1220,12 @@
     if (lo == null && hi == null) {
       var refEl = card.querySelector('.lab-test-ref');
       var tx2 = refEl ? (refEl.textContent || '') : '';
-      // (?!h) rejects clock ranges ("07–09h: 6,0 a 18,4") so the real
-      // numeric range after them is the one that matches.
-      var range = tx2.match(/([\d.,]+)\s*(?:a|to|–|—)\s*([\d.,]+)(?!h)/i);
-      var sup = tx2.match(/(?:superior a|acima de|maior que|>)\s*([\d.,]+)/i);
-      var inf = tx2.match(/(?:inferior a|abaixo de|menor que|até|<)\s*([\d.,]+)/i);
+      // (?![\d.,h]) rejects clock ranges ("07–09h: 6,0 a 18,4") without
+      // letting the engine backtrack into a partial match ("07–0"), so the
+      // real numeric range after them is the one that matches.
+      var range = tx2.match(/([\d.,]+)\s*(?:a|to|–|—)\s*([\d.,]+)(?![\d.,h])/i);
+      var sup = tx2.match(/(?:superior a|acima de|maior que|above|over|>)\s*([\d.,]+)/i);
+      var inf = tx2.match(/(?:inferior a|abaixo de|menor que|até|up to|below|under|<)\s*([\d.,]+)/i);
       // Banded texts lead with the intended limit ("Ótimo: <100;
       // Desejável: 100–129; …") — when a one-sided bound appears BEFORE
       // the first range, the range is a later band, not the reference
@@ -1501,7 +1504,7 @@
           '</div>' +
         '</div>' +
         '<div class="jc-labpop-body' + (chartPane ? '' : ' jc-labpop-tableonly') + '">' +
-          '<div class="jc-labpop-tablewrap"></div>' +
+          '<div class="jc-labpop-tablewrap" tabindex="0"></div>' +
           chartPane +
         '</div>' +
       '</div>';
@@ -1509,6 +1512,29 @@
     // The table is CLONED from the card so both render paths (static
     // retrofit and DB renderer) show exactly what the card carries.
     overlay.querySelector('.jc-labpop-tablewrap').appendChild(table.cloneNode(true));
+
+    // Backdrop dismissal must key on where the press STARTED, not where the
+    // click lands: a text-selection drag that begins on the table and ends
+    // past the dialog edge dispatches its click at the overlay and would
+    // close the popup mid-copy.
+    overlay.addEventListener('pointerdown', function (e) {
+      overlay.__downOnBackdrop = (e.target === overlay);
+    });
+
+    // Minimal focus trap for the aria-modal dialog: Tab cycles between the
+    // close button and the scrollable table pane instead of escaping into
+    // the scroll-locked page behind the backdrop.
+    overlay.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      var focusables = overlay.querySelectorAll('.jc-labpop-close, .jc-labpop-tablewrap');
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    });
 
     overlay.__opener = card;
     document.body.appendChild(overlay);
@@ -1523,7 +1549,7 @@
     document.addEventListener('click', function (e) {
       if (e.target.closest && e.target.closest('.jc-labpop-close')) { closeLabPopup(); return; }
       var overlay = document.getElementById(LABPOP_ID);
-      if (overlay && e.target === overlay) { closeLabPopup(); return; }
+      if (overlay && e.target === overlay && overlay.__downOnBackdrop) { closeLabPopup(); return; }
       var card = e.target && e.target.closest && e.target.closest('.lab-test-has-history');
       if (!card) return;
       if (e.target.closest('a, button, input, select, textarea')) return;
@@ -3661,6 +3687,7 @@
       '.jc-labpop-sub .jc-labpop-ref .lab-test-ref { display: inline; }',
       '.jc-labpop-body { display: flex; gap: 22px; margin-top: 16px; min-height: 0; flex: 1 1 auto; align-items: stretch; overflow: hidden; }',
       '.jc-labpop-tablewrap { flex: 1 1 52%; min-width: 0; min-height: 0; overflow: auto; }',
+      '.jc-labpop-tablewrap:focus { outline: 2px solid #B8954A; outline-offset: -2px; }',
       '.jc-labpop-body.jc-labpop-tableonly .jc-labpop-tablewrap { flex: 1 1 100%; }',
       '.jc-labpop-chartwrap { flex: 1 1 48%; min-width: 0; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid #EFEBE3; padding-left: 22px; }',
       // Compact table metrics inside the popup so all four columns fit its pane
