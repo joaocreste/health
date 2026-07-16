@@ -1064,7 +1064,7 @@
       : '';
     var cardCls = 'lab-test lab-test-' + status + (hasHistory ? ' lab-test-has-history' : '');
     var attrs = hasHistory
-      ? ' role="button" tabindex="0" aria-expanded="false"' +
+      ? ' role="button" tabindex="0" aria-haspopup="dialog"' +
         ' aria-label="' + tPlain('Click to view exam history', 'Clique para ver o histórico do exame') + '"'
       : '';
     return (
@@ -1073,7 +1073,13 @@
           '<div class="lab-test-name">' + (m.marker_html || escapeHtml(m.marker)) + '</div>' +
           '<div class="lab-test-meta">' +
             '<span class="lab-test-val">' + valHtml + '</span>' +
-            '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>' +
+            /* m.no_pill: the metric has NO reference range, so there is no
+               in/out-of-range verdict to show. classifyLab() falls back to
+               'normal' when refs are absent, which would render a green
+               "Normal" chip asserting a judgement the data cannot support
+               (e.g. a raw body weight in kg). Undefined for every existing
+               caller -> pill renders exactly as before. */
+            (m.no_pill ? '' : '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>') +
             historyBadge +
           '</div>' +
         '</div>' +
@@ -1087,11 +1093,24 @@
     );
   }
 
-  // Per-card click-to-expand history. Renders one row per sample in
-  // m.points (Date · Requested by · Result · Status pill) — newest first,
-  // latest row highlighted. Empty string when there's only one sample
-  // (no history to show). Caller wraps the result inside .lab-test;
-  // installLabHistoryHandler() toggles visibility on card click.
+  // Direction of an out-of-range value: 'H' | 'L' | '' — used both to color
+  // the popup chart's dots and to keep the history pills honest when the
+  // source carried no explicit flag.
+  function labFlagDir(v, refLow, refHigh, flag) {
+    if (flag === 'H' || flag === 'HH' || flag === 'high') return 'H';
+    if (flag === 'L' || flag === 'LL' || flag === 'low')  return 'L';
+    if (v == null || !isFinite(v)) return '';
+    if (refHigh != null && isFinite(refHigh) && v > refHigh) return 'H';
+    if (refLow  != null && isFinite(refLow)  && v < refLow)  return 'L';
+    return '';
+  }
+
+  // Per-card sample history. Renders one row per sample in m.points
+  // (Date · Requested by · Result · Status pill) — newest first, latest row
+  // highlighted. Empty string when there's only one sample. The block stays
+  // hidden in the card: it is the DATA CARRIER for the history popup
+  // (openLabPopup scrapes its rows + the data-* attrs below), which
+  // installLabHistoryHandler() opens on card click.
   function renderLabHistory(m) {
     if (!m.points || m.points.length < 2) return '';
     var pts = m.points.slice().sort(function (a, b) {
@@ -1110,17 +1129,27 @@
           : '<span class="lab-hist-empty">—</span>';
       var unit = m.unit ? ' <span class="lab-hist-unit">' + escapeHtml(m.unit) + '</span>' : '';
       var rowCls = 'lab-hist-row' + (i === 0 ? ' is-latest' : '');
+      var isoDate = p.taken_at ? String(p.taken_at).slice(0, 10) : '';
+      var dataAttrs =
+        ' data-date="' + escapeHtml(isoDate) + '"' +
+        (v != null ? ' data-value="' + v + '"' : '') +
+        ' data-flag="' + labFlagDir(v, m.ref_low, m.ref_high, p.flag) + '"';
+      var latestAttr = i === 0 ? ' data-latest="' + tPlain('latest', 'mais recente') + '"' : '';
       return (
-        '<tr class="' + rowCls + '">' +
-          '<td class="lab-hist-date">' + escapeHtml(dateStr) + '</td>' +
+        '<tr class="' + rowCls + '"' + dataAttrs + '>' +
+          '<td class="lab-hist-date"' + latestAttr + '>' + escapeHtml(dateStr) + '</td>' +
           '<td class="lab-hist-doctor">' + requested + '</td>' +
           '<td class="lab-hist-val">' + escapeHtml(valStr) + unit + '</td>' +
           '<td class="lab-hist-status"><span class="pill ' + pillCls + '">' + pillLabel(status, p.flag) + '</span></td>' +
         '</tr>'
       );
     }).join('');
+    var refAttrs =
+      (m.ref_low  != null && isFinite(m.ref_low)  ? ' data-ref-low="'  + m.ref_low  + '"' : '') +
+      (m.ref_high != null && isFinite(m.ref_high) ? ' data-ref-high="' + m.ref_high + '"' : '') +
+      (m.unit ? ' data-unit="' + escapeHtml(m.unit) + '"' : '');
     return (
-      '<div class="lab-test-history" aria-hidden="true">' +
+      '<div class="lab-test-history" aria-hidden="true"' + refAttrs + '>' +
         '<table class="lab-test-history-table">' +
           '<thead><tr>' +
             '<th>' + t('Date', 'Data') + '</th>' +
@@ -1142,21 +1171,87 @@
   // appended .lab-test-history block) so the click-to-expand UX matches
   // LLM-rendered patients. Idempotent. Also runs for Leo, who inherits
   // Joao's static HTML.
+  // "8 Jun 2026" (the static comparison table's authoring format) -> ISO.
+  var CMP_MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+                     jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+  function parseCmpDate(s) {
+    var m = String(s || '').trim().match(/^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?\s+(\d{4})$/);
+    if (!m) return '';
+    var mo = CMP_MONTHS[m[2].toLowerCase()];
+    if (!mo) return '';
+    return m[3] + '-' + pad(mo) + '-' + pad(+m[1]);
+  }
+
+  // Static-table numbers are EN-formatted ("1,250.8"); qualitative results
+  // ("Negative", "< 0.01") stay table-only. Returns a Number or null.
+  function parseCmpNum(raw) {
+    var t = String(raw || '').replace(/,/g, '').replace(/^[<>≤≥]\s*/, '').trim();
+    if (!/^-?[\d.]+$/.test(t)) return null;
+    var n = parseFloat(t);
+    return isFinite(n) ? n : null;
+  }
+
+  // pt-BR-formatted bounds on the static cards ("0,7" / "1.250,8") -> Number.
+  function parsePtNum(raw) {
+    var t = String(raw || '').trim();
+    if (t.indexOf(',') !== -1) t = t.replace(/\./g, '').replace(',', '.');
+    var n = parseFloat(t);
+    return isFinite(n) ? n : null;
+  }
+
+  // Reference bounds for a static .lab-test card: the bar labels are the
+  // machine-friendly source ("min 0,7" / "max 1,2"); the free-text
+  // reference line is the fallback ("0,70 a 1,20 mg/dL", "Superior a 60",
+  // "< 150"). One-sided ranges are normal (eGFR, cholesterol).
+  function parseCardRefs(card) {
+    var lo = null, hi = null;
+    card.querySelectorAll('.lab-bar-labels span').forEach(function (span) {
+      var tx = span.textContent || '';
+      var mLo = tx.match(/(?:min|mín)\.?\s*([\d.,]+)/i);
+      var mHi = tx.match(/(?:max|máx)\.?\s*([\d.,]+)/i);
+      if (mLo) lo = parsePtNum(mLo[1]);
+      if (mHi) hi = parsePtNum(mHi[1]);
+    });
+    if (lo == null && hi == null) {
+      var refEl = card.querySelector('.lab-test-ref');
+      var tx2 = refEl ? (refEl.textContent || '') : '';
+      var range = tx2.match(/([\d.,]+)\s*(?:a|to|–|—)\s*([\d.,]+)/i);
+      if (range) {
+        lo = parsePtNum(range[1]);
+        hi = parsePtNum(range[2]);
+      } else {
+        var sup = tx2.match(/(?:superior a|acima de|maior que|>)\s*([\d.,]+)/i);
+        var inf = tx2.match(/(?:inferior a|abaixo de|menor que|até|<)\s*([\d.,]+)/i);
+        if (sup) lo = parsePtNum(sup[1]);
+        if (inf) hi = parsePtNum(inf[1]);
+      }
+    }
+    return { lo: lo, hi: hi };
+  }
+
   function retrofitStaticLabHistory() {
     var cmpTable = document.querySelector('.lab-cmp-table');
     if (!cmpTable) return;
 
     // ── 1. Read column metadata from <thead> ─────────────────────
     var colHeaders = cmpTable.querySelectorAll('thead .lab-cmp-col-head');
+    // Lab/doctor header cells can carry bilingual .lang-en/.lang-pt pairs
+    // ("Self-administered"/"Autoaplicado") — keep those as trusted static
+    // markup so the CSS language switch keeps working; textContent would
+    // concatenate both languages.
+    function colText(el) {
+      if (!el) return '';
+      return el.querySelector('.lang-en, .lang-pt')
+        ? { html: el.innerHTML }
+        : el.textContent.trim();
+    }
     var cols = [];
     colHeaders.forEach(function (th) {
       var d = th.querySelector('.lab-cmp-date');
-      var l = th.querySelector('.lab-cmp-lab');
-      var m = th.querySelector('.lab-cmp-md');
       cols.push({
         date: d ? d.textContent.trim() : '',
-        lab: l ? l.textContent.trim() : '',
-        doctor: m ? m.textContent.trim() : '',
+        lab: colText(th.querySelector('.lab-cmp-lab')),
+        doctor: colText(th.querySelector('.lab-cmp-md')),
       });
     });
     if (!cols.length) return;
@@ -1187,9 +1282,11 @@
         if (!raw || raw === '—' || raw === '-') return;
         samples.push({
           date: col.date,
+          iso: parseCmpDate(col.date),
           lab: col.lab,
           doctor: col.doctor,
           value: raw,
+          num: parseCmpNum(raw),
           unit: unitTxt,
           flag: td.getAttribute('data-flag') || '',
         });
@@ -1217,28 +1314,44 @@
       var samples = markerHistory[cardMarker];
       if (!samples) return;
 
+      // Reference bounds come from the card itself — the comparison table
+      // carries no per-cell flags, so each historical value is classified
+      // against them (old out-of-range results used to all read "Normal").
+      var refs = parseCardRefs(card);
+
       var rowsHtml = samples.map(function (s, i) {
         var rowCls = 'lab-hist-row' + (i === 0 ? ' is-latest' : '');
+        var dir = labFlagDir(s.num, refs.lo, refs.hi, s.flag);
         var pillCls, pillLabel;
-        if (s.flag === 'high') {
+        if (dir === 'H') {
           pillCls = 'pill-flag';
           pillLabel = '<span class="lang-en">High</span><span class="lang-pt">Alto</span>';
-        } else if (s.flag === 'low') {
+        } else if (dir === 'L') {
           pillCls = 'pill-flag';
           pillLabel = '<span class="lang-en">Low</span><span class="lang-pt">Baixo</span>';
         } else {
           pillCls = 'pill-ok';
           pillLabel = '<span class="lang-en">Normal</span><span class="lang-pt">Normal</span>';
         }
-        var requested = (s.doctor && s.doctor !== '—')
-          ? escapeHtml(s.doctor)
-          : (s.lab && s.lab !== '—')
-            ? '<span class="lab-hist-lab">' + escapeHtml(s.lab) + '</span>'
+        function colHtml(c) { return (c && c.html != null) ? c.html : escapeHtml(c); }
+        function colEmpty(c) {
+          var tx = (c && c.html != null) ? c.html.replace(/<[^>]*>/g, '').trim() : String(c || '').trim();
+          return !tx || tx === '—' || tx === '-';
+        }
+        var requested = !colEmpty(s.doctor)
+          ? colHtml(s.doctor)
+          : !colEmpty(s.lab)
+            ? '<span class="lab-hist-lab">' + colHtml(s.lab) + '</span>'
             : '<span class="lab-hist-empty">—</span>';
         var unit = s.unit ? ' <span class="lab-hist-unit">' + escapeHtml(s.unit) + '</span>' : '';
+        var dataAttrs =
+          ' data-date="' + escapeHtml(s.iso) + '"' +
+          (s.num != null ? ' data-value="' + s.num + '"' : '') +
+          ' data-flag="' + dir + '"';
+        var latestAttr = i === 0 ? ' data-latest="' + tPlain('latest', 'mais recente') + '"' : '';
         return (
-          '<tr class="' + rowCls + '">' +
-            '<td class="lab-hist-date">' + escapeHtml(s.date) + '</td>' +
+          '<tr class="' + rowCls + '"' + dataAttrs + '>' +
+            '<td class="lab-hist-date"' + latestAttr + '>' + escapeHtml(s.date) + '</td>' +
             '<td class="lab-hist-doctor">' + requested + '</td>' +
             '<td class="lab-hist-val">' + escapeHtml(s.value) + unit + '</td>' +
             '<td class="lab-hist-status"><span class="pill ' + pillCls + '">' + pillLabel + '</span></td>' +
@@ -1246,8 +1359,13 @@
         );
       }).join('');
 
+      var refAttrs =
+        (refs.lo != null ? ' data-ref-low="'  + refs.lo + '"' : '') +
+        (refs.hi != null ? ' data-ref-high="' + refs.hi + '"' : '') +
+        (samples[0] && samples[0].unit ? ' data-unit="' + escapeHtml(samples[0].unit) + '"' : '');
+
       var historyHtml =
-        '<div class="lab-test-history" aria-hidden="true">' +
+        '<div class="lab-test-history" aria-hidden="true"' + refAttrs + '>' +
           '<table class="lab-test-history-table">' +
             '<thead><tr>' +
               '<th><span class="lang-en">Date</span><span class="lang-pt">Data</span></th>' +
@@ -1262,7 +1380,7 @@
       card.classList.add('lab-test-has-history');
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
-      card.setAttribute('aria-expanded', 'false');
+      card.setAttribute('aria-haspopup', 'dialog');
 
       var meta = card.querySelector('.lab-test-meta');
       if (meta && !meta.querySelector('.lab-test-history-badge')) {
@@ -1281,29 +1399,137 @@
     });
   }
 
-  // Delegated click + keyboard toggler for .lab-test-has-history cards.
-  // Idempotent: installs the listener once per page load.
+  // Delegated click + keyboard opener for .lab-test-has-history cards —
+  // opens the jc-labpop history dialog (table + chart); ESC / backdrop /
+  // the × button close it. Idempotent: installs the listeners once per load.
+  /* ── Lab history popup ─────────────────────────────────────────────
+     Clicking a marker card with history opens a dialog card: the sample
+     table (date · requested by · result · status) on the left and a
+     time-series chart on the right — reference band with dashed min/max
+     lines, one dot per result, out-of-range dots in red. Data comes from
+     the card's hidden .lab-test-history block (see the data-* attrs the
+     two builders emit), so the popup works identically for the static
+     shells and the DB-rendered patients. */
+
+  var LABPOP_ID = 'jc-labpop';
+
+  function closeLabPopup() {
+    var overlay = document.getElementById(LABPOP_ID);
+    if (!overlay) return;
+    var opener = overlay.__opener;
+    overlay.remove();
+    document.body.classList.remove('jc-labpop-open');
+    if (opener && typeof opener.focus === 'function') opener.focus();
+  }
+
+  function openLabPopup(card) {
+    closeLabPopup();
+    var hist = card.querySelector('.lab-test-history');
+    var table = hist && hist.querySelector('.lab-test-history-table');
+    if (!table) return;
+
+    var nameEl = card.querySelector('.lab-test-name');
+    var refEl = card.querySelector('.lab-test-ref');
+    var rows = hist.querySelectorAll('.lab-hist-row');
+
+    var unit = hist.getAttribute('data-unit') || '';
+    var refLow = parseFloat(hist.getAttribute('data-ref-low'));
+    var refHigh = parseFloat(hist.getAttribute('data-ref-high'));
+    if (!isFinite(refLow)) refLow = null;
+    if (!isFinite(refHigh)) refHigh = null;
+
+    var points = [];
+    rows.forEach(function (tr) {
+      var d = tr.getAttribute('data-date');
+      var v = parseFloat(tr.getAttribute('data-value'));
+      if (d && isFinite(v)) points.push({ date: d, value: v, flag: tr.getAttribute('data-flag') || '' });
+    });
+
+    var chartHtml = '';
+    if (points.length > 1) {
+      chartHtml = svgLineChart({
+        series: [{ color: '#244E6E', unit: unit, points: points }],
+        width: 560, height: 330,
+        ref_low: refLow, ref_high: refHigh,
+      });
+    }
+    var hasRef = refLow != null || refHigh != null;
+    var legendBits = [];
+    if (hasRef) {
+      legendBits.push(
+        '<span class="jc-labpop-key"><span class="jc-labpop-key-dash"></span>' +
+        t('reference limits', 'limites de referência') + '</span>');
+    }
+    if (points.some(function (p) { return p.flag === 'H' || p.flag === 'L'; })) {
+      legendBits.push(
+        '<span class="jc-labpop-key"><span class="jc-labpop-key-dot"></span>' +
+        t('out of range', 'fora do intervalo') + '</span>');
+    }
+    var chartPane = chartHtml
+      ? '<div class="jc-labpop-chartwrap">' + chartHtml +
+          (legendBits.length ? '<div class="jc-labpop-legend">' + legendBits.join('') + '</div>' : '') +
+        '</div>'
+      : '';
+
+    var subBits = [
+      rows.length + ' ' + tPlain(rows.length === 1 ? 'result' : 'results',
+                                 rows.length === 1 ? 'resultado' : 'resultados'),
+    ];
+    var overlay = document.createElement('div');
+    overlay.id = LABPOP_ID;
+    overlay.className = 'jc-labpop-backdrop';
+    overlay.innerHTML =
+      '<div class="jc-labpop" role="dialog" aria-modal="true" aria-label="' +
+        tPlain('Exam history', 'Histórico do exame') + '">' +
+        '<button type="button" class="jc-labpop-close" aria-label="' + tPlain('Close', 'Fechar') + '">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>' +
+        '</button>' +
+        '<div class="jc-labpop-head">' +
+          '<div class="jc-labpop-title">' + (nameEl ? nameEl.innerHTML : '') + '</div>' +
+          '<div class="jc-labpop-sub">' + escapeHtml(subBits.join(' · ')) +
+            (refEl ? ' <span class="jc-labpop-ref">· ' + refEl.innerHTML + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="jc-labpop-body' + (chartPane ? '' : ' jc-labpop-tableonly') + '">' +
+          '<div class="jc-labpop-tablewrap"></div>' +
+          chartPane +
+        '</div>' +
+      '</div>';
+
+    // The table is CLONED from the card so both render paths (static
+    // retrofit and DB renderer) show exactly what the card carries.
+    overlay.querySelector('.jc-labpop-tablewrap').appendChild(table.cloneNode(true));
+
+    overlay.__opener = card;
+    document.body.appendChild(overlay);
+    document.body.classList.add('jc-labpop-open');
+    var closeBtn = overlay.querySelector('.jc-labpop-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
   function installLabHistoryHandler() {
     if (document.body && document.body.dataset.jcLabHistoryHandler === '1') return;
     if (document.body) document.body.dataset.jcLabHistoryHandler = '1';
-    function toggle(card) {
-      var open = card.classList.toggle('is-open');
-      card.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var hist = card.querySelector('.lab-test-history');
-      if (hist) hist.setAttribute('aria-hidden', open ? 'false' : 'true');
-    }
     document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.jc-labpop-close')) { closeLabPopup(); return; }
+      var overlay = document.getElementById(LABPOP_ID);
+      if (overlay && e.target === overlay) { closeLabPopup(); return; }
       var card = e.target && e.target.closest && e.target.closest('.lab-test-has-history');
       if (!card) return;
       if (e.target.closest('a, button, input, select, textarea')) return;
-      toggle(card);
+      openLabPopup(card);
     });
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && document.getElementById(LABPOP_ID)) {
+        e.preventDefault();
+        closeLabPopup();
+        return;
+      }
       if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
       var card = e.target && e.target.closest && e.target.closest('.lab-test-has-history');
       if (!card || card !== e.target) return;
       e.preventDefault();
-      toggle(card);
+      openLabPopup(card);
     });
   }
 
@@ -3042,9 +3268,34 @@
       '.lab-test-has-history:focus { outline: 2px solid #B8954A; outline-offset: 2px; }',
       '.lab-test-history-badge { display: inline-flex; align-items: center; gap: 4px; background: #F4F1EA; border: 1px solid #DDD8CC; border-radius: 999px; padding: 2px 8px 2px 9px; font-family: "IBM Plex Mono", monospace; font-size: 10px; color: #7A8FA6; letter-spacing: 0.04em; margin-left: 6px; }',
       '.lab-test-history-caret { transition: transform 0.18s ease; }',
-      '.lab-test.is-open .lab-test-history-caret { transform: rotate(180deg); }',
-      '.lab-test-history { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E5E2DC; }',
-      '.lab-test.is-open .lab-test-history { display: block; }',
+      // The in-card history block is a hidden data carrier now — clicking the
+      // card opens the jc-labpop dialog instead of expanding in place.
+      '.lab-test-history { display: none; }',
+      // Lab history popup (table + time-series chart)
+      '.jc-labpop-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,0.45); z-index: 1200; display: flex; align-items: center; justify-content: center; padding: 24px; }',
+      '.jc-labpop { background: #FFFFFF; border: 1px solid #E5E2DC; border-radius: 12px; box-shadow: 0 18px 60px rgba(13,27,42,0.28); width: min(1040px, 100%); max-height: min(84vh, 760px); display: flex; flex-direction: column; position: relative; padding: 20px 24px 22px; overflow: hidden; }',
+      '.jc-labpop-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 6px; border: 1px solid #E5E2DC; background: #FFFFFF; color: #7A8FA6; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s, border-color 0.15s; }',
+      '.jc-labpop-close:hover { color: #0D1B2A; border-color: #B8954A; }',
+      '.jc-labpop-head { padding-right: 40px; }',
+      '.jc-labpop-title { font-family: "Raleway", sans-serif; font-weight: 700; font-size: 18px; color: #0D1B2A; }',
+      '.jc-labpop-title .lab-name-pt { font-weight: 300; color: #7A8FA6; font-size: 14px; }',
+      '.jc-labpop-sub { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; margin-top: 4px; letter-spacing: 0.03em; }',
+      '.jc-labpop-sub .jc-labpop-ref .lab-test-ref { display: inline; }',
+      '.jc-labpop-body { display: flex; gap: 22px; margin-top: 16px; min-height: 0; flex: 1 1 auto; align-items: stretch; overflow: hidden; }',
+      '.jc-labpop-tablewrap { flex: 1 1 52%; min-width: 0; min-height: 0; overflow: auto; }',
+      '.jc-labpop-body.jc-labpop-tableonly .jc-labpop-tablewrap { flex: 1 1 100%; }',
+      '.jc-labpop-chartwrap { flex: 1 1 48%; min-width: 0; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid #EFEBE3; padding-left: 22px; }',
+      // Compact table metrics inside the popup so all four columns fit its pane
+      '.jc-labpop .lab-test-history-table td { padding: 7px 6px; }',
+      '.jc-labpop .lab-test-history-table th { padding: 4px 6px 8px; }',
+      '.jc-labpop .lab-test-history-table .pill { white-space: nowrap; }',
+      '.jc-labpop-chartwrap svg { width: 100%; height: auto; display: block; }',
+      '.jc-labpop-legend { display: flex; gap: 16px; margin-top: 10px; font-family: "IBM Plex Sans", sans-serif; font-size: 11px; color: #7A8FA6; }',
+      '.jc-labpop-key { display: inline-flex; align-items: center; gap: 6px; }',
+      '.jc-labpop-key-dash { width: 16px; border-top: 2px dashed #ABBFE5; }',
+      '.jc-labpop-key-dot { width: 8px; height: 8px; border-radius: 50%; background: #7A2E22; border: 1px solid #FFFFFF; box-shadow: 0 0 0 1px #7A2E22; }',
+      'body.jc-labpop-open { overflow: hidden; }',
+      '@media (max-width: 760px) { .jc-labpop-body { flex-direction: column; overflow-y: auto; } .jc-labpop-tablewrap { max-height: none; overflow-y: visible; } .jc-labpop-chartwrap { border-left: none; padding-left: 0; border-top: 1px solid #EFEBE3; padding-top: 16px; } }',
       '.lab-test-history-table { width: 100%; border-collapse: collapse; font-family: "IBM Plex Sans", sans-serif; font-size: 12px; }',
       '.lab-test-history-table th { text-align: left; font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #7A8FA6; padding: 4px 8px 8px; border-bottom: 1px solid #E5E2DC; }',
       '.lab-test-history-table th:last-child { text-align: right; }',
@@ -4110,13 +4361,19 @@
     function yPx(v) { return padT + ih - ((v - yMin) / (yMax - yMin)) * ih; }
 
     var refBand = '';
+    function refLine(v) {
+      var y = yPx(v);
+      return '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y + '" y2="' + y + '" stroke="#ABBFE5" stroke-dasharray="3,3" stroke-width="1"/>';
+    }
     if (yLow != null && yHigh != null && isFinite(yLow) && isFinite(yHigh)) {
       var y1 = yPx(yHigh), y2 = yPx(yLow);
       refBand =
         '<rect x="' + padL + '" y="' + y1 + '" width="' + iw + '" height="' + (y2 - y1) +
-        '" fill="#E7EEFB" opacity="0.6"/>' +
-        '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y1 + '" y2="' + y1 + '" stroke="#ABBFE5" stroke-dasharray="3,3" stroke-width="1"/>' +
-        '<line x1="' + padL + '" x2="' + (padL + iw) + '" y1="' + y2 + '" y2="' + y2 + '" stroke="#ABBFE5" stroke-dasharray="3,3" stroke-width="1"/>';
+        '" fill="#E7EEFB" opacity="0.6"/>' + refLine(yHigh) + refLine(yLow);
+    } else if (yLow != null && isFinite(yLow)) {
+      refBand = refLine(yLow);   // one-sided range ("> low"): single dashed floor
+    } else if (yHigh != null && isFinite(yHigh)) {
+      refBand = refLine(yHigh);  // one-sided range ("< high"): single dashed ceiling
     }
 
     // Y-axis ticks (3 lines)
