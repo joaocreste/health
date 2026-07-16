@@ -7,7 +7,8 @@
  * DOM-level transformer on every static page when the active patient
  * is Leo:
  *
- *   1. Force English locale (Leo's native_language is 'en').
+ *   1. Default to English locale (Leo's native_language is 'en') while
+ *      keeping the language toggle live — his injected copy is bilingual.
  *   2. Swap demographic strings in text nodes:
  *        Joao / João → Leo
  *        Joao Victor Creste → Leo Keller
@@ -42,28 +43,40 @@
   var patient = fromUrl || stored;
   if (patient !== LEO_CLERK) return;
 
-  // Force English locale — Leo's record is EN-only. app.js's initI18n applies
+  // Default English locale — Leo's record is EN-native, but the flag toggle
+  // stays visible and live like every other patient. app.js's initI18n applies
   // the viewer's stored choice (default 'pt') on DOMContentLoaded, which lands
   // AFTER this script's load-time set — so re-apply then too; this listener
-  // registers after app.js's, so it runs last and wins. Mirrors applyLang('en')
-  // minus the localStorage write: the viewer's own language preference must
-  // survive navigating to other patients. The flag toggle is hidden because
-  // there is no Portuguese rendering of this record to switch to.
-  function forceEnglish() {
-    document.documentElement.setAttribute('lang', 'en');
+  // registers after app.js's, so it runs last and wins. Mirrors applyLang()
+  // minus the localStorage write: the viewer's own global language preference
+  // must survive navigating to other patients. A flag click made while viewing
+  // Leo is remembered for the session (sessionStorage) so his pages keep the
+  // chosen language across navigation instead of snapping back to English.
+  function applyLeoLang() {
+    var choice = null;
+    try { choice = sessionStorage.getItem('jc_leo_lang'); } catch (_) {}
+    var lang = choice === 'pt' ? 'pt' : 'en';
+    document.documentElement.setAttribute('lang', lang);
     Array.prototype.forEach.call(document.querySelectorAll('[data-en][data-pt]'), function (el) {
-      var value = el.getAttribute('data-en');
+      var value = el.getAttribute('data-' + lang);
       if (value === null) return;
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = value;
       else el.textContent = value;
     });
     Array.prototype.forEach.call(document.querySelectorAll('.lang-btn'), function (btn) {
-      btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === 'en'));
-      btn.style.display = 'none';
+      btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === lang));
     });
   }
-  forceEnglish();
-  document.addEventListener('DOMContentLoaded', forceEnglish);
+  applyLeoLang();
+  document.addEventListener('DOMContentLoaded', applyLeoLang);
+  // Record flag clicks made while viewing Leo (app.js's own click handler
+  // does the actual language switch; this only carries the choice across
+  // Leo's pages for the rest of the session).
+  document.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest && e.target.closest('.lang-btn');
+    if (!btn) return;
+    try { sessionStorage.setItem('jc_leo_lang', btn.getAttribute('data-lang')); } catch (_) {}
+  });
 
   // ─── 1. Demographic text replacements ───────────────────────────
   // Operate on text nodes only so we don't touch markup or attrs.
@@ -501,57 +514,71 @@
     var card = document.createElement('section');
     card.id = 'leo-ai-summary';
     card.className = 'report-section';
+    function bi(en, pt) {
+      return '<span class="lang-en">' + en + '</span><span class="lang-pt">' + pt + '</span>';
+    }
     card.innerHTML =
       '<div class="container">' +
         '<div class="section-label">' +
-          '02 · Synthesis <span class="ai-pill">AI</span>' +
+          bi('02 · Synthesis ', '02 · Síntese ') + '<span class="ai-pill">AI</span>' +
         '</div>' +
-        '<h2 class="section-title">AI summary · Leo Keller</h2>' +
-        '<p class="section-desc">Synthesised across the lab, vitals, imaging and genetics history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.</p>' +
+        '<h2 class="section-title">' + bi('AI summary · Leo Keller', 'Resumo de IA · Leo Keller') + '</h2>' +
+        '<p class="section-desc">' + bi(
+          'Synthesised across the lab, vitals, imaging and genetics history. Medication context is intentionally minimal — Perindopril 4 mg/day is the only prescription on file.',
+          'Sintetizado a partir do histórico de exames laboratoriais, sinais vitais, imagem e genética. O contexto medicamentoso é intencionalmente mínimo — Perindopril 4 mg/dia é a única prescrição em arquivo.') + '</p>' +
 
         // Risk-tag legend
         '<div class="leo-risk-legend" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:12px;color:var(--text-muted);margin-bottom:14px;">' +
-          '<span style="font-family:\'IBM Plex Mono\',monospace;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">Risk tags</span>' +
-          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-flag">High</span> immediate clinical attention</span>' +
-          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-watch">Medium</span> watch / address near-term</span>' +
-          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-ok">Follow-up</span> routine recheck</span>' +
+          '<span style="font-family:\'IBM Plex Mono\',monospace;letter-spacing:0.08em;text-transform:uppercase;font-size:11px;">' + bi('Risk tags', 'Etiquetas de risco') + '</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-flag">' + bi('High', 'Alto') + '</span> ' + bi('immediate clinical attention', 'atenção clínica imediata') + '</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-watch">' + bi('Medium', 'Médio') + '</span> ' + bi('watch / address near-term', 'observar / tratar em curto prazo') + '</span>' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;"><span class="pill pill-ok">' + bi('Follow-up', 'Acompanhamento') + '</span> ' + bi('routine recheck', 'reavaliação de rotina') + '</span>' +
         '</div>' +
 
         '<div class="two-col mb-3">' +
           '<div class="list-card">' +
-            '<h4>What the data shows</h4>' +
+            '<h4>' + bi('What the data shows', 'O que os dados mostram') + '</h4>' +
             '<ul class="leo-risk-list" style="list-style:disc;padding-left:20px;">' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading home dataset (since 13 Nov 2025) sits in Stage 1–2 territory (mean <strong>135.2 / 90.8 mmHg</strong>) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — worth confirming BP response with your clinician in 4–6 weeks; if the mean stays above 130/80, an escalation is reasonable to discuss.' +
-                '&nbsp;<span class="pill pill-flag" style="margin-left:4px;vertical-align:1px;">High</span>' +
+                bi('<strong>Blood pressure</strong> is the primary axis under active management. The 249-reading home dataset (since 13 Nov 2025) sits in Stage 1–2 territory (mean <strong>135.2 / 90.8 mmHg</strong>) with a peak of <strong>172 / 116</strong>. Perindopril 4 mg/day is the single agent on board — worth confirming BP response with your clinician in 4–6 weeks; if the mean stays above 130/80, an escalation is reasonable to discuss.',
+                   '<strong>A pressão arterial</strong> é o eixo principal sob manejo ativo. O conjunto de 249 medições domiciliares (desde 13 nov 2025) situa-se em território de estágio 1–2 (média <strong>135,2 / 90,8 mmHg</strong>), com pico de <strong>172 / 116</strong>. Perindopril 4 mg/dia é o único agente em uso — vale confirmar a resposta pressórica com seu médico em 4–6 semanas; se a média permanecer acima de 130/80, é razoável discutir um escalonamento.') +
+                '&nbsp;<span class="pill pill-flag" style="margin-left:4px;vertical-align:1px;">' + bi('High', 'Alto') + '</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Elevated homocysteine (14.40 µmol/L)</strong> despite high-normal serum B12 (863) and normal folate, now explained by a <strong>confirmed MTHFR compound heterozygote</strong> on the genetics panel (C677T <em>rs1801133</em> + A1298C <em>rs1801131</em>, ~50% reduced enzyme activity) — the classic pattern where unmethylated B-vitamins fail to clear homocysteine. An independent cardiovascular risk factor that stacks with the BP axis; an L-methylfolate adjunct is the targeted, low-cost step worth discussing with your clinician.' +
-                '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">Medium</span>' +
+                bi('<strong>Elevated homocysteine (14.40 µmol/L)</strong> despite high-normal serum B12 (863) and normal folate, now explained by a <strong>confirmed MTHFR compound heterozygote</strong> on the genetics panel (C677T <em>rs1801133</em> + A1298C <em>rs1801131</em>, ~50% reduced enzyme activity) — the classic pattern where unmethylated B-vitamins fail to clear homocysteine. An independent cardiovascular risk factor that stacks with the BP axis; an L-methylfolate adjunct is the targeted, low-cost step worth discussing with your clinician.',
+                   '<strong>Homocisteína elevada (14,40 µmol/L)</strong> apesar de B12 sérica no limite superior do normal (863) e folato normal, agora explicada por um <strong>heterozigoto composto MTHFR confirmado</strong> no painel genético (C677T <em>rs1801133</em> + A1298C <em>rs1801131</em>, ~50% de redução na atividade enzimática) — o padrão clássico em que vitaminas B não metiladas não conseguem depurar a homocisteína. Fator de risco cardiovascular independente que se soma ao eixo pressórico; um adjuvante de L-metilfolato é o passo dirigido e de baixo custo que vale discutir com seu médico.') +
+                '&nbsp;<span class="pill pill-watch" style="margin-left:4px;vertical-align:1px;">' + bi('Medium', 'Médio') + '</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Borderline-elevated creatinine (1.30 mg/dL)</strong> with preserved eGFR (&gt; 60 mL/min). Without nephrotoxic co-medication this most likely reflects hydration noise + muscle mass — repeat in 8–12 weeks under standardised hydration, add Cystatin C if it persists.' +
-                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">Follow-up</span>' +
+                bi('<strong>Borderline-elevated creatinine (1.30 mg/dL)</strong> with preserved eGFR (&gt; 60 mL/min). Without nephrotoxic co-medication this most likely reflects hydration noise + muscle mass — repeat in 8–12 weeks under standardised hydration, add Cystatin C if it persists.',
+                   '<strong>Creatinina limítrofe-elevada (1,30 mg/dL)</strong> com TFGe preservada (&gt; 60 mL/min). Sem comedicação nefrotóxica, isso muito provavelmente reflete ruído de hidratação + massa muscular — repita em 8–12 semanas sob hidratação padronizada e acrescente Cistatina C se persistir.') +
+                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">' + bi('Follow-up', 'Acompanhamento') + '</span>' +
               '</li>' +
               '<li style="margin-bottom:10px;">' +
-                '<strong>Vitamin D, HbA1c, HDL, testosterone, liver enzymes</strong> all in optimal range. Re-check on the standard annual panel cadence.' +
-                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">Follow-up</span>' +
+                bi('<strong>Vitamin D, HbA1c, HDL, testosterone, liver enzymes</strong> all in optimal range. Re-check on the standard annual panel cadence.',
+                   '<strong>Vitamina D, HbA1c, HDL, testosterona e enzimas hepáticas</strong> todas em faixa ótima. Reavalie na cadência anual padrão do painel.') +
+                '&nbsp;<span class="pill pill-ok" style="margin-left:4px;vertical-align:1px;">' + bi('Follow-up', 'Acompanhamento') + '</span>' +
               '</li>' +
             '</ul>' +
           '</div>' +
           '<div class="list-card">' +
-            '<h4>Three big insights</h4>' +
+            '<h4>' + bi('Three big insights', 'Três grandes insights') + '</h4>' +
             '<ul>' +
-              '<li><strong>Physical.</strong> Cardiovascular-focused programming: 150 min/week zone-2 aerobic (cycling, brisk walking, swim) + 2× lower-body strength sessions. The combination targets BP, supports kidney perfusion and is the highest-yield non-pharma move alongside Perindopril.</li>' +
-              '<li><strong>Mental.</strong> No structured psychological care or assessment on file. A baseline psychometric (PHQ-9 + GAD-7) + a single intake session with a clinical psychologist gives you a reference point and a channel if stress patterns emerge.</li>' +
-              '<li><strong>Spiritual.</strong> <em>TBD.</em> No spiritual / values data captured yet — wheel-of-life, life-event log, or journal entries would let the AI summary include this pillar.</li>' +
+              '<li>' + bi('<strong>Physical.</strong> Cardiovascular-focused programming: 150 min/week zone-2 aerobic (cycling, brisk walking, swim) + 2× lower-body strength sessions. The combination targets BP, supports kidney perfusion and is the highest-yield non-pharma move alongside Perindopril.',
+                          '<strong>Física.</strong> Programação com foco cardiovascular: 150 min/semana de aeróbico em zona 2 (bicicleta, caminhada rápida, natação) + 2 sessões semanais de força para membros inferiores. A combinação atua sobre a PA, apoia a perfusão renal e é o movimento não farmacológico de maior rendimento ao lado do Perindopril.') + '</li>' +
+              '<li>' + bi('<strong>Mental.</strong> No structured psychological care or assessment on file. A baseline psychometric (PHQ-9 + GAD-7) + a single intake session with a clinical psychologist gives you a reference point and a channel if stress patterns emerge.',
+                          '<strong>Mental.</strong> Nenhum cuidado ou avaliação psicológica estruturada em arquivo. Uma psicometria de base (PHQ-9 + GAD-7) + uma única sessão de acolhimento com psicólogo clínico oferece um ponto de referência e um canal caso padrões de estresse surjam.') + '</li>' +
+              '<li>' + bi('<strong>Spiritual.</strong> <em>TBD.</em> No spiritual / values data captured yet — wheel-of-life, life-event log, or journal entries would let the AI summary include this pillar.',
+                          '<strong>Espiritual.</strong> <em>A definir.</em> Nenhum dado espiritual / de valores capturado ainda — roda da vida, registro de eventos de vida ou entradas de diário permitiriam que o resumo de IA incluísse este pilar.') + '</li>' +
             '</ul>' +
           '</div>' +
         '</div>' +
 
         '<div class="alert alert-info">' +
-          '<strong>Recommended next step.</strong> Repeat the full blood &amp; urine panel under standardised conditions to confirm the creatinine trend and re-baseline homocysteine. ' +
-          'Because the MTHFR compound-heterozygote genotype is already confirmed on the genetics panel, the open question is response rather than diagnosis — an L-methylfolate trial is a reasonable, low-cost step worth discussing with your clinician.' +
+          bi('<strong>Recommended next step.</strong> Repeat the full blood &amp; urine panel under standardised conditions to confirm the creatinine trend and re-baseline homocysteine. ' +
+             'Because the MTHFR compound-heterozygote genotype is already confirmed on the genetics panel, the open question is response rather than diagnosis — an L-methylfolate trial is a reasonable, low-cost step worth discussing with your clinician.',
+             '<strong>Próximo passo recomendado.</strong> Repetir o painel completo de sangue e urina sob condições padronizadas para confirmar a tendência da creatinina e restabelecer a linha de base da homocisteína. ' +
+             'Como o genótipo heterozigoto composto MTHFR já está confirmado no painel genético, a questão em aberto é a resposta, não o diagnóstico — um teste de L-metilfolato é um passo razoável e de baixo custo que vale discutir com seu médico.') +
         '</div>' +
       '</div>';
 
@@ -586,7 +613,9 @@
     if (!headerEl) return;
     headerEl.innerHTML =
       '<span class="lang-en">Leo Keller · 35 · Paris · prepared 25 May 2026. ' +
-      'A single antihypertensive (Perindopril 4 mg/day) on the current regimen. The lab, vitals and imaging history on the platform mirror the underlying clinical dataset; the AI insights have been regenerated to reflect this minimal medication context.</span>';
+      'A single antihypertensive (Perindopril 4 mg/day) on the current regimen. The lab, vitals and imaging history on the platform mirror the underlying clinical dataset; the AI insights have been regenerated to reflect this minimal medication context.</span>' +
+      '<span class="lang-pt">Leo Keller · 35 · Paris · preparado em 25 de maio de 2026. ' +
+      'Um único anti-hipertensivo (Perindopril 4 mg/dia) no esquema atual. O histórico de exames laboratoriais, sinais vitais e imagem na plataforma espelha o conjunto de dados clínicos subjacente; os insights de IA foram regenerados para refletir esse contexto medicamentoso mínimo.</span>';
   }
 
   // Also update the <title> tag, which lives in <head> and isn't
@@ -613,77 +642,112 @@
   // hideSelectors() so these injected blocks are not swept by the hide
   // pass. Idempotent (guards on .leo-lab-explain). Matches only
   // non-normal cards to avoid grabbing a same-named normal marker.
+  // note/factors are [en, pt] pairs so the injected explanations follow the
+  // language toggle like the native lab-note / lab-causes blocks they mimic.
   var LEO_LAB_OUTLIERS = [
     {
       key: 'Homocysteine',
-      note: 'Above the upper reference limit (14.40 vs &lt;10 µmol/L). An independent cardiovascular risk marker that compounds the blood-pressure picture.',
+      note: ['Above the upper reference limit (14.40 vs &lt;10 µmol/L). An independent cardiovascular risk marker that compounds the blood-pressure picture.',
+             'Acima do limite superior de referência (14,40 vs &lt;10 µmol/L). Marcador de risco cardiovascular independente que agrava o quadro pressórico.'],
       factors: [
-        'Confirmed MTHFR compound heterozygote (C677T + A1298C, ~50% reduced enzyme activity) on the genetics panel — the methylation bottleneck that lets homocysteine accumulate.',
-        'Serum B12 (863) and folate are normal, so the issue is conversion, not substrate.',
-        'No B6 deficiency signals elsewhere on the panel.',
-        'Next step: a trial of L-methylfolate, which bypasses the MTHFR step, with a recheck in 8–12 weeks — worth discussing with your clinician.',
+        ['Confirmed MTHFR compound heterozygote (C677T + A1298C, ~50% reduced enzyme activity) on the genetics panel — the methylation bottleneck that lets homocysteine accumulate.',
+         'Heterozigoto composto MTHFR confirmado (C677T + A1298C, ~50% de redução na atividade enzimática) no painel genético — o gargalo de metilação que deixa a homocisteína acumular.'],
+        ['Serum B12 (863) and folate are normal, so the issue is conversion, not substrate.',
+         'B12 sérica (863) e folato normais — o problema é de conversão, não de substrato.'],
+        ['No B6 deficiency signals elsewhere on the panel.',
+         'Sem sinais de deficiência de B6 em outras partes do painel.'],
+        ['Next step: a trial of L-methylfolate, which bypasses the MTHFR step, with a recheck in 8–12 weeks — worth discussing with your clinician.',
+         'Próximo passo: um teste de L-metilfolato, que contorna a etapa da MTHFR, com reavaliação em 8–12 semanas — vale discutir com seu médico.'],
       ],
     },
     {
       key: 'hs-CRP',
-      note: 'Markedly above the 3 mg/L cardiovascular threshold (12.10 mg/L). At this magnitude it usually reflects an acute or recent inflammatory or infectious process at the time of the draw rather than a stable baseline.',
+      note: ['Markedly above the 3 mg/L cardiovascular threshold (12.10 mg/L). At this magnitude it usually reflects an acute or recent inflammatory or infectious process at the time of the draw rather than a stable baseline.',
+             'Bem acima do limiar cardiovascular de 3 mg/L (12,10 mg/L). Nessa magnitude, geralmente reflete um processo inflamatório ou infeccioso agudo ou recente no momento da coleta, e não uma linha de base estável.'],
       factors: [
-        'A transient infection, recent illness or minor injury near the collection date can push hs-CRP into double digits.',
-        'Low-grade musculoskeletal or soft-tissue inflammation can add a smaller contribution.',
-        'Adiposity-driven low-grade inflammation is a minor chronic contributor.',
-        'Next step: repeat once fully symptom-free to separate a transient spike from a persistent elevation; if it stays above 3 mg/L it becomes relevant to the cardiovascular risk already flagged by the BP and homocysteine — discuss with your clinician.',
+        ['A transient infection, recent illness or minor injury near the collection date can push hs-CRP into double digits.',
+         'Uma infecção transitória, doença recente ou lesão menor próxima à data da coleta pode elevar a PCR-us a dois dígitos.'],
+        ['Low-grade musculoskeletal or soft-tissue inflammation can add a smaller contribution.',
+         'Inflamação musculoesquelética ou de partes moles de baixo grau pode somar uma contribuição menor.'],
+        ['Adiposity-driven low-grade inflammation is a minor chronic contributor.',
+         'Inflamação de baixo grau associada à adiposidade é um contribuinte crônico menor.'],
+        ['Next step: repeat once fully symptom-free to separate a transient spike from a persistent elevation; if it stays above 3 mg/L it becomes relevant to the cardiovascular risk already flagged by the BP and homocysteine — discuss with your clinician.',
+         'Próximo passo: repetir quando estiver totalmente assintomático para separar um pico transitório de uma elevação persistente; se permanecer acima de 3 mg/L, torna-se relevante para o risco cardiovascular já sinalizado pela PA e pela homocisteína — discuta com seu médico.'],
       ],
     },
     {
       key: 'Creatinine',
-      note: 'At the upper edge of normal (1.30 mg/dL) with a preserved eGFR above 60 mL/min — filtration remains in range.',
+      note: ['At the upper edge of normal (1.30 mg/dL) with a preserved eGFR above 60 mL/min — filtration remains in range.',
+             'No limite superior do normal (1,30 mg/dL) com TFGe preservada acima de 60 mL/min — a filtração permanece na faixa.'],
       factors: [
-        'Perindopril, the single active medication, lowers intraglomerular pressure; a small creatinine rise after starting an ACE inhibitor is expected and usually benign (up to roughly 30 percent).',
-        'Hydration at collection and muscle mass both raise creatinine independently of kidney function.',
-        'No nephrotoxic co-medication is on the regimen.',
-        'Next step: recheck creatinine and electrolytes 1–2 weeks after any Perindopril dose change, and add Cystatin C if the value persists — worth discussing with your clinician.',
+        ['Perindopril, the single active medication, lowers intraglomerular pressure; a small creatinine rise after starting an ACE inhibitor is expected and usually benign (up to roughly 30 percent).',
+         'O Perindopril, única medicação ativa, reduz a pressão intraglomerular; uma pequena elevação da creatinina após iniciar um IECA é esperada e geralmente benigna (até cerca de 30%).'],
+        ['Hydration at collection and muscle mass both raise creatinine independently of kidney function.',
+         'A hidratação na coleta e a massa muscular elevam a creatinina independentemente da função renal.'],
+        ['No nephrotoxic co-medication is on the regimen.',
+         'Não há comedicação nefrotóxica no esquema.'],
+        ['Next step: recheck creatinine and electrolytes 1–2 weeks after any Perindopril dose change, and add Cystatin C if the value persists — worth discussing with your clinician.',
+         'Próximo passo: reavaliar creatinina e eletrólitos 1–2 semanas após qualquer mudança de dose do Perindopril, e acrescentar Cistatina C se o valor persistir — vale discutir com seu médico.'],
       ],
     },
     {
       key: 'Total Cholesterol',
-      note: 'At the top of the desirable band (199 mg/dL). Total cholesterol on its own is not actionable — the fractions are what matter.',
+      note: ['At the top of the desirable band (199 mg/dL). Total cholesterol on its own is not actionable — the fractions are what matter.',
+             'No topo da faixa desejável (199 mg/dL). O colesterol total isolado não é acionável — as frações é que importam.'],
       factors: [
-        'Total cholesterol bundles HDL (protective) and LDL (atherogenic); a high HDL can lift the total without raising risk.',
-        'Diet and genetics are the usual drivers.',
-        'Next step: a fasting lipid panel (LDL, HDL, triglycerides, non-HDL) to see which fraction is driving the number — relevant because BP and homocysteine already place this in a cardiovascular-risk context.',
+        ['Total cholesterol bundles HDL (protective) and LDL (atherogenic); a high HDL can lift the total without raising risk.',
+         'O colesterol total agrega HDL (protetor) e LDL (aterogênico); um HDL alto pode elevar o total sem aumentar o risco.'],
+        ['Diet and genetics are the usual drivers.',
+         'Dieta e genética são os condutores habituais.'],
+        ['Next step: a fasting lipid panel (LDL, HDL, triglycerides, non-HDL) to see which fraction is driving the number — relevant because BP and homocysteine already place this in a cardiovascular-risk context.',
+         'Próximo passo: um painel lipídico em jejum (LDL, HDL, triglicérides, não-HDL) para ver qual fração está puxando o número — relevante porque PA e homocisteína já colocam isso em contexto de risco cardiovascular.'],
       ],
     },
     {
       key: 'Estradiol',
-      note: 'Mildly elevated for an adult male (47.62 pg/mL). A single reading is sensitive to timing and assay.',
+      note: ['Mildly elevated for an adult male (47.62 pg/mL). A single reading is sensitive to timing and assay.',
+             'Levemente elevado para um homem adulto (47,62 pg/mL). Uma única medição é sensível ao horário e ao ensaio.'],
       factors: [
-        'Peripheral aromatisation of testosterone to estradiol in adipose tissue is the most common driver in men.',
-        'Collection timing and the specific immunoassay can shift the number.',
-        'Next step: repeat on a morning sample alongside total testosterone and SHBG to read the testosterone-to-estradiol balance rather than estradiol in isolation.',
+        ['Peripheral aromatisation of testosterone to estradiol in adipose tissue is the most common driver in men.',
+         'A aromatização periférica de testosterona em estradiol no tecido adiposo é o condutor mais comum em homens.'],
+        ['Collection timing and the specific immunoassay can shift the number.',
+         'O horário da coleta e o imunoensaio específico podem deslocar o número.'],
+        ['Next step: repeat on a morning sample alongside total testosterone and SHBG to read the testosterone-to-estradiol balance rather than estradiol in isolation.',
+         'Próximo passo: repetir em amostra matinal junto com testosterona total e SHBG para ler o equilíbrio testosterona-estradiol, e não o estradiol isolado.'],
       ],
     },
     {
       key: 'DHEA',
-      note: 'Exactly at the lower limit of the male range (2.50 ng/mL). On its own this is a soft signal of adrenal-axis output.',
+      note: ['Exactly at the lower limit of the male range (2.50 ng/mL). On its own this is a soft signal of adrenal-axis output.',
+             'Exatamente no limite inferior da faixa masculina (2,50 ng/mL). Isolado, é um sinal fraco da produção do eixo adrenal.'],
       factors: [
-        'DHEA declines naturally with age and falls further under sustained stress and short sleep.',
-        'No medication on the current regimen suppresses the adrenal axis — Perindopril does not.',
-        'Read alongside a morning cortisol: a low-bound cortisol with a low-bound DHEA points to adrenal depletion rather than insufficiency, which is clinically distinct from primary adrenal insufficiency (Addison disease).',
-        'Next step: recheck DHEA-S with an 8 a.m. cortisol before drawing conclusions from a single lower-limit value.',
+        ['DHEA declines naturally with age and falls further under sustained stress and short sleep.',
+         'O DHEA declina naturalmente com a idade e cai ainda mais sob estresse sustentado e sono curto.'],
+        ['No medication on the current regimen suppresses the adrenal axis — Perindopril does not.',
+         'Nenhuma medicação do esquema atual suprime o eixo adrenal — o Perindopril não o faz.'],
+        ['Read alongside a morning cortisol: a low-bound cortisol with a low-bound DHEA points to adrenal depletion rather than insufficiency, which is clinically distinct from primary adrenal insufficiency (Addison disease).',
+         'Leia junto com um cortisol matinal: cortisol no limite inferior com DHEA no limite inferior aponta para depleção adrenal, e não insuficiência — clinicamente distinta da insuficiência adrenal primária (doença de Addison).'],
+        ['Next step: recheck DHEA-S with an 8 a.m. cortisol before drawing conclusions from a single lower-limit value.',
+         'Próximo passo: reavaliar DHEA-S com cortisol das 8h antes de tirar conclusões de um único valor no limite inferior.'],
       ],
     },
     {
       key: 'Urinary specific gravity',
-      note: 'A dilute urine sample (1.005). This is mainly a flag about collection conditions rather than a kidney finding.',
+      note: ['A dilute urine sample (1.005). This is mainly a flag about collection conditions rather than a kidney finding.',
+             'Amostra de urina diluída (1,005). Trata-se principalmente de um alerta sobre as condições de coleta, e não de um achado renal.'],
       factors: [
-        'High fluid intake before collection produces a dilute sample (1.005 sits at the low end).',
-        'A dilute sample also lowers the apparent concentration of other markers measured on the same urine.',
-        'Next step: repeat with a first-morning, pre-hydration sample for a representative concentrating-ability reading.',
+        ['High fluid intake before collection produces a dilute sample (1.005 sits at the low end).',
+         'Alta ingestão de líquidos antes da coleta produz amostra diluída (1,005 fica no extremo inferior).'],
+        ['A dilute sample also lowers the apparent concentration of other markers measured on the same urine.',
+         'Uma amostra diluída também reduz a concentração aparente dos demais marcadores medidos na mesma urina.'],
+        ['Next step: repeat with a first-morning, pre-hydration sample for a representative concentrating-ability reading.',
+         'Próximo passo: repetir com a primeira urina da manhã, antes de hidratar, para uma leitura representativa da capacidade de concentração.'],
       ],
     },
     {
       key: 'Progesterone',
-      note: 'Expected to be low in an adult male (&lt;0.21 ng/mL) — shown for completeness. No action indicated.',
+      note: ['Expected to be low in an adult male (&lt;0.21 ng/mL) — shown for completeness. No action indicated.',
+             'Esperado ser baixo em um homem adulto (&lt;0,21 ng/mL) — exibido por completude. Nenhuma ação indicada.'],
       factors: [],
     },
   ];
@@ -692,8 +756,10 @@
     var cards = document.querySelectorAll('.lab-test');
     if (!cards.length) return;
     var DISCLAIMER =
-      '<span class="lab-causes-disclaimer"><span class="lang-en">— suggestive only, ' +
-      'based on current medication and history. Does not replace clinical evaluation.</span></span>';
+      '<span class="lab-causes-disclaimer">' +
+        '<span class="lang-en">— suggestive only, based on current medication and history. Does not replace clinical evaluation.</span>' +
+        '<span class="lang-pt">— apenas sugestivo, com base na medicação e no histórico atuais. Não substitui avaliação clínica.</span>' +
+      '</span>';
 
     LEO_LAB_OUTLIERS.forEach(function (o) {
       for (var i = 0; i < cards.length; i++) {
@@ -706,17 +772,23 @@
         wrap.className = 'leo-lab-explain';
         var html = '';
         if (o.note) {
-          html += '<div class="lab-note"><span class="lang-en">' + o.note + '</span></div>';
+          html += '<div class="lab-note">' +
+            '<span class="lang-en">' + o.note[0] + '</span>' +
+            '<span class="lang-pt">' + o.note[1] + '</span>' +
+          '</div>';
         }
         if (o.factors && o.factors.length) {
-          var lis = o.factors.map(function (f) { return '<li>' + f + '</li>'; }).join('');
+          var lisEn = o.factors.map(function (f) { return '<li>' + f[0] + '</li>'; }).join('');
+          var lisPt = o.factors.map(function (f) { return '<li>' + f[1] + '</li>'; }).join('');
           html +=
             '<div class="lab-causes">' +
               '<div class="lab-causes-title">' +
                 '<span class="lang-en">Possible contributing factors</span>' +
+                '<span class="lang-pt">Possíveis fatores contribuintes</span>' +
                 DISCLAIMER +
               '</div>' +
-              '<ul class="lab-causes-list lang-en">' + lis + '</ul>' +
+              '<ul class="lab-causes-list lang-en">' + lisEn + '</ul>' +
+              '<ul class="lab-causes-list lang-pt">' + lisPt + '</ul>' +
             '</div>';
         }
         wrap.innerHTML = html;
@@ -789,7 +861,9 @@
       if (pd) {
         pd.innerHTML =
           '<span class="lang-en">Point-in-time clinical exams and lab results — radiology ' +
-          '(MRI brain, lumbar MRI + CT, EEG), a full blood &amp; urine panel and gut microbiota sequencing.</span>';
+          '(MRI brain, lumbar MRI + CT, EEG), a full blood &amp; urine panel and gut microbiota sequencing.</span>' +
+          '<span class="lang-pt">Exames clínicos pontuais e resultados laboratoriais — radiologia ' +
+          '(RM de crânio, RM + TC lombar, EEG), painel completo de sangue e urina e sequenciamento da microbiota intestinal.</span>';
       }
     }
   }
