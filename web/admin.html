@@ -1006,6 +1006,11 @@
                 'data-user="' + escapeHtml(u.clerk_user_id) + '" ' +
                 'title="Edit user info" ' +
                 'style="margin-left:auto;padding:4px 10px;font-size:11px;">Edit</button>' +
+              '<button class="btn btn-ghost delete-user-btn" type="button" ' +
+                'data-user="' + escapeHtml(u.clerk_user_id) + '" ' +
+                'data-name="' + escapeHtml(u.full_name || u.clerk_user_id) + '" ' +
+                'title="Permanently delete this user" ' +
+                'style="padding:4px 10px;font-size:11px;">Delete</button>' +
             '</div>' +
             '<ul class="access-list">' + (pills ||
               '<li class="access-pill">' + langSpan('No patient access granted', 'Nenhum acesso a paciente concedido') + '</li>') + '</ul>' +
@@ -1019,6 +1024,35 @@
           var u = state.users.find(function (x) { return x.clerk_user_id === clerk; });
           if (!u) return;
           openEditModal(u, u.role);
+        });
+      });
+
+      // Wire delete buttons — HARD delete of a doctor/staff user. Drops the
+      // user row and cascades their patient-access grants. Irreversible.
+      Array.prototype.forEach.call(listEl.querySelectorAll('button.delete-user-btn'), function (btn) {
+        btn.addEventListener('click', function () {
+          var user = btn.getAttribute('data-user');
+          var name = btn.getAttribute('data-name');
+          if (!confirm(
+                'Permanently delete user "' + name + '"?\n\n' +
+                'This is irreversible. It will:\n' +
+                '  • drop the user row and their login\n' +
+                '  • revoke every patient-access grant they hold\n\n' +
+                'There is no archive and no undo.'
+              )) return;
+          var orig = btn.textContent;
+          btn.disabled = true; btn.textContent = 'Deleting…';
+          api('/api/admin/users/delete', {
+            method: 'POST',
+            body: JSON.stringify({ user_clerk: user }),
+          }).then(function (data) {
+            var d = (data && data.deleted) || {};
+            alert('Deleted "' + (d.full_name || name) + '".');
+            return reload();
+          }).catch(function (e) {
+            alert('Delete failed: ' + e.message);
+            btn.disabled = false; btn.textContent = orig;
+          });
         });
       });
 

@@ -3263,6 +3263,36 @@ async function handleAdmin(request, env) {
     }
   }
 
+  // POST /api/admin/users/delete — { user_clerk }
+  // HARD delete of a NON-patient user (doctor/staff). They carry no clinical
+  // rows or R2 blobs; dropping the user row cascades their access grants.
+  // Patients must go through /api/admin/patients/delete (R2 cleanup).
+  if (path === "/api/admin/users/delete" && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+    const userClerk = String(body?.user_clerk || "").trim();
+    if (!userClerk) return jsonError(400, "user_clerk_required");
+
+    try {
+      const rows = await sql`
+        SELECT id, role, full_name FROM users
+        WHERE clerk_user_id = ${userClerk} LIMIT 1
+      `;
+      if (rows.length === 0)          return jsonError(404, "user_not_found");
+      if (rows[0].role === "patient") return jsonError(400, "use_patients_delete_for_patients");
+      if (rows[0].id === admin.id)    return jsonError(400, "cannot_delete_self");
+
+      await sql`DELETE FROM users WHERE id = ${rows[0].id}`;
+
+      return new Response(JSON.stringify({
+        ok: true,
+        deleted: { clerk_user_id: userClerk, full_name: rows[0].full_name, role: rows[0].role },
+      }), { headers: { "Content-Type": "application/json" } });
+    } catch (e) {
+      return jsonError(500, `Delete user failed: ${e.message}`);
+    }
+  }
+
   // POST /api/admin/patients/delete — { patient_clerk }
   // HARD delete: removes the user row (cascades to lab_results, documents,
   // writings, imports, import_files, patient_profiles, patient_access,
