@@ -413,7 +413,12 @@
           try { localStorage.setItem('jc_view_pref:' + vc + ':' + patient, target); } catch (_) {}
         }
         var page = target === 'scroll' ? 'consult.html' : 'home.html';
-        location.href = page + '?patient=' + encodeURIComponent(patient);
+        var qs = 'patient=' + encodeURIComponent(patient);
+        // Preserve ?viewer= so the curl/headless clerk-as-identity flow (no
+        // cookie) survives the hop — same as the worker's scroll-pin redirect.
+        var v = new URLSearchParams(location.search).get('viewer');
+        if (v) qs += '&viewer=' + encodeURIComponent(v);
+        location.href = page + '?' + qs;
       });
     }
 
