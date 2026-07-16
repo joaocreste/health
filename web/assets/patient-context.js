@@ -1215,13 +1215,20 @@
     if (lo == null && hi == null) {
       var refEl = card.querySelector('.lab-test-ref');
       var tx2 = refEl ? (refEl.textContent || '') : '';
-      var range = tx2.match(/([\d.,]+)\s*(?:a|to|–|—)\s*([\d.,]+)/i);
-      if (range) {
+      // (?!h) rejects clock ranges ("07–09h: 6,0 a 18,4") so the real
+      // numeric range after them is the one that matches.
+      var range = tx2.match(/([\d.,]+)\s*(?:a|to|–|—)\s*([\d.,]+)(?!h)/i);
+      var sup = tx2.match(/(?:superior a|acima de|maior que|>)\s*([\d.,]+)/i);
+      var inf = tx2.match(/(?:inferior a|abaixo de|menor que|até|<)\s*([\d.,]+)/i);
+      // Banded texts lead with the intended limit ("Ótimo: <100;
+      // Desejável: 100–129; …") — when a one-sided bound appears BEFORE
+      // the first range, the range is a later band, not the reference
+      // (an LDL of 95 must never flag Low against "100–129").
+      var oneSided = [sup, inf].filter(Boolean).sort(function (a, b) { return a.index - b.index; })[0] || null;
+      if (range && (!oneSided || range.index < oneSided.index)) {
         lo = parsePtNum(range[1]);
         hi = parsePtNum(range[2]);
       } else {
-        var sup = tx2.match(/(?:superior a|acima de|maior que|>)\s*([\d.,]+)/i);
-        var inf = tx2.match(/(?:inferior a|abaixo de|menor que|até|<)\s*([\d.,]+)/i);
         if (sup) lo = parsePtNum(sup[1]);
         if (inf) hi = parsePtNum(inf[1]);
       }
