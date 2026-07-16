@@ -65,6 +65,14 @@ export const ecgClassification = pgEnum("ecg_classification", [
 export const pgxCategory = pgEnum("pgx_category", [
   "pharmacokinetic", "pharmacodynamic", "condition_risk", "other",
 ]);
+/* Bioimpedance segmental analysis — InBody-class devices only. */
+export const bioimpedanceSegment = pgEnum("bioimpedance_segment", [
+  "right_arm", "left_arm", "trunk", "right_leg", "left_leg",
+]);
+export const bioimpedanceSegmentStatus = pgEnum("bioimpedance_segment_status", [
+  "below", "normal", "above",   // abaixo / normal / acima
+]);
+
 export const lifeEventCategory = pgEnum("life_event_category", [
   "birth", "move", "marriage", "divorce", "job",
   "education", "hospitalization", "diagnosis", "loss", "crisis", "other",
@@ -406,6 +414,73 @@ export const glucosePoints = pgTable("glucose_points", {
 }, (t) => [
   uniqueIndex("glucose_patient_ts_uq").on(t.patientId, t.ts),
   index("glucose_patient_ts_idx").on(t.patientId, t.ts),
+]);
+
+/* Bioimpedance / body composition (BIA). One row per exam — a point in the
+   patient's body-composition time series. Device-agnostic: a Tanita TBF-410
+   fills the whole-body block and leaves the InBody-only columns NULL, an
+   InBody fills everything plus the segmental child rows below.
+   ffmKg is FAT-FREE mass (muscle + bone + visceral/residual), which is NOT
+   skeletalMuscleMassKg — never derive one from the other.
+   Co-located spot vitals on the same print-out (BP, SpO2, capillary glucose)
+   route to vitalsDaily / glucosePoints; only anthropometrics stay here. */
+export const bioimpedanceExams = pgTable("bioimpedance_exams", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  patientId: uuid("patient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  examDate: date("exam_date").notNull(),
+  deviceManufacturer: text("device_manufacturer"),   // 'Tanita'
+  deviceModel: text("device_model"),                 // 'TBF-410'
+  bodyType: text("body_type"),                       // device classification, e.g. 'ATHLETIC'
+  sex: sex("sex"),
+  ageYears: integer("age_years"),
+  heightCm: real("height_cm"),
+  weightKg: real("weight_kg"),
+  bmi: real("bmi"),
+  bmrKcal: integer("bmr_kcal"),
+  bmrKj: integer("bmr_kj"),
+  impedanceOhms: real("impedance_ohms"),
+  fatPercent: real("fat_percent"),                   // FAT% / PBF
+  fatMassKg: real("fat_mass_kg"),
+  ffmKg: real("ffm_kg"),                             // fat-free mass (NOT muscle mass)
+  tbwKg: real("tbw_kg"),                             // total body water
+  skeletalMuscleMassKg: real("skeletal_muscle_mass_kg"), // InBody-only
+  proteinKg: real("protein_kg"),                     // InBody-only
+  mineralsKg: real("minerals_kg"),                   // InBody-only
+  visceralFatLevel: real("visceral_fat_level"),      // InBody-only
+  waistCircumferenceCm: real("waist_circumference_cm"),
+  hipCircumferenceCm: real("hip_circumference_cm"),
+  whr: real("whr"),
+  requestingProfessional: text("requesting_professional"), // who ordered it; NULL when not stated
+  performingProfessional: text("performing_professional"), // who signed (name + reg ID inline)
+  facilityName: text("facility_name"),
+  facilityCity: text("facility_city"),
+  facilityCountry: text("facility_country"),
+  sourceDocumentId: uuid("source_document_id").references(() => documents.id),
+  rawExtract: jsonb("raw_extract"),                  // verbatim device print-out, PHI excluded
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("bioimpedance_exam_uq").on(t.patientId, t.examDate, t.deviceManufacturer, t.deviceModel),
+  index("bioimpedance_patient_date_idx").on(t.patientId, t.examDate),
+]);
+
+/* Per-region lean/fat — InBody-class devices only. Populated ONLY when the
+   device actually reports segmental values; a Tanita exam legitimately has
+   ZERO rows here. The presence of rows is what the segmental render keys off,
+   so empty = omit the section, never render an empty skeleton. Never derive
+   these from whole-body values. */
+export const bioimpedanceSegments = pgTable("bioimpedance_segments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  examId: uuid("exam_id").notNull().references(() => bioimpedanceExams.id, { onDelete: "cascade" }),
+  segment: bioimpedanceSegment("segment").notNull(),
+  leanMassKg: real("lean_mass_kg"),
+  leanPctIdeal: real("lean_pct_ideal"),              // % vs. device ideal
+  leanStatus: bioimpedanceSegmentStatus("lean_status"),
+  fatMassKg: real("fat_mass_kg"),
+  fatPctIdeal: real("fat_pct_ideal"),
+  fatStatus: bioimpedanceSegmentStatus("fat_status"),
+}, (t) => [
+  uniqueIndex("bioimpedance_segment_uq").on(t.examId, t.segment),
 ]);
 
 /* ───── 3. Patient artifacts (blob-backed) ────────── */
