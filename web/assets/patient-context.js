@@ -339,6 +339,118 @@
     signOut.parentNode.insertBefore(btn, signOut);
   }
 
+  /* ── View-mode toggle (topnav, left of the language flags) ──────────
+     Every record has two experiences: 'navigation' (the multi-page app)
+     and 'scroll' (/consult — one continuous page). The active side is
+     whichever page type is open right now. Switching persists before it
+     navigates: granted viewers write their own grant's view_mode via
+     /api/access/view-mode (the picker and the worker's scroll pin then
+     land them on the chosen mode at every later login, until they switch
+     again — the admin-set value is only the default); self/admin viewers
+     have no grant row, so their preference lives in localStorage and the
+     picker reads it from there. */
+  function injectViewToggle() {
+    var host = document.querySelector('.topnav .lang-switch');
+    if (!host || host.querySelector('.viewmode-btn')) return;
+
+    if (!document.getElementById('jc-viewmode-css')) {
+      var css = document.createElement('style');
+      css.id = 'jc-viewmode-css';
+      // Mirrors .lang-btn (the flags immediately to the right) so the two
+      // controls read as one family; kept inline-injected so no styles.css
+      // version bump is needed on the static shells.
+      css.textContent =
+        '.viewmode-btn{background:transparent;border:1.5px solid rgba(255,255,255,0.18);' +
+          'border-radius:4px;padding:0;width:30px;height:21px;cursor:pointer;color:#fff;' +
+          'opacity:0.55;display:inline-flex;align-items:center;justify-content:center;' +
+          'transition:border-color 0.15s,opacity 0.15s}' +
+        '.viewmode-btn:hover{opacity:0.85}' +
+        '.viewmode-btn[aria-pressed="true"]{border-color:#fff;opacity:1;cursor:default;' +
+          'box-shadow:0 0 0 1.5px rgba(255,255,255,0.25)}' +
+        '.viewmode-btn svg{display:block}';
+      document.head.appendChild(css);
+    }
+
+    var mode = currentSection() === 'consult' ? 'scroll' : 'navigation';
+
+    function switchTo(target) {
+      if (target === mode) return;
+      var headers = { 'Content-Type': 'application/json' };
+      var vc = '';
+      try { vc = sessionStorage.getItem('jc_viewer_clerk') || ''; } catch (_) {}
+      if (vc) headers['X-Viewer-Clerk'] = vc;
+      // Persist BEFORE navigating: the worker's static gate 302s a
+      // scroll-granted viewer off every nav page, so the grant row must
+      // already say 'navigation' when the next page loads. A network
+      // failure still navigates (the gate re-pins, never breaks), but an
+      // explicit 400 means the server refused the pin because /consult
+      // can render nothing for this grant — stay put instead of landing
+      // the viewer on a guaranteed-blank page.
+      fetch('/api/access/view-mode', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ patient: patient, view_mode: target }),
+      }).then(
+        function (r) {
+          return r.json().then(
+            function (b) { return { status: r.status, body: b }; },
+            function () { return { status: r.status, body: null }; }
+          );
+        },
+        function () { return { status: 0, body: null }; }
+      ).then(function (res) {
+        if (res.status === 400) {
+          alert(tPlain(
+            'The scroll view has nothing to display for this record with your access level.',
+            'A visão de rolagem não tem o que exibir neste prontuário com o seu nível de acesso.'
+          ));
+          return;
+        }
+        // Self/admin viewers have no grant row to carry the choice — keep
+        // it client-side, namespaced by VIEWER + patient so one account's
+        // preference can never route another account on a shared browser.
+        if (vc && res.body && res.body.persisted === 'none') {
+          try { localStorage.setItem('jc_view_pref:' + vc + ':' + patient, target); } catch (_) {}
+        }
+        var page = target === 'scroll' ? 'consult.html' : 'home.html';
+        location.href = page + '?patient=' + encodeURIComponent(patient);
+      });
+    }
+
+    function makeBtn(value, svg, en, pt) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'viewmode-btn';
+      b.setAttribute('data-viewmode', value);
+      b.setAttribute('aria-pressed', String(mode === value));
+      var label = tPlain(en, pt);
+      b.setAttribute('aria-label', label);
+      b.title = label;
+      b.innerHTML = svg;
+      b.addEventListener('click', function () { switchTo(value); });
+      return b;
+    }
+
+    // Navigation: pillar pages behind a topnav. Scroll: one long page.
+    var navBtn = makeBtn('navigation',
+      '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+      'Navigation view — pages', 'Visão de navegação — páginas');
+    var scrollBtn = makeBtn('scroll',
+      '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="7 4 12 9 17 4"/><line x1="12" y1="9" x2="12" y2="15"/><polyline points="7 20 12 15 17 20"/></svg>',
+      'Scroll view — single page', 'Visão de rolagem — página única');
+
+    // "To the left of the flags": before the first flag button; falls back
+    // to appending when a shell has no flags (defensive only).
+    var firstFlag = host.querySelector('.lang-btn');
+    if (firstFlag) {
+      host.insertBefore(navBtn, firstFlag);
+      host.insertBefore(scrollBtn, firstFlag);
+    } else {
+      host.appendChild(navBtn);
+      host.appendChild(scrollBtn);
+    }
+  }
+
   function hidePageBody() {
     var kids = document.body.children;
     for (var i = 0; i < kids.length; i++) {
@@ -3866,6 +3978,7 @@
 
   ready(function () {
     injectChangeButton();
+    injectViewToggle();
     registerLumenProviders();
 
     /* The consultation scroll page has no static shell content to decorate —

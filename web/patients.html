@@ -369,15 +369,20 @@
 
         /* A grant with view_mode='scroll' opens the single-scroll consultation
            view instead of the multi-page app (the worker enforces the same
-           routing server-side). Self and admin rows have no view_mode. */
-        var scroll = p.view_mode === 'scroll' && p.relation !== 'self';
+           routing server-side). The grant's view_mode is the viewer's LAST
+           choice — the in-app toggle writes it back — so both values route
+           from here. Self and admin rows have no view_mode (NULL): their
+           preference lives in localStorage and the click handler reads it. */
+        var grantMode = p.relation !== 'self' && (p.view_mode === 'scroll' || p.view_mode === 'navigation')
+          ? p.view_mode : '';
+        var scroll = grantMode === 'scroll';
         if (scroll) {
           relation += '<div class="relation"><span class="lang-en">Consultation view</span><span class="lang-pt">Visão de consulta</span></div>';
         }
 
         html +=
           '<button type="button" class="patient-card" data-clerk="' + escapeHtml(p.clerk_user_id) + '"' +
-            (scroll ? ' data-view-mode="scroll"' : '') + '>' +
+            (grantMode ? ' data-view-mode="' + grantMode + '"' : '') + '>' +
             '<div class="avatar">' + escapeHtml(initials(p.full_name)) + '</div>' +
             '<div class="name">' + escapeHtml(p.full_name || '(unnamed)') + '</div>' +
             '<div class="meta">' + meta.join(' &nbsp;·&nbsp; ') + '</div>' +
@@ -391,7 +396,16 @@
           var clerk = card.getAttribute('data-clerk');
           if (!clerk) return;
           sessionStorage.setItem('jc_current_patient', clerk);
-          var page = card.getAttribute('data-view-mode') === 'scroll' ? 'consult.html' : 'home.html';
+          /* Grant rows carry the persisted choice server-side; self/admin
+             rows (no data-view-mode) fall back to the localStorage
+             preference the in-app toggle keeps for them — namespaced by
+             VIEWER + patient so a shared browser never routes one account
+             by another account's choice. */
+          var mode = card.getAttribute('data-view-mode');
+          if (!mode && viewerClerk) {
+            try { mode = localStorage.getItem('jc_view_pref:' + viewerClerk + ':' + clerk) || ''; } catch (e) { mode = ''; }
+          }
+          var page = mode === 'scroll' ? 'consult.html' : 'home.html';
           location.href = page + '?patient=' + encodeURIComponent(clerk);
         });
       });

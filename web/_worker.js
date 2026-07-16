@@ -60,6 +60,13 @@ const SCOPE_KEYS = [
   "clinical_history", "genetics", "mental", "journal",
 ];
 
+/* Scopes the /consult scroll page can actually render a section for
+ * (genetics/journal have no consult section yet). A grant may only be
+ * switched to view_mode='scroll' when it carries at least one of these —
+ * otherwise the viewer is pinned to a guaranteed-blank page. Shared by the
+ * admin grant path and the viewer's own /api/access/view-mode toggle. */
+const CONSULT_RENDERABLE_SCOPES = ["imaging", "labs", "vitals", "medications", "clinical_history", "mental"];
+
 const PATIENT_CLERKS = {
   joao: "pending:joao",                            // Patient Zero (static pages)
   paulo: "pending:paulo-silotto-df3441",
@@ -2979,6 +2986,48 @@ async function handleProfile(request, env) {
   return jsonError(404, "not_found");
 }
 
+/* POST /api/access/view-mode — { patient, view_mode } — a viewer switches
+ * their OWN experience of one patient's record between 'navigation' (the
+ * multi-page app) and 'scroll' (the /consult page).
+ *
+ * For granted viewers this UPDATEs their patient_access row's view_mode, so
+ * the admin-set value acts as the DEFAULT: the viewer's last choice wins on
+ * every later login (the patient picker and the static gate's scroll pin
+ * both read that column) until they switch again or an admin resets it.
+ * Only view_mode is touched — scopes/filter/expiry never widen here.
+ *
+ * Self and admin viewers have no grant row to carry the preference; the
+ * client keeps theirs in localStorage, so this endpoint just acks. */
+async function handleAccessViewMode(request, env) {
+  if (request.method !== "POST") return jsonError(405, "method_not_allowed");
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  let body;
+  try { body = await request.json(); } catch { return jsonError(400, "invalid_json"); }
+  const patientClerk = String(body?.patient || "").trim();
+  const viewMode = String(body?.view_mode || "");
+  if (!patientClerk) return jsonError(400, "patient_required");
+  if (viewMode !== "navigation" && viewMode !== "scroll") {
+    return jsonError(400, "view_mode_must_be_navigation_or_scroll");
+  }
+  const viewerClerk = await viewerFromRequest(request, env);
+  if (!viewerClerk) return jsonError(401, "viewer_required");
+  const sql = neon(env.DATABASE_URL);
+  try {
+    const g = await loadScopeGrant(sql, viewerClerk, patientClerk);
+    if (isPrivileged(g)) return jsonOk({ ok: true, view_mode: viewMode, persisted: "none" });
+    if (g.status !== "grant") return jsonError(403, "no_active_grant");
+    if (viewMode === "scroll" && !scopeHasAny(g, CONSULT_RENDERABLE_SCOPES)) {
+      return jsonError(400, "scroll_view_requires_a_consult_renderable_scope");
+    }
+    await sql`UPDATE patient_access SET view_mode = ${viewMode}
+      WHERE user_id = ${g.viewerId} AND patient_id = ${g.patientId}`;
+    await auditScopedRead(sql, g, "view_mode_self_change", "/api/access/view-mode", [viewMode]);
+    return jsonOk({ ok: true, view_mode: viewMode, persisted: "grant" });
+  } catch (e) {
+    return jsonError(500, `view_mode_update_failed: ${e.message}`);
+  }
+}
+
 async function handleAdmin(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const sql = neon(env.DATABASE_URL);
@@ -3506,10 +3555,8 @@ async function handleAdmin(request, env) {
           return jsonError(400, "view_mode_must_be_navigation_or_scroll");
         }
         // A scroll grant must carry at least one scope the /consult page can
-        // actually render (genetics/journal have no consult section yet) —
-        // otherwise the viewer is pinned to a guaranteed-blank page.
-        const CONSULT_RENDERABLE = ["imaging", "labs", "vitals", "medications", "clinical_history", "mental"];
-        if (viewMode === "scroll" && !scopes.some((s) => CONSULT_RENDERABLE.includes(s))) {
+        // actually render — otherwise the viewer is pinned to a blank page.
+        if (viewMode === "scroll" && !scopes.some((s) => CONSULT_RENDERABLE_SCOPES.includes(s))) {
           return jsonError(400, "scroll_view_requires_a_consult_renderable_scope");
         }
 
@@ -4448,6 +4495,9 @@ export default {
     }
     if (url.pathname === "/api/profile" || url.pathname.startsWith("/api/profile/")) {
       return handleProfile(request, env);
+    }
+    if (url.pathname === "/api/access/view-mode") {
+      return handleAccessViewMode(request, env);
     }
     if (url.pathname.startsWith("/api/admin/")) {
       return handleAdmin(request, env);
