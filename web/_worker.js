@@ -936,6 +936,80 @@ function vrIsoMonday(day) {
   return d.toISOString().slice(0, 10);
 }
 
+/* ── /api/patient-body-composition ─────────────────────────────────
+ * GET /api/patient-body-composition?clerk=
+ *
+ * READ-ONLY display infra for the Vitals body-composition block. Returns the
+ * patient's bioimpedance exams NEWEST-FIRST, each with its segment rows
+ * (empty array for whole-body-only devices like the Tanita TBF-410 — the
+ * absence of segments is what tells the renderer to omit the silhouettes).
+ *
+ * Param is `clerk`, matching every sibling endpoint (/api/patient-summary,
+ * /api/vitals-range); there is no `patientId` convention in this codebase.
+ * Scope: 'vitals' — body composition is vitals-surface data, same as
+ * /api/vitals-range. Writes nothing; ingestion owns the write path. */
+async function handleBodyComposition(request, env) {
+  if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
+  const url = new URL(request.url);
+  const clerk = url.searchParams.get("clerk");
+  if (!clerk) return jsonError(400, "clerk_required");
+
+  try {
+    const sql = neon(env.DATABASE_URL);
+    const patientRows = await sql`
+      SELECT id FROM users
+      WHERE clerk_user_id = ${clerk} AND role = 'patient' AND archived_at IS NULL LIMIT 1`;
+    if (!patientRows.length) return jsonError(404, "patient_not_found");
+    const pid = patientRows[0].id;
+
+    const viewerClerk = await viewerFromRequest(request, env);
+    const grant = await loadScopeGrant(sql, viewerClerk, clerk);
+    if (!isPrivileged(grant) && !grant.scopes.has("vitals")) {
+      return jsonError(viewerClerk ? 403 : 401, "vitals_scope_required");
+    }
+    await auditScopedRead(sql, grant, "body_composition_read", "/api/patient-body-composition", ["vitals"]);
+
+    // The table may not exist on an env that predates migration 0024.
+    let exams = [];
+    try {
+      exams = await sql`
+        SELECT id, exam_date::text AS exam_date, device_manufacturer, device_model, body_type,
+               sex::text AS sex, age_years, height_cm, weight_kg, bmi, bmr_kcal, bmr_kj,
+               impedance_ohms, fat_percent, fat_mass_kg, ffm_kg, tbw_kg,
+               skeletal_muscle_mass_kg, protein_kg, minerals_kg, visceral_fat_level,
+               waist_circumference_cm, hip_circumference_cm, whr,
+               requesting_professional, performing_professional,
+               facility_name, facility_city, facility_country,
+               raw_extract, notes
+        FROM bioimpedance_exams
+        WHERE patient_id = ${pid}
+        ORDER BY exam_date DESC`;
+    } catch { exams = []; }
+
+    if (exams.length) {
+      const ids = exams.map((e) => e.id);
+      let segs = [];
+      try {
+        segs = await sql`
+          SELECT exam_id, segment::text AS segment, lean_mass_kg, lean_pct_ideal,
+                 lean_status::text AS lean_status, fat_mass_kg, fat_pct_ideal,
+                 fat_status::text AS fat_status
+          FROM bioimpedance_segments
+          WHERE exam_id = ANY(${ids})`;
+      } catch { segs = []; }
+      const byExam = new Map(ids.map((id) => [id, []]));
+      for (const s of segs) (byExam.get(s.exam_id) || []).push(s);
+      for (const e of exams) e.segments = byExam.get(e.id) || [];
+    }
+
+    return new Response(JSON.stringify({ exams }), {
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    });
+  } catch (e) {
+    return jsonError(500, `body-composition failed: ${e.message}`);
+  }
+}
+
 async function handleVitalsRange(request, env) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const url = new URL(request.url);
@@ -4465,6 +4539,9 @@ export default {
     }
     if (url.pathname === "/api/vitals-range") {
       return handleVitalsRange(request, env);
+    }
+    if (url.pathname === "/api/patient-body-composition") {
+      return handleBodyComposition(request, env);
     }
     if (url.pathname === "/api/patient-dashboard") {
       return handlePatientDashboard(request, env);

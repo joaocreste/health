@@ -149,6 +149,25 @@
         gate: { fn: 'PATIENT', args: [] }, patientScope: SILVANA, provider: 'silvanaVitals', badge: false },
       { id: 'body-composition', order: 20, title: { en: 'Body composition', pt: 'Composição corporal' },
         gate: { fn: 'G-ARR', args: ['vitals.weight'] }, provider: 'vitalsSection', badge: false },
+      /* Bioimpedance (BIA) block — orders 21-25 so it stays contiguous and sits
+         next to the wearable-scale body-composition section above. All five gate
+         coarsely on "the patient has >=1 BIA exam"; the fine-grained conditions
+         live in the providers, which return null (= section omitted, no empty
+         skeleton) when the device didn't produce that data:
+           bia-segmental -> only when bioimpedance_segments rows exist (InBody).
+           bia-history   -> only with >=2 exams.
+         Measured values are patient data, so badge:false throughout — no AI pill
+         on a number a device printed. */
+      { id: 'bia-cards', order: 21, title: { en: 'Body composition · bioimpedance', pt: 'Composição corporal · bioimpedância' },
+        gate: { fn: 'G-ARR', args: ['bodyComp.exams'] }, provider: 'biaCards', badge: false },
+      { id: 'bia-muscle-fat', order: 22, title: { en: 'Muscle-fat analysis', pt: 'Análise músculo-gordura' },
+        gate: { fn: 'G-ARR', args: ['bodyComp.exams'] }, provider: 'biaMuscleFat', badge: false },
+      { id: 'bia-obesity', order: 23, title: { en: 'Obesity analysis', pt: 'Análise de obesidade' },
+        gate: { fn: 'G-ARR', args: ['bodyComp.exams'] }, provider: 'biaObesity', badge: false },
+      { id: 'bia-segmental', order: 24, title: { en: 'Segmental analysis', pt: 'Análise segmentar' },
+        gate: { fn: 'G-ARR', args: ['bodyComp.exams'] }, provider: 'biaSegmental', badge: false },
+      { id: 'bia-history', order: 25, title: { en: 'Body composition history', pt: 'Histórico de composição corporal' },
+        gate: { fn: 'G-ARR', args: ['bodyComp.exams'] }, provider: 'biaHistory', badge: false },
       { id: 'glucose', order: 30, title: { en: 'Glucose', pt: 'Glicose' },
         gate: { fn: 'G-ARR', args: ['vitals.glucose'] }, provider: 'vitalsSection', badge: false }, // no series in vitals-range yet → closed
       { id: 'sleep', order: 40, title: { en: 'Sleep architecture', pt: 'Arquitetura do sono' },

@@ -357,6 +357,11 @@
       var today = new Date().toISOString().slice(0, 10);
       jobs.vitals = getJson('/api/vitals-range?' + q + '&from=2015-01-01&to=' + today,
         viewer ? { 'X-Viewer-Clerk': viewer, Accept: 'application/json' } : { Accept: 'application/json' });
+      /* Bioimpedance / body composition — its own table, not part of the
+         vitals-range device series. Scope-filtered server-side ('vitals'),
+         so a denied viewer gets an error body and the sections stay closed. */
+      jobs.bodyComp = getJson('/api/patient-body-composition?' + q,
+        viewer ? { 'X-Viewer-Clerk': viewer, Accept: 'application/json' } : { Accept: 'application/json' });
     }
     var keys = Object.keys(jobs);
     return Promise.all(keys.map(function (k) { return jobs[k]; })).then(function (vals) {

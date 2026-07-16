@@ -1073,21 +1073,24 @@
           '<div class="lab-test-name">' + (m.marker_html || escapeHtml(m.marker)) + '</div>' +
           '<div class="lab-test-meta">' +
             '<span class="lab-test-val">' + valHtml + '</span>' +
-            /* m.no_pill: the metric has NO reference range, so there is no
-               in/out-of-range verdict to show. classifyLab() falls back to
+            /* m.no_ref: this metric has NO reference range at all, so there is
+               no in/out-of-range verdict to show. classifyLab() falls back to
                'normal' when refs are absent, which would render a green
                "Normal" chip asserting a judgement the data cannot support
                (e.g. a raw body weight in kg). Undefined for every existing
                caller -> pill renders exactly as before. */
-            (m.no_pill ? '' : '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>') +
+            (m.no_ref ? '' : '<span class="pill ' + pillCls + '">' + pillLabel(status, m.flag) + '</span>') +
             historyBadge +
           '</div>' +
         '</div>' +
         renderLabBar(value, m.ref_low, m.ref_high, status) +
-        '<div class="lab-test-foot">' +
-          '<div class="lab-test-ref">' + t('Reference:', 'Referência:') + ' ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>' +
-          subline +
-        '</div>' +
+        /* no_ref also suppresses the reference line: "Reference: —" is noise
+           for a metric that has no range to compare against. */
+        ((m.no_ref && !subline) ? '' :
+          '<div class="lab-test-foot">' +
+            (m.no_ref ? '' : '<div class="lab-test-ref">' + t('Reference:', 'Referência:') + ' ' + formatRefText(m.ref_low, m.ref_high, m.unit) + '</div>') +
+            subline +
+          '</div>') +
         renderLabHistory(m) +
       '</div>'
     );
@@ -2363,6 +2366,374 @@
      renderVitals — fetch the range, build only the sections with data,
      mount the shell, then initialise the charts.
      ══════════════════════════════════════════════════════════════════════ */
+  /* ══ Body composition · bioimpedance (BIA) ═══════════════════════════
+     Renders bioimpedance_exams (+ bioimpedance_segments) from
+     /api/patient-body-composition (payloads.bodyComp). Sections are
+     registry ids bia-cards / bia-muscle-fat / bia-obesity / bia-segmental
+     / bia-history, orders 21-25.
+
+     DEVICE-SHAPE DRIVEN. Every sub-section returns null when its source data
+     is absent, so the assembler omits it entirely (I-5 — never an empty
+     skeleton). A Tanita TBF-410 (whole-body only) yields cards +
+     muscle-fat + obesity; an InBody additionally yields the segmental
+     silhouettes. History needs >=2 exams.
+
+     MEASURED VALUES ARE PATIENT DATA — no .ai-pill anywhere in this block.
+     The AI synthesis narrative is a separate card generated elsewhere.
+
+     REFERENCE BASES. Every reference is stated in its section's desc line so
+     no number on screen is an unattributed claim:
+       ideal fat %  <- the DEVICE's own printed table (raw_extract), by sex+age
+       BMI band     <- WHO 18.5-25
+       weight band  <- that same WHO BMI band applied to the exam's own height
+     FFM is fat-free mass and is NEVER relabelled as muscle; SMM renders only
+     when the device actually measured it.                                */
+
+  function biaExams(ctx) {
+    var d = ctx && ctx.payloads && ctx.payloads.bodyComp;
+    return (d && Array.isArray(d.exams)) ? d.exams : [];
+  }
+  function biaNum(v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+  /* The device's own printed "ideal fat %" table, keyed by sex + age band.
+     Read from raw_extract — never hardcoded, and absent for devices that
+     don't print one (then the fat rows simply carry no reference). */
+  function biaIdealFatPct(e) {
+    var rx = e && e.raw_extract;
+    var ref = rx && rx.device_reference_ideal_fat_percent;
+    var tbl = ref && ref.by_age;
+    var age = biaNum(e && e.age_years);
+    var sex = (e && (e.sex === 'male' || e.sex === 'female')) ? e.sex : null;
+    if (!tbl || age == null || !sex) return null;
+    var band = age <= 19 ? 'up_to_19' : age <= 29 ? '20_29' : age <= 39 ? '30_39'
+             : age <= 49 ? '40_49' : age <= 59 ? '50_59' : '60_plus';
+    return (tbl[band] && biaNum(tbl[band][sex]));
+  }
+  var BIA_BMI_LOW = 18.5, BIA_BMI_HIGH = 25;   // WHO adult band
+  /* Healthy-weight band = the WHO BMI band applied to THIS exam's height. */
+  function biaWeightBand(e) {
+    var h = biaNum(e && e.height_cm);
+    if (h == null || h <= 0) return null;
+    var m2 = (h / 100) * (h / 100);
+    return { low: BIA_BMI_LOW * m2, high: BIA_BMI_HIGH * m2 };
+  }
+  function biaDeviceName(e) {
+    return [e.device_manufacturer, e.device_model].filter(Boolean).join(' ');
+  }
+  /* Provenance strip under the block title: date · device · facility ·
+     performing professional — the five facts the ingestion captured. */
+  function biaMetaLine(e) {
+    var bits = [];
+    if (e.exam_date) bits.push(escapeHtml(formatDate(e.exam_date)));
+    var dev = biaDeviceName(e);
+    if (dev) bits.push(escapeHtml(dev));
+    var fac = [e.facility_name, e.facility_city].filter(Boolean).join(', ');
+    if (fac) bits.push(escapeHtml(fac));
+    if (e.performing_professional) bits.push(escapeHtml(e.performing_professional));
+    return bits.length ? '<p class="bia-meta">' + bits.join(' · ') + '</p>' : '';
+  }
+  function biaSection(id, labelEn, labelPt, titleEn, titlePt, descEn, descPt, bodyHtml) {
+    return '<section class="report-section" id="' + id + '"><div class="container">' +
+      '<div class="section-label">' + t(labelEn, labelPt) + '</div>' +
+      '<h2 class="section-title">' + t(titleEn, titlePt) + '</h2>' +
+      ((descEn || descPt) ? '<p class="section-desc">' + t(descEn || '', descPt || '') + '</p>' : '') +
+      bodyHtml +
+      '</div></section>';
+  }
+  /* One labelled metric row: value + the shared lab-bar (track, reference
+     band, marker). Reuses renderLabBar so the bar semantics are identical to
+     the blood-test cards. */
+  function biaBarRow(labelHtml, valueHtml, value, refLow, refHigh, noteHtml) {
+    var status = classifyLab(value, refLow, refHigh, null);
+    return '<div class="bia-row">' +
+      '<div class="bia-row-head">' +
+        '<span class="bia-row-label">' + labelHtml + '</span>' +
+        '<span class="bia-row-val">' + valueHtml + '</span>' +
+      '</div>' +
+      renderLabBar(value, refLow, refHigh, status) +
+      (noteHtml ? '<div class="bia-row-note">' + noteHtml + '</div>' : '') +
+      '</div>';
+  }
+  function biaVal(n, unit) {
+    return '<span class="lab-val-num">' + escapeHtml(fmtLabNum(n)) + '</span>' +
+      (unit ? ' <span class="lab-val-unit">' + escapeHtml(unit) + '</span>' : '');
+  }
+
+  /* C.1 — value cards. Reuses renderLabTest (the blood-test bar card)
+     verbatim; metrics with no reference range pass no_ref so the card shows
+     the measured number without an unearned "Normal" verdict. */
+  function renderBiaCards(ctx) {
+    var exams = biaExams(ctx);
+    if (!exams.length) return null;
+    var e = exams[0];
+    var metrics = [];
+    function add(v, unit, en, pt) {
+      var val = biaNum(v);
+      if (val == null) return;   // device didn't measure it -> no card
+      metrics.push({ marker_html: t(en, pt), value: val, unit: unit,
+                     ref_low: null, ref_high: null, no_ref: true });
+    }
+    add(e.weight_kg, 'kg', 'Weight', 'Peso');
+    add(e.fat_mass_kg, 'kg', 'Body fat mass', 'Massa de gordura');
+    add(e.ffm_kg, 'kg', 'Fat-free mass (FFM)', 'Massa livre de gordura (FFM)');
+    add(e.tbw_kg, 'kg', 'Total body water (TBW)', 'Água corporal total (TBW)');
+    add(e.waist_circumference_cm, 'cm', 'Waist circumference', 'Circunferência abdominal');
+    /* InBody-class only — each renders iff the device produced it. */
+    add(e.skeletal_muscle_mass_kg, 'kg', 'Skeletal muscle mass (SMM)', 'Massa muscular esquelética (SMM)');
+    add(e.protein_kg, 'kg', 'Protein', 'Proteína');
+    add(e.minerals_kg, 'kg', 'Minerals', 'Minerais');
+    add(e.visceral_fat_level, '', 'Visceral fat level', 'Nível de gordura visceral');
+    if (!metrics.length) return null;
+
+    /* FFM-is-not-muscle note, in the device's own terms — shown only when the
+       device reported FFM but NOT skeletal muscle mass (the Tanita case),
+       which is exactly when the two could be confused. */
+    var note = '';
+    if (biaNum(e.ffm_kg) != null && biaNum(e.skeletal_muscle_mass_kg) == null) {
+      note = '<p class="bia-note">' + t(
+        'Fat-free mass (FFM) is everything that is not fat — muscle, bone and organ/residual mass together. It is <strong>not</strong> skeletal muscle mass: this device does not measure that separately.',
+        'A massa livre de gordura (FFM) é tudo o que não é gordura — músculo, massa óssea e massa visceral/residual somados. <strong>Não</strong> é a massa muscular esquelética: este aparelho não a mede separadamente.'
+      ) + '</p>';
+    }
+    return biaSection('bia-cards',
+      'Bioimpedance' + (biaDeviceName(e) ? ' · ' + escapeHtml(biaDeviceName(e)) : ''),
+      'Bioimpedância' + (biaDeviceName(e) ? ' · ' + escapeHtml(biaDeviceName(e)) : ''),
+      'Body composition', 'Composição corporal',
+      'Whole-body measurements from the bioimpedance exam, as the device reported them.',
+      'Medidas de corpo inteiro do exame de bioimpedância, conforme o aparelho as reportou.',
+      biaMetaLine(e) +
+      '<div class="lab-panel-body bia-cards">' + metrics.map(renderLabTest).join('') + '</div>' +
+      note);
+  }
+
+  /* C.2 — muscle-fat rows. Weight + fat mass (+ SMM only when measured). */
+  function renderBiaMuscleFat(ctx) {
+    var exams = biaExams(ctx);
+    if (!exams.length) return null;
+    var e = exams[0];
+    var rows = [];
+    var band = biaWeightBand(e);
+    var w = biaNum(e.weight_kg);
+    if (w != null && band) {
+      rows.push(biaBarRow(t('Weight', 'Peso'), biaVal(w, 'kg'), w, band.low, band.high, ''));
+    }
+    var smm = biaNum(e.skeletal_muscle_mass_kg);
+    if (smm != null) {
+      /* Only the device can supply an SMM reference; we never invent one. */
+      rows.push(biaBarRow(t('Skeletal muscle mass', 'Massa muscular esquelética'), biaVal(smm, 'kg'), smm, null, null, ''));
+    }
+    var fm = biaNum(e.fat_mass_kg);
+    var idealPct = biaIdealFatPct(e);
+    if (fm != null) {
+      var idealFm = (idealPct != null && w != null) ? (idealPct / 100) * w : null;
+      var pctOf = idealFm ? Math.round((fm / idealFm) * 100) : null;
+      rows.push(biaBarRow(t('Body fat mass', 'Massa de gordura'), biaVal(fm, 'kg'),
+        fm, null, idealFm,
+        pctOf != null ? t(
+          pctOf + '% of the device\'s ideal for this age and sex (' + fmtLabNum(idealFm) + ' kg at ' + idealPct + '%).',
+          pctOf + '% do ideal do aparelho para esta idade e sexo (' + fmtLabNum(idealFm) + ' kg a ' + idealPct + '%).') : ''));
+    }
+    if (!rows.length) return null;
+    return biaSection('bia-muscle-fat', 'Analysis', 'Análise',
+      'Muscle-fat analysis', 'Análise músculo-gordura',
+      'Each measurement against its reference. Healthy-weight range is the WHO BMI band (18.5-25) applied to this exam\'s height; the fat reference is the device\'s own printed ideal for this age and sex.',
+      'Cada medida em relação à sua referência. A faixa de peso saudável é a banda de IMC da OMS (18,5-25) aplicada à altura deste exame; a referência de gordura é o ideal impresso pelo próprio aparelho para esta idade e sexo.',
+      '<div class="bia-rows">' + rows.join('') + '</div>');
+  }
+
+  /* C.3 — obesity rows: BMI + PBF. */
+  function renderBiaObesity(ctx) {
+    var exams = biaExams(ctx);
+    if (!exams.length) return null;
+    var e = exams[0];
+    var rows = [];
+    var bmi = biaNum(e.bmi);
+    if (bmi != null) {
+      rows.push(biaBarRow(t('BMI', 'IMC'), biaVal(bmi, 'kg/m²'), bmi, BIA_BMI_LOW, BIA_BMI_HIGH, ''));
+    }
+    var pbf = biaNum(e.fat_percent);
+    var idealPct = biaIdealFatPct(e);
+    if (pbf != null) {
+      rows.push(biaBarRow(t('Body fat percentage (PBF)', 'Percentual de gordura (PBF)'), biaVal(pbf, '%'),
+        pbf, null, idealPct,
+        idealPct != null ? t(
+          'Device\'s printed ideal for this age and sex: ' + idealPct + '%.',
+          'Ideal impresso pelo aparelho para esta idade e sexo: ' + idealPct + '%.') : ''));
+    }
+    if (!rows.length) return null;
+
+    /* The device's OWN printed caveat, verbatim from raw_extract — shown
+       because BMI cannot separate fat from fat-free mass, and this exam
+       classified the body type as ATHLETIC. Quoting the manufacturer is not
+       Lumen interpreting the result; it is the reference stating its own
+       limits. Rendered only when the device actually printed one. */
+    var rx = e.raw_extract || {};
+    var ref = rx.device_reference_ideal_fat_percent || {};
+    var caveat = ref.caveat_verbatim;
+    var caveatHtml = caveat
+      ? '<p class="bia-note bia-caveat">' +
+          '<span class="bia-caveat-src">' + t('Device note', 'Nota do aparelho') +
+          (biaDeviceName(e) ? ' · ' + escapeHtml(biaDeviceName(e)) : '') + '</span>' +
+          '<span class="bia-caveat-txt">&ldquo;' + escapeHtml(caveat) + '&rdquo;</span>' +
+        '</p>'
+      : '';
+    var typeHtml = e.body_type
+      ? '<p class="bia-note">' + t(
+          'This exam classified the body type as <strong>' + escapeHtml(e.body_type) + '</strong>. BMI is a weight-for-height ratio and does not distinguish fat from fat-free mass.',
+          'Este exame classificou o tipo corporal como <strong>' + escapeHtml(e.body_type) + '</strong>. O IMC é uma razão peso-altura e não distingue gordura de massa livre de gordura.'
+        ) + '</p>'
+      : '';
+    return biaSection('bia-obesity', 'Analysis', 'Análise',
+      'Obesity analysis', 'Análise de obesidade',
+      'BMI against the WHO adult band (18.5-25) and body-fat percentage against the device\'s own printed ideal.',
+      'IMC em relação à banda adulta da OMS (18,5-25) e percentual de gordura em relação ao ideal impresso pelo próprio aparelho.',
+      '<div class="bia-rows">' + rows.join('') + '</div>' + typeHtml + caveatHtml);
+  }
+
+  /* C.4 — segmental silhouettes. Renders ONLY when the device produced
+     per-region rows (InBody-class). Zero rows -> null -> section omitted, so
+     a whole-body-only device (Tanita) shows nothing here rather than an
+     empty skeleton. */
+  var BIA_SEGMENTS = [
+    { key: 'right_arm', en: 'Right arm', pt: 'Braço direito' },
+    { key: 'left_arm',  en: 'Left arm',  pt: 'Braço esquerdo' },
+    { key: 'trunk',     en: 'Trunk',     pt: 'Tronco' },
+    { key: 'right_leg', en: 'Right leg', pt: 'Perna direita' },
+    { key: 'left_leg',  en: 'Left leg',  pt: 'Perna esquerda' },
+  ];
+  /* Anatomical anchors in the SVG viewBox, front-facing: the patient's RIGHT
+     limbs sit on the VIEWER's left, matching the device's RA/LA/TR/RL/LL. */
+  var BIA_SEG_POS = {
+    right_arm: { x: 14,  y: 40 }, left_arm: { x: 86, y: 40 },
+    trunk:     { x: 50,  y: 42 },
+    right_leg: { x: 30,  y: 84 }, left_leg: { x: 70, y: 84 },
+  };
+  /* Status -> chip class, PER METRIC. The unhealthy direction is red on each
+     body, so the SAME enum value maps to different colours:
+       lean: below  = red (too little muscle), normal/above = green
+       fat:  above  = red (too much fat),      normal/below = green
+     Falls back to deriving the status from % vs. ideal when the device left
+     the status column null. */
+  function biaSegStatus(status, pctIdeal, metric) {
+    var s = status;
+    if (!s && pctIdeal != null) {
+      s = pctIdeal < 90 ? 'below' : pctIdeal > 110 ? 'above' : 'normal';
+    }
+    if (!s) return null;
+    var bad = (metric === 'lean') ? 'below' : 'above';
+    return {
+      key: s,
+      cls: (s === bad) ? 'pill-flag' : 'pill-ok',
+      label: s === 'below' ? t('Below', 'Abaixo')
+           : s === 'above' ? t('Above', 'Acima')
+           : t('Normal', 'Normal'),
+    };
+  }
+  function biaBodySvg(segs, metric) {
+    var boxes = BIA_SEGMENTS.map(function (def) {
+      var row = segs[def.key];
+      if (!row) return '';
+      var pos = BIA_SEG_POS[def.key];
+      var mass = biaNum(metric === 'lean' ? row.lean_mass_kg : row.fat_mass_kg);
+      var pct = biaNum(metric === 'lean' ? row.lean_pct_ideal : row.fat_pct_ideal);
+      var st = biaSegStatus(metric === 'lean' ? row.lean_status : row.fat_status, pct, metric);
+      if (mass == null && pct == null && !st) return '';
+      return '<div class="bia-seg-box" style="left:' + pos.x + '%;top:' + pos.y + '%;">' +
+        (mass != null ? '<span class="bia-seg-kg">' + escapeHtml(fmtLabNum(mass)) + ' kg</span>' : '') +
+        (pct != null ? '<span class="bia-seg-pct">' + escapeHtml(fmtLabNum(pct)) + '%</span>' : '') +
+        (st ? '<span class="pill ' + st.cls + ' bia-seg-chip">' + st.label + '</span>' : '') +
+        '</div>';
+    }).join('');
+    /* Front-facing body outline, drawn from the petrol tokens (same fill +
+       stroke treatment as the brand silhouette). */
+    var body =
+      '<svg class="bia-body-svg" viewBox="0 0 100 120" aria-hidden="true">' +
+        '<circle class="bia-body-shape" cx="50" cy="11" r="8"/>' +
+        '<path class="bia-body-shape" d="M50 21 C43 21 38 24 36 29 L33 45 L28 62 L34 63 L38 48 L39 60 L37 78 L44 78 L47 60 L50 60 L53 60 L56 78 L63 78 L61 60 L62 48 L66 63 L72 62 L67 45 L64 29 C62 24 57 21 50 21 Z"/>' +
+        '<path class="bia-body-shape" d="M39 79 L37 104 L35 118 L44 118 L46 104 L50 84 L54 104 L56 118 L65 118 L63 104 L61 79 Z"/>' +
+      '</svg>';
+    return '<div class="bia-body">' +
+        '<h4 class="bia-body-title">' +
+          (metric === 'lean' ? t('Lean mass by limb', 'Massa magra por membro')
+                             : t('Fat by limb', 'Gordura por membro')) +
+        '</h4>' +
+        '<div class="bia-body-stage">' + body + boxes + '</div>' +
+      '</div>';
+  }
+  function renderBiaSegmental(ctx) {
+    var exams = biaExams(ctx);
+    if (!exams.length) return null;
+    var e = exams[0];
+    var rows = Array.isArray(e.segments) ? e.segments : [];
+    if (!rows.length) return null;   // whole-body-only device -> omit entirely
+    var segs = {};
+    rows.forEach(function (r) { if (r && r.segment) segs[r.segment] = r; });
+    var hasLean = rows.some(function (r) { return biaNum(r.lean_mass_kg) != null || biaNum(r.lean_pct_ideal) != null; });
+    var hasFat  = rows.some(function (r) { return biaNum(r.fat_mass_kg)  != null || biaNum(r.fat_pct_ideal)  != null; });
+    if (!hasLean && !hasFat) return null;
+    var bodies = (hasLean ? biaBodySvg(segs, 'lean') : '') + (hasFat ? biaBodySvg(segs, 'fat') : '');
+    return biaSection('bia-segmental', 'Analysis', 'Análise',
+      'Segmental analysis', 'Análise segmentar',
+      '', '',
+      '<p class="bia-meta bia-meta-right">' + t(
+        'Lean mass and fat by limb · five regions · % vs. device ideal',
+        'Massa magra e gordura por membro · cinco regiões · % vs. ideal do aparelho') + '</p>' +
+      '<div class="bia-bodies">' + bodies + '</div>');
+  }
+
+  /* C.5 — history line chart. Needs >=2 exams; a single measurement has no
+     trend, so the section is omitted until a second one exists. Chart.js
+     (the Vitals page's charting library — not Plotly). */
+  function renderBiaHistory(ctx) {
+    var exams = biaExams(ctx);
+    if (exams.length < 2) return null;
+    var series = exams.slice().sort(function (a, b) {
+      return (dateMs(a.exam_date) || 0) - (dateMs(b.exam_date) || 0);   // oldest -> newest
+    });
+    var hasSmm = series.some(function (e) { return biaNum(e.skeletal_muscle_mass_kg) != null; });
+    var el = biaSection('bia-history', 'Trend', 'Tendência',
+      'Body composition history', 'Histórico de composição corporal',
+      'Each bioimpedance exam over time. Weight and fat mass in kg (left axis); body-fat percentage (right axis).',
+      'Cada exame de bioimpedância ao longo do tempo. Peso e massa de gordura em kg (eixo esquerdo); percentual de gordura (eixo direito).',
+      '<div class="chart-card"><div class="chart-wrap"><canvas id="biaHistChart"></canvas></div></div>');
+    return {
+      el: (function () { var d = document.createElement('div'); d.innerHTML = el; return d; })(),
+      after: function () {
+        var cv = document.getElementById('biaHistChart');
+        if (!cv || !window.Chart) return;
+        if (Chart.getChart(cv)) Chart.getChart(cv).destroy();
+        var ds = [
+          { label: L('Weight (kg)', 'Peso (kg)'), data: series.map(function (e) { return biaNum(e.weight_kg); }),
+            borderColor: C.blue600, backgroundColor: 'rgba(94,151,188,0.18)', tension: 0.3, yAxisID: 'y', fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: C.blue600 },
+          { label: L('Body fat mass (kg)', 'Massa de gordura (kg)'), data: series.map(function (e) { return biaNum(e.fat_mass_kg); }),
+            borderColor: C.red500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.red500 },
+          { label: L('Body fat (%)', 'Gordura corporal (%)'), data: series.map(function (e) { return biaNum(e.fat_percent); }),
+            borderColor: C.amber500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y1', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.amber500, borderDash: [4, 4] },
+        ];
+        if (hasSmm) {
+          ds.splice(1, 0, { label: L('Skeletal muscle mass (kg)', 'Massa muscular esquelética (kg)'),
+            data: series.map(function (e) { return biaNum(e.skeletal_muscle_mass_kg); }),
+            borderColor: C.green500, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y', borderWidth: 2, pointRadius: 2, pointBackgroundColor: C.green500 });
+        }
+        new Chart(cv, {
+          type: 'line',
+          data: { labels: series.map(function (e) { return e.exam_date; }), datasets: ds },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              y:  { position: 'left',  title: { display: true, text: 'kg' } },
+              y1: { position: 'right', title: { display: true, text: '%' }, grid: { drawOnChartArea: false } },
+            },
+          },
+        });
+      },
+    };
+  }
+
   /* Computes the vitals chart sections for the assembler, keyed by the
      registry section ids (body-composition / sleep / movement /
      cardiovascular / stress-resilience / blood-pressure). The vitals-range
@@ -4116,6 +4487,15 @@
         };
       },
       silvanaVitals: function () { return renderSilvanaVitals(); },
+
+      /* Body composition · bioimpedance (orders 21-25). Each returns null when
+         the device didn't produce that data, so the assembler omits the
+         section rather than drawing an empty one. */
+      biaCards: function (ctx) { return renderBiaCards(ctx); },
+      biaMuscleFat: function (ctx) { return renderBiaMuscleFat(ctx); },
+      biaObesity: function (ctx) { return renderBiaObesity(ctx); },
+      biaSegmental: function (ctx) { return renderBiaSegmental(ctx); },
+      biaHistory: function (ctx) { return renderBiaHistory(ctx); },
 
       /* physical-exams */
       examsImaging: function (ctx) {
