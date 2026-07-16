@@ -42,8 +42,28 @@
   var patient = fromUrl || stored;
   if (patient !== LEO_CLERK) return;
 
-  // Force English locale — overrides any html[lang="pt"] persisted state.
-  document.documentElement.setAttribute('lang', 'en');
+  // Force English locale — Leo's record is EN-only. app.js's initI18n applies
+  // the viewer's stored choice (default 'pt') on DOMContentLoaded, which lands
+  // AFTER this script's load-time set — so re-apply then too; this listener
+  // registers after app.js's, so it runs last and wins. Mirrors applyLang('en')
+  // minus the localStorage write: the viewer's own language preference must
+  // survive navigating to other patients. The flag toggle is hidden because
+  // there is no Portuguese rendering of this record to switch to.
+  function forceEnglish() {
+    document.documentElement.setAttribute('lang', 'en');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en][data-pt]'), function (el) {
+      var value = el.getAttribute('data-en');
+      if (value === null) return;
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = value;
+      else el.textContent = value;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.lang-btn'), function (btn) {
+      btn.setAttribute('aria-pressed', String(btn.getAttribute('data-lang') === 'en'));
+      btn.style.display = 'none';
+    });
+  }
+  forceEnglish();
+  document.addEventListener('DOMContentLoaded', forceEnglish);
 
   // ─── 1. Demographic text replacements ───────────────────────────
   // Operate on text nodes only so we don't touch markup or attrs.
