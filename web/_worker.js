@@ -245,6 +245,7 @@ async function serveNotFound(request, env, url) {
 
 const PAGE_RULES = [
   { re: /^\/mental(\.html)?$/, anyOf: ["mental"] },
+  { re: /^\/mental-clinical(\.html)?$/, anyOf: ["mental"] },
   { re: /^\/spiritual(\.html)?$/, anyOf: ["journal"] },
   { re: /^\/physical-exams(\.html)?$/, anyOf: ["imaging", "labs"] },
   { re: /^\/physical-vitals(\.html)?$/, anyOf: ["vitals"] },
