@@ -259,19 +259,9 @@
     <div id="evo-radar" style="margin-top:1.25rem;">
       <p style="margin:0 0 4px;"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> <span style="font-size:12px;color:var(--text-muted);"><span class="lang-en">Scored from your writing against a fixed rubric — not a self-assessment.</span><span class="lang-pt">Pontuado a partir da sua escrita contra uma régua fixa — não é autoavaliação.</span></span></p>
       <div id="evo-radar-plot" style="width:100%;max-width:640px;margin:0 auto;height:380px;"></div>
-      <div class="evo-chips" style="justify-content:center;">
-        <span class="evo-chip" style="border-color:var(--accent-petrol);color:var(--accent-petrol);">2015–16 · <span class="lang-en">then</span><span class="lang-pt">antes</span></span>
-        <span class="evo-chip" style="border-color:var(--accent-gold);color:var(--accent-gold);">2025–26 · <span class="lang-en">now</span><span class="lang-pt">agora</span></span>
-      </div>
-      <div class="evo-chips" style="justify-content:center;">
-        <span class="evo-chip">2015–16 · 10 <span class="lang-en">entries</span><span class="lang-pt">registros</span></span>
-        <span class="evo-chip">2017–18 · 83 <span class="lang-en">entries</span><span class="lang-pt">registros</span></span>
-        <span class="evo-chip evo-gap">2019–20 · —</span>
-        <span class="evo-chip evo-gap">2021–22 · —</span>
-        <span class="evo-chip">2023–24 · 73 <span class="lang-en">entries</span><span class="lang-pt">registros</span></span>
-        <span class="evo-chip">2025–26 · ~80 <span class="lang-en">entries</span><span class="lang-pt">registros</span></span>
-      </div>
-      <p style="text-align:center;font-size:11.5px;color:var(--text-muted);margin:6px 0 0;"><span class="lang-en">Two axes of the 2015–16 trace are open: not enough written evidence that early. The line exists only where you wrote.</span><span class="lang-pt">Dois eixos do traço 2015–16 ficam abertos: não há escrita suficiente tão cedo. A linha só existe onde você escreveu.</span></p>
+      <div class="evo-chips" style="justify-content:center;" id="evo-radar-legend"></div>
+      <div class="evo-chips" style="justify-content:center;" id="evo-epoch-chips"></div>
+      <p style="text-align:center;font-size:11.5px;color:var(--text-muted);margin:6px 0 0;"><span class="lang-en">Tap any written period to compare it. Axes without enough writing in a chosen period stay open, and unwritten periods cannot be chosen — the line exists only where you wrote.</span><span class="lang-pt">Toque em qualquer período escrito para compará-lo. Eixos sem escrita suficiente num período escolhido ficam abertos, e períodos não escritos não podem ser escolhidos — a linha só existe onde você escreveu.</span></p>
     </div>
 
     <!-- c. Dimension trails -->
@@ -329,7 +319,9 @@ window.JC_EVOLUTION = {
     { id:"body",           en:"Body",         pt:"Corpo",       scores:[null,2,null,null,1,3], ev:[0,2,0,0,2,4],
       delta_en:"Long at odds with the writer; lately reads more like an ally.", delta_pt:"Por muito tempo em conflito com quem escreve; ultimamente lê-se mais como aliado." }
   ],
-  thenEpoch: 0, nowEpoch: 5
+  thenEpoch: 0, nowEpoch: 5,
+  /* evidence-count labels for the epoch chips; null = unwritten gap (not selectable) */
+  epochEvidence: [10, 83, null, null, 73, "~80"]
 };
 </script>
 <script src="assets/app.js?v=36"></script>
@@ -341,7 +333,7 @@ window.JC_EVOLUTION = {
 <script src="assets/insights-update.js?v=4"></script>
 <script src="assets/upload-card.js?v=2"></script>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="assets/reflective-portrait.js?v=1"></script>
+<script src="assets/reflective-portrait.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="assets/export-pdf.js?v=5"></script>

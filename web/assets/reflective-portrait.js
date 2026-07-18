@@ -28,10 +28,20 @@
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
   }
 
-  /* ── Radar: earliest scored epoch vs latest ── */
+  /* ── Radar: two selected epochs (defaults: earliest scored vs latest).
+     Any epoch that carries scores is selectable via the chips below the
+     plot; unwritten bins have no scores and are never selectable. The
+     earlier of the two selections always renders petrol, the later gold. ── */
+  var selected = null; // [thenIdx, nowIdx], initialised from EV defaults
+  function scoredEpochs() {
+    return EV.epochs.map(function (_, i) { return i; }).filter(function (i) {
+      return EV.dims.some(function (d) { return d.scores[i] !== null; });
+    });
+  }
   function renderRadar() {
     var el = document.getElementById('evo-radar-plot');
     if (!el || !window.Plotly || !EV) return;
+    if (!selected) selected = [EV.thenEpoch, EV.nowEpoch];
     var L = lang();
     var petrol = cssVar('--accent-petrol', '#244E6E');
     var gold = cssVar('--accent-gold', '#B8860B');
@@ -48,10 +58,12 @@
         hovertemplate: '%{theta}: %{r}<extra>' + name + '</extra>'
       };
     }
+    var lo = Math.min(selected[0], selected[1]), hi = Math.max(selected[0], selected[1]);
     var data = [
-      trace(EV.thenEpoch, petrol, EV.epochs[EV.thenEpoch]),
-      trace(EV.nowEpoch, gold, EV.epochs[EV.nowEpoch])
+      trace(lo, petrol, EV.epochs[lo]),
+      trace(hi, gold, EV.epochs[hi])
     ];
+    renderRadarChips(lo, hi, petrol, gold);
     var layout = {
       polar: {
         radialaxis: { range: [0, 5], tickvals: [1, 2, 3, 4, 5], tickfont: { size: 9, family: 'IBM Plex Mono' }, gridcolor: 'rgba(62,124,163,0.15)', angle: 90, tickangle: 90 },
@@ -63,6 +75,52 @@
       font: { family: 'IBM Plex Sans, sans-serif' }
     };
     Plotly.newPlot(el, data, layout, { displayModeBar: false, responsive: true });
+  }
+
+  /* ── Radar legend + selectable epoch chips ── */
+  function renderRadarChips(lo, hi, petrol, gold) {
+    var L = lang();
+    var legend = document.getElementById('evo-radar-legend');
+    var chips = document.getElementById('evo-epoch-chips');
+    if (legend) {
+      legend.innerHTML = '';
+      [[lo, petrol, L === 'en' ? 'then' : 'antes'], [hi, gold, L === 'en' ? 'now' : 'agora']].forEach(function (t) {
+        var s = document.createElement('span');
+        s.className = 'evo-chip';
+        s.style.borderColor = t[1]; s.style.color = t[1];
+        s.textContent = EV.epochs[t[0]] + ' · ' + t[2];
+        legend.appendChild(s);
+      });
+    }
+    if (!chips) return;
+    chips.innerHTML = '';
+    var scorable = scoredEpochs();
+    EV.epochs.forEach(function (label, i) {
+      var ev = EV.epochEvidence ? EV.epochEvidence[i] : null;
+      var isGap = scorable.indexOf(i) === -1;
+      var el = document.createElement(isGap ? 'span' : 'button');
+      el.className = 'evo-chip' + (isGap ? ' evo-gap' : '');
+      el.textContent = label + ' · ' + (ev === null ? '—'
+        : ev + ' ' + (L === 'en' ? 'entries' : 'registros'));
+      if (!isGap) {
+        el.type = 'button';
+        el.style.cursor = 'pointer';
+        var active = (i === lo || i === hi);
+        el.setAttribute('aria-pressed', String(active));
+        if (active) {
+          var c = i === lo ? petrol : gold;
+          el.style.borderColor = c; el.style.color = '#fff'; el.style.background = c;
+        }
+        el.addEventListener('click', function () {
+          if (i === lo || i === hi) return; // both ends must stay populated
+          // replace whichever selected end is closer in time to the tap
+          if (Math.abs(i - lo) <= Math.abs(i - hi)) selected = [i, hi];
+          else selected = [lo, i];
+          renderRadar();
+        });
+      }
+      chips.appendChild(el);
+    });
   }
 
   /* ── Trails: one compact line per dimension; gaps break the line ── */
