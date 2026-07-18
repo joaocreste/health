@@ -225,7 +225,7 @@ const SCAN_OWNERS = [
    404 page with HTTP 404, never the marketing index.html (old soft-404). */
 const VALID_PAGES = new Set([
   "home", "physical", "physical-vitals", "physical-exams", "physical-genetics",
-  "mental", "spiritual", "patients", "admin", "account", "upload", "login",
+  "mental", "mental-clinical", "spiritual", "patients", "admin", "account", "upload", "login",
   "uploads-review", "log", "consult",
 ]);
 
