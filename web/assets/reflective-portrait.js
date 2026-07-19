@@ -139,22 +139,18 @@
     return svg;
   }
 
-  /* ── Loop groups + cards ── */
+  /* ── Loop cards, filled into the static valence group shells (labels are
+     static dual-span HTML so they survive without JS and in curl checks) ── */
   function renderLoops() {
     var wrap = document.getElementById('loop-groups');
     if (!wrap || !TR) return;
     var L = lang();
-    wrap.innerHTML = '';
-    ['sustaining', 'mixed', 'costly'].forEach(function (valence) {
+    wrap.querySelectorAll('.loop-group').forEach(function (g) {
+      var valence = g.getAttribute('data-valence');
       var loops = TR.loops.filter(function (l) { return l.valence === valence; });
-      if (!loops.length) return;
-      var g = document.createElement('div');
-      g.className = 'loop-group v-' + valence;
-      var h = document.createElement('h3');
-      h.textContent = GROUP_COPY[valence][L];
-      g.appendChild(h);
-      var cards = document.createElement('div');
-      cards.className = 'loop-cards';
+      var cards = g.querySelector('.loop-cards');
+      if (!cards) return;
+      cards.innerHTML = '';
       loops.forEach(function (loop) {
         var card = document.createElement('div');
         card.className = 'loop-card';
@@ -197,14 +193,6 @@
         card.appendChild(rtr);
         cards.appendChild(card);
       });
-      g.appendChild(cards);
-      if (valence !== 'sustaining') {
-        var a = document.createElement('p');
-        a.className = 'loop-agency';
-        a.textContent = GROUP_COPY.agency[L];
-        g.appendChild(a);
-      }
-      wrap.appendChild(g);
     });
     bindResponses();
   }
