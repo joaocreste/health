@@ -10,20 +10,9 @@
 <link rel="stylesheet" href="assets/styles.css?v=60">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <style>
-/* ── Reflective Portrait v2 — page-scoped components ── */
+/* ── Reflective Portrait v3 — triad-first, cards over prose ── */
 .prov-chip{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:999px;border:1px solid var(--blue-500);color:var(--accent-petrol);background:var(--blue-50);vertical-align:middle;}
 .prov-chip.prov-other{border-color:var(--accent-gold);color:var(--accent-gold);background:var(--accent-gold-soft);}
-.johari-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:1rem 0 0.5rem;}
-.johari-cell{border:1px solid rgba(62,124,163,.25);border-radius:10px;padding:14px 16px;background:#fff;display:block;text-decoration:none;color:inherit;}
-.johari-cell:hover{border-color:var(--blue-500);}
-.johari-cell .jh-count{font-family:Raleway,sans-serif;font-weight:700;font-size:26px;color:var(--accent-petrol);}
-.johari-cell h4{margin:2px 0 4px;font-size:14px;}
-.johari-cell p{margin:0;font-size:12.5px;line-height:1.5;color:var(--text-muted);}
-.rp-item{border:1px solid rgba(62,124,163,.22);border-radius:10px;background:#fff;padding:14px 16px;margin:0 0 12px;}
-.rp-item p.rp-content{margin:0 0 6px;font-size:14.5px;line-height:1.6;}
-.rp-item details{margin:4px 0 0;}
-.rp-item details summary{cursor:pointer;font-size:12px;color:var(--text-muted);}
-.rp-item .rp-evd{font-size:12.5px;color:var(--text-muted);font-style:italic;margin:6px 0 0;}
 .rtr{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px dashed rgba(62,124,163,.25);}
 .rtr .rtr-q{font-size:12px;color:var(--text-muted);margin-right:2px;}
 .rtr button{font-family:'IBM Plex Sans',sans-serif;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid rgba(62,124,163,.4);background:#fff;cursor:pointer;color:var(--text-default);}
@@ -31,6 +20,61 @@
 .rtr textarea{width:100%;min-height:54px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;padding:8px;border:1px solid rgba(62,124,163,.35);border-radius:8px;display:none;}
 .rtr.rtr-noting textarea{display:block;}
 .rtr .rtr-saved{font-size:11.5px;color:var(--accent-petrol);display:none;}
+.mp-card{border:1px solid rgba(62,124,163,.22);border-radius:12px;background:#fff;padding:16px 18px;}
+.mp-strip{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);margin:.5rem 0 0;}
+.mp-strip .mp-legend{display:inline-flex;gap:8px;align-items:center;font-size:11px;}
+/* identity */
+.arch-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:center;}
+@media (max-width:560px){.arch-grid{grid-template-columns:1fr;}}
+.arch-name{font-family:Raleway,sans-serif;font-weight:700;font-size:30px;margin:0;}
+.arch-essence{font-size:14.5px;line-height:1.6;margin:6px 0 0;}
+.arch-shadow{font-size:13px;line-height:1.55;color:var(--text-muted);margin:8px 0 0;}
+.arch-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.arch-chips details{display:inline-block;}
+.arch-chips summary{list-style:none;cursor:pointer;}
+.arch-chips summary::-webkit-details-marker{display:none;}
+.arch-chips .chip-pop{font-size:12px;font-style:italic;color:var(--text-muted);margin:4px 0 0;max-width:420px;}
+/* resources */
+.res-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:640px){.res-cols{grid-template-columns:1fr;}}
+.res-col{border:1px solid rgba(62,124,163,.22);border-radius:12px;background:#fff;padding:12px 14px;border-top:3px solid var(--green-500,#3D9460);}
+.res-col.res-edges{border-top-color:var(--amber-600,#B8860B);}
+.res-col h3{font-size:15px;margin:0 0 8px;}
+.res-col details{border-bottom:1px dashed rgba(62,124,163,.18);padding:6px 0;}
+.res-col details:last-child{border-bottom:none;}
+.res-col summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.res-col summary::-webkit-details-marker{display:none;}
+.res-label{font-size:13.5px;font-weight:600;flex:1 1 auto;}
+.res-bar{height:4px;border-radius:2px;background:var(--green-200,#B0DEBE);flex:0 0 64px;position:relative;overflow:hidden;}
+.res-edges .res-bar{background:var(--amber-200,#F5E0A3);}
+.res-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--green-600,#2D7A4C);border-radius:2px;}
+.res-edges .res-bar i{background:var(--amber-700,#8a6508);}
+.res-evd{font-size:12.5px;font-style:italic;color:var(--text-muted);margin:6px 0 0;}
+.jh-chip{font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid rgba(62,124,163,.35);color:var(--text-muted);}
+/* loops */
+.loop-groups{display:flex;flex-direction:column;gap:16px;}
+.loop-group{border-radius:12px;padding:12px 14px;border:1px solid;border-left-width:4px;}
+.loop-group.v-sustaining{border-color:var(--green-200,#B0DEBE);border-left-color:var(--green-500,#3D9460);background:var(--green-50,#EEF8F1);}
+.loop-group.v-mixed{border-color:var(--amber-200,#F5E0A3);border-left-color:var(--amber-600,#B8860B);background:var(--amber-50,#FDF8EC);}
+.loop-group.v-costly{border-color:#F2C9C9;border-left-color:#B54747;background:#FBF0F0;}
+.loop-group h3{font-size:15px;margin:0 0 10px;}
+.loop-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;}
+.loop-card{background:#fff;border:1px solid rgba(62,124,163,.18);border-radius:10px;padding:10px 12px;}
+.loop-card h4{font-size:13.5px;margin:0 0 4px;}
+.loop-svg{width:100%;max-width:210px;margin:0 auto;display:block;}
+.loop-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;}
+.loop-strip{display:flex;gap:5px;align-items:center;margin-top:6px;}
+.loop-strip .dot{border-radius:50%;background:var(--accent-petrol);display:inline-block;}
+.loop-strip .dot.empty{width:5px;height:5px;background:transparent;border:1px dashed rgba(62,124,163,.5);}
+.loop-strip .ep{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);}
+.loop-agency{font-size:12px;color:var(--text-muted);margin:10px 0 0;}
+.loop-card details summary{font-size:11.5px;color:var(--text-muted);cursor:pointer;}
+/* deeper + evolution reuse */
+.mp-deeper details.mp-acc{border:1px solid rgba(62,124,163,.22);border-radius:10px;background:#fff;padding:10px 14px;margin-bottom:10px;}
+.mp-deeper summary{cursor:pointer;font-size:14px;font-weight:600;}
+.mp-deeper .acc-item{border-bottom:1px dashed rgba(62,124,163,.18);padding:8px 0;font-size:13.5px;line-height:1.55;}
+.mp-deeper .acc-item:last-child{border-bottom:none;}
+.johari-mini{max-width:260px;margin:8px auto 0;display:block;}
 .evo-frame{border-top:2px solid var(--accent-gold);margin-top:1.5rem;padding-top:1.25rem;}
 .evo-ribbon{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 10px;}
 .evo-chapter{min-width:210px;flex:1;border:1px solid rgba(62,124,163,.25);border-left:3px solid var(--accent-petrol);border-radius:10px;background:#fff;padding:12px 14px;}
@@ -48,7 +92,7 @@
 .tn-pair .tn-q{font-style:italic;font-size:14.5px;line-height:1.6;margin:2px 0;}
 .tn-pair .tn-d{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);}
 .tn-arrow{color:var(--accent-gold);font-weight:700;padding:0 4px;}
-@media (max-width:480px){.johari-grid{grid-template-columns:1fr 1fr;}.evo-chapter{min-width:170px;}}
+.rp-evd{font-size:12.5px;color:var(--text-muted);font-style:italic;margin:6px 0 0;}
 </style>
 </head>
 <body class="has-side-nav">
@@ -74,217 +118,184 @@
 
 </nav>
 
-<!-- 01 HERO — nothing renders above this -->
+<!-- 1 HERO — nothing renders above this -->
 <header class="page-header">
   <div class="container">
     <div class="page-eyebrow">Section II · Reflective portrait</div>
-    <h1 class="page-title"><span class="lang-en">Reflective Portrait · 17 July 2026</span><span class="lang-pt">Retrato Reflexivo · 17 de julho de 2026</span></h1>
-    <p class="page-desc"><span class="lang-en">Drawn from your own words and the people who know you.</span><span class="lang-pt">Desenhado a partir das suas próprias palavras e das pessoas que conhecem você.</span></p>
+    <h1 class="page-title"><span class="lang-en">Reflective Portrait · 19 July 2026</span><span class="lang-pt">Retrato Reflexivo · 19 de julho de 2026</span></h1>
+    <p class="page-desc"><span class="lang-en">Drawn from your own words and the people who know you.</span><span class="lang-pt">Feito das suas próprias palavras e das pessoas que te conhecem.</span></p>
   </div>
 </header>
 
-<!-- 02 GLOBAL FRAMING NOTE -->
+<!-- 2 FRAMING STRIP -->
 <div class="container">
-  <div class="ai-disclaimer">
-    <span class="lang-en">This is a reflective portrait, not a diagnosis. It belongs to you: every card can be answered, questioned, or removed at your request. Blocks marked <strong><span class="ai-pill">AI</span></strong> are a synthesis offered for reflection — a reading, not ground truth. Attributed words are exactly that: the words of the person named. The <a href="mental-clinical.html">clinical record view</a> remains available for conversations with your care team.</span>
-    <span class="lang-pt">Este é um retrato reflexivo, não um diagnóstico. Ele pertence a você: cada cartão pode ser respondido, questionado ou removido a seu pedido. Blocos com o selo <strong><span class="ai-pill">IA</span></strong> são uma síntese oferecida para reflexão — uma leitura, não uma verdade absoluta. Palavras atribuídas são exatamente isso: as palavras da pessoa nomeada. A <a href="mental-clinical.html">visão de registro clínico</a> continua disponível para conversas com a sua equipe de cuidado.</span>
+  <div class="mp-strip">
+    <span><span class="lang-en">A mirror, not a diagnosis — respond to anything.</span><span class="lang-pt">Um espelho, não um diagnóstico — responda a qualquer item.</span></span>
+    <span class="mp-legend"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> = <span class="lang-en">synthesis</span><span class="lang-pt">síntese</span></span>
+    <span class="mp-legend">◦ <span class="lang-en">= someone's words</span><span class="lang-pt">= palavras de alguém</span></span>
+    <span class="mp-legend">✎ <span class="lang-en">= your words</span><span class="lang-pt">= suas palavras</span></span>
   </div>
 </div>
 
-<!-- 03 JOHARI OVERVIEW -->
-<section class="report-section" id="johari">
+<!-- 3 IDENTITY -->
+<section class="report-section" id="mp-identity">
   <div class="container">
-    <div class="section-label"><span class="lang-en">The window</span><span class="lang-pt">A janela</span></div>
-    <h2 class="section-title"><span class="lang-en">Four ways of being seen</span><span class="lang-pt">Quatro formas de ser visto</span></h2>
-    <p class="section-desc"><span class="lang-en">The portrait is arranged as a Johari window: what you and others both see, what only others see, what only you have written, and what is offered as a reading.</span><span class="lang-pt">O retrato está organizado como uma janela de Johari: o que você e os outros veem, o que só os outros veem, o que só você escreveu, e o que é oferecido como leitura.</span></p>
-    <div class="johari-grid">
-      <a class="johari-cell" href="#strengths-others"><span class="jh-count">15</span><h4><span class="lang-en">Open</span><span class="lang-pt">Aberto</span></h4><p><span class="lang-en">Seen by you and by the people who know you — named on both sides.</span><span class="lang-pt">Visto por você e por quem conhece você — nomeado dos dois lados.</span></p></a>
-      <a class="johari-cell" href="#growth-edges"><span class="jh-count">1</span><h4><span class="lang-en">Blind spot</span><span class="lang-pt">Ponto cego</span></h4><p><span class="lang-en">Named only by someone close to you — perspective, not verdict.</span><span class="lang-pt">Nomeado apenas por alguém próximo — perspectiva, não veredito.</span></p></a>
-      <a class="johari-cell" href="#values"><span class="jh-count">9</span><h4><span class="lang-en">Hidden</span><span class="lang-pt">Oculto</span></h4><p><span class="lang-en">Present in your writing, not yet named by others.</span><span class="lang-pt">Presente na sua escrita, ainda não nomeado por outros.</span></p></a>
-      <a class="johari-cell" href="#themes"><span class="jh-count">9</span><h4><span class="lang-en">Emerging</span><span class="lang-pt">Emergente</span></h4><p><span class="lang-en">Proposed by synthesis for you to keep or discard.</span><span class="lang-pt">Proposto pela síntese, para você guardar ou descartar.</span></p></a>
-    </div>
-  </div>
-</section>
-
-<!-- 04 STRENGTHS OTHERS SEE -->
-<section class="report-section" id="strengths-others">
-  <div class="container">
-    <div class="section-label"><span class="lang-en">Strengths others see in you</span><span class="lang-pt">Fortalezas que os outros veem em você</span></div>
-    <h2 class="section-title"><span class="lang-en">Silvana, who has known you your whole life, sees…</span><span class="lang-pt">Silvana, que conhece você a vida inteira, vê…</span></h2>
-    <p class="section-desc"><span class="prov-chip prov-other"><span class="lang-en">From Silvana's account · 15 Jul 2026</span><span class="lang-pt">Do relato de Silvana · 15/07/2026</span></span></p>
-
-    <div class="rp-item" data-item-key="joao-v2-oth-str-01"><p class="rp-content"><span class="lang-en">Charisma that lands everywhere — charismatic, peaceful, popular wherever he goes. He says the same of himself: loving people, jokes, quality time is "this is me".</span><span class="lang-pt">Um carisma que chega a todo lugar — carismático, pacífico e popular por onde passa. Ele diz o mesmo de si: amar pessoas, piadas, tempo de qualidade — "isso sou eu".</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "carismática, pacífica e popular em todo lugar onde passa" · The Book 2017: "I love people… This is me."</p></details><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-str-02"><p class="rp-content"><span class="lang-en">Care expressed in the details — gentle, sensitive, watchful of the family's well-being, attentive to detail and to making things beautiful.</span><span class="lang-pt">Cuidado expresso nos detalhes — gentil, sensível, atento ao bem-estar da família, aos detalhes e a fazer as coisas ficarem bonitas.</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "gentil, sensível… atento a detalhes e à ornamentação"</p></details><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-str-03"><p class="rp-content"><span class="lang-en">Responsibility and discipline as core equipment — she names them as lifelong traits; his writing shows them returning to daily life.</span><span class="lang-pt">Responsabilidade e disciplina como equipamento de base — ela as nomeia como traços de vida inteira; a escrita dele as mostra voltando ao cotidiano.</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "Extremamente responsável e disciplinado"</p></details><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-str-04"><p class="rp-content"><span class="lang-en">Challenge-driven — routine does not move him; challenges do. His own words: curiosity, adventure, making a difference.</span><span class="lang-pt">Movido a desafios — a rotina não o move; desafios sim. Nas palavras dele: curiosidade, aventura, fazer diferença.</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "não se motiva por atividades de rotina, mas por desafios" · The Book 2017: "I am curious. I like the adventure."</p></details><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-str-05"><p class="rp-content"><span class="lang-en">The return she sees today — dreams coming back, self-care, attention to people and things around him, focus on building what he loves and believes in.</span><span class="lang-pt">O retorno que ela vê hoje — os sonhos voltando, o autocuidado, a atenção às pessoas e às coisas ao redor, o foco em construir aquilo em que acredita.</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "Vejo o João Victor voltando à sua identidade…"</p></details><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-str-06"><p class="rp-content"><span class="lang-en">An essence that never left — in her words, he never lost it; he only lost his way for a stretch, and everything inside is intact.</span><span class="lang-pt">Uma essência que nunca se foi — nas palavras dela, ele nunca a perdeu; apenas se perdeu por um trecho do caminho, e o conteúdo está todo íntegro.</span></p><details><summary><span class="lang-en">Source</span><span class="lang-pt">Fonte</span></summary><p class="rp-evd">Mother, 15 Jul 2026: "Ele nunca perdeu a sua essência… o seu conteúdo está todo íntegro."</p></details><div class="rtr"></div></div>
-  </div>
-</section>
-
-<!-- 05 GROWTH EDGES -->
-<section class="report-section" id="growth-edges" style="background:var(--blue-50);">
-  <div class="container">
-    <div class="section-label"><span class="lang-en">Growth edges</span><span class="lang-pt">Bordas de crescimento</span></div>
-    <h2 class="section-title"><span class="lang-en">Perspective, not verdict</span><span class="lang-pt">Perspectiva, não veredito</span></h2>
-    <p class="section-desc"><span class="lang-en">What someone who loves you still watches with care. Each card asks for your answer — agreeing is not required.</span><span class="lang-pt">O que alguém que ama você ainda observa com cuidado. Cada cartão pede a sua resposta — concordar não é obrigatório.</span></p>
-
-    <div class="rp-item" data-item-key="joao-v2-oth-gro-01"><p class="rp-content"><span class="prov-chip prov-other"><span class="lang-en">From Silvana's account</span><span class="lang-pt">Do relato de Silvana</span></span><br><span class="lang-en">Acting on the moment — she still worries about impulsivity and self-control: acting immediately and possibly regretting it. His own record names episodes that rhyme with this.</span><span class="lang-pt">Agir no impulso — ela ainda se preocupa com a impulsividade e o autocontrole: agir de imediato e talvez se arrepender. O próprio registro dele nomeia episódios que rimam com isso.</span></p><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-gro-02"><p class="rp-content"><span class="prov-chip prov-other"><span class="lang-en">From Silvana's account · only she names this</span><span class="lang-pt">Do relato de Silvana · só ela nomeia isto</span></span><br><span class="lang-en">Shopping to fill the void — she notices him often trying to fill the emotional void with purchases. Nothing in his own writing names this channel; only she sees it.</span><span class="lang-pt">Compras para preencher o vazio — ela percebe que muitas vezes ele tenta preencher o vazio emocional com compras. Nada na escrita dele nomeia esse canal; só ela o vê.</span></p><div class="rtr"></div></div>
-    <div class="rp-item" data-item-key="joao-v2-oth-gro-03"><p class="rp-content"><span class="prov-chip prov-other"><span class="lang-en">From Silvana's account</span><span class="lang-pt">Do relato de Silvana</span></span><br><span class="lang-en">Permission to be human — "João needs to realise that he is human, and not a superhero." Nine years earlier he wrote the same discovery himself: "on the phone I become the superhero Joao, but this is not me."</span><span class="lang-pt">Permissão para ser humano — "O João precisa perceber que é humano — e não um super-herói." Nove anos antes, ele mesmo escreveu a mesma descoberta: "viro o super-herói João no telefone, mas isso não sou eu."</span></p><div class="rtr"></div></div>
-  </div>
-</section>
-
-<!-- 06 WHAT MATTERS TO YOU -->
-<section class="report-section" id="values">
-  <div class="container">
-    <div class="section-label"><span class="lang-en">What matters to you</span><span class="lang-pt">O que importa para você</span></div>
-    <h2 class="section-title"><span class="lang-en">The things your writing keeps returning to</span><span class="lang-pt">As coisas às quais a sua escrita sempre volta</span></h2>
-    <p class="section-desc"><span class="prov-chip"><span class="lang-en">From your words</span><span class="lang-pt">Das suas palavras</span></span></p>
-
-    <div class="two-col">
+    <div class="section-label"><span class="lang-en">Identity</span><span class="lang-pt">Identidade</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
+    <div class="mp-card arch-grid" data-item-key="joao-v3-archetype">
+      <div id="arch-wheel"></div>
       <div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-01"><p class="rp-content"><span class="lang-en"><strong>Faith that carries</strong> — not decoration but load-bearing: "my life does not belong to me." The hardest nights end when the situation is handed over.</span><span class="lang-pt"><strong>Fé que sustenta</strong> — não é enfeite, é estrutura: "a minha vida não me pertence." As noites mais difíceis terminam quando a situação é entregue.</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-02"><p class="rp-content"><span class="lang-en"><strong>Family as ground</strong> — "If today I am standing, it is because one day I had parents on their knees." Small family, strong bonds, cousins loved as siblings.</span><span class="lang-pt"><strong>Família como chão</strong> — "Se hoje estou de pé, é porque um dia tive pais de joelhos." Família pequena, laços fortes, primos amados como irmãos.</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-03"><p class="rp-content"><span class="lang-en"><strong>Music as first language</strong> — a childhood friend of 88 keys; "the way God gave me to communicate in my deepest inner being, to Him and others."</span><span class="lang-pt"><strong>Música como primeira língua</strong> — um amigo de infância de 88 teclas; "o jeito que Deus me deu de comunicar meu ser mais profundo, a Ele e aos outros."</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-04"><p class="rp-content"><span class="lang-en"><strong>Building things that matter</strong> — the sandcastle builder who spends days preparing; now aimed at a venture that turns scattered health data into care.</span><span class="lang-pt"><strong>Construir coisas que importam</strong> — o construtor de castelos de areia que passa dias preparando; agora voltado a uma empresa que transforma dados de saúde dispersos em cuidado.</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-05"><p class="rp-content"><span class="lang-en"><strong>Telling the truth publicly</strong> — a letter of accountability sent to friends and family, and blunt answers when blunt questions are asked.</span><span class="lang-pt"><strong>Dizer a verdade publicamente</strong> — uma carta de responsabilização enviada a amigos e família, e respostas diretas quando as perguntas são diretas.</span></p><div class="rtr"></div></div>
-      </div>
-      <div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-06"><p class="rp-content"><span class="lang-en"><strong>Between languages, whole</strong> — "English speaks to my heart and brain, Portuguese speaks to my relational being."</span><span class="lang-pt"><strong>Inteiro entre línguas</strong> — "O inglês fala ao meu coração e cérebro, o português fala ao meu ser relacional."</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-07"><p class="rp-content"><span class="lang-en"><strong>Made for people</strong> — "I am not made to be alone", stated as a certainty to be reminded of, not a fear. She has known it all along.</span><span class="lang-pt"><strong>Feito para pessoas</strong> — "não fui feito para ficar sozinho", dito como certeza a ser lembrada, não como medo. Ela sempre soube.</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-self-val-08"><p class="rp-content"><span class="lang-en"><strong>Choosing aliveness</strong> — "I hate the numbness… I do not want it, and I will not lose this." Warmth over safety, feeling over anesthesia, named as a commitment.</span><span class="lang-pt"><strong>Escolher estar vivo</strong> — "Odeio a anestesia… não quero isso, e não vou perder isto." Calor em vez de segurança, sentir em vez de anestesiar, nomeado como compromisso.</span></p><div class="rtr"></div></div>
-        <div class="rp-item" data-item-key="joao-v2-oth-val-01"><p class="rp-content"><span class="prov-chip prov-other"><span class="lang-en">From Silvana's account</span><span class="lang-pt">Do relato de Silvana</span></span><br><span class="lang-en"><strong>Tears as evidence of values</strong> — her reading: only those who carry pain cry, and only those with principles carry that kind of pain. His own arc agrees: the crying ends in surrender and rest.</span><span class="lang-pt"><strong>Lágrimas como evidência de valores</strong> — a leitura dela: só chora quem tem dor, e só carrega essa dor quem tem princípios. O arco dele concorda: o choro termina em entrega e descanso.</span></p><div class="rtr"></div></div>
+        <h2 class="arch-name"><span class="lang-en">The Hero</span><span class="lang-pt">O Herói</span> <span class="jh-chip" style="font-family:'IBM Plex Sans';"><span class="lang-en">+ The Creator</span><span class="lang-pt">+ O Criador</span></span></h2>
+        <p class="arch-essence"><span class="lang-en">The one who meets adversity head-on and returns marked — courage as a refusal to look away: from the wound, the failure, or the climb back.</span><span class="lang-pt">Aquele que enfrenta a adversidade de frente e volta marcado — coragem como recusa de desviar o olhar: da ferida, do fracasso, da subida de volta.</span></p>
+        <p class="arch-shadow"><span class="lang-en"><strong>Shadow side:</strong> worth proven through relentless struggle; rest reads as failure, and asking for help feels like defeat.</span><span class="lang-pt"><strong>Lado sombra:</strong> o valor provado na luta incessante; descansar soa como fracasso, e pedir ajuda parece derrota.</span></p>
+        <div class="arch-chips">
+          <details><summary class="jh-chip">✎ 2017</summary><p class="chip-pop">"On the phone I become the superhero Joao, but this is not me." — The Book, 2017</p></details>
+          <details><summary class="jh-chip">◦ Silvana · 15 Jul 2026</summary><p class="chip-pop">"O João precisa perceber que é humano — e não um super-herói."</p></details>
+          <details><summary class="jh-chip">✎ <span class="lang-en">therapy</span><span class="lang-pt">terapia</span> · 3 Jul 2026</summary><p class="chip-pop">"I don't allow myself to need anything… I'm acting like the god of my own life."</p></details>
+          <span class="jh-chip"><span class="lang-en">confidence: high</span><span class="lang-pt">confiança: alta</span></span>
+        </div>
+        <p class="arch-shadow" style="margin-top:6px;"><span class="lang-en">A lens, not a verdict.</span><span class="lang-pt">Uma lente, não um veredito.</span></p>
+        <div class="rtr"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 07 RECURRING THEMES -->
-<section class="report-section" id="themes" style="background:var(--blue-50);">
+<!-- 4 RESOURCES -->
+<section class="report-section" id="mp-resources">
   <div class="container">
-    <div class="section-label"><span class="lang-en">Recurring themes</span><span class="lang-pt">Temas recorrentes</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
-    <h2 class="section-title"><span class="lang-en">Threads that run through eleven years of writing</span><span class="lang-pt">Fios que atravessam onze anos de escrita</span></h2>
-    <p class="section-desc"><span class="lang-en">A synthesis, offered for reflection. Open each thread only if you want to.</span><span class="lang-pt">Uma síntese, oferecida para reflexão. Abra cada fio apenas se quiser.</span></p>
-
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-01"><summary><strong><span class="lang-en">The superhero and the mask</span><span class="lang-pt">O super-herói e a máscara</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">A nine-year thread: the 2017 "very good mask" and "superhero Joao", the 2026 question "why do I only feel like a person when I'm performing one", and his mother's closing line about being human. The mask is named by both of them.</span><span class="lang-pt">Um fio de nove anos: a "máscara muito boa" e o "super-herói João" de 2017, a pergunta de 2026 "por que eu só me sinto uma pessoa quando estou interpretando uma", e a frase final da mãe sobre ser humano. A máscara é nomeada pelos dois.</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-02"><summary><strong><span class="lang-en">Anesthesia as an old ally</span><span class="lang-pt">A anestesia como velha aliada</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">2014: "pain had found its most powerful rival: anesthesia. And it worked." 2026: "I've been looking for anesthesia instead of resolution" and "anesthesia is not negentropic." The writing traces the ally becoming the pattern, and the pattern being renounced.</span><span class="lang-pt">2014: "a dor encontrou seu rival mais poderoso: a anestesia. E funcionou." 2026: "tenho buscado anestesia em vez de resolução" e "anestesia não é negentrópica." A escrita traça a aliada virando padrão, e o padrão sendo renunciado.</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-03"><summary><strong><span class="lang-en">Worth measured in output</span><span class="lang-pt">Valor medido em produção</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">2017: "I lift myself up in a meeting to get a well done." 2026: worth felt as conditional on producing, and rest reads as worthlessness. The sentence he chose to carry forward: "why do I only feel like a person when I'm performing one."</span><span class="lang-pt">2017: "me levanto numa reunião para ganhar um muito bem." 2026: o valor sentido como condicionado a produzir, e o descanso lido como falta de valor. A frase que ele escolheu levar adiante: "por que eu só me sinto uma pessoa quando estou interpretando uma."</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-04"><summary><strong><span class="lang-en">The lone captain</span><span class="lang-pt">O capitão solitário</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">A 2017 dream: a boat where "there is only space for one captain… on this boat you will be alone." In 2026 he writes its waking form: "The way I try — alone, from above, with white knuckles — that is the failure." The image and the insight are nine years apart and say the same thing.</span><span class="lang-pt">Um sonho de 2017: um barco onde "só há espaço para um capitão… neste barco você estará sozinho." Em 2026 ele escreve a forma desperta disso: "O jeito como eu tento — sozinho, de cima, com os nós dos dedos brancos — essa é a falha." A imagem e o insight, com nove anos de distância, dizem a mesma coisa.</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-05"><summary><strong><span class="lang-en">The borrowed verdict</span><span class="lang-pt">O veredito emprestado</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">Guilt that arrived as someone else's sentence and was believed as total truth. The writing distinguishes what was his to own from what was handed to him, and records permission arriving from outside — "You are not guilty, Joao" (2017) — and from himself: "Enough guilt — I want my right to freedom" (2026).</span><span class="lang-pt">Uma culpa que chegou como sentença de outra pessoa e foi acreditada como verdade total. A escrita distingue o que era dele daquilo que lhe foi entregue, e registra a permissão vindo de fora — "Você não tem culpa, João" (2017) — e dele mesmo: "Chega de culpa — quero meu direito à liberdade" (2026).</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-06"><summary><strong><span class="lang-en">Writing as the unmasking place</span><span class="lang-pt">A escrita como o lugar de tirar a máscara</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">"I discovered that, by writing, I can take off the mask" (2017). The habit held: eleven years of journals, letters and essays are where the private voice lives — including this page's own sources.</span><span class="lang-pt">"Descobri que, escrevendo, consigo tirar a máscara" (2017). O hábito permaneceu: onze anos de diários, cartas e ensaios são onde a voz privada mora — incluindo as fontes desta própria página.</span></p><div class="rtr"></div></details>
-    <details class="rp-item" data-item-key="joao-v2-ai-thm-07"><summary><strong><span class="lang-en">The inherited pattern, seen in time</span><span class="lang-pt">O padrão herdado, visto a tempo</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="rp-content" style="margin-top:8px;"><span class="lang-en">Building his father's health report, he recognized the same graying he saw in his father beginning in himself, and chose to say it out loud before it settled. Naming it is the difference.</span><span class="lang-pt">Ao construir o relatório de saúde do pai, reconheceu em si o mesmo acinzentar que via no pai, e escolheu dizê-lo em voz alta antes que assentasse. Nomear é a diferença.</span></p><div class="rtr"></div></details>
-  </div>
-</section>
-
-<!-- 08 A JUNGIAN LENS -->
-<section class="report-section" id="jungian">
-  <div class="container">
-    <div class="section-label"><span class="lang-en">A Jungian lens</span><span class="lang-pt">Uma lente junguiana</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
-    <h2 class="section-title"><span class="lang-en">One way to read this</span><span class="lang-pt">Uma forma de ler isto</span></h2>
-    <details class="rp-item" data-item-key="joao-v2-ai-jng-01"><summary><span class="lang-en">Open the reading</span><span class="lang-pt">Abrir a leitura</span> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary>
-      <p class="rp-content" style="margin-top:8px;"><span class="lang-en">The "superhero" is a persona — a brilliant, useful costume that got stuck ("it ended up stuck to my face"). The anesthetic years read as time in the shadow, where what was unlived waited. The recurring dream-image of the solitary captain may be the psyche picturing its own arrangement — one commander, no crew — and the July warmth, arriving unforced and guilt-free, reads like the return of feeling to parts of life that had gone gray. In this reading, his own sentence is the program: "Identity is the discipline of holding paradoxes without resolving them prematurely."</span><span class="lang-pt">O "super-herói" é uma persona — uma fantasia brilhante e útil que ficou colada ("acabou grudada no meu rosto"). Os anos de anestesia leem-se como tempo na sombra, onde o não-vivido esperava. A imagem recorrente do capitão solitário talvez seja a psique retratando o próprio arranjo — um comandante, nenhuma tripulação — e o calor de julho, chegando sem esforço e sem culpa, lê-se como o retorno do sentir a partes da vida que haviam ficado cinzas. Nessa leitura, a frase dele mesmo é o programa: "Identidade é a disciplina de sustentar paradoxos sem resolvê-los prematuramente."</span></p>
-      <p class="rp-evd"><span class="lang-en">A lens, not a fact — dismiss it freely if it does not serve you.</span><span class="lang-pt">Uma lente, não um fato — descarte livremente se não servir a você.</span></p><div class="rtr"></div></details>
-  </div>
-</section>
-
-<!-- 09 RECOMMENDED READING -->
-<section class="report-section" id="reading" style="background:var(--blue-50);">
-  <div class="container">
-    <div class="section-label"><span class="lang-en">Recommended reading</span><span class="lang-pt">Leituras sugeridas</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
-    <h2 class="section-title"><span class="lang-en">Curiosity, not prescription</span><span class="lang-pt">Curiosidade, não prescrição</span></h2>
-    <div class="two-col">
-      <div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en"><strong>Viktor Frankl — Man's Search for Meaning.</strong> For someone who already writes "the wanting is quiet and stubborn": meaning found inside suffering rather than after it.</span><span class="lang-pt"><strong>Viktor Frankl — Em Busca de Sentido.</strong> Para quem já escreve "o querer é quieto e teimoso": sentido encontrado dentro do sofrimento, não depois dele.</span></p></div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en"><strong>Henri Nouwen — The Return of the Prodigal Son.</strong> A meditation on Rembrandt's painting, in his own faith register: sonship, second chances, and the harder task of receiving love.</span><span class="lang-pt"><strong>Henri Nouwen — A Volta do Filho Pródigo.</strong> Uma meditação sobre o quadro de Rembrandt, no registro de fé dele: filiação, segundas chances e a tarefa mais difícil de receber amor.</span></p></div>
+    <div class="section-label"><span class="lang-en">Resources</span><span class="lang-pt">Recursos</span></div>
+    <div class="res-cols">
+      <div class="res-col">
+        <h3><span class="lang-en">Strengths</span><span class="lang-pt">Forças</span></h3>
+        <details data-item-key="joao-v2-oth-str-01"><summary><span class="res-label"><span class="lang-en">Charisma that lands everywhere</span><span class="lang-pt">Carisma que chega a todo lugar</span></span><span class="res-bar"><i style="width:90%"></i></span><span class="jh-chip">◦ ✎</span></summary><p class="res-evd">"popular em todo lugar onde passa" — Silvana · "I love people… this is me" — 2017</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-str-03"><summary><span class="res-label"><span class="lang-en">Responsibility and discipline</span><span class="lang-pt">Responsabilidade e disciplina</span></span><span class="res-bar"><i style="width:80%"></i></span><span class="jh-chip">◦ ✎</span></summary><p class="res-evd">"Extremamente responsável e disciplinado" — Silvana, 15 Jul 2026</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-str-02"><summary><span class="res-label"><span class="lang-en">Care expressed in details</span><span class="lang-pt">Cuidado expresso nos detalhes</span></span><span class="res-bar"><i style="width:70%"></i></span><span class="jh-chip">◦</span></summary><p class="res-evd">"gentil, sensível… atento a detalhes e à ornamentação" — Silvana</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-str-06"><summary><span class="res-label"><span class="lang-en">An essence that never left</span><span class="lang-pt">Uma essência que nunca se foi</span></span><span class="res-bar"><i style="width:65%"></i></span><span class="jh-chip">◦</span></summary><p class="res-evd">"Ele nunca perdeu a sua essência… está todo íntegro" — Silvana</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-str-04"><summary><span class="res-label"><span class="lang-en">Moved by challenges</span><span class="lang-pt">Movido a desafios</span></span><span class="res-bar"><i style="width:60%"></i></span><span class="jh-chip">◦ ✎</span></summary><p class="res-evd">"não se motiva por rotina, mas por desafios" — Silvana · "I like the adventure" — 2017</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
       </div>
-      <div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en"><strong>Rainer Maria Rilke — Letters to a Young Poet.</strong> On living the questions and being patient with everything unresolved — close cousin to his own line about holding paradoxes.</span><span class="lang-pt"><strong>Rainer Maria Rilke — Cartas a um Jovem Poeta.</strong> Sobre viver as perguntas e ter paciência com o que não se resolveu — primo próximo da frase dele sobre sustentar paradoxos.</span></p></div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en"><strong>Brené Brown — Daring Greatly.</strong> On the exact trade he described on July 17: being seen without the curated version, and surviving the possibility of no.</span><span class="lang-pt"><strong>Brené Brown — A Coragem de Ser Imperfeito.</strong> Sobre a troca exata que ele descreveu em 17 de julho: ser visto sem a versão curada, e sobreviver à possibilidade do não.</span></p></div>
+      <div class="res-col res-edges">
+        <h3><span class="lang-en">Growth edges</span><span class="lang-pt">Frentes de crescimento</span> <span class="jh-chip"><span class="lang-en">perspective, not verdict</span><span class="lang-pt">perspectiva, não veredito</span></span></h3>
+        <details data-item-key="joao-v2-oth-gro-03"><summary><span class="res-label"><span class="lang-en">Permission to be human</span><span class="lang-pt">Permissão para ser humano</span></span><span class="res-bar"><i style="width:85%"></i></span><span class="jh-chip">◦ ✎</span></summary><p class="res-evd">"humano — e não um super-herói" — Silvana · "this is not me" — 2017</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-ai-thm-03"><summary><span class="res-label"><span class="lang-en">Resting without proving</span><span class="lang-pt">Descansar sem provar</span></span><span class="res-bar"><i style="width:75%"></i></span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="res-evd"><span class="lang-en">"why do I only feel like a person when I'm performing one" — 3 Jul 2026</span><span class="lang-pt">"por que só me sinto uma pessoa quando estou interpretando uma" — 03/07/2026</span></p><span class="jh-chip"><span class="lang-en">AI-proposed</span><span class="lang-pt">Proposto pela IA</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-ai-thm-04"><summary><span class="res-label"><span class="lang-en">Letting others carry</span><span class="lang-pt">Deixar os outros carregarem</span></span><span class="res-bar"><i style="width:75%"></i></span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary><p class="res-evd"><span class="lang-en">"The way I try — alone, from above — that is the failure." — 19 Apr 2026</span><span class="lang-pt">"O jeito como tento — sozinho, de cima — essa é a falha." — 19/04/2026</span></p><span class="jh-chip"><span class="lang-en">AI-proposed</span><span class="lang-pt">Proposto pela IA</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-gro-01"><summary><span class="res-label"><span class="lang-en">Acting on the moment</span><span class="lang-pt">Agir no impulso</span></span><span class="res-bar"><i style="width:70%"></i></span><span class="jh-chip">◦ ✎</span></summary><p class="res-evd">"age de forma imediata e talvez se arrependa" — Silvana</p><span class="jh-chip"><span class="lang-en">You and Silvana both see this</span><span class="lang-pt">Você e Silvana veem isso</span></span><div class="rtr"></div></details>
+        <details data-item-key="joao-v2-oth-gro-02"><summary><span class="res-label"><span class="lang-en">Shopping at the void</span><span class="lang-pt">Compras contra o vazio</span></span><span class="res-bar"><i style="width:40%"></i></span><span class="jh-chip">◦</span></summary><p class="res-evd">"tenta preencher o vazio emocional com compras" — Silvana</p><span class="jh-chip"><span class="lang-en">Silvana sees this — only she names it</span><span class="lang-pt">Silvana vê isso — só ela nomeia</span></span><div class="rtr"></div></details>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 10 QUESTIONS WORTH SITTING WITH -->
-<section class="report-section" id="questions">
+<!-- 5 PATTERNS — THE LOOPS -->
+<section class="report-section" id="mp-loops">
   <div class="container">
-    <div class="section-label"><span class="lang-en">Questions worth sitting with</span><span class="lang-pt">Perguntas que valem a pausa</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
-    <h2 class="section-title"><span class="lang-en">No answers required</span><span class="lang-pt">Nenhuma resposta é obrigatória</span></h2>
-    <div class="two-col">
-      <div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en">On a day you produced nothing — no meeting, no deliverable, no rescue — who is it that your family loves?</span><span class="lang-pt">Num dia em que você não produziu nada — nenhuma reunião, nenhuma entrega, nenhum resgate — quem é que a sua família ama?</span></p></div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en">What would the sandcastle builder make first, if no one were watching and nothing depended on it?</span><span class="lang-pt">O que o construtor de castelos de areia faria primeiro, se ninguém estivesse olhando e nada dependesse disso?</span></p></div>
-      </div>
-      <div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en">You asked to be reminded that you are not made to be alone. Who, by name, is allowed to do the reminding?</span><span class="lang-pt">Você pediu para ser lembrado de que não foi feito para ficar sozinho. Quem, com nome, tem permissão para fazer essa lembrança?</span></p></div>
-        <div class="rp-item"><p class="rp-content"><span class="lang-en">The forehead is about to stop being a secret. What else in your story might be lighter in daylight than in hiding?</span><span class="lang-pt">A testa está prestes a deixar de ser segredo. O que mais na sua história talvez pese menos à luz do dia do que escondido?</span></p></div>
-      </div>
-    </div>
+    <div class="section-label"><span class="lang-en">Patterns</span><span class="lang-pt">Padrões</span><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></div>
+    <h2 class="section-title"><span class="lang-en">The loops you return to</span><span class="lang-pt">Os ciclos aos quais você retorna</span></h2>
+    <p class="section-desc"><span class="lang-en">Patterns are how minds economize. Some serve you; some tax you.</span><span class="lang-pt">Padrões são a economia da mente. Alguns te servem; outros te cobram.</span></p>
+    <div class="loop-groups" id="loop-groups"></div>
   </div>
 </section>
 
-<!-- 11 THREE PILLARS -->
-<section class="report-section" id="pillars" style="background:var(--blue-50);">
+<!-- 6 DEEPER LAYERS -->
+<section class="report-section mp-deeper" id="mp-deeper" style="background:var(--blue-50);">
+  <div class="container">
+    <div class="section-label"><span class="lang-en">Deeper layers</span><span class="lang-pt">Camadas mais profundas</span></div>
+
+    <details class="mp-acc"><summary><span class="lang-en">What matters to you</span><span class="lang-pt">O que importa para você</span> <span class="jh-chip">✎</span></summary>
+      <div class="acc-item" data-item-key="joao-v2-self-val-01"><span class="lang-en"><strong>Faith that carries</strong> — "my life does not belong to me." The hardest nights end when the situation is handed over.</span><span class="lang-pt"><strong>Fé que sustenta</strong> — "a minha vida não me pertence." As noites mais difíceis terminam quando a situação é entregue.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-02"><span class="lang-en"><strong>Family as ground</strong> — "If today I am standing, it is because one day I had parents on their knees."</span><span class="lang-pt"><strong>Família como chão</strong> — "Se hoje estou de pé, é porque um dia tive pais de joelhos."</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-03"><span class="lang-en"><strong>Music as first language</strong> — "the way God gave me to communicate in my deepest inner being."</span><span class="lang-pt"><strong>Música como primeira língua</strong> — "o jeito que Deus me deu de comunicar meu ser mais profundo."</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-04"><span class="lang-en"><strong>Building things that matter</strong> — the sandcastle builder, now aimed at turning scattered health data into care.</span><span class="lang-pt"><strong>Construir coisas que importam</strong> — o construtor de castelos de areia, agora voltado a transformar dados de saúde dispersos em cuidado.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-05"><span class="lang-en"><strong>Telling the truth publicly</strong> — the accountability letter; blunt answers to blunt questions.</span><span class="lang-pt"><strong>Dizer a verdade publicamente</strong> — a carta de responsabilização; respostas diretas a perguntas diretas.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-06"><span class="lang-en"><strong>Between languages, whole</strong> — "English speaks to my heart and brain, Portuguese speaks to my relational being."</span><span class="lang-pt"><strong>Inteiro entre línguas</strong> — "O inglês fala ao meu coração e cérebro, o português ao meu ser relacional."</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-07"><span class="lang-en"><strong>Made for people</strong> — "I am not made to be alone", a certainty to be reminded of.</span><span class="lang-pt"><strong>Feito para pessoas</strong> — "não fui feito para ficar sozinho", uma certeza a ser lembrada.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-self-val-08"><span class="lang-en"><strong>Choosing aliveness</strong> — "I hate the numbness… I will not lose this."</span><span class="lang-pt"><strong>Escolher estar vivo</strong> — "Odeio a anestesia… não vou perder isto."</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-oth-val-01"><span class="lang-en"><strong>Tears as evidence of values</strong> <span class="jh-chip">◦ Silvana</span> — only those with principles carry that kind of pain; the crying ends in surrender and rest.</span><span class="lang-pt"><strong>Lágrimas como evidência de valores</strong> <span class="jh-chip">◦ Silvana</span> — só carrega essa dor quem tem princípios; o choro termina em entrega e descanso.</span><div class="rtr"></div></div>
+    </details>
+
+    <details class="mp-acc"><summary><span class="lang-en">Recurring themes</span><span class="lang-pt">Temas recorrentes</span> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary>
+      <div class="acc-item" data-item-key="joao-v2-ai-thm-01"><span class="lang-en"><strong>The superhero and the mask</strong> — 2017's "superhero Joao" to 2026's "why do I only feel like a person when performing one"; named by him and by his mother.</span><span class="lang-pt"><strong>O super-herói e a máscara</strong> — do "super-herói João" de 2017 ao "por que só me sinto uma pessoa interpretando uma" de 2026; nomeado por ele e pela mãe.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-ai-thm-02"><span class="lang-en"><strong>Anesthesia as an old ally</strong> — 2014's rival to pain; 2026's "anesthesia instead of resolution", renounced.</span><span class="lang-pt"><strong>A anestesia como velha aliada</strong> — a rival da dor em 2014; em 2026, "anestesia em vez de resolução", renunciada.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-ai-thm-05"><span class="lang-en"><strong>The borrowed verdict</strong> — guilt that arrived as someone else's sentence; "Enough guilt — I want my right to freedom."</span><span class="lang-pt"><strong>O veredito emprestado</strong> — a culpa que chegou como sentença alheia; "Chega de culpa — quero meu direito à liberdade."</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-ai-thm-06"><span class="lang-en"><strong>Writing as the unmasking place</strong> — eleven years of journals where the private voice lives.</span><span class="lang-pt"><strong>A escrita como o lugar de tirar a máscara</strong> — onze anos de diários onde a voz privada mora.</span><div class="rtr"></div></div>
+      <div class="acc-item" data-item-key="joao-v2-ai-thm-07"><span class="lang-en"><strong>The inherited pattern, seen in time</strong> — recognizing the father's graying in himself, and saying it out loud first.</span><span class="lang-pt"><strong>O padrão herdado, visto a tempo</strong> — reconhecer em si o acinzentar do pai, e dizê-lo em voz alta primeiro.</span><div class="rtr"></div></div>
+    </details>
+
+    <details class="mp-acc"><summary><span class="lang-en">Questions worth sitting with</span><span class="lang-pt">Perguntas que valem a pausa</span> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary>
+      <div class="acc-item"><span class="lang-en">On a day you produced nothing — who is it that your family loves?</span><span class="lang-pt">Num dia em que você não produziu nada — quem é que a sua família ama?</span></div>
+      <div class="acc-item"><span class="lang-en">What would the sandcastle builder make first, if no one were watching?</span><span class="lang-pt">O que o construtor de castelos de areia faria primeiro, se ninguém estivesse olhando?</span></div>
+      <div class="acc-item"><span class="lang-en">Who, by name, is allowed to remind you that you are not made to be alone?</span><span class="lang-pt">Quem, com nome, tem permissão para lembrar você de que não foi feito para ficar sozinho?</span></div>
+      <div class="acc-item"><span class="lang-en">What else in your story might be lighter in daylight than in hiding?</span><span class="lang-pt">O que mais na sua história talvez pese menos à luz do dia do que escondido?</span></div>
+    </details>
+
+    <details class="mp-acc"><summary><span class="lang-en">Recommended reading</span><span class="lang-pt">Leituras sugeridas</span> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary>
+      <div class="acc-item"><span class="lang-en"><strong>Frankl — Man's Search for Meaning</strong>: meaning found inside suffering, not after it.</span><span class="lang-pt"><strong>Frankl — Em Busca de Sentido</strong>: sentido encontrado dentro do sofrimento, não depois dele.</span></div>
+      <div class="acc-item"><span class="lang-en"><strong>Nouwen — The Return of the Prodigal Son</strong>: sonship, second chances, receiving love.</span><span class="lang-pt"><strong>Nouwen — A Volta do Filho Pródigo</strong>: filiação, segundas chances, receber amor.</span></div>
+      <div class="acc-item"><span class="lang-en"><strong>Rilke — Letters to a Young Poet</strong>: living the questions, patience with the unresolved.</span><span class="lang-pt"><strong>Rilke — Cartas a um Jovem Poeta</strong>: viver as perguntas, paciência com o não resolvido.</span></div>
+      <div class="acc-item"><span class="lang-en"><strong>Brown — Daring Greatly</strong>: being seen without the curated version.</span><span class="lang-pt"><strong>Brown — A Coragem de Ser Imperfeito</strong>: ser visto sem a versão curada.</span></div>
+    </details>
+
+    <details class="mp-acc"><summary><span class="lang-en">Where this comes from</span><span class="lang-pt">De onde isto vem</span></summary>
+      <div id="johari-mini-slot"></div>
+      <p class="rp-evd" style="text-align:center;"><span class="lang-en">Open: seen by you and others · Blind: only others · Hidden: only your writing · Emerging: AI-proposed.</span><span class="lang-pt">Aberto: visto por você e outros · Cego: só pelos outros · Oculto: só na sua escrita · Emergente: proposto pela IA.</span></p>
+      <p class="rp-evd" style="text-align:center;"><span class="lang-en">Clinical companion: <a href="mental-clinical.html">clinical record view</a>.</span><span class="lang-pt">Companheiro clínico: <a href="mental-clinical.html">visão de registro clínico</a>.</span></p>
+    </details>
+  </div>
+</section>
+
+<!-- 7 THREE PILLARS -->
+<section class="report-section" id="pillars">
   <div class="container">
     <div class="section-label"><span class="lang-en">Three pillars</span><span class="lang-pt">Três pilares</span></div>
-    <h2 class="section-title"><span class="lang-en">One person, three registers</span><span class="lang-pt">Uma pessoa, três registros</span></h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
-      <a class="johari-cell" href="physical.html"><h4><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></h4><p><span class="lang-en">Labs, vitals, imaging, body composition — the measurable register.</span><span class="lang-pt">Exames, sinais vitais, imagem, composição corporal — o registro mensurável.</span></p></a>
-      <a class="johari-cell" href="#johari" style="border-color:var(--accent-petrol);"><h4><span class="lang-en">Mental — this portrait</span><span class="lang-pt">Mental — este retrato</span></h4><p><span class="lang-en">Words, patterns, and the window above.</span><span class="lang-pt">Palavras, padrões e a janela acima.</span></p></a>
-      <a class="johari-cell" href="spiritual.html"><h4><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></h4><p><span class="lang-en">Faith, practice, and the readings that hold.</span><span class="lang-pt">Fé, prática e as leituras que sustentam.</span></p></a>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+      <a class="mp-card" style="text-decoration:none;color:inherit;" href="physical.html"><strong><span class="lang-en">Physical</span><span class="lang-pt">Físico</span></strong></a>
+      <a class="mp-card" style="text-decoration:none;color:inherit;border-color:var(--accent-petrol);" href="#mp-identity"><strong><span class="lang-en">Mental — this portrait</span><span class="lang-pt">Mental — este retrato</span></strong></a>
+      <a class="mp-card" style="text-decoration:none;color:inherit;" href="spiritual.html"><strong><span class="lang-en">Spiritual</span><span class="lang-pt">Espiritual</span></strong></a>
     </div>
   </div>
 </section>
 
-<!-- 12 EVOLUTION — final content section -->
+<!-- 8 EVOLUTION — final content section -->
 <section class="report-section evo-frame" id="evolution">
   <div class="container">
     <div class="section-label"><span class="lang-en">Evolution</span><span class="lang-pt">Evolução</span></div>
     <h2 class="section-title"><span class="lang-en">How your story has moved.</span><span class="lang-pt">Como a sua história se moveu.</span></h2>
-    <p class="section-desc"><span class="lang-en">This reads your writing over time. A mirror, not a report card — the line exists only where you wrote.</span><span class="lang-pt">Isto lê a sua escrita ao longo do tempo. Um espelho, não um boletim — a linha só existe onde você escreveu.</span></p>
+    <p class="section-desc"><span class="lang-en">A mirror, not a report card — the line exists only where you wrote.</span><span class="lang-pt">Um espelho, não um boletim — a linha só existe onde você escreveu.</span></p>
 
-    <!-- a. Chapters ribbon -->
     <div id="evo-chapters">
       <p style="margin:0 0 6px;"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> <span style="font-size:12px;color:var(--text-muted);"><span class="lang-en">Naming eras is synthesis — the spans are where your writing lives.</span><span class="lang-pt">Nomear eras é síntese — os períodos são onde a sua escrita mora.</span></span></p>
       <div class="evo-ribbon">
-        <details class="evo-chapter"><summary style="cursor:pointer;list-style:none;"><span class="evo-span">2015 – 2018</span><h4><span class="lang-en">The two shores</span><span class="lang-pt">As duas margens</span></h4></summary><p style="margin-top:6px;"><span class="lang-en">The Paris and Eindhoven years — building a life abroad while belonging stayed split between continents, and the mask learned its job.</span><span class="lang-pt">Os anos de Paris e Eindhoven — construindo uma vida fora enquanto o pertencimento ficava dividido entre continentes, e a máscara aprendia seu ofício.</span></p><p class="rp-evd">"A part of me in Sao Paulo always wants to be flying… A part of me in Europe always wants to find its place." · "On that boat, I was the only crew member."</p></details>
+        <details class="evo-chapter"><summary style="cursor:pointer;list-style:none;"><span class="evo-span">2015 – 2018</span><h4><span class="lang-en">The two shores</span><span class="lang-pt">As duas margens</span></h4></summary><p style="margin-top:6px;"><span class="lang-en">The Paris and Eindhoven years — building a life abroad while belonging stayed split between continents, and the mask learned its job.</span><span class="lang-pt">Os anos de Paris e Eindhoven — construindo uma vida fora enquanto o pertencimento ficava dividido entre continentes, e a máscara aprendia seu ofício.</span></p><p class="rp-evd">"A part of me in Sao Paulo always wants to be flying…" · "On that boat, I was the only crew member."</p></details>
         <div class="evo-chapter evo-gap-block"><p><span class="evo-span">2019 – 2022</span><br><span class="lang-en">unwritten</span><span class="lang-pt">não escrito</span></p></div>
-        <details class="evo-chapter"><summary style="cursor:pointer;list-style:none;"><span class="evo-span">2023 – 2024</span><h4><span class="lang-en">Holding the house</span><span class="lang-pt">Segurando a casa</span></h4></summary><p style="margin-top:6px;"><span class="lang-en">The caretaking years — everything poured into keeping a household standing, and the page grows quiet about everything else.</span><span class="lang-pt">Os anos de cuidado — tudo investido em manter uma casa de pé, e a página fica quieta sobre todo o resto.</span></p><p class="rp-evd">"For almost three years, I invested all I had into building and saving my household." · "I felt like a husband on a shelf."</p></details>
+        <details class="evo-chapter"><summary style="cursor:pointer;list-style:none;"><span class="evo-span">2023 – 2024</span><h4><span class="lang-en">Holding the house</span><span class="lang-pt">Segurando a casa</span></h4></summary><p style="margin-top:6px;"><span class="lang-en">The caretaking years — everything poured into keeping a household standing, and the page grows quiet about everything else.</span><span class="lang-pt">Os anos de cuidado — tudo investido em manter uma casa de pé, e a página fica quieta sobre todo o resto.</span></p><p class="rp-evd">"For almost three years, I invested all I had…" · "I felt like a husband on a shelf."</p></details>
         <details class="evo-chapter" style="border-left-color:var(--accent-gold);"><summary style="cursor:pointer;list-style:none;"><span class="evo-span">2025 – Jul 2026</span><h4><span class="lang-en">The rebuilding year</span><span class="lang-pt">O ano da reconstrução</span></h4></summary><p style="margin-top:6px;"><span class="lang-en">Naming what fell, asking for help by name, building something of his own — and warmth arriving back on the page, unforced.</span><span class="lang-pt">Nomear o que caiu, pedir ajuda com nome e sobrenome, construir algo próprio — e o calor voltando à página, sem esforço.</span></p><p class="rp-evd">"This house of cards came down in 2025." · "I felt something that is not numb, but is alive."</p></details>
       </div>
     </div>
 
-    <!-- b. Then vs now radar -->
     <div id="evo-radar" style="margin-top:1.25rem;">
       <p style="margin:0 0 4px;"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> <span style="font-size:12px;color:var(--text-muted);"><span class="lang-en">Scored from your writing against a fixed rubric — not a self-assessment.</span><span class="lang-pt">Pontuado a partir da sua escrita contra uma régua fixa — não é autoavaliação.</span></span></p>
       <div id="evo-radar-plot" style="width:100%;max-width:640px;margin:0 auto;height:380px;"></div>
       <div class="evo-chips" style="justify-content:center;" id="evo-radar-legend"></div>
       <div class="evo-chips" style="justify-content:center;" id="evo-epoch-chips"></div>
-      <p style="text-align:center;font-size:11.5px;color:var(--text-muted);margin:6px 0 0;"><span class="lang-en">Tap any written period to compare it. Axes without enough writing in a chosen period stay open, and unwritten periods cannot be chosen — the line exists only where you wrote.</span><span class="lang-pt">Toque em qualquer período escrito para compará-lo. Eixos sem escrita suficiente num período escolhido ficam abertos, e períodos não escritos não podem ser escolhidos — a linha só existe onde você escreveu.</span></p>
+      <p style="text-align:center;font-size:11.5px;color:var(--text-muted);margin:6px 0 0;"><span class="lang-en">Tap any written period to compare it. Open axes and unwritten periods stay open — the line exists only where you wrote.</span><span class="lang-pt">Toque em qualquer período escrito para compará-lo. Eixos e períodos sem escrita ficam abertos — a linha só existe onde você escreveu.</span></p>
     </div>
 
-    <!-- c. Dimension trails -->
     <details id="evo-trails" style="margin-top:1.25rem;">
       <summary style="cursor:pointer;font-size:14px;"><strong><span class="lang-en">Dimension trails — the long way round</span><span class="lang-pt">Trilhas por dimensão — o caminho longo</span></strong> <span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span></summary>
       <div class="evo-trail-grid" id="evo-trail-grid"></div>
     </details>
 
-    <!-- d. In your own words — then and now -->
     <div id="evo-then-now" style="margin-top:1.5rem;">
-      <h3 style="font-size:17px;margin:0 0 4px;"><span class="lang-en">Then and now</span><span class="lang-pt">Antes e agora</span> <span class="prov-chip"><span class="lang-en">From your words</span><span class="lang-pt">Das suas palavras</span></span></h3>
-      <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> <span class="lang-en">The pairing is synthesis; the words are yours, dates visible.</span><span class="lang-pt">O pareamento é síntese; as palavras são suas, com datas visíveis.</span></p>
-
+      <h3 style="font-size:17px;margin:0 0 4px;"><span class="lang-en">Then and now</span><span class="lang-pt">Antes e agora</span> <span class="prov-chip">✎ <span class="lang-en">From your words</span><span class="lang-pt">Das suas palavras</span></span></h3>
+      <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;"><span class="ai-pill"><span class="lang-en">AI</span><span class="lang-pt">IA</span></span> <span class="lang-en">The pairing is synthesis; the words are yours.</span><span class="lang-pt">O pareamento é síntese; as palavras são suas.</span></p>
       <div class="tn-pair" data-item-key="joao-v2-evo-pair-1"><p class="tn-q">"Joao shouldn't be all by himself, but sometimes he just has to." <span class="tn-d">· 2015</span></p><p style="margin:2px 0;"><span class="tn-arrow">→</span></p><p class="tn-q">"I am not made to be alone." <span class="tn-d">· 3 Jul 2026</span></p><div class="rtr"></div></div>
       <div class="tn-pair" data-item-key="joao-v2-evo-pair-2"><p class="tn-q">"I get high, I sleep, but this isn't me." <span class="tn-d">· 2017</span></p><p style="margin:2px 0;"><span class="tn-arrow">→</span></p><p class="tn-q">"I felt something that is not numb, but is alive." <span class="tn-d">· 17 Jul 2026</span></p><div class="rtr"></div></div>
       <div class="tn-pair" data-item-key="joao-v2-evo-pair-3"><p class="tn-q">"I lift myself up in a meeting to get a 'well done', on the phone I become the superhero Joao, but this is not me." <span class="tn-d">· 2017</span></p><p style="margin:2px 0;"><span class="tn-arrow">→</span></p><p class="tn-q">"I have been answering all of these questions with nothing but an open heart." <span class="tn-d">· 14 Jul 2026</span></p><div class="rtr"></div></div>
       <div class="tn-pair" data-item-key="joao-v2-evo-pair-4"><p class="tn-q">"I'm doing well at work, I'm kinda building a nice life here." <span class="tn-d">· 2015</span></p><p style="margin:2px 0;"><span class="tn-arrow">→</span></p><p class="tn-q">"Estou produtivo: consultoria ativa, projeto na área de saúde em desenvolvimento, presença na rotina da família." <span class="tn-d">· 15 Jul 2026</span></p><div class="rtr"></div></div>
     </div>
 
-    <!-- e. The next chapter -->
     <div id="evo-next" class="alert alert-info" style="margin-top:1.5rem;">
       <strong><span class="lang-en">The next chapter.</span><span class="lang-pt">O próximo capítulo.</span></strong>
-      <span class="lang-en">This portrait and this timeline grow as you — and the people you trust — contribute. Every new dated entry extends the line. </span><span class="lang-pt">Este retrato e esta linha do tempo crescem à medida que você — e as pessoas em quem confia — contribuem. Cada novo registro datado estende a linha. </span>
+      <span class="lang-en">Every new dated entry extends the line. </span><span class="lang-pt">Cada novo registro datado estende a linha. </span>
       <a href="upload.html"><span class="lang-en">Add to your record →</span><span class="lang-pt">Adicionar ao seu registro →</span></a>
     </div>
   </div>
@@ -295,16 +306,54 @@
     <img src="assets/logo.svg" alt="">
     <span>Lumen Health · <span class="lang-en">From data to insights</span><span class="lang-pt">Dos dados aos insights</span></span>
   </div>
-  <div><span class="lang-en">If anything on this page stirs more than it settles, you are not meant to sit with it alone: Dr. Tischer, Dr. Cleandro, your pastor — or CVV 188 (24h, free).</span><span class="lang-pt">Se algo nesta página mexer mais do que acalmar, não é para carregar sozinho: Dr. Tischer, Dr. Cleandro, seu pastor — ou CVV 188 (24h, gratuito).</span></div>
+  <div><span class="lang-en">If anything here stirs more than it settles: Dr. Tischer, Dr. Cleandro, your pastor — or CVV 188 (24h, free).</span><span class="lang-pt">Se algo aqui mexer mais do que acalmar: Dr. Tischer, Dr. Cleandro, seu pastor — ou CVV 188 (24h, gratuito).</span></div>
   <div style="margin-top:4px;"><span class="lang-en">Strictly confidential · A reflective document, not medical advice.</span><span class="lang-pt">Estritamente confidencial · Um documento reflexivo, não aconselhamento médico.</span></div>
 </footer>
 
 <script>
-/* Evolution data — mirrored in patient_dashboards.cards_json (section='evolution'). */
+/* v3 triad data — mirrored in patient_dashboards.cards_json (section='portrait_triad').
+   Archetype + all valence labels operator-approved 2026-07-19. */
+window.JC_TRIAD = {
+  archetype: { primaryIdx: 2, secondaryIdx: 7,
+    /* wheel order: Innocent, Everyman, Hero, Caregiver, Explorer, Rebel, Lover, Creator, Jester, Sage, Magician, Ruler */
+    labels_en: ["Innocent","Everyman","Hero","Caregiver","Explorer","Rebel","Lover","Creator","Jester","Sage","Magician","Ruler"],
+    labels_pt: ["Inocente","Pessoa Comum","Herói","Cuidador","Explorador","Rebelde","Amante","Criador","Bufão","Sábio","Mago","Governante"] },
+  loops: [
+    { id:"crying-surrender", valence:"sustaining", label_en:"Crying into surrender", label_pt:"Choro que vira entrega",
+      nodes_en:["Grief arrives — music, memories","Deep crying, hours long","Surrender, peace","Restorative sleep"], nodes_pt:["O luto chega — músicas, lembranças","Choro profundo, de horas","Entrega, paz","Sono restaurador"],
+      count:6, epochs:{e2025:6}, conf:"high",
+      evd:"Pre-consult 4b · 18 Questions Q2/Q9 · session 25 Jun · Silvana Q5" },
+    { id:"writing-unmask", valence:"sustaining", label_en:"Writing to unmask", label_pt:"Escrever para tirar a máscara",
+      nodes_en:["What cannot be said aloud","Write it down, unmasked","The mask comes off","Return, lighter"], nodes_pt:["O que não dá para dizer","Escrever, sem máscara","A máscara sai","Volta, mais leve"],
+      count:20, epochs:{e2015:1,e2017:1,e2023:1,e2025:17}, conf:"high",
+      evd:"\"By writing, I can take off the mask\" (2017) · 20 dated writings 2015→2026" },
+    { id:"body-occupation", valence:"sustaining", label_en:"Working with the hands", label_pt:"Trabalhar com as mãos",
+      nodes_en:["Restlessness, urge to numb","Gardening, housework, exercise","Mind occupied","Urge passes"], nodes_pt:["Inquietação, vontade de anestesiar","Jardim, casa, exercício","Mente ocupada","O impulso passa"],
+      count:4, epochs:{e2025:4}, conf:"medium",
+      evd:"18 Questions Q6 · pre-consult goals · sessions 25 Jun / 3 Jul" },
+    { id:"perform-worth", valence:"mixed", label_en:"Performing for the applause", label_pt:"Atuar pelo aplauso",
+      nodes_en:["An audience, a stage","Perform the impressive self","The 'well done'","Emptiness after"], nodes_pt:["Uma plateia, um palco","Interpretar o eu impressionante","O 'muito bem'","Vazio depois"],
+      count:4, epochs:{e2017:1,e2025:3}, conf:"high",
+      evd:"\"I lift myself up in a meeting…\" (2017) · \"only feel like a person when performing\" (3 Jul 2026)" },
+    { id:"carry-alone", valence:"costly", label_en:"Carrying it alone", label_pt:"Carregar tudo sozinho",
+      nodes_en:["A challenge, a crisis","Take sole command","Control, competence proven","Exhaustion; no ground"], nodes_pt:["Um desafio, uma crise","Assumir sozinho, na força","Controle, competência provada","Exaustão; sem chão"],
+      count:5, epochs:{e2017:1,e2023:1,e2025:3}, conf:"high",
+      evd:"\"Only crew member\" (2017) · \"invested all I had\" (2024) · \"the way I try — alone — is the failure\" (19 Apr 2026)" },
+    { id:"void-alcohol", valence:"costly", label_en:"Drinking at the void", label_pt:"Beber contra o vazio",
+      nodes_en:["The void — fear of loneliness","Wine, beyond the intention","The void quiets briefly","Sadness; taper at risk"], nodes_pt:["O vazio — medo da solidão","Vinho, além da intenção","O vazio aquieta um instante","Tristeza; desmame em risco"],
+      count:4, epochs:{e2025:4}, conf:"high",
+      evd:"Black Lion (Apr 2026) · session 25 Jun · pre-consult 4c · 18 Questions Q4–Q6" },
+    { id:"anesthesia-seek", valence:"costly", label_en:"Reaching for anesthesia", label_pt:"Buscar a anestesia",
+      nodes_en:["Frustration, pain spike","Reach for sedation","Pain neutralized, sleep","Decisions numbed; years grayed"], nodes_pt:["Frustração, pico de dor","Buscar sedação","Dor neutralizada, sono","Decisões anestesiadas; anos cinzas"],
+      count:4, epochs:{e2023:1,e2025:2}, conf:"high",
+      evd:"Xanax era (2014, in Forehead) · Valium context (2024) · \"anesthesia instead of resolution\" (2026) — now under supervised taper" }
+  ],
+  epochOrder: ["e2015","e2017","e2019","e2021","e2023","e2025"],
+  epochLabels: ["15-16","17-18","19-20","21-22","23-24","25-26"],
+  johari: { open: 15, blind: 1, hidden: 9, emerging: 9 }
+};
 window.JC_EVOLUTION = {
   epochs: ["2015-16","2017-18","2019-20","2021-22","2023-24","2025-26"],
-  /* axis order groups the four early-scored dimensions contiguously so the
-     2015-16 trace renders as one arc with two honestly-open axes */
   dims: [
     { id:"connection",     en:"Connection",   pt:"Conexão",     scores:[2,2,null,null,1,3], ev:[2,4,0,0,3,5],
       delta_en:"Quieter in the early and middle chapters; more present in recent writing.", delta_pt:"Mais quieta nos capítulos iniciais e do meio; mais presente na escrita recente." },
@@ -320,7 +369,6 @@ window.JC_EVOLUTION = {
       delta_en:"Long at odds with the writer; lately reads more like an ally.", delta_pt:"Por muito tempo em conflito com quem escreve; ultimamente lê-se mais como aliado." }
   ],
   thenEpoch: 0, nowEpoch: 5,
-  /* evidence-count labels for the epoch chips; null = unwritten gap (not selectable) */
   epochEvidence: [10, 83, null, null, 73, "~80"]
 };
 </script>
@@ -333,7 +381,7 @@ window.JC_EVOLUTION = {
 <script src="assets/insights-update.js?v=4"></script>
 <script src="assets/upload-card.js?v=2"></script>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-<script src="assets/reflective-portrait.js?v=2"></script>
+<script src="assets/reflective-portrait.js?v=3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="assets/export-pdf.js?v=5"></script>
