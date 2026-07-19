@@ -1,9 +1,11 @@
 /* Lumen Health — Paulo Silotto Souza lab history
  *
- * Structured from 26 scanned lab PDFs (2011-2024) in
- * Patients/Paulo Silotto/New Exams/Blood and Urine. Source PDFs are stored in
- * R2 (eu) under lab/<clerk>/ and streamed via the labs-scoped /api/lab-source
- * route; each document card links to its original.
+ * Structured from 30 scanned lab PDFs (2011-2026) in
+ * Patients/Paulo Silotto/New Exams. Most source PDFs are stored in R2 (eu)
+ * under lab/<clerk>/ and streamed via the labs-scoped /api/lab-source route;
+ * each document card links to its original. Two sources (o29 Pasteur sodium,
+ * o30 Unimed emergency panel) are ingested without an archived original, so
+ * their analytes render but they carry no document card — see NOCARD.
  *
  * Values were transcribed per-PDF, then reconciled into canonical markers and
  * deduplicated to one point per analyte per collection date (.staging/paulo-labs).
