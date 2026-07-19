@@ -74,11 +74,13 @@ async function main() {
     await Promise.all(batch.map((r) => sql`
       INSERT INTO lab_results
         (patient_id, panel, marker, value, value_text, unit, ref_low, ref_high,
-         flag, taken_at, laboratory, requesting_doctor, performing_doctor, source_blob_key)
+         flag, taken_at, laboratory, lab_city, lab_country, requesting_doctor,
+         performing_doctor, source_blob_key)
       VALUES
         (${pid}, ${r.panel}, ${r.marker}, ${num(r.value)}, ${r.value_text ?? null},
          ${r.unit ?? null}, ${num(r.ref_low)}, ${num(r.ref_high)}, ${r.flag ?? null},
-         ${r.taken_at}, ${r.laboratory ?? null}, ${r.requesting_doctor ?? null},
+         ${r.taken_at}, ${r.laboratory ?? null}, ${r.lab_city ?? null},
+         ${r.lab_country ?? null}, ${r.requesting_doctor ?? null},
          ${r.performing_doctor ?? null}, ${r.source_blob_key ?? null})`));
     n += batch.length;
   }

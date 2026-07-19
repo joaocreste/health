@@ -285,11 +285,16 @@ window.PAULO_LABS = {
           "marker_en": "Red blood cells (RBC)",
           "marker_pt": "Eritrócitos (hemácias)",
           "unit": "milhões/mm³",
-          "ref_low": 4.3,
-          "ref_high": 5.9,
-          "ref_text_en": "4.3 – 5.9 milhões/mm³",
-          "ref_text_pt": "4,3 – 5,9 milhões/mm³",
+          "ref_low": 4.5,
+          "ref_high": 5.5,
+          "ref_text_en": "4.5 – 5.5 milhões/mm³",
+          "ref_text_pt": "4,5 – 5,5 milhões/mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 4.2,
+              "flag": "L"
+            },
             {
               "date": "2025-11-12",
               "value": 4.15,
@@ -369,6 +374,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "13 – 17,5 g/dL",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 13.5
+            },
+            {
               "date": "2025-11-12",
               "value": 13.3
             },
@@ -440,10 +449,15 @@ window.PAULO_LABS = {
           "marker_pt": "Hematócrito",
           "unit": "%",
           "ref_low": 40.0,
-          "ref_high": 53.0,
-          "ref_text_en": "40 – 53 %",
-          "ref_text_pt": "40 – 53 %",
+          "ref_high": 50.0,
+          "ref_text_en": "40 – 50 %",
+          "ref_text_pt": "40 – 50 %",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 36.7,
+              "flag": "L"
+            },
             {
               "date": "2025-11-12",
               "value": 40.3
@@ -523,6 +537,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "80 – 100 fL",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 87.8
+            },
+            {
               "date": "2025-11-12",
               "value": 97.1
             },
@@ -593,10 +611,15 @@ window.PAULO_LABS = {
           "marker_pt": "HCM",
           "unit": "pg",
           "ref_low": 26.0,
-          "ref_high": 34.0,
-          "ref_text_en": "26 – 34 pg",
-          "ref_text_pt": "26 – 34 pg",
+          "ref_high": 32.0,
+          "ref_text_en": "26 – 32 pg",
+          "ref_text_pt": "26 – 32 pg",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 32.3,
+              "flag": "H"
+            },
             {
               "date": "2025-11-12",
               "value": 32.1
@@ -668,11 +691,16 @@ window.PAULO_LABS = {
           "marker_en": "MCHC",
           "marker_pt": "CHCM",
           "unit": "g/dL",
-          "ref_low": 31.0,
-          "ref_high": 36.0,
-          "ref_text_en": "31 – 36 g/dL",
-          "ref_text_pt": "31 – 36 g/dL",
+          "ref_low": 31.5,
+          "ref_high": 36.5,
+          "ref_text_en": "31.5 – 36.5 g/dL",
+          "ref_text_pt": "31,5 – 36,5 g/dL",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 36.8,
+              "flag": "H"
+            },
             {
               "date": "2025-11-12",
               "value": 33
@@ -746,10 +774,14 @@ window.PAULO_LABS = {
           "marker_pt": "RDW",
           "unit": "%",
           "ref_low": 11.5,
-          "ref_high": 15.1,
-          "ref_text_en": "11.5 – 15.1 %",
-          "ref_text_pt": "11,5 – 15,1 %",
+          "ref_high": 14.6,
+          "ref_text_en": "11.5 – 14.6 %",
+          "ref_text_pt": "11,5 – 14,6 %",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 12.5
+            },
             {
               "date": "2025-11-12",
               "value": 12.7
@@ -846,11 +878,15 @@ window.PAULO_LABS = {
           "marker_en": "White blood cells (WBC)",
           "marker_pt": "Leucócitos",
           "unit": "/mm³",
-          "ref_low": 3500,
-          "ref_high": 10500,
-          "ref_text_en": "3500 – 10500 /mm³",
-          "ref_text_pt": "3500 – 10500 /mm³",
+          "ref_low": 4000,
+          "ref_high": 11000,
+          "ref_text_en": "4000 – 11000 /mm³",
+          "ref_text_pt": "4000 – 11000 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 8810
+            },
             {
               "date": "2025-11-12",
               "value": 4520
@@ -928,6 +964,10 @@ window.PAULO_LABS = {
           "ref_text_en": "150000 – 450000 /mm³",
           "ref_text_pt": "150000 – 450000 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 239000
+            },
             {
               "date": "2025-11-12",
               "value": 222000
@@ -1126,6 +1166,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "45 – 66 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 59.4
+            },
+            {
               "date": "2025-11-12",
               "value": 51.1
             },
@@ -1164,11 +1208,15 @@ window.PAULO_LABS = {
           "marker_en": "Segmented neutrophils (abs)",
           "marker_pt": "Neutrófilos segmentados (absoluto)",
           "unit": "/mm³",
-          "ref_low": 1600,
+          "ref_low": 2000,
           "ref_high": 7000,
-          "ref_text_en": "1600 – 7000 /mm³",
-          "ref_text_pt": "1600 – 7000 /mm³",
+          "ref_text_en": "2000 – 7000 /mm³",
+          "ref_text_pt": "2000 – 7000 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 5233
+            },
             {
               "date": "2025-11-12",
               "value": 2310
@@ -1288,6 +1336,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "0 – 5 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0
+            },
+            {
               "date": "2024-04-15",
               "value": 0
             },
@@ -1322,11 +1374,15 @@ window.PAULO_LABS = {
           "marker_en": "Band neutrophils (abs)",
           "marker_pt": "Bastonetes (absoluto)",
           "unit": "/mm³",
-          "ref_low": 0,
-          "ref_high": 1000,
-          "ref_text_en": "0 – 1000 /mm³",
-          "ref_text_pt": "0 – 1000 /mm³",
+          "ref_low": null,
+          "ref_high": 840,
+          "ref_text_en": "< 840 /mm³",
+          "ref_text_pt": "< 840 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 0
+            },
             {
               "date": "2024-04-13",
               "value": 5
@@ -1388,6 +1444,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "1 – 4 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0.2
+            },
+            {
               "date": "2025-11-12",
               "value": 2.5
             },
@@ -1431,11 +1491,16 @@ window.PAULO_LABS = {
           "marker_en": "Eosinophils (abs)",
           "marker_pt": "Eosinófilos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 35,
-          "ref_high": 400,
-          "ref_text_en": "35 – 400 /mm³",
-          "ref_text_pt": "35 – 400 /mm³",
+          "ref_low": 20,
+          "ref_high": 500,
+          "ref_text_en": "20 – 500 /mm³",
+          "ref_text_pt": "20 – 500 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 18,
+              "flag": "L"
+            },
             {
               "date": "2025-11-12",
               "value": 113
@@ -1512,6 +1577,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "0 – 1 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0.2
+            },
+            {
               "date": "2025-11-12",
               "value": 0.9
             },
@@ -1554,10 +1623,14 @@ window.PAULO_LABS = {
           "marker_pt": "Basófilos (absoluto)",
           "unit": "/mm³",
           "ref_low": 0,
-          "ref_high": 100,
-          "ref_text_en": "0 – 100 /mm³",
-          "ref_text_pt": "0 – 100 /mm³",
+          "ref_high": 200,
+          "ref_text_en": "0 – 200 /mm³",
+          "ref_text_pt": "0 – 200 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 18
+            },
             {
               "date": "2025-11-12",
               "value": 41
@@ -1630,6 +1703,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "18 – 36 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 24.6
+            },
+            {
               "date": "2025-11-12",
               "value": 34.3
             },
@@ -1673,11 +1750,15 @@ window.PAULO_LABS = {
           "marker_en": "Lymphocytes (abs)",
           "marker_pt": "Linfócitos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 810,
-          "ref_high": 3600,
-          "ref_text_en": "810 – 3600 /mm³",
-          "ref_text_pt": "810 – 3600 /mm³",
+          "ref_low": 1000,
+          "ref_high": 3500,
+          "ref_text_en": "1000 – 3500 /mm³",
+          "ref_text_pt": "1000 – 3500 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 2167
+            },
             {
               "date": "2025-11-12",
               "value": 1550
@@ -1751,6 +1832,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "2 – 10 %",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 15.6
+            },
+            {
               "date": "2025-11-12",
               "value": 11.2,
               "flag": "H"
@@ -1797,11 +1882,16 @@ window.PAULO_LABS = {
           "marker_en": "Monocytes (abs)",
           "marker_pt": "Monócitos (absoluto)",
           "unit": "/mm³",
-          "ref_low": 90,
+          "ref_low": 200,
           "ref_high": 1000,
-          "ref_text_en": "90 – 1000 /mm³",
-          "ref_text_pt": "90 – 1000 /mm³",
+          "ref_text_en": "200 – 1000 /mm³",
+          "ref_text_pt": "200 – 1000 /mm³",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 1374,
+              "flag": "H"
+            },
             {
               "date": "2025-11-12",
               "value": 506
@@ -2588,11 +2678,15 @@ window.PAULO_LABS = {
           "marker_en": "Creatinine",
           "marker_pt": "Creatinina",
           "unit": "mg/dL",
-          "ref_low": 0.8,
-          "ref_high": 1.3,
-          "ref_text_en": "0.8 – 1.3 mg/dL",
-          "ref_text_pt": "0,8 – 1,3 mg/dL",
+          "ref_low": 0.7,
+          "ref_high": 1.2,
+          "ref_text_en": "0.7 – 1.2 mg/dL",
+          "ref_text_pt": "0,7 – 1,2 mg/dL",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 0.8
+            },
             {
               "date": "2023-02-24",
               "value": 0.92
@@ -2627,11 +2721,15 @@ window.PAULO_LABS = {
           "marker_en": "Urea",
           "marker_pt": "Ureia",
           "unit": "mg/dL",
-          "ref_low": 17.9,
-          "ref_high": 54.9,
-          "ref_text_en": "17.9 – 54.9 mg/dL",
-          "ref_text_pt": "17,9 – 54,9 mg/dL",
+          "ref_low": 16.6,
+          "ref_high": 48.5,
+          "ref_text_en": "16.6 – 48.5 mg/dL",
+          "ref_text_pt": "16,6 – 48,5 mg/dL",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 20
+            },
             {
               "date": "2022-09-22",
               "value": 21
@@ -2646,11 +2744,15 @@ window.PAULO_LABS = {
           "marker_en": "eGFR",
           "marker_pt": "Taxa de filtração glomerular estimada (eTFG)",
           "unit": "mL/min/1.73m²",
-          "ref_low": 60,
+          "ref_low": 90,
           "ref_high": null,
-          "ref_text_en": "> 60 mL/min/1.73m²",
-          "ref_text_pt": "> 60 mL/min/1.73m²",
+          "ref_text_en": "> 90 mL/min/1.73m²",
+          "ref_text_pt": "> 90 mL/min/1.73m²",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value_text": ">90 mL/min/1,73m²"
+            },
             {
               "date": "2017-01-28",
               "value_text": ">60 ml/min./1.73 m2"
@@ -2706,6 +2808,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "3,5 – 5,1 mEq/L",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 4.1
+            },
+            {
               "date": "2022-09-22",
               "value": 4.1
             },
@@ -2759,6 +2865,11 @@ window.PAULO_LABS = {
               "date": "2026-07-14",
               "value": 129,
               "flag": "L"
+            },
+            {
+              "date": "2026-07-10",
+              "value": 126,
+              "flag": "L"
             }
           ]
         }
@@ -2775,11 +2886,15 @@ window.PAULO_LABS = {
           "marker_en": "AST (TGO)",
           "marker_pt": "AST (TGO)",
           "unit": "U/L",
-          "ref_low": 5,
-          "ref_high": 34,
-          "ref_text_en": "5 – 34 U/L",
-          "ref_text_pt": "5 – 34 U/L",
+          "ref_low": 10,
+          "ref_high": 50,
+          "ref_text_en": "10 – 50 U/L",
+          "ref_text_pt": "10 – 50 U/L",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 25
+            },
             {
               "date": "2022-09-22",
               "value": 20
@@ -2802,11 +2917,15 @@ window.PAULO_LABS = {
           "marker_en": "ALT (TGP)",
           "marker_pt": "ALT (TGP)",
           "unit": "U/L",
-          "ref_low": 5,
-          "ref_high": 55,
-          "ref_text_en": "5 – 55 U/L",
-          "ref_text_pt": "5 – 55 U/L",
+          "ref_low": 10,
+          "ref_high": 50,
+          "ref_text_en": "10 – 50 U/L",
+          "ref_text_pt": "10 – 50 U/L",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 21
+            },
             {
               "date": "2022-09-22",
               "value": 20
@@ -2870,6 +2989,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "< 1,2 mg/dL",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0.3
+            },
+            {
               "date": "2013-07-27",
               "value": 0.48
             }
@@ -2885,6 +3008,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "< 0,2 mg/dL",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0.2
+            },
+            {
               "date": "2013-07-27",
               "value": 0.2
             }
@@ -2899,6 +3026,10 @@ window.PAULO_LABS = {
           "ref_text_en": "< 0.8 mg/dL",
           "ref_text_pt": "< 0,8 mg/dL",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 0.1
+            },
             {
               "date": "2013-07-27",
               "value": 0.28
@@ -3134,8 +3265,8 @@ window.PAULO_LABS = {
       "slug": "inflammatory",
       "title_en": "Cardiac & inflammatory markers",
       "title_pt": "Marcadores cardíacos e inflamatórios",
-      "subtitle_en": "CRP, ESR, CK-MB, troponin I",
-      "subtitle_pt": "PCR, VHS, CK-MB, troponina I",
+      "subtitle_en": "CRP, ESR, CK-MB, troponin I, NT-proBNP",
+      "subtitle_pt": "PCR, VHS, CK-MB, troponina I, NT-proBNP",
       "markers": [
         {
           "marker_en": "ESR (sedimentation rate)",
@@ -3158,10 +3289,14 @@ window.PAULO_LABS = {
           "marker_pt": "Proteína C reativa (PCR)",
           "unit": "mg/L",
           "ref_low": null,
-          "ref_high": 6.0,
-          "ref_text_en": "< 6 mg/L",
-          "ref_text_pt": "< 6 mg/L",
+          "ref_high": 5.0,
+          "ref_text_en": "< 5 mg/L",
+          "ref_text_pt": "< 5 mg/L",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 3
+            },
             {
               "date": "2019-03-05",
               "value": 4.9
@@ -3205,6 +3340,22 @@ window.PAULO_LABS = {
               "value_text": "< 0,03"
             }
           ]
+        },
+        {
+          "marker_en": "NT-proBNP",
+          "marker_pt": "NT-proBNP",
+          "unit": "pg/mL",
+          "ref_low": null,
+          "ref_high": 125.0,
+          "ref_text_en": "< 125 pg/mL",
+          "ref_text_pt": "< 125 pg/mL",
+          "points": [
+            {
+              "date": "2026-07-10",
+              "value": 205,
+              "flag": "H"
+            }
+          ]
         }
       ]
     },
@@ -3219,11 +3370,15 @@ window.PAULO_LABS = {
           "marker_en": "Prothrombin time",
           "marker_pt": "Tempo de protrombina (TP)",
           "unit": "s",
-          "ref_low": 10.3,
-          "ref_high": 14.2,
-          "ref_text_en": "10.3 – 14.2 s",
-          "ref_text_pt": "10,3 – 14,2 s",
+          "ref_low": 9.8,
+          "ref_high": 12.7,
+          "ref_text_en": "9.8 – 12.7 s",
+          "ref_text_pt": "9,8 – 12,7 s",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 9.9
+            },
             {
               "date": "2018-08-16",
               "value": 11.1
@@ -3244,6 +3399,10 @@ window.PAULO_LABS = {
           "ref_text_pt": "0,86 – 1,2",
           "points": [
             {
+              "date": "2026-07-10",
+              "value": 0.9
+            },
+            {
               "date": "2018-08-16",
               "value": 0.94
             }
@@ -3254,10 +3413,14 @@ window.PAULO_LABS = {
           "marker_pt": "Atividade de protrombina",
           "unit": "%",
           "ref_low": 70,
-          "ref_high": null,
-          "ref_text_en": "> 70 %",
-          "ref_text_pt": "> 70 %",
+          "ref_high": 130,
+          "ref_text_en": "70 – 130 %",
+          "ref_text_pt": "70 – 130 %",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 106
+            },
             {
               "date": "2018-08-16",
               "value": 100
@@ -3268,11 +3431,15 @@ window.PAULO_LABS = {
           "marker_en": "aPTT",
           "marker_pt": "TTPA",
           "unit": "s",
-          "ref_low": 25.4,
-          "ref_high": 38.4,
-          "ref_text_en": "25.4 – 38.4 s",
-          "ref_text_pt": "25,4 – 38,4 s",
+          "ref_low": null,
+          "ref_high": 37.3,
+          "ref_text_en": "< 37.3 s",
+          "ref_text_pt": "< 37,3 s",
           "points": [
+            {
+              "date": "2026-07-10",
+              "value": 24.6
+            },
             {
               "date": "2018-08-16",
               "value": 28.9
