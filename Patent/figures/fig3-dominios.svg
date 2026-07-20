@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1754" height="1240" viewBox="0 0 1754 1240">
+<rect x="0" y="0" width="1754" height="1240" fill="#FFFFFF"/>
+<text x="35" y="62" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="start" fill="#000000">FIG. 3</text>
+<text x="180" y="62" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" text-anchor="start" fill="#000000">Dimensões configuráveis, não pilares fixos</text>
+<rect x="120" y="120" width="1000" height="230" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.6"/>
+<text x="620" y="158" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#000000">Dimensões configuráveis (N ≥ 2)</text>
+<rect x="150" y="195" width="220" height="130" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="260.0" y="266.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Física</text>
+<rect x="410" y="195" width="220" height="130" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="520.0" y="266.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Mental</text>
+<rect x="670" y="195" width="220" height="130" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="780.0" y="266.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Espiritual</text>
+<rect x="930" y="195" width="175" height="130" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4" stroke-dasharray="9 7"/>
+<text x="1017.5" y="252.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Dimensão</text>
+<text x="1017.5" y="279.96000000000004" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">adicional</text>
+<rect x="1200" y="150" width="490" height="170" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.5" stroke-dasharray="9 7"/>
+<text x="1445" y="212.28" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="normal" text-anchor="middle" fill="#000000">Sinais externos</text>
+<text x="1445" y="239.28" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="normal" text-anchor="middle" fill="#000000">(ambiente / epidemiologia)</text>
+<text x="1445" y="300" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle" fill="#000000">opcional</text>
+<rect x="360" y="460" width="520" height="150" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.7"/>
+<text x="620.0" y="526.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Motor de correlação entre domínios</text>
+<text x="620.0" y="556.46" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">alinhamento temporal dos eventos</text>
+<polyline points="260.0,325 400,460" fill="none" stroke="#000000" stroke-width="1.4" stroke-linejoin="miter"/>
+<polygon points="400,460 387.17134630660996,454.5754590595084 394.11270201245225,447.37701610530155" fill="#000000" stroke="none"/>
+<polyline points="520.0,325 520.0,460" fill="none" stroke="#000000" stroke-width="1.4" stroke-linejoin="miter"/>
+<polygon points="520.0,460 515.0,447.0 525.0,447.0" fill="#000000" stroke="none"/>
+<polyline points="780.0,325 780.0,460" fill="none" stroke="#000000" stroke-width="1.4" stroke-linejoin="miter"/>
+<polygon points="780.0,460 775.0,447.0 785.0,447.0" fill="#000000" stroke="none"/>
+<polyline points="1017.5,325 840,460" fill="none" stroke="#000000" stroke-width="1.4" stroke-linejoin="miter"/>
+<polygon points="840,460 847.320462196569,448.1504922790606 853.3741369073612,456.10995347287985" fill="#000000" stroke="none"/>
+<polyline points="1445,320 1445,535 880,535" fill="none" stroke="#000000" stroke-width="1.3" stroke-linejoin="miter" stroke-dasharray="8 6"/>
+<polygon points="880,535 893.0,530.0 893.0,540.0" fill="#000000" stroke="none"/>
+<text x="1150" y="522" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#000000">concretização opcional</text>
+<rect x="360" y="720" width="520" height="150" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="620.0" y="774.12" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" text-anchor="middle" fill="#000000">Indicadores integrados e apresentação</text>
+<text x="620.0" y="801.12" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">dado do paciente x inferência de IA;</text>
+<text x="620.0" y="828.12" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">interpretação diagnóstica do médico</text>
+<polyline points="620,610 620,720" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="620,720 615.0,707.0 625.0,707.0" fill="#000000" stroke="none"/>
+<text x="1250" y="632" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">Alinhamento temporal entre domínios</text>
+<text x="1050" y="674" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="start" fill="#000000">medicação</text>
+<polyline points="1260,680 1610,680" fill="none" stroke="#000000" stroke-width="1.2" stroke-linejoin="miter"/>
+<text x="1050" y="729" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="start" fill="#000000">humor / pânico</text>
+<polyline points="1260,735 1610,735" fill="none" stroke="#000000" stroke-width="1.2" stroke-linejoin="miter"/>
+<text x="1050" y="784" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="start" fill="#000000">variabilidade de FC</text>
+<polyline points="1260,790 1610,790" fill="none" stroke="#000000" stroke-width="1.2" stroke-linejoin="miter"/>
+<rect x="1388" y="660" width="44" height="150" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.1" stroke-dasharray="9 7"/>
+<text x="1410" y="652" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#000000">mesma janela</text>
+</svg>

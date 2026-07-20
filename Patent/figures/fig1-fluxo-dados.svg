@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1754" height="1240" viewBox="0 0 1754 1240">
+<rect x="0" y="0" width="1754" height="1240" fill="#FFFFFF"/>
+<text x="35" y="62" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="bold" text-anchor="start" fill="#000000">FIG. 1</text>
+<text x="180" y="62" font-family="Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" text-anchor="start" fill="#000000">Da coleta ao suporte à decisão clínica</text>
+<rect x="350.0" y="120" width="420" height="96" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.6"/>
+<text x="560.0" y="174.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Fontes heterogêneas de dados</text>
+<rect x="350.0" y="268" width="420" height="110" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.6"/>
+<text x="560.0" y="315.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Ingestão e extração estruturada</text>
+<text x="560.0" y="342.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">(com proveniência)</text>
+<polygon points="560,428 770,520 560,612 350,520" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="560" y="512.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Confiança</text>
+<text x="560" y="539.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">suficiente?</text>
+<rect x="350.0" y="670" width="420" height="96" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.6"/>
+<text x="560.0" y="724.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Registro clínico unificado</text>
+<rect x="350.0" y="818" width="420" height="110" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.7" stroke-dasharray="9 7"/>
+<text x="560.0" y="865.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Desidentificação antes</text>
+<text x="560.0" y="892.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">da inferência externa</text>
+<rect x="350.0" y="966" width="420" height="128" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.6"/>
+<text x="560.0" y="1010.46" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Correlação entre domínios e apresentação</text>
+<text x="560.0" y="1036.46" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">dado do paciente x inferência de IA;</text>
+<text x="560.0" y="1062.46" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="middle" fill="#000000">interpretação diagnóstica do médico</text>
+<polyline points="560,216 560,268" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="560,268 555.0,255.0 565.0,255.0" fill="#000000" stroke="none"/>
+<polyline points="560,378 560,428" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="560,428 555.0,415.0 565.0,415.0" fill="#000000" stroke="none"/>
+<polyline points="560,612 560,670" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="560,670 555.0,657.0 565.0,657.0" fill="#000000" stroke="none"/>
+<text x="582" y="647.0" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#000000">sim</text>
+<polyline points="560,766 560,818" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="560,818 555.0,805.0 565.0,805.0" fill="#000000" stroke="none"/>
+<polyline points="560,928 560,966" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="560,966 555.0,953.0 565.0,953.0" fill="#000000" stroke="none"/>
+<rect x="1030" y="465" width="300" height="110" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="1180.0" y="512.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Revisão pela</text>
+<text x="1180.0" y="539.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Client Services</text>
+<circle cx="1288" cy="480.2" r="10.2" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<line x1="1288" y1="490.4" x2="1288" y2="524.4" stroke="#000000" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="1271.0" y1="503.15" x2="1305.0" y2="503.15" stroke="#000000" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="1288" y1="524.4" x2="1274.4" y2="549.9" stroke="#000000" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="1288" y1="524.4" x2="1301.6" y2="549.9" stroke="#000000" stroke-width="1.4" stroke-linecap="round"/>
+<polyline points="770,520 1030,520" fill="none" stroke="#000000" stroke-width="1.7" stroke-linejoin="miter"/>
+<polygon points="1030,520 1017.0,525.0 1017.0,515.0" fill="#000000" stroke="none"/>
+<text x="900.0" y="508" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="normal" text-anchor="middle" fill="#000000">não</text>
+<polyline points="1030,545 980,545 980,718 770.0,718" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="miter"/>
+<polygon points="770.0,718 783.0,713.0 783.0,723.0" fill="#000000" stroke="none"/>
+<text x="985" y="700" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="start" fill="#000000">após revisão</text>
+<rect x="1030" y="818" width="300" height="110" rx="0" fill="#FFFFFF" stroke="#000000" stroke-width="1.4"/>
+<text x="1180.0" y="865.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">Serviço de inferência</text>
+<text x="1180.0" y="892.96" font-family="Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" text-anchor="middle" fill="#000000">externo (terceiro)</text>
+<polyline points="770.0,850 1030,850" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="miter"/>
+<polygon points="1030,850 1017.0,855.0 1017.0,845.0" fill="#000000" stroke="none"/>
+<text x="900.0" y="838" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#000000">dados desidentificados</text>
+<polyline points="1030,895 770.0,895" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="miter"/>
+<polygon points="770.0,895 783.0,890.0 783.0,900.0" fill="#000000" stroke="none"/>
+<text x="900.0" y="912" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#000000">resposta da inferência</text>
+<text x="60" y="1120" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="start" fill="#000000">CONVENÇÕES</text>
+<line x1="60" y1="1142" x2="100" y2="1142" stroke="#000000" stroke-width="1.6"/>
+<text x="110" y="1147" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="start" fill="#000000">fluxo de dados</text>
+<line x1="290" y1="1142" x2="330" y2="1142" stroke="#000000" stroke-width="1.7" stroke-dasharray="9 7"/>
+<text x="340" y="1147" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="start" fill="#000000">fronteira de confiança</text>
+<text x="560" y="1147" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="normal" text-anchor="start" fill="#000000">losango = decisão   ·   boneco = revisor humano</text>
+</svg>
