@@ -4284,7 +4284,7 @@
      file(s) and awaits the load before the providers run. */
   var PATIENT_DATA_ASSETS = {};
   PATIENT_DATA_ASSETS[PAULO_SILOTTO] = [
-    'assets/paulo-labs.js?v=6', 'assets/paulo-ergometric.js?v=1',
+    'assets/paulo-labs.js?v=7', 'assets/paulo-ergometric.js?v=1',
     'assets/paulo-sleep.js?v=1', 'assets/paulo-mental.js?v=1',
   ];
   PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=3', 'assets/silvana-vitals.js?v=1'];
@@ -6747,6 +6747,10 @@
       P + '.silv-hist-val { font-family: "IBM Plex Mono", monospace; }',
       P + '.silv-hist-note { font-size: 11px; color: #7A8FA6; }',
       P + '.silv-latest-date { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #7A8FA6; }',
+      // "Older exam" chip — flags a card whose latest value predates the newest draw.
+      P + '.lab-age-badge { display: inline-flex; align-items: center; gap: 5px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }',
+      P + '.lab-age-badge.lab-age-older { background: #FBEFD6; color: #7C5B15; border: 1px solid #EAD9A8; }',
+      P + '.lab-age-badge.lab-age-older::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: #B8954A; }',
       P + '.lab-cmp-val[data-flag="high"] { color: #7A2E22; }',
       P + '.lab-cmp-val[data-flag="low"]  { color: #B8862B; }',
       P + '.paulo-labs-panels { margin-top: 8px; }',
@@ -7196,19 +7200,36 @@
     return main;
   }
 
+  // Set by renderPauloLabsSection so the shared silvanaMarkerCard can flag Paulo
+  // cards whose latest value predates the newest draw. Null for everyone else.
+  var pauloLabsLatestDate = null;
+
   function renderPauloLabsSection() {
     var L = window.PAULO_LABS;
     if (!L || !L.panels || !L.panels.length) return '';
     injectPauloLabsStyles();
     var nMarkers = L.panels.reduce(function (a, p) { return a + p.markers.length; }, 0);
 
+    // Newest collection date across every marker/point; cards older than this get
+    // an "older exam" chip in silvanaMarkerCard.
+    pauloLabsLatestDate = null;
+    L.panels.forEach(function (p) {
+      (p.markers || []).forEach(function (m) {
+        (m.points || []).forEach(function (pt) {
+          if (pt.date && (!pauloLabsLatestDate || dateMs(pt.date) > dateMs(pauloLabsLatestDate))) {
+            pauloLabsLatestDate = pt.date;
+          }
+        });
+      });
+    });
+
     var head =
       '<div class="container">' +
         '<div class="section-label">' + t('9 · Laboratory', '9 · Laboratorial') + '</div>' +
         '<h2 class="section-title">' + t('Laboratory exams', 'Exames laboratoriais') + '</h2>' +
         '<p class="section-desc">' +
-          t('Fifteen years of blood and urine work (2011-2026), reconciled from 30 scanned reports across 12+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; the full side-by-side comparison sits at the bottom, most recent at left. The 28 reports whose originals are archived are linked beneath.',
-            'Quinze anos de exames de sangue e urina (2011-2026), reconciliados de 30 laudos digitalizados de 12+ laboratórios em ' + nMarkers + ' marcadores agrupados por painel. Cada cartão mostra o valor mais recente com sua barra de referência e um histórico por marcador expansível; a comparação completa lado a lado fica ao final, mais recente à esquerda. Os 28 laudos cujos originais estão arquivados são linkados abaixo.') +
+          t('Fifteen years of blood and urine work (2011-2026), reconciled from 31 scanned reports across 12+ laboratories into ' + nMarkers + ' markers grouped by panel. Each card shows the latest value with its reference bar and an expandable per-marker history; markers not repeated in the newest draw carry an "older exam" tag with their date. The full side-by-side comparison sits at the bottom, most recent at left. The 28 reports whose originals are archived are linked beneath.',
+            'Quinze anos de exames de sangue e urina (2011-2026), reconciliados de 31 laudos digitalizados de 12+ laboratórios em ' + nMarkers + ' marcadores agrupados por painel. Cada cartão mostra o valor mais recente com sua barra de referência e um histórico por marcador expansível; marcadores não repetidos na coleta mais recente trazem a etiqueta "exame anterior" com a data. A comparação completa lado a lado fica ao final, mais recente à esquerda. Os 28 laudos cujos originais estão arquivados são linkados abaixo.') +
         '</p>' +
       '</div>';
 
@@ -7220,7 +7241,7 @@
       '</div>';
     var docsHtml = silvanaDocsList(L.documents);
 
-    return (
+    var out = (
       buildPauloLabsAiCard() +
       '<section class="report-section" id="labs">' +
         head +
@@ -7232,6 +7253,8 @@
         '</div>' +
       '</section>'
     );
+    pauloLabsLatestDate = null;
+    return out;
   }
 
   /* ── Paulo Silotto · ergometric (exercise stress test) series ─────────
@@ -8198,6 +8221,17 @@
 
     var latestDate = latest ? formatDate(latest.date) : '—';
 
+    // When pauloLabsLatestDate is set (Paulo's labs section only — Silvana leaves
+    // it null), flag any card whose latest value predates the newest overall draw
+    // as an "older exam", carrying its own date. Fresh cards keep "Latest sample:".
+    var ageBadge = '';
+    if (pauloLabsLatestDate && latest && latest.date &&
+        dateMs(latest.date) < dateMs(pauloLabsLatestDate)) {
+      ageBadge = '<span class="lab-age-badge lab-age-older">' +
+        t('Older exam &middot; ', 'Exame anterior &middot; ') + escapeHtml(latestDate) +
+        '</span>';
+    }
+
     return (
       '<div class="lab-test lab-test-' + status + '">' +
         '<div class="lab-test-head">' +
@@ -8220,7 +8254,7 @@
             '<span class="lang-pt">' + escapeHtml(m.ref_text_pt || '—') + '</span>' +
           '</div>' +
           '<div class="silv-latest-date">' +
-            t('Latest sample: ', 'Última amostra: ') + escapeHtml(latestDate) +
+            (ageBadge || (t('Latest sample: ', 'Última amostra: ') + escapeHtml(latestDate))) +
           '</div>' +
         '</div>' +
         noteHtml +
