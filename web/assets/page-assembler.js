@@ -295,14 +295,14 @@
           var el = list[k];
           if (!el.id || !railIsVisible(el)) continue;
           var opt = railLabelOptions(el);
-          if (opt.primary) raw.push({ id: el.id, opt: opt });
+          if (opt.primary) raw.push({ id: el.id, el: el, opt: opt });
         }
       } else {
         if (!railIsVisible(secEl)) continue;
         var ttl = titleById[id];
         if (!ttl) continue; // untitled scaffolding (legend etc.) → not a nav target
         if (!secEl.id) secEl.id = 'sec-' + id;
-        raw.push({ id: secEl.id, opt: { primary: { html: t(esc(ttl.en), esc(ttl.pt)), key: String(ttl.en || '').toLowerCase() }, alt: null } });
+        raw.push({ id: secEl.id, el: secEl, opt: { primary: { html: t(esc(ttl.en), esc(ttl.pt)), key: String(ttl.en || '').toLowerCase() }, alt: null } });
       }
     }
     /* De-dup: when several sections resolve to the same primary label (all the
@@ -313,7 +313,7 @@
     return raw.map(function (r) {
       var choice = r.opt.primary;
       if (counts[choice.key] > 1 && r.opt.alt && r.opt.alt.key && r.opt.alt.key !== choice.key) choice = r.opt.alt;
-      return { id: r.id, html: choice.html };
+      return { id: r.id, el: r.el, html: choice.html };
     });
   }
   function buildSideNav(targets) {
@@ -331,7 +331,12 @@
       a.innerHTML = tg.html;
       a.addEventListener('click', function (ev) {
         ev.preventDefault();
-        var dest = document.getElementById(tg.id);
+        /* Resolve to the exact element the rail collected inside the assembler
+           root — NOT document.getElementById(tg.id). The hidden static shell
+           (display:none, left in the DOM by hidePageBody) can carry the same id
+           (e.g. #labs on the exams shell), and getElementById would return that
+           first, stranding the scroll on an invisible node. */
+        var dest = tg.el || document.getElementById(tg.id);
         if (!dest) return;
         dest.scrollIntoView({ behavior: 'smooth', block: 'start' });
         try { history.replaceState(null, '', '#' + tg.id); } catch (_) {}
@@ -353,7 +358,7 @@
       });
     }, { rootMargin: '-72px 0px -68% 0px', threshold: 0 });
     targets.forEach(function (tg) {
-      var el = document.getElementById(tg.id);
+      var el = tg.el || document.getElementById(tg.id); // scoped element, dodges duplicate-id shells
       if (el) obs.observe(el);
     });
   }
