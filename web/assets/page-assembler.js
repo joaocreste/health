@@ -198,9 +198,11 @@
         'body.lumen-assembled .jc-home-dash-wrap{background:transparent;}' +
       'body.lumen-has-rail > .lumen-page-root{margin-left:var(--side-nav-w,240px);}' +
       /* the banner full-bleeds left (-24px) out of the overview padding; with the
-         rail present that poke lands under the rail — cancel it and give the
-         banner text a clean inset from the rail edge. */
-      'body.lumen-has-rail .lumen-page-root.jc-overview:not(.jc-home) > .lumen-hero{margin-left:0;}' +
+         rail present, page-root sits at margin-left:240px, so that same -24px
+         lands the band's left edge flush on the rail's right edge (no gap, no
+         poke-under). banner-inner's padding-left:24px keeps the text inset from
+         the seam. (Zeroing this left a 24px light-blue strip between rail+band.) */
+      'body.lumen-has-rail .lumen-page-root.jc-overview:not(.jc-home) > .lumen-hero{margin-left:-24px;}' +
       'body.lumen-has-rail .lumen-page-root .banner-inner,' +
         'body.lumen-has-rail .lumen-page-root .lumen-ai-legend,' +
         'body.lumen-has-rail .lumen-page-root .lumen-tail{padding-left:24px;}' +
