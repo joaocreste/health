@@ -33,6 +33,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -166,6 +167,8 @@ async function apply() {
         deep_sleep_minutes=EXCLUDED.deep_sleep_minutes, rem_sleep_minutes=EXCLUDED.rem_sleep_minutes, spo2_pct=EXCLUDED.spo2_pct`),
   ];
   await sql.transaction(queries);
+
+  await markSourceWritten(sql, pid, { writer: "ingest-john-oura" });
 
   const after = await sql`SELECT count(*)::int n, min(day) mn, max(day) mx FROM vitals_daily WHERE patient_id=${pid} AND source=${SOURCE}`;
   const afterAgg = await sql`SELECT count(*)::int n FROM vitals_daily WHERE patient_id=${pid} AND source='aggregate'`;

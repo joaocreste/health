@@ -14,6 +14,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -41,6 +42,9 @@ for (const r of recoveries) {
   if (APPLY && !cur[0].d) {
     await sql`update writings set written_at = ${r.recovered_date} where id = ${cur[0].id} and written_at is null`;
   }
+}
+if (APPLY) {
+  await markSourceWritten(sql, PID, { writer: "backfill-joao-writing-dates" });
 }
 const tally = await sql`select count(*)::int total, count(written_at)::int dated from writings where patient_id = ${PID}`;
 console.log(`\n${APPLY ? "APPLIED." : "DRY RUN - pass --apply."} Corpus now: ${tally[0].dated}/${tally[0].total} dated.`);

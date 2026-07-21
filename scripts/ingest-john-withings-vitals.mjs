@@ -25,6 +25,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -125,6 +126,7 @@ for (let i = 0; i < all.length; i += CH) {
   process.stdout.write(`\r  inserted ${Math.min(i + CH, all.length)}/${all.length}…`);
 }
 process.stdout.write("\n");
+await markSourceWritten(sql, pid, { writer: "ingest-john-withings-vitals" });
 const after = await sql`SELECT source, count(*)::int n, min(day)::text mn, max(day)::text mx FROM vitals_daily WHERE patient_id=${pid} GROUP BY source ORDER BY source`;
 console.log(`before : ${JSON.stringify(before)}`);
 console.log(`after  : ${JSON.stringify(after)}`);

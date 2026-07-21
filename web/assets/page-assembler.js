@@ -363,7 +363,7 @@
   /* The unified page banner (prompt #2b): breadcrumb → title → description →
      identity strip. Identity strictly from /api/patient-summary (I-3);
      absent fields are omitted entirely — no dashes, no placeholders. */
-  function renderPageBanner(summary, pageMeta, generatedAt) {
+  function renderPageBanner(summary, pageMeta, generatedAt, stale) {
     var meta = pageMeta || {};
     var p = (summary && summary.patient) || {};
     var crumb = meta.pillar ? t(crumbHtml(meta.pillar.en), crumbHtml(meta.pillar.pt)) : '';
@@ -381,8 +381,14 @@
     }
     if (p.country_of_residence) items += bannerIdItem('Locale', 'Local', esc(p.country_of_residence));
     var prep = dateShort(generatedAt);
-    if (prep) items += bannerIdItem('Prepared', 'Preparado',
-      '<span class="lang-en">' + prep.en + '</span><span class="lang-pt">' + prep.pt + '</span>');
+    if (prep) {
+      var prepVal = '<span class="lang-en">' + prep.en + '</span><span class="lang-pt">' + prep.pt + '</span>';
+      // Read-time staleness: newer source data has been ingested than this narrative
+      // reflects. Never let the banner silently imply the page is fully current.
+      if (stale) prepVal += ' <span class="id-soft" style="color:#B8954A">' +
+        t('&middot; update pending', '&middot; atualiza&ccedil;&atilde;o pendente') + '</span>';
+      items += bannerIdItem('Prepared', 'Preparado', prepVal, stale ? 'id-item--stale' : '');
+    }
 
     /* <header>, not <section>: on the static shells the banner replaces a
        <header> element in place, and section.report-section zebra striping
@@ -565,7 +571,8 @@
     /* 1 · hero — the unified page banner */
     var heroWrap = document.createElement('div');
     heroWrap.className = 'lumen-hero';
-    heroWrap.innerHTML = renderPageBanner(payloads.summary, meta, newestGeneratedAt(payloads));
+    heroWrap.innerHTML = renderPageBanner(payloads.summary, meta, newestGeneratedAt(payloads),
+      payloads.dashboard && payloads.dashboard.freshness && payloads.dashboard.freshness.stale);
     root.appendChild(heroWrap);
 
     /* 2+3 · concise AI summary, then topic sections, in registry order.

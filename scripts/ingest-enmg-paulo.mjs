@@ -11,6 +11,7 @@
 import { neon } from "@neondatabase/serverless";
 import { readFileSync } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const DB = process.env.DATABASE_URL;
 if (!DB) { console.error("DATABASE_URL not set"); process.exit(1); }
@@ -186,5 +187,7 @@ async function main() {
   console.log("audit_log:", JSON.stringify(audit[0]));
   console.log("\nstructured_data block counts:",
     `motor_ncs=${row.motor_ncs_rows} f_wave=${row.f_wave_rows} sensory_ncs=${row.sensory_ncs_rows} needle_emg=${row.needle_emg_rows}`);
+
+  await markSourceWritten(sql, PATIENT_ID, { writer: "ingest-enmg-paulo" });
 }
 main().catch((e) => { console.error("FAILED:", e.message); process.exit(1); });

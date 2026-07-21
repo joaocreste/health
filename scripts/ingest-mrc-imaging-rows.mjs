@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const APPLY = process.argv.includes("--apply");
@@ -75,6 +76,7 @@ async function main() {
     }),
   ];
   await sql.transaction(queries);
+  await markSourceWritten(sql, pid, { writer: "ingest-mrc-imaging-rows" });
   const after = await sql`SELECT modality, body_part, study_date, file_count, manifest_blob_key
     FROM imaging_studies WHERE patient_id=${pid} ORDER BY study_date DESC`;
   console.log(`\nimaging_studies ${before} -> ${after.length}:`);

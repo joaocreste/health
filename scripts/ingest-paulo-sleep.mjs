@@ -29,6 +29,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -279,6 +280,7 @@ async function main() {
   const i = await sql`SELECT count(*)::int n FROM imaging_studies WHERE patient_id=${pid} AND blob_prefix=${disePrefix}`;
   const docs = await sql`SELECT count(*)::int n FROM documents WHERE patient_id=${pid} AND metadata->>'exam_type'='sleep_study'`;
   console.log(`\n✓ Inserted — sleep_studies(PSG): ${s[0].n}  imaging_studies(DISE): ${i[0].n}  sleep documents: ${docs[0].n}`);
+  await markSourceWritten(sql, pid, { writer: "ingest-paulo-sleep" });
   console.log("Done.");
 }
 

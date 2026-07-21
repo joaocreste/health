@@ -13,6 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -81,6 +82,7 @@ async function apply() {
   const other = await sql`SELECT count(*)::int n FROM ecg_events WHERE patient_id=${pid} AND source<>${SOURCE}`;
   console.log(`apple_watch ecg before->after : ${before[0].n} -> ${after[0].n}  (${after[0].mn} … ${after[0].mx})`);
   console.log(`non-apple ecg rows (untouched): ${other[0].n}`);
+  await markSourceWritten(sql, pid, { writer: "ingest-joao-apple-ecg" });
   console.log("✓ Apple ECG ecg_events replaced.");
 }
 

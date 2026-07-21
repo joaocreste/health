@@ -30,6 +30,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -95,3 +96,5 @@ console.log(`\n✓ deleted ${del.length} prior row(s); inserted writing ${ins[0]
 const chk = await sql`select length(extracted_text) chars, (fts is not null) has_fts
                       from writings where id = ${ins[0].id}`;
 console.log(`✓ stored ${chk[0].chars} chars · fts ${chk[0].has_fts ? "indexed" : "NULL"}`);
+
+await markSourceWritten(sql, patientId, { writer: "ingest-joao-claude-conversation-2026-07-17" });

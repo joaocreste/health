@@ -18,6 +18,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -115,6 +116,8 @@ for (const e of events) {
     VALUES (${pid}, ${e.occurred_on}::date, ${e.category}, ${e.title}, ${e.description || null}, ${e.significance ?? null})`;
   nEvents++;
 }
+
+await markSourceWritten(sql, pid, { writer: "load-john-psych-profile" });
 
 const chk = await sql`SELECT
   (SELECT count(*)::int FROM psych_items WHERE patient_id=${pid}) pi,

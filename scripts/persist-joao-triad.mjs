@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -52,5 +53,6 @@ for (const a of anchors) {
             'emerging', 'texture', ${a.en}, ${a.pt}, null, false, 60, 'pending_review')`;
 }
 console.log(`✓ ${anchors.length} joao-v3 anchors upserted (replaced ${delA.length}), status=pending_review`);
+await markSourceWritten(sql, PID, { writer: "persist-joao-triad" });
 const chk = await sql`select count(*)::int n from reflective_items where patient_id = ${PID} and item_key like 'joao-v3-%'`;
 console.log(`✓ read-back: ${chk[0].n} anchor rows in DB`);

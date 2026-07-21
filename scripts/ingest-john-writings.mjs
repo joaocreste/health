@@ -20,6 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -93,4 +94,5 @@ for (const r of rows) {
 }
 const after = await sql`SELECT count(*)::int n, min(written_at) mn, max(written_at) mx FROM writings WHERE patient_id=${pid}`;
 console.log(`\nwritings before -> after : ${before[0].n} -> ${after[0].n}  (dated ${after[0].mn} … ${after[0].mx})`);
+await markSourceWritten(sql, pid, { writer: "ingest-john-writings" });
 console.log("✓ writings ingested.");

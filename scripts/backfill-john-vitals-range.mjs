@@ -29,6 +29,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -229,3 +230,5 @@ const chk2 = await sql`SELECT count(*)::int n FROM vitals_daily WHERE patient_id
 const chk3 = await sql`SELECT count(*)::int n FROM vitals_daily WHERE patient_id=${pid} AND source='withings_cuff' AND extras ? 'bp_list'`;
 console.log(`✓ hr_readings: ${chk[0].n} rows (${chk[0].mn} … ${chk[0].mx})`);
 console.log(`✓ oura days with sleep_periods: ${chk2[0].n} · cuff days with bp_list: ${chk3[0].n}`);
+
+await markSourceWritten(sql, pid, { writer: "backfill-john-vitals-range" });

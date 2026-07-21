@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -82,4 +83,5 @@ const after = await sql`SELECT count(*)::int n, min(recorded_at)::date::text mn,
 const other = await sql`SELECT source, count(*)::int n FROM ecg_events WHERE patient_id=${pid} AND source<>${SOURCE} GROUP BY source`;
 console.log(`withings ecg before->after : ${before[0].n} -> ${after[0].n}  (${after[0].mn} … ${after[0].mx})`);
 console.log(`other ecg sources (untouched): ${JSON.stringify(other)}`);
+await markSourceWritten(sql, pid, { writer: "ingest-john-withings-ecg" });
 console.log("✓ Withings ecg_events replaced.");

@@ -33,6 +33,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -174,6 +175,7 @@ async function apply() {
   console.log(`oura rows  before→after : ${before[0].n} → ${after[0].n}  (${after[0].mn} … ${after[0].mx})`);
   console.log(`aggregate rows (guard)  : ${beforeAgg[0].n} → ${afterAgg[0].n}  (must be UNCHANGED)`);
   if (beforeAgg[0].n !== afterAgg[0].n) { console.error("✗✗ aggregate row count changed — investigate!"); process.exit(1); }
+  await markSourceWritten(sql, pid, { writer: "ingest-joao-oura" });
   console.log("✓ Oura vitals_daily replaced.");
 }
 

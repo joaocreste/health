@@ -23,6 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -92,6 +93,8 @@ const ins = await sql`
   values (${patientId}, ${TITLE}, ${WRITTEN}, ${LANG}, ${BLOB_KEY}, ${text})
   returning id, created_at`;
 console.log(`\n✓ deleted ${del.length} prior row(s); inserted writing ${ins[0].id} at ${ins[0].created_at}`);
+
+await markSourceWritten(sql, patientId, { writer: "ingest-paulo-mental-account" });
 
 // Confirm FTS populated by the trigger.
 const chk = await sql`select length(extracted_text) chars, (fts is not null) has_fts

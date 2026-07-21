@@ -25,6 +25,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -95,6 +96,7 @@ const main = async () => {
     if (APPLY) await sql`UPDATE medications SET status = 'needs-review' WHERE id = ${o.id}`;
   }
   if (!orphans.length) console.log("\nNo orphaned active meds — DB set matches the CSV.");
+  if (APPLY) await markSourceWritten(sql, pid, { writer: "ingest-joao-medications" });
   console.log(`\n${APPLY ? "✓ Applied." : "Dry-run complete. Re-run with --apply to write."}`);
 };
 

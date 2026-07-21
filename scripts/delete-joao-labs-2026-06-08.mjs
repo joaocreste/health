@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -48,6 +49,7 @@ async function main() {
   if (!APPLY) { console.log("\n(dry run — no DB writes. Re-run with --apply.)"); return; }
 
   await sql`DELETE FROM lab_results WHERE patient_id=${pid} AND taken_at=${TAKEN_AT}::date`;
+  await markSourceWritten(sql, pid, { writer: "delete-joao-labs-2026-06-08" });
   const after = await sql`SELECT count(*)::int n, count(DISTINCT marker)::int markers, count(DISTINCT taken_at)::int dates, min(taken_at) mn, max(taken_at) mx FROM lab_results WHERE patient_id=${pid}`;
   console.log(`\ntotal after     : ${after[0].n}  (${after[0].markers} markers, ${after[0].dates} dates, ${after[0].mn} … ${after[0].mx})`);
   console.log("✓ Joao 2026-06-08 lab_results deleted. Other dates untouched.");

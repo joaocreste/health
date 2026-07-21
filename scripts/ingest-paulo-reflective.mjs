@@ -28,6 +28,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -205,6 +206,8 @@ for (const it of ITEMS) {
   n++;
 }
 console.log(`\n✓ upserted ${n} reflective_items`);
+
+await markSourceWritten(sql, patientId, { writer: "ingest-paulo-reflective" });
 
 // ── read-back proof ──────────────────────────────────────────────────────
 const cBySrc = await sql`select source, count(*)::int n from reflective_items where patient_id=${patientId} group by source order by source`;

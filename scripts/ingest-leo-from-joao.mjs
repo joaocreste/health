@@ -20,7 +20,8 @@
  *
  * Idempotent: deletes Leo's rows first, then re-clones. Reads DATABASE_URL/.env.
  */
-import { Pool, neonConfig } from "@neondatabase/serverless";
+import { Pool, neon, neonConfig } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 
@@ -32,6 +33,7 @@ const env = Object.fromEntries(
 );
 neonConfig.webSocketConstructor = globalThis.WebSocket; // Node 25 global WS
 const pool = new Pool({ connectionString: env.DATABASE_URL });
+const sql = neon(env.DATABASE_URL);
 const q = async (text, params = []) => (await pool.query(text, params)).rows;
 const J = "d984faba-4a3a-45ff-9ef2-fd52606a02d3"; // Joao (source)
 const L = "37fc9137-3597-474b-ad8c-36bdc00657f8"; // Leo  (dest)
@@ -164,6 +166,7 @@ async function main() {
   console.log("\nLEAK CHECK (all must be 0):");
   console.log(JSON.stringify(leak));
   console.log("\nDONE.");
+  await markSourceWritten(sql, L, { writer: "ingest-leo-from-joao" });
   await pool.end();
 }
 main().catch(async (e) => { console.error(e); try { await pool.end(); } catch {} process.exit(1); });

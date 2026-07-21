@@ -22,9 +22,10 @@
  * Idempotent: deletes John's rows first (FK-safe), then re-clones.
  * Reads DATABASE_URL from .env.
  */
-import { Pool, neonConfig } from "@neondatabase/serverless";
+import { Pool, neonConfig, neon } from "@neondatabase/serverless";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const env = Object.fromEntries(
   fs.readFileSync(new URL("../.env", import.meta.url), "utf8")
@@ -35,6 +36,8 @@ const env = Object.fromEntries(
 neonConfig.webSocketConstructor = globalThis.WebSocket;
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const q = async (text, params = []) => (await pool.query(text, params)).rows;
+// Tagged-template Neon client for markSourceWritten (Pool handles the actual writes).
+const sql = neon(env.DATABASE_URL);
 
 const J = "d984faba-4a3a-45ff-9ef2-fd52606a02d3"; // Joao (source) users.id
 const JOHN_CLERK = "pending:john-smith-jr-9d4e21";
@@ -250,6 +253,11 @@ async function main() {
     const na = (await q(`SELECT count(*)::int n FROM patient_access WHERE patient_id=$1`, [JOHN]))[0].n;
     console.log(`patient_access -> ${na} viewer grant(s) on John + John->Joao asset grant`);
   }
+
+  // ── freshness: John's clinical source tables just got cloned; advance his
+  // source watermark + enqueue an AI-insight rebuild so his narrative can't go
+  // silently stale. (Joao's rows are only read, so his freshness is untouched.)
+  await markSourceWritten(sql, JOHN, { writer: "clone-joao-to-john" });
 
   // ── 8. sanity ──
   console.log("\nSANITY (John row counts):");

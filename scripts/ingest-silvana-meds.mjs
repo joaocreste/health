@@ -39,6 +39,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -191,6 +192,8 @@ async function apply() {
   }
 
   await sql.transaction(queries);
+
+  await markSourceWritten(sql, pid, { writer: "ingest-silvana-meds" });
 
   const meds = await sql`SELECT name, dose, frequency, daily_dose_amount, daily_dose_unit, status
     FROM medications WHERE patient_id=${pid} ORDER BY (status='active') DESC, name ASC`;

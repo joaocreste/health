@@ -19,6 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -81,6 +82,8 @@ for (const it of items) {
   inserted++;
 }
 console.log(`\n✓ deleted ${del.length} prior row(s); inserted ${inserted} rows with status='${STATUS}'`);
+
+await markSourceWritten(sql, patientId, { writer: "ingest-joao-reflective" });
 
 // Blocking read-back proof (spec Gate 1): counts from the DB, not from the file.
 const chk = await sql`select source, quadrant, category, count(*)::int n,

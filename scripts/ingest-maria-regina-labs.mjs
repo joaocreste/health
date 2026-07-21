@@ -38,6 +38,7 @@ import path from "node:path";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -176,6 +177,7 @@ async function apply() {
          ${r.taken_at}::date, ${r.laboratory}, ${r.lab_city}, ${r.lab_country}, ${r.requesting_doctor}, ${r.performing_doctor})`),
   ];
   await sql.transaction(queries);
+  await markSourceWritten(sql, pid, { writer: "ingest-maria-regina-labs" });
   const after = await sql`SELECT count(*)::int n, count(DISTINCT marker)::int markers, min(taken_at) mn, max(taken_at) mx FROM lab_results WHERE patient_id=${pid}`;
   console.log(`\npatient pid : ${pid}`);
   console.log(`lab_results before -> after : ${before[0].n} -> ${after[0].n}  (${after[0].markers} markers, ${after[0].mn} … ${after[0].mx})`);

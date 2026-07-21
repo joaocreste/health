@@ -29,6 +29,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -213,6 +214,8 @@ async function main() {
         (${pid}, 'doctor_report', ${title}, ${pdfName}, ${e.source.source_pdf_r2_key},
          'application/pdf', ${size}, ${p.exam_date}, ${JSON.stringify(metadata)}::jsonb)`;
   }
+
+  await markSourceWritten(sql, pid, { writer: "ingest-paulo-ergometric" });
 
   const s = await sql`SELECT count(*)::int n FROM ergometric_studies WHERE patient_id=${pid}`;
   const docs = await sql`SELECT count(*)::int n FROM documents WHERE patient_id=${pid} AND metadata->>'exam_type'='ergometric_stress_test'`;

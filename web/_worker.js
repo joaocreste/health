@@ -4,6 +4,7 @@ import { makeZip } from "client-zip";
 import { neon } from "@neondatabase/serverless";
 import { authenticate } from "../lib/auth.js";
 import { handleIngest, reclassifyForPatient, backfillRequestingDoctor } from "../lib/ingest.js";
+import { markSourceWritten, computeStale } from "../lib/derived-freshness.js";
 import { fetchAllDashboards } from "../lib/dashboard.js";
 import { rebuildAiInsights, AI_INSIGHTS_SECTION } from "../lib/ai-insights.js";
 import { assignRanks, foldDeprecatedCard } from "../lib/card-order.js";
@@ -1813,7 +1814,11 @@ async function handlePatientDashboard(request, env) {
         .filter(([key]) => key !== "ai-insights"));
     }
     await auditScopedRead(sql, grant, "patient_dashboard_read", "/api/patient-dashboard", [...grant.scopes]);
-    return new Response(JSON.stringify({ sections }), {
+    // Read-time freshness: is the AI narrative built against older source data than
+    // what's now in the DB? Lets the page banner say so instead of silently lying.
+    let freshness = null;
+    try { freshness = await computeStale(sql, rows[0].id); } catch { /* non-fatal */ }
+    return new Response(JSON.stringify({ sections, freshness }), {
       headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
     });
   } catch (e) {
@@ -1921,21 +1926,19 @@ const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-
  * scripts/run-insights-local.mjs drains it (see project_insight_rebuild_wallclock). */
 async function enqueueInsightRebuild(sql, patientId, env, ctx) {
   try {
-    const running = await sql`
-      SELECT id FROM insight_jobs
-      WHERE patient_id = ${patientId} AND status IN ('queued','running')
-      ORDER BY started_at DESC LIMIT 1`;
-    if (running.length > 0) return { skipped: "already_running" };
-    const created = await sql`
-      INSERT INTO insight_jobs (patient_id, status, progress, stage)
-      VALUES (${patientId}, 'queued', 0, 'queued') RETURNING id`;
-    const jobId = created[0].id;
-    const work = runInsightJob(jobId, patientId, null, env);
-    if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work);
-    else work.catch(() => {});
-    return { enqueued: jobId };
+    // markSourceWritten advances the per-patient watermark AND enqueues a rebuild job
+    // (unless one is already pending) — the shared primitive ingest scripts also call.
+    const res = await markSourceWritten(sql, patientId, { writer: "ingest:reclassify" });
+    if (res.jobId) {
+      // Best-effort immediate rebuild: small records finish inside the Pages wall-clock;
+      // large ones die and leave the queued job for scripts/run-insights-local.mjs.
+      const work = runInsightJob(res.jobId, patientId, null, env);
+      if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work);
+      else work.catch(() => {});
+    }
+    return res;
   } catch (e) {
-    console.warn(`[insight] ingest-triggered rebuild enqueue failed for ${patientId}: ${e.message}`);
+    console.warn(`[insight] ingest-triggered rebuild failed for ${patientId}: ${e.message}`);
     return { error: e.message };
   }
 }

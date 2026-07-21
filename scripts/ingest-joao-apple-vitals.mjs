@@ -31,6 +31,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -243,6 +244,7 @@ async function main() {
   console.log(`apple_health rows before->after : ${beforeApple[0].n} -> ${afterApple[0].n}  (${afterApple[0].mn} … ${afterApple[0].mx})`);
   console.log(`other sources before : ${JSON.stringify(beforeOther)}`);
   console.log(`other sources after  : ${JSON.stringify(afterOther)}  (must be UNCHANGED)`);
+  await markSourceWritten(sql, pid, { writer: "ingest-joao-apple-vitals" });
   console.log("✓ Apple Health vitals_daily replaced.");
 }
 

@@ -38,8 +38,9 @@
  *
  * Usage: node scripts/ingest-paulo-bioimpedance.mjs [--skip-r2]
  */
-import { Pool, neonConfig } from "@neondatabase/serverless";
+import { Pool, neonConfig, neon } from "@neondatabase/serverless";
 import fs from "node:fs";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const env = Object.fromEntries(
   fs.readFileSync(new URL("../.env", import.meta.url), "utf8")
@@ -50,6 +51,7 @@ const env = Object.fromEntries(
 neonConfig.webSocketConstructor = globalThis.WebSocket;
 const pool = new Pool({ connectionString: env.DATABASE_URL });
 const q = async (t, p = []) => (await pool.query(t, p)).rows;
+const sql = neon(env.DATABASE_URL);
 
 const CLERK = "pending:paulo-silotto-df3441";
 const PDF = "/Users/joaocreste/Downloads/Bioimpedancia.pdf";
@@ -220,6 +222,8 @@ async function main() {
     [PID, SPOT_TS]
   );
   console.log("glucose_points upserted: 91 mg/dL capillary (source clinic_spot)");
+
+  await markSourceWritten(sql, PID, { writer: "ingest-paulo-bioimpedance" });
 
   // ── READ-BACK ─────────────────────────────────────────────────
   console.log("\n========== READ-BACK ==========");

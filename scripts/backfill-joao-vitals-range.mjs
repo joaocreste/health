@@ -29,6 +29,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -215,6 +216,8 @@ for (let i = 0; i < hr.length; i += CHUNK) {
   process.stdout.write(`\r  hr_readings inserted: ${Math.min(i + CHUNK, hr.length)}/${hr.length}`);
 }
 console.log();
+
+await markSourceWritten(sql, pid, { writer: "backfill-joao-vitals-range" });
 
 const chk = await sql`SELECT count(*)::int n, min(ts) mn, max(ts) mx FROM hr_readings WHERE patient_id=${pid} AND source='oura'`;
 const chk2 = await sql`SELECT count(*)::int n FROM vitals_daily WHERE patient_id=${pid} AND source='oura' AND extras ? 'sleep_periods'`;

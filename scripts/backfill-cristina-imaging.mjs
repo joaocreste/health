@@ -20,6 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -80,4 +81,5 @@ const IMAGING = [
   }
   const c1 = await sql`SELECT count(*)::int n FROM imaging_studies WHERE patient_id=${pid}`;
   console.log(`\n✓ written — imaging_studies=${c1[0].n}`);
+  await markSourceWritten(sql, pid, { writer: "backfill-cristina-imaging" });
 })().catch((e) => { console.error("✗ failed:", e.message); process.exit(1); });

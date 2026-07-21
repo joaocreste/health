@@ -3,6 +3,7 @@
 // Idempotent: delete-by-blob_prefix then insert.
 import fs from "node:fs";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const url = (process.env.DATABASE_URL ||
   fs.readFileSync(new URL("../.env", import.meta.url), "utf8").match(/DATABASE_URL=(.*)/)[1])
@@ -29,5 +30,6 @@ await sql`
      'Helton de Oliveira Couto', 'Renato Campos Soares de Faria — CRM 82077',
      ${"HURP — Hospital Unimed Ribeirão Preto · Centro de Diagnóstico por Imagem"}, 'Ribeirão Preto', 'Brazil')`;
 console.log("upserted", PREFIX);
+await markSourceWritten(sql, pid, { writer: "ingest-paulo-chest-xr-2026-07-10-db" });
 const chk = await sql`SELECT study_date, modality, body_part FROM imaging_studies WHERE patient_id = ${pid} AND study_date = '2026-07-10' ORDER BY modality`;
 console.log(JSON.stringify(chk));

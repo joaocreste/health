@@ -7,6 +7,7 @@
 // touches other imaging rows).
 import fs from "node:fs";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const url = (process.env.DATABASE_URL ||
   fs.readFileSync(new URL("../.env", import.meta.url), "utf8").match(/DATABASE_URL=(.*)/)[1])
@@ -71,5 +72,6 @@ for (const r of ROWS) {
        ${r.requesting_doctor}, ${r.performing_doctor}, ${r.lab_name}, ${r.lab_city}, ${r.lab_country})`;
   console.log("upserted", r.blob_prefix);
 }
+await markSourceWritten(sql, pid, { writer: "ingest-paulo-chest-ct-2026-07-10-db" });
 const chk = await sql`SELECT study_date, body_part, file_count FROM imaging_studies WHERE patient_id = ${pid} AND modality = 'CT' AND body_part = 'Chest' ORDER BY study_date DESC`;
 console.log(JSON.stringify(chk));

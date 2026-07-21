@@ -20,6 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { neon } from "@neondatabase/serverless";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -166,6 +167,8 @@ const main = async () => {
 
   const after = await sql`SELECT count(*)::int n FROM imaging_studies WHERE patient_id=${pid}`;
   console.log(`✓ Done. imaging_studies rows now: ${after[0].n} (was ${before[0].n}).`);
+
+  await markSourceWritten(sql, pid, { writer: "ingest-paulo-imagery-wave" });
 };
 
 main().catch((e) => { console.error("✗", e.message); process.exit(1); });

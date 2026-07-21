@@ -20,6 +20,7 @@
  */
 import { neon } from "@neondatabase/serverless";
 import fs from "node:fs";
+import { markSourceWritten } from "../lib/derived-freshness.js";
 
 const APPLY = process.argv.includes("--apply");
 const env = Object.fromEntries(
@@ -84,4 +85,7 @@ for (const [file, u] of Object.entries(UPDATES)) {
 }
 
 if (!APPLY) console.log("\n(dry run — re-run with --apply)");
-else console.log("\n✓ backfill applied");
+else {
+  await markSourceWritten(sql, PID, { writer: "backfill-mrc-imaging-notes" });
+  console.log("\n✓ backfill applied");
+}
