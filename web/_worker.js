@@ -1908,6 +1908,38 @@ async function resolveInsightAccess(sql, viewerClerk, patientId) {
 
 const JSON_HEADERS = { "Content-Type": "application/json", "Cache-Control": "no-store" };
 
+/* Ingest-triggered AI-insight rebuild — the generic invalidation hook.
+ * Call this after ANY write to a patient's clinical source tables (labs, imaging,
+ * writings, ...) so the AI narrative can't silently lag the freshly-ingested data.
+ * Best-effort and self-contained:
+ *   - skips if a rebuild is already queued/running (the lock debounces repeat ingests),
+ *   - runs the generation in the background via ctx.waitUntil,
+ *   - NEVER throws into the caller — a failed rebuild must not fail the ingest.
+ * Unlike the manual button it does NOT apply INSIGHT_COOLDOWN_MS: new source data
+ * always warrants a refresh. Large records can exceed the Pages wall-clock and die
+ * mid-generation; the queued row remains as the signal and
+ * scripts/run-insights-local.mjs drains it (see project_insight_rebuild_wallclock). */
+async function enqueueInsightRebuild(sql, patientId, env, ctx) {
+  try {
+    const running = await sql`
+      SELECT id FROM insight_jobs
+      WHERE patient_id = ${patientId} AND status IN ('queued','running')
+      ORDER BY started_at DESC LIMIT 1`;
+    if (running.length > 0) return { skipped: "already_running" };
+    const created = await sql`
+      INSERT INTO insight_jobs (patient_id, status, progress, stage)
+      VALUES (${patientId}, 'queued', 0, 'queued') RETURNING id`;
+    const jobId = created[0].id;
+    const work = runInsightJob(jobId, patientId, null, env);
+    if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(work);
+    else work.catch(() => {});
+    return { enqueued: jobId };
+  } catch (e) {
+    console.warn(`[insight] ingest-triggered rebuild enqueue failed for ${patientId}: ${e.message}`);
+    return { error: e.message };
+  }
+}
+
 /* POST /api/patient-dashboard-build
    One contract only: body { patient } (or { patient_clerk }) -> START a
    whole-patient AI Insight Update job, return 202 { job_id }. Access is
@@ -3103,7 +3135,7 @@ async function handleAccessViewMode(request, env) {
   }
 }
 
-async function handleAdmin(request, env) {
+async function handleAdmin(request, env, ctx) {
   if (!env.DATABASE_URL) return jsonError(500, "DATABASE_URL not configured.");
   const sql = neon(env.DATABASE_URL);
 
@@ -3688,7 +3720,12 @@ async function handleAdmin(request, env) {
       }
       const anthropic = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 4 });
       const result = await reclassifyForPatient(sql, anthropic, env, patientRows[0].id, limit);
-      return new Response(JSON.stringify({ ok: true, ...result }), {
+      // Generic invalidation: if this reclassify wrote any clinical source rows,
+      // auto-refresh the AI insights so the narrative can't silently lag the data.
+      const wroteSource = Array.isArray(result?.processed) &&
+        result.processed.some((p) => (p.lab_rows > 0) || p.writing_inserted);
+      if (wroteSource) await enqueueInsightRebuild(sql, patientRows[0].id, env, ctx);
+      return new Response(JSON.stringify({ ok: true, ...result, insights_refresh: wroteSource || false }), {
         headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
       });
     } catch (e) {
@@ -4578,7 +4615,7 @@ export default {
       return handleAccessViewMode(request, env);
     }
     if (url.pathname.startsWith("/api/admin/")) {
-      return handleAdmin(request, env);
+      return handleAdmin(request, env, ctx);
     }
     if (url.pathname === "/api/ingest") {
       // Write path: self/admin only (scoped viewers are read-only).
