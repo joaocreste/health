@@ -446,7 +446,7 @@ async function handleChat(request, env) {
       const send = (obj) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
       try {
         const stream = client.messages.stream({
-          model: "claude-opus-4-7",
+          model: "claude-opus-4-8",
           max_tokens: 2048,
           thinking: { type: "adaptive" },
           output_config: { effort: "high" },
