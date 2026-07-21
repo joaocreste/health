@@ -187,6 +187,15 @@
          Applies to every assembler-rendered page — no per-patient rules. */
       'body.lumen-assembled{background:var(--blue-50,#EBF2F8);}' +
       'body.lumen-assembled > .lumen-page-root{background:var(--blue-50,#EBF2F8);}' +
+      /* bespoke providers wrap their output in a page-canvas wrapper that paints
+         over the blue root — .jc-paulo-mental / .jc-home-dash-wrap are literal
+         cream (#F9F7F4), the exam wrappers cool near-white. Make them all
+         transparent so the one light-blue canvas shows uniformly; the section
+         cards keep their own surfaces. Intentional warm AI cards are untouched. */
+      'body.lumen-assembled .jc-paulo-exams,' +
+        'body.lumen-assembled .jc-silvana-exams,' +
+        'body.lumen-assembled .jc-paulo-mental,' +
+        'body.lumen-assembled .jc-home-dash-wrap{background:transparent;}' +
       'body.lumen-has-rail > .lumen-page-root{margin-left:var(--side-nav-w,240px);}' +
       /* the banner full-bleeds left (-24px) out of the overview padding; with the
          rail present that poke lands under the rail — cancel it and give the
@@ -196,6 +205,9 @@
         'body.lumen-has-rail .lumen-page-root .lumen-ai-legend,' +
         'body.lumen-has-rail .lumen-page-root .lumen-tail{padding-left:24px;}' +
       '.lumen-page-root .report-section[id],.lumen-page-root [data-lumen-section]{scroll-margin-top:calc(var(--topnav-h,60px) + 16px);}' +
+      /* safety net: a chart that did not re-fit to the narrowed column scrolls
+         inside its own box, never forcing page-level horizontal scroll. */
+      'body.lumen-has-rail .chart-wrap{max-width:100%;overflow-x:auto;}' +
       '.lumen-side-nav{position:fixed;left:0;top:var(--topnav-h,60px);bottom:0;width:var(--side-nav-w,240px);' +
         'background:var(--surface-dark-base,#0A1428);border-right:1px solid rgba(255,255,255,0.06);' +
         'box-shadow:2px 0 8px rgba(0,0,0,0.10);padding:22px 12px 24px;overflow-y:auto;overflow-x:hidden;z-index:30;}' +
@@ -242,23 +254,32 @@
     if (parts.length > 1) s = parts[parts.length - 1].trim();
     return s;
   }
-  function railLabelFromSection(el) {
-    var src = el.querySelector('.section-label') || el.querySelector('.section-title') || el.querySelector('h2');
+  /* Shorten one heading element into { html (bilingual), key (en text) }. */
+  function railShortenNode(src) {
     if (!src) return null;
     var enS = src.querySelector('.lang-en'), ptS = src.querySelector('.lang-pt');
     if (enS || ptS) {
       var en = railShorten(enS ? enS.textContent : (ptS ? ptS.textContent : ''));
       var pt = railShorten(ptS ? ptS.textContent : (enS ? enS.textContent : ''));
       if (!en && !pt) return null;
-      return t(esc(en || pt), esc(pt || en));
+      return { html: t(esc(en || pt), esc(pt || en)), key: (en || pt).toLowerCase() };
     }
     var flat = railShorten(src.textContent);
-    return flat ? esc(flat) : null;
+    return flat ? { html: esc(flat), key: flat.toLowerCase() } : null;
+  }
+  /* Primary label from .section-label (distinctive for imaging: "Spine MRI"),
+     plus an alternate from .section-title used only to break ties — BIA rows
+     all share the generic label "Analysis" but carry distinct titles
+     ("Muscle-fat analysis", "Obesity analysis", ...). */
+  function railLabelOptions(el) {
+    var labelNode = railShortenNode(el.querySelector('.section-label'));
+    var titleNode = railShortenNode(el.querySelector('.section-title') || el.querySelector('h2'));
+    return { primary: labelNode || titleNode, alt: titleNode };
   }
   function collectRailTargets(root, titleById) {
-    var out = [];
+    var raw = [];
     var topics = root.querySelector('.lumen-topics');
-    if (!topics) return out;
+    if (!topics) return [];
     var secs = topics.children;
     for (var i = 0; i < secs.length; i++) {
       var secEl = secs[i];
@@ -271,18 +292,27 @@
         for (var k = 0; k < list.length; k++) {
           var el = list[k];
           if (!el.id || !railIsVisible(el)) continue;
-          var html = railLabelFromSection(el);
-          if (html) out.push({ id: el.id, html: html });
+          var opt = railLabelOptions(el);
+          if (opt.primary) raw.push({ id: el.id, opt: opt });
         }
       } else {
         if (!railIsVisible(secEl)) continue;
         var ttl = titleById[id];
         if (!ttl) continue; // untitled scaffolding (legend etc.) → not a nav target
         if (!secEl.id) secEl.id = 'sec-' + id;
-        out.push({ id: secEl.id, html: t(esc(ttl.en), esc(ttl.pt)) });
+        raw.push({ id: secEl.id, opt: { primary: { html: t(esc(ttl.en), esc(ttl.pt)), key: String(ttl.en || '').toLowerCase() }, alt: null } });
       }
     }
-    return out;
+    /* De-dup: when several sections resolve to the same primary label (all the
+       BIA rows read "Analysis"), swap each to its distinct title. Distinctive
+       labels (Paulo's imaging) never collide, so they're untouched. */
+    var counts = {};
+    raw.forEach(function (r) { counts[r.opt.primary.key] = (counts[r.opt.primary.key] || 0) + 1; });
+    return raw.map(function (r) {
+      var choice = r.opt.primary;
+      if (counts[choice.key] > 1 && r.opt.alt && r.opt.alt.key && r.opt.alt.key !== choice.key) choice = r.opt.alt;
+      return { id: r.id, html: choice.html };
+    });
   }
   function buildSideNav(targets) {
     var nav = document.createElement('nav');
@@ -325,16 +355,32 @@
       if (el) obs.observe(el);
     });
   }
-  function mountSideNav(root, titleById) {
+  /* The left rail belongs on the detail pages that carry it on the static
+     shells (Joao's has-side-nav pages): exams, vitals, genetics, mental.
+     Landing/summary/narrative pages (home, physical, spiritual) and the
+     single-scroll consult view intentionally have no rail — matching the
+     canon so machine-2 pages look like machine-1, not more chromed. */
+  var RAIL_PAGES = {
+    'physical-exams': 1, 'physical-vitals': 1, 'physical-genetics': 1,
+    'mental': 1, 'spiritual': 1,
+  };
+  function mountSideNav(root, titleById, page) {
     var existing = document.querySelector('.lumen-side-nav');
     if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
     document.body.classList.remove('lumen-has-rail');
+    if (!RAIL_PAGES[page]) return;
     var targets = collectRailTargets(root, titleById);
     if (targets.length < 2) return;
     var nav = buildSideNav(targets);
     root.insertBefore(nav, root.firstChild);
     document.body.classList.add('lumen-has-rail');
     wireRailSpy(nav, targets);
+    /* Charts rendered by the after-hooks measured the full-width column; the
+       rail just narrowed it by 240px. Chart.js re-fits via ResizeObserver, but
+       Plotly (responsive:true) only listens to window resize — nudge it once
+       layout has settled so its SVG can't overflow the narrowed column. */
+    var reflow = function () { try { window.dispatchEvent(new Event('resize')); } catch (_) {} };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(reflow); else reflow();
   }
 
   /* ── hero (slot 1) ── */
@@ -639,8 +685,9 @@
     /* D2: one legend line under the first AI-badged block */
     ensureAiLegend(root);
 
-    /* left rail — generated from the sections that actually rendered */
-    mountSideNav(root, titleById);
+    /* left rail — generated from the sections that actually rendered
+       (only on the canon rail pages) */
+    mountSideNav(root, titleById, page);
 
     return root;
   }
