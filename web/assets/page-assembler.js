@@ -180,8 +180,161 @@
         'font-size:11px;letter-spacing:.04em;color:var(--text-muted,#6E7B8A);text-align:center;}' +
       /* keep the assembler root clear of the fixed side rail on shells that have one */
       'body.has-side-nav > .lumen-page-root{margin-left:var(--side-nav-w,240px);}' +
-      '@media(max-width:880px){body.has-side-nav > .lumen-page-root{margin-left:0;}}';
+      '@media(max-width:880px){body.has-side-nav > .lumen-page-root{margin-left:0;}}' +
+      /* ── scalable-machine chrome (assembler-owned) ──
+         Light-blue canvas replaces the warm .jc-overview #F9F7F4; a dark-blue
+         left rail in the banner colour is generated from the rendered sections.
+         Applies to every assembler-rendered page — no per-patient rules. */
+      'body.lumen-assembled{background:var(--blue-50,#EBF2F8);}' +
+      'body.lumen-assembled > .lumen-page-root{background:var(--blue-50,#EBF2F8);}' +
+      'body.lumen-has-rail > .lumen-page-root{margin-left:var(--side-nav-w,240px);}' +
+      /* the banner full-bleeds left (-24px) out of the overview padding; with the
+         rail present that poke lands under the rail — cancel it and give the
+         banner text a clean inset from the rail edge. */
+      'body.lumen-has-rail .lumen-page-root.jc-overview:not(.jc-home) > .lumen-hero{margin-left:0;}' +
+      'body.lumen-has-rail .lumen-page-root .banner-inner,' +
+        'body.lumen-has-rail .lumen-page-root .lumen-ai-legend,' +
+        'body.lumen-has-rail .lumen-page-root .lumen-tail{padding-left:24px;}' +
+      '.lumen-page-root .report-section[id],.lumen-page-root [data-lumen-section]{scroll-margin-top:calc(var(--topnav-h,60px) + 16px);}' +
+      '.lumen-side-nav{position:fixed;left:0;top:var(--topnav-h,60px);bottom:0;width:var(--side-nav-w,240px);' +
+        'background:var(--surface-dark-base,#0A1428);border-right:1px solid rgba(255,255,255,0.06);' +
+        'box-shadow:2px 0 8px rgba(0,0,0,0.10);padding:22px 12px 24px;overflow-y:auto;overflow-x:hidden;z-index:30;}' +
+      '.lumen-side-nav-title{padding:0 12px 12px;margin-bottom:8px;font-family:var(--font-mono,monospace);' +
+        'font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.36);' +
+        'border-bottom:1px solid rgba(255,255,255,0.08);}' +
+      '.lumen-side-nav a{display:block;padding:9px 12px;border-radius:6px;color:rgba(255,255,255,0.66);' +
+        'font-family:var(--font-mono,monospace);font-size:11px;font-weight:500;letter-spacing:0.09em;' +
+        'text-transform:uppercase;text-decoration:none;line-height:1.4;transition:background .15s,color .15s;}' +
+      '.lumen-side-nav a + a{margin-top:2px;}' +
+      '.lumen-side-nav a:hover{background:rgba(255,255,255,0.06);color:#fff;}' +
+      '.lumen-side-nav a.active{background:rgba(94,151,188,0.20);color:#fff;' +
+        'border-left:3px solid var(--blue-400,#5E97BC);padding-left:9px;}' +
+      '@media(max-width:880px){' +
+        'body.lumen-has-rail > .lumen-page-root{margin-left:0;}' +
+        '.lumen-side-nav{position:static;left:auto;top:auto;bottom:auto;width:auto;height:auto;' +
+          'display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:10px 14px;white-space:nowrap;' +
+          'border-right:none;box-shadow:none;margin:0 0 8px;border-radius:8px;}' +
+        '.lumen-side-nav-title{display:none;}' +
+        '.lumen-side-nav a{padding:6px 10px;border-radius:14px;background:rgba(255,255,255,0.06);' +
+          'flex:0 0 auto;}' +
+        '.lumen-side-nav a + a{margin-top:0;}' +
+      '}';
     document.head.appendChild(s);
+  }
+
+  /* ── assembler-built left rail (scalable chrome) ──
+     Generated from the sections the page actually rendered — no patient
+     branches (I-2). Each top-level section contributes either its own nav
+     entry (generic providers) or one entry per inner .report-section[id]
+     (bespoke providers that pack many studies into a single output, e.g.
+     Paulo's exams). Labels reuse each section's own bilingual heading, so
+     the rail is bilingual by construction (I-7). Rendered only when ≥2
+     targets exist — a one-item rail is noise. */
+  function railIsVisible(el) {
+    return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+  }
+  /* "5 · Imagery · Spine MRI" → "Spine MRI": drop the (out-of-order) ordinal
+     prefix and keep the most specific segment, so the rail reads cleanly. */
+  function railShorten(text) {
+    var s = String(text == null ? '' : text).trim();
+    s = s.replace(/^\s*\d+\s*[·.–—\-]\s*/, '');
+    var parts = s.split('·');
+    if (parts.length > 1) s = parts[parts.length - 1].trim();
+    return s;
+  }
+  function railLabelFromSection(el) {
+    var src = el.querySelector('.section-label') || el.querySelector('.section-title') || el.querySelector('h2');
+    if (!src) return null;
+    var enS = src.querySelector('.lang-en'), ptS = src.querySelector('.lang-pt');
+    if (enS || ptS) {
+      var en = railShorten(enS ? enS.textContent : (ptS ? ptS.textContent : ''));
+      var pt = railShorten(ptS ? ptS.textContent : (enS ? enS.textContent : ''));
+      if (!en && !pt) return null;
+      return t(esc(en || pt), esc(pt || en));
+    }
+    var flat = railShorten(src.textContent);
+    return flat ? esc(flat) : null;
+  }
+  function collectRailTargets(root, titleById) {
+    var out = [];
+    var topics = root.querySelector('.lumen-topics');
+    if (!topics) return out;
+    var secs = topics.children;
+    for (var i = 0; i < secs.length; i++) {
+      var secEl = secs[i];
+      var id = secEl.getAttribute('data-lumen-section') || '';
+      var inner = secEl.querySelectorAll(':scope > .report-section[id]');
+      var list = [];
+      if (inner.length) { for (var j = 0; j < inner.length; j++) list.push(inner[j]); }
+      else if (secEl.matches && secEl.matches('.report-section[id]')) { list.push(secEl); }
+      if (list.length) {
+        for (var k = 0; k < list.length; k++) {
+          var el = list[k];
+          if (!el.id || !railIsVisible(el)) continue;
+          var html = railLabelFromSection(el);
+          if (html) out.push({ id: el.id, html: html });
+        }
+      } else {
+        if (!railIsVisible(secEl)) continue;
+        var ttl = titleById[id];
+        if (!ttl) continue; // untitled scaffolding (legend etc.) → not a nav target
+        if (!secEl.id) secEl.id = 'sec-' + id;
+        out.push({ id: secEl.id, html: t(esc(ttl.en), esc(ttl.pt)) });
+      }
+    }
+    return out;
+  }
+  function buildSideNav(targets) {
+    var nav = document.createElement('nav');
+    nav.className = 'lumen-side-nav';
+    nav.setAttribute('aria-label', tPlain('On this page', 'Nesta página'));
+    var title = document.createElement('div');
+    title.className = 'lumen-side-nav-title';
+    title.innerHTML = t('On this page', 'Nesta página');
+    nav.appendChild(title);
+    targets.forEach(function (tg) {
+      var a = document.createElement('a');
+      a.href = '#' + tg.id;
+      a.setAttribute('data-target', tg.id);
+      a.innerHTML = tg.html;
+      a.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        var dest = document.getElementById(tg.id);
+        if (!dest) return;
+        dest.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try { history.replaceState(null, '', '#' + tg.id); } catch (_) {}
+      });
+      nav.appendChild(a);
+    });
+    return nav;
+  }
+  function wireRailSpy(nav, targets) {
+    if (!('IntersectionObserver' in window)) return;
+    var links = {};
+    nav.querySelectorAll('a[data-target]').forEach(function (a) { links[a.getAttribute('data-target')] = a; });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        Object.keys(links).forEach(function (kk) { links[kk].classList.remove('active'); });
+        var a = links[e.target.id];
+        if (a) a.classList.add('active');
+      });
+    }, { rootMargin: '-72px 0px -68% 0px', threshold: 0 });
+    targets.forEach(function (tg) {
+      var el = document.getElementById(tg.id);
+      if (el) obs.observe(el);
+    });
+  }
+  function mountSideNav(root, titleById) {
+    var existing = document.querySelector('.lumen-side-nav');
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+    document.body.classList.remove('lumen-has-rail');
+    var targets = collectRailTargets(root, titleById);
+    if (targets.length < 2) return;
+    var nav = buildSideNav(targets);
+    root.insertBefore(nav, root.firstChild);
+    document.body.classList.add('lumen-has-rail');
+    wireRailSpy(nav, targets);
   }
 
   /* ── hero (slot 1) ── */
@@ -396,6 +549,7 @@
 
   function assemblePage(patient, page, payloads) {
     injectAssemblerStyles();
+    document.body.classList.add('lumen-assembled'); // light-blue canvas + rail scope
     var registry = (window.LUMEN_REGISTRY || {})[page] || [];
     var providers = window.LUMEN_PROVIDERS || {};
     var meta = (window.LUMEN_PAGE_META || {})[page] || {};
@@ -425,6 +579,7 @@
     var afters = [];
     var topicCount = 0;
     var summaryCount = 0;
+    var titleById = {}; // id → {en,pt} for rendered sections (side-rail labels)
     var shared = {}; // per-render scratch shared across providers (memoized computations)
     registry.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); })
       .forEach(function (entry) {
@@ -438,6 +593,7 @@
         if (!out) return;
         out.el.setAttribute('data-lumen-section', entry.id);
         if (entry.summary) out.el.classList.add('lumen-slot-summary');
+        if (entry.title) titleById[entry.id] = entry.title;
         topics.appendChild(out.el);
         if (out.after) afters.push(out.after);
         if (!entry.summary) topicCount++;
@@ -475,6 +631,9 @@
 
     /* D2: one legend line under the first AI-badged block */
     ensureAiLegend(root);
+
+    /* left rail — generated from the sections that actually rendered */
+    mountSideNav(root, titleById);
 
     return root;
   }
