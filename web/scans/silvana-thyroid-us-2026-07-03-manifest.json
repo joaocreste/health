@@ -1,0 +1,41 @@
+{
+ "patient": "Silvana Aparecida Creste Dias de Souza",
+ "patientSlug": "silvana",
+ "study": "Thyroid ultrasound with Doppler",
+ "studySlug": "silvana-thyroid-us-2026-07-03",
+ "studyInstanceUID": "1.2.840.113663.1500.1.403154046.1.1.20260703.74005.89317",
+ "accessionNumber": "89317",
+ "date": "2026-07-03",
+ "modality": "US",
+ "facility": "DMI · Diagnóstico Médico Integrado",
+ "facilityCity": "Ribeirão Preto",
+ "facilityCountry": "Brazil",
+ "reportingDoctor": "Dr. Ricardo Issa — CRM 67417/SP",
+ "requestingDoctor": "Dr. José Roberto Chodraui",
+ "ways": [],
+ "defaultSelect": {},
+ "stacks": [
+  {
+   "select": {},
+   "count": 10,
+   "slices": [
+    "0001.jpg",
+    "0002.jpg",
+    "0003.jpg",
+    "0004.jpg",
+    "0005.jpg",
+    "0006.jpg",
+    "0007.jpg",
+    "0008.jpg",
+    "0009.jpg",
+    "0010.jpg"
+   ]
+  }
+ ],
+ "report": {
+  "pdf": "report.pdf",
+  "textPt": "RELATÓRIO ULTRASSONOGRAFIA DA TIREÓIDE COM AVALIAÇÃO DOPPLER\n\nDados clínicos e motivo do exame: Avaliação da tireóide.\n\nExames anteriores: Disponível para comparação exame de 30/03/2023.\n\nTécnica de exame: Utilizou-se transdutor linear, multifrequencial, de até 14 MHz para estudo tireoidiano e uso complementar com Doppler colorido. Paciente posicionada em decúbito dorsal, com hiperextensão cervical.\n\nOs seguintes aspectos foram observados:\nO padrão glandular é heterogêneo, identificando-se nódulos descritos a seguir:\nLOBO ESQUERDO:\nNo terço superior, nódulo heterogêneo com calcificação medindo 0,8 x 0,7 cm (padrão III de Chammas / TI-RADS 4) (estável).\nNo terço inferior, nódulo hipoecoico medindo 0,7 x 0,4 cm (padrão III de Chammas / TI-RADS 3) (estável).\nA tireóide apresenta contornos regulares e dimensões reduzidas.\nAo Doppler colorido a glândula apresenta vascularização habitual.\n\nMedidas da glândula:\nLobo direito medindo 0,8 x 1,0 x 3,3 cm em seus eixos longitudinal, transversal e antero posterior respectivamente, com volume de 1,51 cm³.\nLobo esquerdo medindo 0,8 x 0,9 x 4,2 cm em seus eixos longitudinal, transversal e antero posterior respectivamente, com volume de 1,71 cm³.\nO istmo mediu 1,2 x 0,8 x 0,2 cm de espessura em seus eixos transversal e antero posterior respectivamente, com volume de 0,10 cm³.\nVolume total da tireoide de 3,32 cm³.\nAs glândulas submandibulares e parótidas apresentaram aspecto ecográfico normal.\nEm relação ao exame anterior não se observam alterações ecográficas significativas.\n\nImpressão diagnóstica: Exame ultrassonográfico evidencia tireoide de dimensões reduzidas com nódulos conforme descritos acima.\n\nRICARDO ISSA — MÉDICO ESPECIALISTA EM RADIOLOGIA E DIAGNÓSTICO POR IMAGEM — CRM: 67417 / SP",
+  "textEn": null,
+  "aiSummary": null
+ }
+}

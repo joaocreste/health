@@ -210,6 +210,9 @@ const SCAN_OWNERS = [
   { prefix: "/scans/maria-regina-coury-", patient: PATIENT_CLERKS.maria, anyOf: ["imaging"], honorFilter: true },
   { prefix: "/scans/john-smith-jr-", patient: PATIENT_CLERKS.johnsmithjr, anyOf: ["imaging"], honorFilter: true },
   { prefix: "/scans/silvana-source-pdfs/", patient: PATIENT_CLERKS.silvana, anyOf: ["labs"] },
+  // Imaging previews/manifests/reports (e.g. thyroid-us-2026-07-03). MUST stay
+  // below the source-pdfs entry: first-match wins, so labs PDFs keep the labs scope.
+  { prefix: "/scans/silvana-", patient: PATIENT_CLERKS.silvana, anyOf: ["imaging"], honorFilter: true },
   { prefix: "/scans/cristina-source-pdfs/", patient: PATIENT_CLERKS.cristina, anyOf: ["labs"] },
   // Patient Zero's scan slugs are historically unprefixed:
   ...["/scans/mri-", "/scans/us-", "/scans/tc-heart", "/scans/tc1", "/scans/eeg",

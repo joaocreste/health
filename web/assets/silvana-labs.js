@@ -42,6 +42,23 @@ window.SILVANA_LABS = {
    * web/scans/silvana-source-pdfs/ and are linked from each card. Newest first. */
   studies: [
     {
+      date: '2026-07-03', category: 'imaging',
+      modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
+      title_en: 'Thyroid ultrasound with Doppler', title_pt: 'Ultrassonografia de tireoide com Doppler',
+      laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
+      conclusion_en: 'Reduced-volume thyroid (total 3.32 cm³; right lobe 1.51, left lobe 1.71, isthmus 0.10) with two stable left-lobe nodules — superior third 0.8 × 0.7 cm (Chammas III / TI-RADS 4) and inferior third 0.7 × 0.4 cm (Chammas III / TI-RADS 3). Regular contours; normal color-Doppler vascularization. No significant change vs 30 Mar 2023.',
+      conclusion_pt: 'Tireoide de dimensões reduzidas (volume total 3,32 cm³; lobo direito 1,51, esquerdo 1,71, istmo 0,10) com dois nódulos estáveis no lobo esquerdo — terço superior 0,8 × 0,7 cm (Chammas III / TI-RADS 4) e terço inferior 0,7 × 0,4 cm (Chammas III / TI-RADS 3). Contornos regulares; vascularização habitual ao Doppler. Sem alteração significativa vs 30 mar 2023.',
+      // First study with real pixel data: interactive viewer over 10 de-identified
+      // DICOM captures + the original laudo. Wired by app.js's generic .ct-viewer
+      // engine (JCInitCtViewers). Previews/manifest under web/scans/, SCAN_OWNERS-gated.
+      viewer: {
+        manifest: 'scans/silvana-thyroid-us-2026-07-03-manifest.json',
+        prefix: 'scans/silvana-thyroid-us-2026-07-03/',
+        count: 10,
+        report: 'scans/silvana-thyroid-us-2026-07-03/report.pdf',
+      },
+    },
+    {
       date: '2026-02-09', category: 'imaging',
       modality_en: 'Thyroid ultrasound', modality_pt: 'Ultrassom de tireoide',
       title_en: 'Cervical / thyroid ultrasound', title_pt: 'Ultrassonografia cervical / tireoide',

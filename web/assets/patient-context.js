@@ -4287,7 +4287,7 @@
     'assets/paulo-labs.js?v=8', 'assets/paulo-ergometric.js?v=1',
     'assets/paulo-sleep.js?v=1', 'assets/paulo-mental.js?v=1',
   ];
-  PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=3', 'assets/silvana-vitals.js?v=1'];
+  PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=4', 'assets/silvana-vitals.js?v=1'];
   PATIENT_DATA_ASSETS[CRISTINA_CRESTI] = ['assets/cristina-labs.js?v=2'];
 
   function loadPatientDataAssets(clerkId) {
@@ -4547,7 +4547,12 @@
       silvanaExams: function () {
         var el = renderSilvanaPhysicalExams();
         if (!el) return null;
-        return { el: el, after: function () { setTimeout(decorateExamsWithAiOutliers, 600); } };
+        return { el: el, after: function () {
+          // Wire any .ct-viewer blocks (app.js generic engine) — Silvana's newest
+          // thyroid US ships a real series viewer, unlike her text-only studies.
+          if (typeof window !== 'undefined' && window.JCInitCtViewers) window.JCInitCtViewers();
+          setTimeout(decorateExamsWithAiOutliers, 600);
+        } };
       },
       cristinaExams: function () {
         var el = renderCristinaPhysicalExams();
@@ -8417,38 +8422,80 @@
 
   // Imaging / pathology / endoscopy / functional studies — newest first.
   function silvanaStudiesList(studies) {
-    var items = (studies || []).slice().sort(function (a, b) {
+    var sorted = (studies || []).slice().sort(function (a, b) {
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
-    }).map(function (s) {
+    });
+
+    // Shared card head: category pill + date + bilingual title + provenance + conclusion.
+    function studyHead(s) {
       var cat = silvanaStudyCategoryLabel(s.category);
+      return (
+        '<div class="silv-study-head">' +
+          '<span class="silv-study-cat silv-study-cat-' + escapeHtml(s.category) + '">' + t(cat[0], cat[1]) + '</span>' +
+          '<span class="silv-study-date">' + escapeHtml(formatDate(s.date)) + '</span>' +
+        '</div>' +
+        '<div class="silv-study-title">' +
+          '<span class="lang-en">' + escapeHtml(s.title_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(s.title_pt) + '</span>' +
+        '</div>' +
+        '<div class="silv-study-meta">' +
+          escapeHtml(s.laboratory || '—') +
+          (s.doctor ? ' · ' + escapeHtml(s.doctor) : '') +
+          (s.requested_by ? ' · ' + t('req. ', 'sol. ') + escapeHtml(s.requested_by) : '') +
+        '</div>' +
+        '<p class="silv-study-concl">' +
+          '<span class="lang-en">' + escapeHtml(s.conclusion_en) + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(s.conclusion_pt) + '</span>' +
+        '</p>'
+      );
+    }
+
+    // A study carrying real pixel data (s.viewer) renders as a full-width
+    // featured card with an interactive .ct-viewer (wired by app.js's generic
+    // ways/stacks engine via JCInitCtViewers) and the original laudo beneath it —
+    // the imaging-spec invariant that the report always sits below the surface.
+    var featured = sorted.filter(function (s) { return s.viewer; }).map(function (s) {
+      var v = s.viewer;
+      var viewer =
+        '<div class="ct-grid ct-grid-single silv-study-viewer">' +
+          '<div class="ct-viewer" data-prefix="' + escapeHtml(v.prefix) + '" data-manifest="' + escapeHtml(v.manifest) + '?v=1">' +
+            '<div class="ct-viewer-head">' +
+              '<div class="ct-viewer-title">' + t('Series viewer', 'Visualizador por série') + '</div>' +
+              '<div class="ct-viewer-meta">' +
+                '<span class="ct-lbl ct-lbl-2d">' + t('Image', 'Imagem') + '</span>' +
+                '<span class="ct-lbl ct-lbl-3d">' + t('View', 'Vista') + '</span> ' +
+                '<span class="ct-idx">1</span> / <span class="ct-total">1</span><span class="ct-rot"></span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ct-controls"></div>' +
+            '<div class="ct-stage"><img class="ct-img" alt="" loading="eager"></div>' +
+            '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="slice">' +
+          '</div>' +
+        '</div>';
+      var report = v.report
+        ? '<div class="silv-study-srcs"><a href="' + escapeHtml(v.report) + '" target="_blank" rel="noopener" class="silv-study-src">' +
+            t('Report (PDF)', 'Laudo (PDF)') + '</a></div>'
+        : '';
+      return '<div class="silv-study silv-study-' + escapeHtml(s.category) + ' silv-study-featured">' +
+          studyHead(s) + viewer + report +
+        '</div>';
+    }).join('');
+
+    // Report-only studies: the existing grid of cards linking their source laudo.
+    var rest = sorted.filter(function (s) { return !s.viewer; }).map(function (s) {
       var imgs = (s.images || []).map(function (src, i) {
         return '<a href="scans/' + escapeHtml(src) + '" target="_blank" rel="noopener" class="silv-study-src">' +
           t('View source', 'Ver laudo') + (s.images.length > 1 ? ' ' + (i + 1) : '') + '</a>';
       }).join('');
       return (
         '<div class="silv-study silv-study-' + escapeHtml(s.category) + '">' +
-          '<div class="silv-study-head">' +
-            '<span class="silv-study-cat silv-study-cat-' + escapeHtml(s.category) + '">' + t(cat[0], cat[1]) + '</span>' +
-            '<span class="silv-study-date">' + escapeHtml(formatDate(s.date)) + '</span>' +
-          '</div>' +
-          '<div class="silv-study-title">' +
-            '<span class="lang-en">' + escapeHtml(s.title_en) + '</span>' +
-            '<span class="lang-pt">' + escapeHtml(s.title_pt) + '</span>' +
-          '</div>' +
-          '<div class="silv-study-meta">' +
-            escapeHtml(s.laboratory || '—') +
-            (s.doctor ? ' · ' + escapeHtml(s.doctor) : '') +
-            (s.requested_by ? ' · ' + t('req. ', 'sol. ') + escapeHtml(s.requested_by) : '') +
-          '</div>' +
-          '<p class="silv-study-concl">' +
-            '<span class="lang-en">' + escapeHtml(s.conclusion_en) + '</span>' +
-            '<span class="lang-pt">' + escapeHtml(s.conclusion_pt) + '</span>' +
-          '</p>' +
+          studyHead(s) +
           (imgs ? '<div class="silv-study-srcs">' + imgs + '</div>' : '') +
         '</div>'
       );
     }).join('');
-    return '<div class="silv-studies">' + items + '</div>';
+
+    return featured + (rest ? '<div class="silv-studies">' + rest + '</div>' : '');
   }
 
   function silvanaStudyGroupMeta(cat) {
@@ -8613,6 +8660,13 @@
       '.jc-silvana-exams .silv-study-srcs { display: flex; flex-wrap: wrap; gap: 8px; }',
       '.jc-silvana-exams .silv-study-src { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #244E6E; text-decoration: none; border: 1px solid #E5E2DC; border-radius: 6px; padding: 4px 10px; background: #F4F1EA; }',
       '.jc-silvana-exams .silv-study-src:hover { border-color: #B8954A; }',
+
+      // Featured study (with an interactive .ct-viewer): full-width card above the
+      // report-only grid; the viewer keeps its comfortable ~620px cap.
+      '.jc-silvana-exams .silv-study-featured { margin-bottom: 16px; }',
+      '.jc-silvana-exams .silv-study-viewer { margin: 12px 0 4px; }',
+      '.jc-silvana-exams .silv-study-featured .ct-viewer { max-width: 620px; }',
+      '.jc-silvana-exams .silv-study-featured .silv-study-srcs { margin-top: 12px; }',
 
       // Grouped sections (Imaging / Endoscopy / Pathology / Functional) + amber AI card
       '.jc-silvana-exams .silv-study-group { margin-bottom: 30px; }',
