@@ -8615,8 +8615,15 @@
       '.jc-silvana-exams .hero-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin-top: 8px; }',
       '.jc-silvana-exams .hero-meta-item { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.06em; text-transform: uppercase; }',
       '.jc-silvana-exams .hero-meta-item > span:last-child { font-family: "IBM Plex Sans", sans-serif; font-size: 13px; font-weight: 400; color: #FFFFFF; text-transform: none; letter-spacing: 0; }',
-      '.jc-silvana-exams #silv-content { padding: 36px 0 16px; }',
-      '.jc-silvana-exams #silv-content > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      // The exams page is split into the two canonical rail sections (#imaging /
+      // #laboratory) so the left menu reads "Imaging studies" + "Laboratory" like
+      // every other patient. Neutralize the global .report-section chrome (alternating
+      // backgrounds / borders / 4rem padding) so Silvana's bespoke card look is kept —
+      // the report-sections here are structural anchors for the rail, not styled bands.
+      '.jc-silvana-exams .silv-preamble { padding: 36px 0 0; }',
+      '.jc-silvana-exams .report-section { background: transparent; border: none; padding: 20px 0 16px; }',
+      '.jc-silvana-exams .silv-preamble > .container, .jc-silvana-exams .report-section > .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
+      '.jc-silvana-exams .report-section + .report-section { border-top: 1px solid #E5E2DC; }',
 
       // AI summary card
       '.jc-silvana-exams .silv-ai-summary { background: #FFFFFF; border: 1px solid #E5E2DC; border-top: 3px solid #B8954A; border-radius: 10px; padding: 22px 26px; margin-bottom: 24px; }',
@@ -8918,15 +8925,40 @@
         '</div>' +
       '</section>';
 
+    // Split into the two canonical rail sections — #imaging ("Imaging studies") and
+    // #laboratory ("Laboratory") — so Silvana's left menu matches every other
+    // patient instead of a single "Exams" item. The AI 7-year synthesis + meds sit
+    // in a preamble above both: rendered, but not a .report-section, so no third
+    // rail entry. Section order (imaging -> laboratory) mirrors the generic blueprint.
+    var studiesBlock = (data.studies && data.studies.length)
+      ? silvanaStudiesSections(data.studies)
+      : '<p class="section-desc">' + t('No imaging or diagnostic studies on file yet.', 'Nenhum exame de imagem ou diagnóstico registrado ainda.') + '</p>';
     var imagery =
-      '<section id="silv-content">' +
+      '<div class="silv-preamble">' +
         '<div class="container">' +
           ai +
           // Medications & Supplements — DB-driven (/api/patient-summary), filled
           // async below so it docks directly under the AI summary card.
           '<div id="silv-meds-mount"></div>' +
-          '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
-          '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
+        '</div>' +
+      '</div>' +
+      '<section class="report-section" id="imaging">' +
+        '<div class="container">' +
+          // Leading .section-label is the rail anchor (railLabelOptions prefers the
+          // first .section-label); keep it canonical so the menu reads "Imaging studies".
+          '<div class="section-label">' + t('Imaging studies', 'Estudos de imagem') + '</div>' +
+          '<h2 class="section-title">' + t('Imaging &amp; diagnostic studies', 'Imagem e estudos diagnósticos') + '</h2>' +
+          '<p class="section-desc">' +
+            t('Non-lab diagnostic exams grouped by type — Imaging, Endoscopy, Pathology and Functional. Each group opens with an AI Insights synthesis; the cards beneath it are newest-first and link their original report.',
+              'Exames diagnósticos não laboratoriais agrupados por tipo — Imagem, Endoscopia, Patologia e Funcional. Cada grupo abre com uma síntese de Insights de IA; os cartões abaixo vêm dos mais recentes aos mais antigos e trazem o laudo original.') +
+          '</p>' +
+          studiesBlock +
+        '</div>' +
+      '</section>' +
+      '<section class="report-section" id="laboratory">' +
+        '<div class="container">' +
+          '<div class="section-label">' + t('Laboratory', 'Laboratório') + '</div>' +
+          '<h2 class="section-title">' + t('Blood &amp; urine panels', 'Painéis de sangue e urina') + '</h2>' +
           '<p class="section-desc">' +
             t('Each panel shows the latest result with its reference bar and status pill. Click "historical samples" beneath each marker to see every prior value. The historical comparison table near the bottom puts every date side-by-side.',
               'Cada painel mostra o resultado mais recente com a barra de referência e o status. Clique em "amostras anteriores" abaixo de cada marcador para ver todos os valores. A tabela de comparação histórica ao final coloca todas as datas lado a lado.') +
@@ -8935,15 +8967,6 @@
             data.panels.map(silvanaPanelDetails).join('') +
           '</div>' +
           silvanaHistoricalComparison(data.panels) +
-          (data.studies && data.studies.length ?
-            '<div class="section-label" style="margin-top:32px;">' + t('09B · Imaging & studies', '09B · Imagem & estudos') + '</div>' +
-            '<h2 class="section-title">' + t('Imaging & diagnostic studies', 'Estudos de imagem e diagnósticos') + '</h2>' +
-            '<p class="section-desc">' +
-              t('Non-lab diagnostic exams grouped by type — Imaging, Endoscopy, Pathology and Functional. Each group opens with an AI Insights synthesis; the cards beneath it are newest-first and link their original report.',
-                'Exames diagnósticos não laboratoriais agrupados por tipo — Imagem, Endoscopia, Patologia e Funcional. Cada grupo abre com uma síntese de Insights de IA; os cartões abaixo vêm dos mais recentes aos mais antigos e trazem o laudo original.') +
-            '</p>' +
-            silvanaStudiesSections(data.studies)
-          : '') +
           '<div class="section-label" style="margin-top:32px;">' + t('Source PDFs', 'PDFs originais') + '</div>' +
           '<h2 class="section-title">' + t('Original lab reports', 'Laudos originais') + '</h2>' +
           '<p class="section-desc">' +
@@ -9116,12 +9139,22 @@
         '</div>' +
       '</section>';
 
+    // Two canonical rail sections (#imaging / #laboratory) so Cristina's left menu
+    // matches every other patient instead of a single "Exams" item. #imaging is
+    // omitted when she has no imaging study (an empty rail entry would be noise).
+    var cimaging = cristinaImagingSection(data); // '' when she has no imaging study
     var content =
-      '<section id="silv-content">' +
+      '<div class="silv-preamble">' +
+        '<div class="container">' + ai + '</div>' +
+      '</div>' +
+      (cimaging
+        ? '<section class="report-section" id="imaging">' +
+            '<div class="container">' + cimaging + '</div>' +
+          '</section>'
+        : '') +
+      '<section class="report-section" id="laboratory">' +
         '<div class="container">' +
-          cristinaImagingSection(data) +
-          ai +
-          '<div class="section-label">' + t('09A · Labs', '09A · Exames') + '</div>' +
+          '<div class="section-label">' + t('Laboratory', 'Laboratório') + '</div>' +
           '<h2 class="section-title">' + t('Lab panels', 'Painéis laboratoriais') + '</h2>' +
           '<p class="section-desc">' +
             t('Each panel shows the latest result with its reference bar and status pill. Sub-threshold antibody results are shown as reported by the lab ("< value").',
