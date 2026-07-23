@@ -5442,6 +5442,12 @@
     s.id = 'paulo-exams-styles';
     s.textContent = [
       '.jc-paulo-exams { background: var(--surface-base, #F9F7F4); padding: 0 0 96px; }',
+      // The imaging cluster is wrapped in one #imaging section so the left rail
+      // reads a single "Imaging studies" entry (was one entry per study). Make the
+      // wrapper chrome-less so the inner per-study .report-section bands keep their
+      // existing look; only the leading .section-label eyebrow needs top spacing.
+      '.jc-paulo-exams #imaging { background: transparent; border: none; padding: 0; }',
+      '.jc-paulo-exams #imaging > .pl-imaging-head { padding-top: 3rem; padding-bottom: 0; }',
       '.jc-paulo-exams .hero { background: #0D1B2A; color: #FFFFFF; padding: 48px 0 56px; }',
       '.jc-paulo-exams .hero .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }',
       '.jc-paulo-exams .hero-eyebrow { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; }',
@@ -8087,8 +8093,21 @@
     // Imagery exams render newest-first (house rule): contrast chest CT
     // (10 Jul 19:09) -> chest X-ray (10 Jul 18:32) -> non-contrast chest CT
     // (6 Jul) -> spine MRI (15 May). Cardiac cluster: ergometric (10) then ECG (11).
-    main.innerHTML = aiSummary + chestCtContrast + chestXr + chestCt + imagery + history + otherStudies + overall +
-      labs + ergometric + ecg + sleep;
+    // Collapse the imaging cluster (AI arc + per-study viewers + longitudinal
+    // analysis, sections 1-8) under ONE #imaging section so the left rail reads a
+    // single "Imaging studies" entry like every other patient — the inner per-study
+    // .report-section[id] become grandchildren and stop being separate rail items.
+    // Laboratory (9, already reads "Laboratory"), Cardiac (10), ECG (11) and Sleep
+    // keep their own entries. Newest-first imaging order preserved.
+    var imagingCluster = aiSummary + chestCtContrast + chestXr + chestCt + imagery + history + otherStudies + overall;
+    var imagingSection =
+      '<section class="report-section" id="imaging">' +
+        '<div class="container pl-imaging-head">' +
+          '<div class="section-label">' + t('Imaging studies', 'Estudos de imagem') + '</div>' +
+        '</div>' +
+        imagingCluster +
+      '</section>';
+    main.innerHTML = imagingSection + labs + ergometric + ecg + sleep;
 
     return {
       el: main,
