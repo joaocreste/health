@@ -4287,7 +4287,7 @@
     'assets/paulo-labs.js?v=8', 'assets/paulo-ergometric.js?v=1',
     'assets/paulo-sleep.js?v=1', 'assets/paulo-mental.js?v=1',
   ];
-  PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=4', 'assets/silvana-vitals.js?v=1'];
+  PATIENT_DATA_ASSETS[SILVANA_CRESTE] = ['assets/silvana-labs.js?v=5', 'assets/silvana-vitals.js?v=1'];
   PATIENT_DATA_ASSETS[CRISTINA_CRESTI] = ['assets/cristina-labs.js?v=2'];
 
   function loadPatientDataAssets(clerkId) {
@@ -8450,15 +8450,12 @@
       );
     }
 
-    // A study carrying real pixel data (s.viewer) renders as a full-width
-    // featured card with an interactive .ct-viewer (wired by app.js's generic
-    // ways/stacks engine via JCInitCtViewers) and the original laudo beneath it —
-    // the imaging-spec invariant that the report always sits below the surface.
-    var featured = sorted.filter(function (s) { return s.viewer; }).map(function (s) {
-      var v = s.viewer;
-      var viewer =
+    // One .ct-viewer block (wired by app.js's generic ways/stacks engine via
+    // JCInitCtViewers). Reused for the single legacy viewer and each column of a pair.
+    function ctViewerBlock(prefix, manifest) {
+      return (
         '<div class="ct-grid ct-grid-single silv-study-viewer">' +
-          '<div class="ct-viewer" data-prefix="' + escapeHtml(v.prefix) + '" data-manifest="' + escapeHtml(v.manifest) + '?v=1">' +
+          '<div class="ct-viewer" data-prefix="' + escapeHtml(prefix) + '" data-manifest="' + escapeHtml(manifest) + '?v=1">' +
             '<div class="ct-viewer-head">' +
               '<div class="ct-viewer-title">' + t('Series viewer', 'Visualizador por série') + '</div>' +
               '<div class="ct-viewer-meta">' +
@@ -8471,13 +8468,49 @@
             '<div class="ct-stage"><img class="ct-img" alt="" loading="eager"></div>' +
             '<input class="ct-slider" type="range" min="0" max="0" value="0" aria-label="slice">' +
           '</div>' +
-        '</div>';
-      var report = v.report
-        ? '<div class="silv-study-srcs"><a href="' + escapeHtml(v.report) + '" target="_blank" rel="noopener" class="silv-study-src">' +
-            t('Report (PDF)', 'Laudo (PDF)') + '</a></div>'
-        : '';
+        '</div>'
+      );
+    }
+    // Bilingual report link list, sat below the viewer(s) (imaging-spec invariant:
+    // the report always renders beneath the surface). De-duplicated by href.
+    function reportsRow(reports) {
+      var seen = {};
+      var links = (reports || []).filter(function (r) {
+        if (!r || !r.href || seen[r.href]) return false; seen[r.href] = 1; return true;
+      }).map(function (r) {
+        return '<a href="' + escapeHtml(r.href) + '" target="_blank" rel="noopener" class="silv-study-src">' +
+          '<span class="lang-en">' + escapeHtml(r.label_en || 'Report (PDF)') + '</span>' +
+          '<span class="lang-pt">' + escapeHtml(r.label_pt || 'Laudo (PDF)') + '</span></a>';
+      }).join('');
+      return links ? '<div class="silv-study-srcs">' + links + '</div>' : '';
+    }
+
+    // A study carrying real pixel data renders as a full-width featured card. It may
+    // hold a single viewer (s.viewer) or a paired set (s.viewers — e.g. the same
+    // year's thyroid Ultrasound and colour-Doppler shown side by side), with the
+    // laudo(s) beneath. Newest first.
+    var featured = sorted.filter(function (s) { return s.viewer || s.viewers; }).map(function (s) {
+      var body, report;
+      if (s.viewers && s.viewers.length) {
+        var multi = s.viewers.length > 1;
+        var cols = s.viewers.map(function (v) {
+          return '<div class="silv-dual-col">' +
+              '<div class="silv-dual-label">' +
+                '<span class="lang-en">' + escapeHtml(v.label_en) + '</span>' +
+                '<span class="lang-pt">' + escapeHtml(v.label_pt) + '</span>' +
+              '</div>' +
+              ctViewerBlock(v.prefix, v.manifest) +
+            '</div>';
+        }).join('');
+        body = '<div class="silv-dual-grid' + (multi ? '' : ' silv-dual-grid-single') + '">' + cols + '</div>';
+        report = reportsRow(s.reports);
+      } else {
+        var v = s.viewer;
+        body = ctViewerBlock(v.prefix, v.manifest);
+        report = v.report ? reportsRow([{ href: v.report }]) : '';
+      }
       return '<div class="silv-study silv-study-' + escapeHtml(s.category) + ' silv-study-featured">' +
-          studyHead(s) + viewer + report +
+          studyHead(s) + body + report +
         '</div>';
     }).join('');
 
@@ -8667,6 +8700,17 @@
       '.jc-silvana-exams .silv-study-viewer { margin: 12px 0 4px; }',
       '.jc-silvana-exams .silv-study-featured .ct-viewer { max-width: 620px; }',
       '.jc-silvana-exams .silv-study-featured .silv-study-srcs { margin-top: 12px; }',
+
+      // Paired viewers (Ultrasound | Doppler) side by side for one year. minmax(0,1fr)
+      // lets each column shrink below the viewer\'s intrinsic width; the 620px cap is
+      // released inside the grid so the two viewers fill their columns instead of overflowing.
+      '.jc-silvana-exams .silv-dual-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 22px; align-items: start; margin: 12px 0 4px; }',
+      '.jc-silvana-exams .silv-dual-grid-single { grid-template-columns: minmax(0,1fr); max-width: 620px; }',
+      '.jc-silvana-exams .silv-dual-col { min-width: 0; }',
+      '.jc-silvana-exams .silv-dual-col .silv-study-viewer { margin: 0; }',
+      '.jc-silvana-exams .silv-dual-grid .ct-viewer { max-width: none; }',
+      '.jc-silvana-exams .silv-dual-label { font-family: "Raleway", sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: #B8954A; margin: 0 0 8px; }',
+      '@media (max-width: 860px) { .jc-silvana-exams .silv-dual-grid { grid-template-columns: 1fr; } }',
 
       // Grouped sections (Imaging / Endoscopy / Pathology / Functional) + amber AI card
       '.jc-silvana-exams .silv-study-group { margin-bottom: 30px; }',

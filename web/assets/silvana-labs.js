@@ -119,7 +119,18 @@ window.SILVANA_LABS = {
       laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
       conclusion_en: 'Reduced-volume thyroid (4.28 cm³) with stable left-lobe nodules; reactional cervical lymph nodes. No significant change vs 18 Jan 2022.',
       conclusion_pt: 'Tireoide de volume reduzido (4,28 cm³) com nódulos estáveis no lobo esquerdo; linfonodos cervicais reacionais. Sem alteração significativa vs 18 jan 2022.',
-      images: ['silvana-source-pdfs/silvana-thyroid-us-2023-03-30.jpeg'],
+      // Real DICOM series: B-mode ultrasound and colour-Doppler shown side by side,
+      // each year's two laudos beneath. Previews/manifests under web/scans/, SCAN_OWNERS-gated.
+      viewers: [
+        { label_en: 'Ultrasound (B-mode)', label_pt: 'Ultrassom (modo B)',
+          manifest: 'scans/silvana-us-2023-03-30-manifest.json', prefix: 'scans/silvana-us-2023-03-30/', count: 10 },
+        { label_en: 'Colour Doppler', label_pt: 'Doppler colorido',
+          manifest: 'scans/silvana-doppler-2023-03-30-manifest.json', prefix: 'scans/silvana-doppler-2023-03-30/', count: 6 },
+      ],
+      reports: [
+        { label_en: 'Ultrasound report (PDF)', label_pt: 'Laudo do ultrassom (PDF)', href: 'scans/silvana-us-2023-03-30/report.pdf' },
+        { label_en: 'Doppler report (PDF)', label_pt: 'Laudo do Doppler (PDF)', href: 'scans/silvana-doppler-2023-03-30/report.pdf' },
+      ],
     },
     {
       date: '2022-09-19', category: 'functional',
@@ -137,7 +148,15 @@ window.SILVANA_LABS = {
       laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
       conclusion_en: 'Reduced-volume thyroid (3.78 cm³) with stable left-lobe nodules; mildly enlarged right cervical lymph node — continue follow-up.',
       conclusion_pt: 'Tireoide de volume reduzido (3,78 cm³) com nódulos estáveis no lobo esquerdo; linfonodo cervical direito discretamente aumentado — manter seguimento.',
-      images: ['silvana-source-pdfs/silvana-thyroid-us-2022-01-18.jpeg'],
+      // Only the Doppler acquisition was exported for this year (no separate B-mode
+      // series in the source), so a single viewer + its laudo.
+      viewers: [
+        { label_en: 'Ultrasound with Doppler', label_pt: 'Ultrassom com Doppler',
+          manifest: 'scans/silvana-doppler-2022-01-18-manifest.json', prefix: 'scans/silvana-doppler-2022-01-18/', count: 9 },
+      ],
+      reports: [
+        { label_en: 'Report (PDF)', label_pt: 'Laudo (PDF)', href: 'scans/silvana-doppler-2022-01-18/report.pdf' },
+      ],
     },
     {
       date: '2022-01-18', category: 'imaging',
@@ -155,7 +174,17 @@ window.SILVANA_LABS = {
       laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
       conclusion_en: 'Thyroid 4.06 cm³ with left-lobe nodules (superior nodule now with more cystic content); reactional right cervical lymph node.',
       conclusion_pt: 'Tireoide de 4,06 cm³ com nódulos no lobo esquerdo (nódulo superior agora com conteúdo mais cístico); linfonodo cervical direito reacional.',
-      images: ['silvana-source-pdfs/silvana-thyroid-us-2021-07-13.jpeg'],
+      // 2021: the B-mode acquisition exported a single frame; the Doppler series is complete.
+      viewers: [
+        { label_en: 'Ultrasound (B-mode)', label_pt: 'Ultrassom (modo B)',
+          manifest: 'scans/silvana-us-2021-07-13-manifest.json', prefix: 'scans/silvana-us-2021-07-13/', count: 1 },
+        { label_en: 'Colour Doppler', label_pt: 'Doppler colorido',
+          manifest: 'scans/silvana-doppler-2021-07-13-manifest.json', prefix: 'scans/silvana-doppler-2021-07-13/', count: 12 },
+      ],
+      reports: [
+        { label_en: 'Ultrasound report (PDF)', label_pt: 'Laudo do ultrassom (PDF)', href: 'scans/silvana-us-2021-07-13/report.pdf' },
+        { label_en: 'Doppler report (PDF)', label_pt: 'Laudo do Doppler (PDF)', href: 'scans/silvana-doppler-2021-07-13/report.pdf' },
+      ],
     },
     {
       date: '2020-06-18', category: 'imaging',
@@ -164,7 +193,17 @@ window.SILVANA_LABS = {
       laboratory: 'DMI · Diagnóstico Médico Integrado', requested_by: 'Dr. José Roberto Chodraui', doctor: 'Dr. Ricardo Issa',
       conclusion_en: 'Left-lobe nodule and cyst; total thyroid volume 4.29 cm³. Reactional right cervical lymph node.',
       conclusion_pt: 'Nódulo e cisto no lobo esquerdo; volume tireoidiano total 4,29 cm³. Linfonodo cervical direito reacional.',
-      images: ['silvana-source-pdfs/silvana-thyroid-us-2020-06-18.jpeg'],
+      // 2020: one combined laudo (the source's US-folder PDF was a misfiled 2023 copy;
+      // the true 2020 report is the Doppler-folder laudo, referenced once below).
+      viewers: [
+        { label_en: 'Ultrasound (B-mode)', label_pt: 'Ultrassom (modo B)',
+          manifest: 'scans/silvana-us-2020-06-18-manifest.json', prefix: 'scans/silvana-us-2020-06-18/', count: 8 },
+        { label_en: 'Colour Doppler', label_pt: 'Doppler colorido',
+          manifest: 'scans/silvana-doppler-2020-06-18-manifest.json', prefix: 'scans/silvana-doppler-2020-06-18/', count: 11 },
+      ],
+      reports: [
+        { label_en: 'Report (PDF)', label_pt: 'Laudo (PDF)', href: 'scans/silvana-doppler-2020-06-18/report.pdf' },
+      ],
     },
     {
       date: '2017-12-15', category: 'pathology',

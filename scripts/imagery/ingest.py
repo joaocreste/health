@@ -216,22 +216,75 @@ def segment(files):
     return studies, pdfs, warnings
 
 
+# ── report ↔ study association ────────────────────────────────────────────────
+def _dir_is_ancestor(anc, path):
+    """True if `anc` is `path` itself or a directory above it."""
+    anc, path = os.path.abspath(anc), os.path.abspath(path)
+    return path == anc or path.startswith(anc + os.sep)
+
+
+def assign_reports(studies, pdfs):
+    """Map each study UID -> (pdf_path|None, note|None).
+
+    A PDF belongs to a study when its directory sits at or above that study's image
+    dirs — the common hospital export puts the report at the study-folder root with
+    the images in an `IMAGES/` subdir — AND that directory is not also above another
+    study's images (a shared container-level PDF, which stays flagged for manual
+    attachment). Falls back to the lone-PDF/single-study case.
+    """
+    imgdirs = {st["uid"]: {os.path.dirname(f) for sl in st["series"].values() for f in sl}
+               for st in studies}
+    assign = {}
+    for st in studies:
+        uid, dirs = st["uid"], imgdirs[st["uid"]]
+        own = []
+        for p in pdfs:
+            pdir = os.path.dirname(p)
+            if dirs and all(_dir_is_ancestor(pdir, d) for d in dirs):
+                covers_other = any(
+                    o["uid"] != uid and imgdirs[o["uid"]]
+                    and all(_dir_is_ancestor(pdir, d2) for d2 in imgdirs[o["uid"]])
+                    for o in studies)
+                if not covers_other:
+                    own.append(p)
+        if len(own) == 1:
+            assign[uid] = (own[0], None)
+        elif len(own) > 1:
+            assign[uid] = (own[0], f"{len(own)} PDFs under this study's folder — using {os.path.basename(own[0])}; verify which is the report.")
+        elif len(pdfs) == 1 and len(studies) == 1:
+            assign[uid] = (pdfs[0], None)
+        else:
+            assign[uid] = (None, f"{len(pdfs)} PDFs, none uniquely under this study's folder — attach manually." if pdfs else None)
+    return assign
+
+
 # ── per-study build ──────────────────────────────────────────────────────────
 def study_kind(study, override):
     if override:
         return slugify(override)
     ref = study["ref_tags"]
-    bodypart = ""
+    mod = (study["modality"] or "img").lower()
+    bodypart, desc = "", ""
     if ref is not None:
         bodypart = str(dcm_val(ref, "BodyPartExamined", "") or "")
-        if not bodypart:
-            desc = str(dcm_val(ref, "StudyDescription", "") or dcm_val(ref, "SeriesDescription", "") or "")
-            bodypart = slugify(desc.split()[0]) if desc.strip() else ""
-    mod = (study["modality"] or "img").lower()
-    return slugify(f"{bodypart}-{mod}") if bodypart else mod
+        desc = str(dcm_val(ref, "StudyDescription", "") or dcm_val(ref, "SeriesDescription", "") or "")
+    # US technique split: a colour-Doppler exam reads as 'doppler', plain B-mode as 'us'.
+    technique = "doppler" if (mod == "us" and "doppler" in desc.lower()) else None
+    if bodypart:
+        bp = slugify(bodypart)
+    elif desc.strip() and not technique:
+        bp = slugify(desc.split()[0])
+    else:
+        bp = ""
+    if technique:
+        return slugify(f"{bp}-{technique}") if bp else technique
+    if not bp:
+        return mod
+    # avoid duplicating the modality token ('us' + 'us' -> 'us-us')
+    return bp if (bp == mod or mod in bp.split("-")) else slugify(f"{bp}-{mod}")
 
 
-def build_study(study, slug, name, out_base, staging_slugs, pdfs, deid_mode, max_dim, apply):
+def build_study(study, slug, name, out_base, staging_slugs, assigned, deid_mode, max_dim, apply):
     date = study["date"] or "undated"
     kind = study_kind(study, staging_slugs.get(study["uid"]))
     web_slug = f"{slug}-{kind}-{date}"
@@ -297,16 +350,9 @@ def build_study(study, slug, name, out_base, staging_slugs, pdfs, deid_mode, max
         total += len(slices)
         stacks.append({"select": {}, "count": len(slices), "slices": slices})
 
-    # report: prefer a PDF inside this study's own dirs, else a container-level PDF
+    # report: pre-assigned by assign_reports() (folder-ancestry match, container-aware)
     report = None
-    report_note = None
-    study_dirs = {os.path.dirname(f) for sl in study["series"].values() for f in sl}
-    own = [p for p in pdfs if os.path.dirname(p) in study_dirs]
-    chosen = own[0] if own else (pdfs[0] if len(pdfs) == 1 else None)
-    if len(own) > 1:
-        report_note = f"{len(own)} PDFs in study dir — using first; verify per-region mapping."
-    if chosen is None and pdfs:
-        report_note = f"{len(pdfs)} PDFs at container level for >1 study — attach manually."
+    chosen, report_note = assigned
     if chosen:
         if apply:
             shutil.copyfile(chosen, os.path.join(out_dir, "report.pdf"))
@@ -393,11 +439,12 @@ def main():
 
     build_study.seen = set()
     descriptors = []
+    report_assign = assign_reports(studies, pdfs)
     log(f"\nPatient token: {args.slug}   source: {src}")
     log(f"Detected {len(studies)} study(ies), {len(pdfs)} PDF(s). deid={args.deid}  apply={args.apply}\n")
     for st in sorted(studies, key=lambda s: (s["date"] or ""), reverse=True):
         d = build_study(st, args.slug, args.name or (st.get("patient_name") or args.slug),
-                        out_base, {st["uid"]: args.kind} if args.kind else {}, pdfs,
+                        out_base, {st["uid"]: args.kind} if args.kind else {}, report_assign[st["uid"]],
                         args.deid, args.max_dim, args.apply)
         descriptors.append(d)
         flag = ""
