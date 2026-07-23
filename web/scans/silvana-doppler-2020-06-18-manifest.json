@@ -1,0 +1,41 @@
+{
+ "patient": "Silvana Aparecida Creste",
+ "patientSlug": "silvana",
+ "study": "Doppler colorido de orgao ou estrutura isolada",
+ "studySlug": "silvana-doppler-2020-06-18",
+ "studyInstanceUID": "1.2.840.113663.1500.1.403154046.1.1.20200618.74005.30985",
+ "date": "2020-06-18",
+ "modality": "US",
+ "reportingDoctor": "RICARDO ISSA",
+ "requestingDoctor": "JOSE ROBERTO CHODRAUI",
+ "facility": "D M I",
+ "facilityCity": null,
+ "facilityCountry": null,
+ "ways": [],
+ "defaultSelect": {},
+ "stacks": [
+  {
+   "select": {},
+   "count": 11,
+   "slices": [
+    "0001.jpg",
+    "0002.jpg",
+    "0003.jpg",
+    "0004.jpg",
+    "0005.jpg",
+    "0006.jpg",
+    "0007.jpg",
+    "0008.jpg",
+    "0009.jpg",
+    "0010.jpg",
+    "0011.jpg"
+   ]
+  }
+ ],
+ "report": {
+  "pdf": "report.pdf",
+  "textPt": "Paciente: SILVANA APARECIDA CRESTE DIAS DE SOUZA    \nIdade: 52A    Sexo: FEMININO    \nSolicitante Dr(a).: JOSE ROBERTO CHODRAUI    \nCódigo: US-0002258-20    Data de realização: 18/06/2020    \nRUA CONDE AFONSO CELSO, 1580 - JARDIM SUMARE, Ribeirão Preto/SP - 14025040 - Telefone: (16) 3101-0010 | (16) 3101-0011 | (16) 98182-8000\n1 de 1\nRELATÓRIO ULTRASSONOGRAFIA DA TIREÓIDE COM DOPPLER\n \nDados clínicos e motivo do exame: Avaliação da tireóide.\n \nExames anteriores: Disponível para comparação exame de 05/02/2020.\n \nTécnica de exame: Utilizou-se transdutor linear, multifrequencial, de até 14 MHz para estudo\ntireoidiano e uso complementar de Doppler colorido. Paciente posicionada em decúbito dorsal, com\nhiperextensão cervical.\n \nOs seguintes aspectos foram observados: \nO padrão glandular é heterogêneo, identiﬁcando-se nódulos, descritos a seguir:\nLOBO ESQUERDO:\nNo terço superior, nódulo predominantemente cístico, com áreas de espessamento parietal,\nmedindo 1,1 x 0,9 cm(padrão II de Chammas)(estável).\nNo terço inferior, nódulo hiperecoico, medindo 0,6 x 0,3 cm(padrão III de Chammas)(estável).\nA tireóide apresenta contornos regulares e dimensões nos limites inferiores da normalidade.\nAo Doppler colorido a glândula apresenta vascularização habitual.\n \nMedidas da glândula: \nLobo direito medindo 1,0 x 0,9 x 4,0 cm em seus eixos longitudinal, transversal e antero posterior\nrespectivamente, com volume de 2,07 cm³.\nLobo esquerdo medindo 1,0 x 0,9 x 4,1 cm em seus eixos longitudinal, transversal e antero\nposterior respectivamente, com volume de 2,03 cm³.\nO istmo mediu 1,0 x 1,1 x 0,2 cm de espessura em seus eixos transversal e antero posterior\nrespectivamente, com volume de 0,19 cm³.\nVolume total da tireoide de 4,29 cm³.\nA região cervical direita apresenta linfonodos de aspecto habitual, medindo 0,6 cm e 1,5 cm, sem\nﬂuxo vascular anômalo ao Doppler colorido.\nAs glândulas submandibulares e parótidas apresentaram aspecto ecográﬁco normal.\nEm relação ao exame anterior não se observam alterações ecográﬁcas signiﬁcativas.\n \nImpressão diagnóstica: Exame ultrassonográﬁco da tireoide evidencia nódulo e cisto no\nlobo esquerdo, conforme descritos acima. Linfonodo cervical direito aumentado, de\naspecto reacional.\nObs: Exame documentado em 2 páginas de papel fotográﬁco colorido, que deve ser guardado, bem como os demais e,\ntodos devem ser fornecidos por ocasião das consultas médicas e exames de controle por imagem, para as análises\ncomparativas. *Fim do relatório da ultrassonograﬁa tireoidiana.\n \n_________________________________\nRICARDO ISSA\nMÉDICO ESPECIALISTA EM RADIOLOGIA E DIAGNÓSTICO POR IMAGEM\nCRM: 67417 / SP",
+  "textEn": null,
+  "aiSummary": null
+ }
+}

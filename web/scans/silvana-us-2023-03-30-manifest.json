@@ -1,0 +1,40 @@
+{
+ "patient": "Silvana Aparecida Creste",
+ "patientSlug": "silvana",
+ "study": "US  Estruturas superficiais (cervical ou axila ou musculo ou",
+ "studySlug": "silvana-us-2023-03-30",
+ "studyInstanceUID": "1.2.840.113663.1500.1.403154046.1.1.20230330.74005.55451",
+ "date": "2023-03-30",
+ "modality": "US",
+ "reportingDoctor": "RICARDO ISSA",
+ "requestingDoctor": "JOSE ROBERTO CHODRAUI",
+ "facility": "D M I",
+ "facilityCity": null,
+ "facilityCountry": null,
+ "ways": [],
+ "defaultSelect": {},
+ "stacks": [
+  {
+   "select": {},
+   "count": 10,
+   "slices": [
+    "0001.jpg",
+    "0002.jpg",
+    "0003.jpg",
+    "0004.jpg",
+    "0005.jpg",
+    "0006.jpg",
+    "0007.jpg",
+    "0008.jpg",
+    "0009.jpg",
+    "0010.jpg"
+   ]
+  }
+ ],
+ "report": {
+  "pdf": "report.pdf",
+  "textPt": "Paciente: SILVANA APARECIDA CRESTE DIAS DE SOUZA    \nIdade: 55A    Sexo: FEMININO    \nSolicitante Dr(a).: JOSE ROBERTO CHODRAUI    \nCódigo: US-0001184-23    Data de realização: 30/03/2023    \nRUA CONDE AFONSO CELSO, 1580 - JARDIM SUMARE, Ribeirão Preto/SP - 14025040 - Telefone: (16) 3101-0010 | (16) 3101-0011 | (16) 98182-8000\n1 de 1\n \nUS TIREOIDE COM BIÓPSIA\n \nIMPRESSÃO:\n \nExame realizado com transdutor linear multifrêquencial de até 14,0 MHZ, para estruturas\nsuperﬁciais.\n \nFoi realizado punção biópsia de nódulo heterogêneo no terço superior do lobo esquerdo, conforme\ndescrito em exame prévio, sem intercorrências. \n \n \n_________________________________\nRICARDO ISSA\nMÉDICO ESPECIALISTA EM RADIOLOGIA E DIAGNÓSTICO POR IMAGEM\nCRM: 67417 / SP",
+  "textEn": null,
+  "aiSummary": null
+ }
+}
